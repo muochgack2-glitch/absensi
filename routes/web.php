@@ -10,6 +10,7 @@ use App\Http\Controllers\AttendanceSettingController;
 use App\Http\Controllers\WhatsAppController;
 use App\Http\Controllers\WhatsAppGatewayController;
 use App\Http\Controllers\WhatsAppDiagnosticController;
+use App\Http\Controllers\StudentCardController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -47,9 +48,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/attendance/scan', [AttendanceScanController::class, 'scan'])
         ->name('attendance.scan');
 
-    // Students Management
-    Route::resource('attendance/students', AttendanceStudentController::class)
-        ->names('attendance.students');
+    // Students Management - Custom routes BEFORE resource (prevent {student} catching)
+    Route::get('/attendance/students/card', [StudentCardController::class, 'index'])
+        ->name('attendance.students.card');
+    Route::post('/attendance/students/card/generate', [StudentCardController::class, 'generate'])
+        ->name('attendance.students.card.generate');
     
     Route::get('/attendance/students/import/form', [AttendanceStudentController::class, 'importForm'])
         ->name('attendance.students.import.form');
@@ -59,6 +62,12 @@ Route::middleware(['auth'])->group(function () {
     
     Route::get('/attendance/students/export/template', [AttendanceStudentController::class, 'exportTemplate'])
         ->name('attendance.students.export.template');
+
+    Route::get('/attendance/students/{student}/print-qr', [StudentCardController::class, 'printSingle'])
+        ->name('attendance.students.print-qr');
+
+    Route::resource('attendance/students', AttendanceStudentController::class)
+        ->names('attendance.students');
 
     // Classes Management
     Route::resource('attendance/classes', AttendanceClassController::class)

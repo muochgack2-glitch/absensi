@@ -1,7 +1,10 @@
 <?php $attributes ??= new \Illuminate\View\ComponentAttributeBag;
 
 $__newAttributes = [];
-$__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames((['status']));
+$__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames(([
+    'striped' => true,
+    'hoverable' => true
+]));
 
 foreach ($attributes->all() as $__key => $__value) {
     if (in_array($__key, $__propNames)) {
@@ -16,7 +19,10 @@ $attributes = new \Illuminate\View\ComponentAttributeBag($__newAttributes);
 unset($__propNames);
 unset($__newAttributes);
 
-foreach (array_filter((['status']), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
+foreach (array_filter(([
+    'striped' => true,
+    'hoverable' => true
+]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
 }
 
@@ -28,10 +34,14 @@ foreach ($attributes->all() as $__key => $__value) {
 
 unset($__defined_vars, $__key, $__value); ?>
 
-<?php if($status): ?>
-    <div <?php echo e($attributes->merge(['class' => 'font-medium text-sm text-green-600 dark:text-green-400'])); ?>>
-        <?php echo e($status); ?>
+<?php
+    $classes = "min-w-full divide-y divide-gray-200 dark:divide-gray-700";
+?>
 
-    </div>
-<?php endif; ?>
-<?php /**PATH C:\Users\DMCenter\Music\SPMB2\SPMB\absensi\resources\views/components/auth-session-status.blade.php ENDPATH**/ ?>
+<div class="overflow-x-auto">
+    <table <?php echo e($attributes->merge(['class' => $classes])); ?>>
+        <?php echo e($slot); ?>
+
+    </table>
+</div>
+<?php /**PATH C:\Users\DMCenter\Music\SPMB2\SPMB\absensi\resources\views/components/table.blade.php ENDPATH**/ ?>

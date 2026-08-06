@@ -70,6 +70,18 @@ class AttendanceSettingController extends Controller
             AttendanceSetting::set($key, $value);
         }
 
+        // Handle logo upload
+        if ($request->hasFile('school_logo')) {
+            $logo = $request->file('school_logo');
+            $logoPath = $logo->store('settings', 'public');
+            AttendanceSetting::set('school_logo', $logoPath);
+        }
+
+        // Handle school address
+        if ($request->has('school_address')) {
+            AttendanceSetting::set('school_address', $request->input('school_address', ''));
+        }
+
         // Clear settings cache
         AttendanceSetting::clearCache();
 
