@@ -1,0 +1,134 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║   DEPLOY ABSENSI KE /www/wwwroot/absensi - START HERE        ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+LANGKAH 1: Buat Database (via aaPanel)
+═══════════════════════════════════════════════════════════════
+1. Login ke aaPanel
+2. Klik menu "Database"
+3. Klik "Add Database"
+4. Isi form:
+   ┌─────────────────────────────────────────┐
+   │ Database Name  : absensi_db             │
+   │ Username       : absensi_db             │
+   │ Password       : password               │
+   │ Access Host    : localhost              │
+   └─────────────────────────────────────────┘
+5. Klik "Submit"
+
+✓ Database siap!
+
+
+LANGKAH 2: Deploy Aplikasi (ONE COMMAND)
+═══════════════════════════════════════════════════════════════
+Login SSH ke server, lalu copy-paste command ini:
+
+┌───────────────────────────────────────────────────────────────┐
+│                                                               │
+│  cd /tmp && wget -O deploy.sh https://raw.githubusercontent.  │
+│  com/muochgack2-glitch/Absensi/master/quick-deploy.sh &&     │
+│  chmod +x deploy.sh && ./deploy.sh                           │
+│                                                               │
+└───────────────────────────────────────────────────────────────┘
+
+
+LANGKAH 3: Setup Admin User
+═══════════════════════════════════════════════════════════════
+Setelah deploy selesai, run command ini:
+
+cd /www/wwwroot/absensi
+php artisan db:seed --class=AdminUserSeeder
+
+
+LANGKAH 4: Test Website
+═══════════════════════════════════════════════════════════════
+Buka browser: https://absensi.smkpgriblora.sch.id
+
+Login dengan:
+  Email    : admin@smkpgriblora.sch.id
+  Password : admin123
+
+✓ Selesai!
+
+
+═══════════════════════════════════════════════════════════════
+TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════
+
+❌ Error: "Connection refused" atau "Database not found"
+   → Pastikan database 'absensi_db' sudah dibuat di aaPanel
+   → Test koneksi: 
+     mysql -u absensi_db -p absensi_db
+     (password: password)
+
+❌ Error 500 / Blank page
+   → Cek log error:
+     tail -f /www/wwwroot/absensi/storage/logs/laravel.log
+   
+   → Fix permission:
+     chmod -R 775 /www/wwwroot/absensi/storage
+     chmod -R 775 /www/wwwroot/absensi/bootstrap/cache
+
+❌ Assets tidak load (CSS/JS 404)
+   → Rebuild assets:
+     cd /www/wwwroot/absensi
+     npm run build
+     php artisan view:clear
+
+❌ "Please configure database" atau migration error
+   → Cek .env:
+     nano /www/wwwroot/absensi/.env
+     
+   → Pastikan baris ini benar:
+     DB_DATABASE=absensi_db
+     DB_USERNAME=absensi_db
+     DB_PASSWORD=password
+   
+   → Run migration lagi:
+     php artisan migrate --force
+
+
+═══════════════════════════════════════════════════════════════
+INFO PENTING
+═══════════════════════════════════════════════════════════════
+
+📁 Lokasi Files:
+   App         : /www/wwwroot/absensi/
+   Config      : /www/wwwroot/absensi/.env
+   Laravel Log : /www/wwwroot/absensi/storage/logs/laravel.log
+   Nginx Log   : /www/wwwlogs/absensi.smkpgriblora.sch.id.log
+
+🔧 Database:
+   Name     : absensi_db
+   User     : absensi_db
+   Password : password
+   Host     : localhost
+
+🌐 Domain:
+   URL      : https://absensi.smkpgriblora.sch.id
+   Nginx    : /www/server/panel/vhost/nginx/absensi.smkpgriblora.sch.id.conf
+   Root     : /www/wwwroot/absensi/public
+
+👤 Default Admin:
+   Email    : admin@smkpgriblora.sch.id
+   Password : admin123
+   (Ganti password setelah login pertama!)
+
+
+═══════════════════════════════════════════════════════════════
+SETELAH DEPLOY BERHASIL
+═══════════════════════════════════════════════════════════════
+
+1. ✓ Test login admin
+2. ✓ Upload data siswa via Excel atau seed:
+     php artisan db:seed --class=AttendanceClassSeeder
+     php artisan db:seed --class=AttendanceStudentSeeder
+3. ✓ Test scan QR code
+4. ✓ Test generate laporan
+5. ✓ Ganti password admin
+6. ✓ Setup WhatsApp Gateway (optional)
+
+
+═══════════════════════════════════════════════════════════════
