@@ -58,7 +58,7 @@
                 <button
                     type="button"
                     onclick="document.getElementById('modalBulkQR').classList.remove('hidden')"
-                    class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-teal-500 to-teal-600 text-white hover:from-teal-600 hover:to-teal-700 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 shadow-md hover:shadow-lg hover:-translate-y-0.5"
                 >
                     <i class="fas fa-qrcode mr-2"></i>
                     Generate QR Massal
@@ -348,8 +348,8 @@
         {{-- Modal Box --}}
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 z-10">
             {{-- Icon --}}
-            <div class="flex items-center justify-center w-14 h-14 rounded-full bg-teal-100 dark:bg-teal-900/40 mx-auto mb-4">
-                <i class="fas fa-qrcode text-2xl text-teal-600 dark:text-teal-400"></i>
+            <div class="flex items-center justify-center w-14 h-14 rounded-full bg-green-100 dark:bg-green-900/40 mx-auto mb-4">
+                <i class="fas fa-qrcode text-2xl text-green-600 dark:text-green-400"></i>
             </div>
 
             <h3 class="text-lg font-bold text-center text-gray-900 dark:text-white mb-1">Generate QR Code Massal</h3>
@@ -390,7 +390,7 @@
                 <button
                     type="submit"
                     form="formBulkMissing"
-                    class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 transition-all shadow-md"
+                    class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all shadow-md"
                 >
                     <i class="fas fa-plus-circle mr-2"></i>
                     Generate Yang Belum Ada
@@ -399,7 +399,7 @@
                     type="submit"
                     form="formBulkAll"
                     onclick="return confirm('Generate ulang QR untuk SEMUA siswa aktif? File QR lama akan ditimpa.')"
-                    class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-900/20 hover:bg-teal-100 dark:hover:bg-teal-900/40 border border-teal-200 dark:border-teal-700 transition-all"
+                    class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40 border border-green-200 dark:border-green-700 transition-all"
                 >
                     <i class="fas fa-redo mr-2"></i>
                     Generate Ulang Semua
