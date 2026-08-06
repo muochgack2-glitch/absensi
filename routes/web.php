@@ -102,6 +102,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/attendance/qr/{student}/regenerate', [AttendanceQRController::class, 'regenerate'])
         ->name('attendance.qr.regenerate');
 
+    Route::post('/attendance/qr/bulk-generate', [AttendanceQRController::class, 'bulkGenerate'])
+        ->name('attendance.qr.bulk-generate');
+
     // Settings
     Route::get('/attendance/settings', [AttendanceSettingController::class, 'index'])
         ->name('attendance.settings.index');

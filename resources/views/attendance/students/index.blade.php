@@ -3,6 +3,25 @@
     <x-slot name="pageTitle">Manajemen Siswa</x-slot>
 
     <div class="space-y-6">
+        {{-- Flash Messages --}}
+        @if(session('success'))
+            <div class="flex items-center gap-3 p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-300">
+                <i class="fas fa-check-circle text-green-500 text-lg"></i>
+                <span class="font-medium">{{ session('success') }}</span>
+            </div>
+        @endif
+        @if(session('warning'))
+            <div class="flex items-center gap-3 p-4 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-300">
+                <i class="fas fa-exclamation-triangle text-yellow-500 text-lg"></i>
+                <span class="font-medium">{{ session('warning') }}</span>
+            </div>
+        @endif
+        @if(session('info'))
+            <div class="flex items-center gap-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300">
+                <i class="fas fa-info-circle text-blue-500 text-lg"></i>
+                <span class="font-medium">{{ session('info') }}</span>
+            </div>
+        @endif
         {{-- Page Header --}}
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
@@ -34,6 +53,16 @@
                     <i class="fas fa-id-card mr-2"></i>
                     Cetak Kartu
                 </a>
+
+                {{-- Generate QR Massal --}}
+                <button
+                    type="button"
+                    onclick="document.getElementById('modalBulkQR').classList.remove('hidden')"
+                    class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-teal-500 to-teal-600 text-white hover:from-teal-600 hover:to-teal-700 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                >
+                    <i class="fas fa-qrcode mr-2"></i>
+                    Generate QR Massal
+                </button>
 
                 <a
                     href="{{ route('attendance.students.create') }}"
@@ -307,4 +336,83 @@
             @endif
         </x-section-card>
     </div>
+
+    {{-- Modal Bulk Generate QR --}}
+    <div id="modalBulkQR" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+        {{-- Backdrop --}}
+        <div
+            class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onclick="document.getElementById('modalBulkQR').classList.add('hidden')"
+        ></div>
+
+        {{-- Modal Box --}}
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 z-10">
+            {{-- Icon --}}
+            <div class="flex items-center justify-center w-14 h-14 rounded-full bg-teal-100 dark:bg-teal-900/40 mx-auto mb-4">
+                <i class="fas fa-qrcode text-2xl text-teal-600 dark:text-teal-400"></i>
+            </div>
+
+            <h3 class="text-lg font-bold text-center text-gray-900 dark:text-white mb-1">Generate QR Code Massal</h3>
+            <p class="text-sm text-center text-gray-500 dark:text-gray-400 mb-6">
+                Pilih mode generate untuk semua siswa aktif.
+            </p>
+
+            {{-- Statistik --}}
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="text-center p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white">
+                        {{ \App\Models\AttendanceStudent::where('is_active', true)->count() }}
+                    </div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Total Siswa Aktif</div>
+                </div>
+                <div class="text-center p-3 rounded-xl bg-yellow-50 dark:bg-yellow-900/20">
+                    <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                        {{ \App\Models\AttendanceStudent::where('is_active', true)->whereNull('qr_code_path')->count() }}
+                    </div>
+                    <div class="text-xs text-yellow-600 dark:text-yellow-400 mt-0.5">Belum Ada QR</div>
+                </div>
+            </div>
+
+            {{-- Form: hanya yang belum ada --}}
+            <form method="POST" action="{{ route('attendance.qr.bulk-generate') }}" id="formBulkMissing">
+                @csrf
+                <input type="hidden" name="only_missing" value="1">
+            </form>
+
+            {{-- Form: generate ulang semua --}}
+            <form method="POST" action="{{ route('attendance.qr.bulk-generate') }}" id="formBulkAll">
+                @csrf
+                <input type="hidden" name="only_missing" value="0">
+            </form>
+
+            {{-- Tombol Aksi --}}
+            <div class="space-y-2">
+                <button
+                    type="submit"
+                    form="formBulkMissing"
+                    class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 transition-all shadow-md"
+                >
+                    <i class="fas fa-plus-circle mr-2"></i>
+                    Generate Yang Belum Ada
+                </button>
+                <button
+                    type="submit"
+                    form="formBulkAll"
+                    onclick="return confirm('Generate ulang QR untuk SEMUA siswa aktif? File QR lama akan ditimpa.')"
+                    class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-900/20 hover:bg-teal-100 dark:hover:bg-teal-900/40 border border-teal-200 dark:border-teal-700 transition-all"
+                >
+                    <i class="fas fa-redo mr-2"></i>
+                    Generate Ulang Semua
+                </button>
+                <button
+                    type="button"
+                    onclick="document.getElementById('modalBulkQR').classList.add('hidden')"
+                    class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                >
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+
 </x-app-layout>

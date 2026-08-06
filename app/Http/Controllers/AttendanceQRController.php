@@ -77,4 +77,49 @@ class AttendanceQRController extends Controller
 
         return redirect()->back()->with('success', 'QR Code berhasil di-generate ulang');
     }
-}
+
+    /**
+     * Generate QR Code untuk SEMUA siswa aktif yang belum punya QR (bulk).
+     *
+     * POST /attendance/qr/bulk-generate
+     */
+    public function bulkGenerate(Request $request)
+    {
+        ini_set('memory_limit', '256M');
+        ini_set('max_execution_time', '300');
+
+        $onlyMissing = $request->input('only_missing', true);
+
+        $query = AttendanceStudent::where('is_active', true);
+
+        if ($onlyMissing) {
+            // Hanya siswa yang belum punya QR (null di DB)
+            $query->whereNull('qr_code_path');
+        }
+
+        $students = $query->get();
+
+        if ($students->isEmpty()) {
+            return redirect()->back()->with('info', 'Semua siswa aktif sudah memiliki QR Code.');
+        }
+
+        $results  = $this->qrCodeService->generateBatchQRCodes($students->all());
+        $success  = collect($results)->where('success', true)->count();
+        $failed   = collect($results)->where('success', false)->count();
+
+        // Update qr_code_path di database untuk yang berhasil
+        foreach ($results as $result) {
+            if ($result['success']) {
+                AttendanceStudent::where('nis', $result['nis'])
+                    ->update(['qr_code_path' => $result['path']]);
+            }
+        }
+
+        $message = "Berhasil generate {$success} QR Code.";
+        if ($failed > 0) {
+            $message .= " Gagal: {$failed} siswa.";
+            return redirect()->back()->with('warning', $message);
+        }
+
+        return redirect()->back()->with('success', $message);
+    }
