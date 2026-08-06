@@ -582,6 +582,86 @@
             <!-- Divider -->
             <div class="sidebar-divider"></div>
 
+            <!-- Section Label: WhatsApp -->
+            <div class="sidebar-section-label px-3 py-1">
+                <span class="text-xs font-semibold text-primary-400 uppercase tracking-wider">WhatsApp</span>
+            </div>
+
+            <!-- WA Dashboard -->
+            <a 
+                href="{{ route('whatsapp.index') }}"
+                class="sidebar-menu-item {{ request()->routeIs('whatsapp.index') ? 'active' : '' }}"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="right" 
+                title="WA Gateway"
+            >
+                <i class="fab fa-whatsapp text-lg"></i>
+                <span class="nav-text font-medium">WA Gateway</span>
+            </a>
+
+            <!-- Kirim Pesan -->
+            <a 
+                href="{{ route('whatsapp.send') }}"
+                class="sidebar-menu-item {{ request()->routeIs('whatsapp.send') ? 'active' : '' }}"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="right" 
+                title="Kirim Pesan"
+            >
+                <i class="fas fa-paper-plane text-lg"></i>
+                <span class="nav-text font-medium">Kirim Pesan</span>
+            </a>
+
+            <!-- Log Pesan -->
+            <a 
+                href="{{ route('whatsapp.logs') }}"
+                class="sidebar-menu-item {{ request()->routeIs('whatsapp.logs') ? 'active' : '' }}"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="right" 
+                title="Log Pesan"
+            >
+                <i class="fas fa-history text-lg"></i>
+                <span class="nav-text font-medium">Log Pesan</span>
+            </a>
+
+            <!-- Templates -->
+            <a 
+                href="{{ route('whatsapp.templates') }}"
+                class="sidebar-menu-item {{ request()->routeIs('whatsapp.templates*') ? 'active' : '' }}"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="right" 
+                title="Templates"
+            >
+                <i class="fas fa-file-alt text-lg"></i>
+                <span class="nav-text font-medium">Templates</span>
+            </a>
+
+            <!-- Broadcast -->
+            <a 
+                href="{{ route('whatsapp.broadcast') }}"
+                class="sidebar-menu-item {{ request()->routeIs('whatsapp.broadcast') ? 'active' : '' }}"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="right" 
+                title="Broadcast"
+            >
+                <i class="fas fa-bullhorn text-lg"></i>
+                <span class="nav-text font-medium">Broadcast</span>
+            </a>
+
+            <!-- Gateway Management -->
+            <a 
+                href="{{ route('gateway.index') }}"
+                class="sidebar-menu-item {{ request()->routeIs('gateway.*') ? 'active' : '' }}"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="right" 
+                title="Gateway"
+            >
+                <i class="fas fa-server text-lg"></i>
+                <span class="nav-text font-medium">Gateway</span>
+            </a>
+
+            <!-- Divider -->
+            <div class="sidebar-divider"></div>
+
             <!-- Settings -->
             <a 
                 href="{{ route('attendance.settings.index') }}"
@@ -592,6 +672,18 @@
             >
                 <i class="fas fa-cog text-lg"></i>
                 <span class="nav-text font-medium">Settings</span>
+            </a>
+
+            <!-- WA Settings -->
+            <a 
+                href="{{ route('whatsapp.settings') }}"
+                class="sidebar-menu-item {{ request()->routeIs('whatsapp.settings') ? 'active' : '' }}"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="right" 
+                title="Settings WA"
+            >
+                <i class="fas fa-sliders-h text-lg"></i>
+                <span class="nav-text font-medium">Settings WA</span>
             </a>
 
         </nav>

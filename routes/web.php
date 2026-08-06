@@ -7,6 +7,9 @@ use App\Http\Controllers\AttendanceClassController;
 use App\Http\Controllers\AttendanceReportController;
 use App\Http\Controllers\AttendanceQRController;
 use App\Http\Controllers\AttendanceSettingController;
+use App\Http\Controllers\WhatsAppController;
+use App\Http\Controllers\WhatsAppGatewayController;
+use App\Http\Controllers\WhatsAppDiagnosticController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -102,6 +105,63 @@ Route::middleware(['auth'])->group(function () {
     
     Route::post('/attendance/settings/test-notification', [AttendanceSettingController::class, 'testNotification'])
         ->name('attendance.settings.test-notification');
+
+    // ==========================================
+    // WhatsApp Gateway Management
+    // ==========================================
+    Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
+        // Dashboard
+        Route::get('/', [WhatsAppController::class, 'index'])->name('index');
+        Route::get('/status', [WhatsAppController::class, 'status'])->name('status');
+        Route::get('/health', [WhatsAppController::class, 'health'])->name('health');
+        Route::get('/qr', [WhatsAppController::class, 'qrCode'])->name('qr');
+
+        // Diagnostics & Auto-Fix
+        Route::get('/diagnostics', [WhatsAppController::class, 'diagnostics'])->name('diagnostics');
+        Route::post('/auto-fix', [WhatsAppController::class, 'autoFix'])->name('auto-fix');
+        Route::post('/diagnostic/test-send', [WhatsAppDiagnosticController::class, 'testSend'])->name('diagnostic.test-send');
+
+        // Send Messages
+        Route::get('/send', [WhatsAppController::class, 'sendPage'])->name('send');
+        Route::post('/send', [WhatsAppController::class, 'send'])->name('send.submit');
+        Route::post('/send-template', [WhatsAppController::class, 'sendWithTemplate'])->name('send.template');
+
+        // Logs
+        Route::get('/logs', [WhatsAppController::class, 'logs'])->name('logs');
+
+        // Templates CRUD
+        Route::get('/templates', [WhatsAppController::class, 'templates'])->name('templates');
+        Route::get('/templates/create', [WhatsAppController::class, 'createTemplate'])->name('templates.create');
+        Route::post('/templates', [WhatsAppController::class, 'storeTemplate'])->name('templates.store');
+        Route::get('/templates/{id}/edit', [WhatsAppController::class, 'editTemplate'])->name('templates.edit');
+        Route::put('/templates/{id}', [WhatsAppController::class, 'updateTemplate'])->name('templates.update');
+        Route::delete('/templates/{id}', [WhatsAppController::class, 'deleteTemplate'])->name('templates.delete');
+
+        // Settings
+        Route::get('/settings', [WhatsAppController::class, 'settings'])->name('settings');
+        Route::post('/settings', [WhatsAppController::class, 'updateSettings'])->name('settings.update');
+
+        // Broadcast
+        Route::get('/broadcast', [WhatsAppController::class, 'broadcastPage'])->name('broadcast');
+        Route::post('/broadcast', [WhatsAppController::class, 'sendBroadcast'])->name('broadcast.submit');
+
+        // Gateway Control
+        Route::post('/logout', [WhatsAppController::class, 'logout'])->name('logout');
+        Route::post('/restart', [WhatsAppController::class, 'restart'])->name('restart');
+        Route::post('/reset', [WhatsAppController::class, 'reset'])->name('reset');
+    });
+
+    // Gateway Management (Dual Gateway)
+    Route::prefix('gateway')->name('gateway.')->group(function () {
+        Route::get('/', [WhatsAppGatewayController::class, 'index'])->name('index');
+        Route::get('/statuses', [WhatsAppGatewayController::class, 'getStatuses'])->name('statuses');
+        Route::get('/{gateway}/qr', [WhatsAppGatewayController::class, 'getQRCode'])->name('qr');
+        Route::post('/{gateway}/restart', [WhatsAppGatewayController::class, 'restart'])->name('restart');
+        Route::post('/{gateway}/logout', [WhatsAppGatewayController::class, 'logout'])->name('logout');
+        Route::post('/{gateway}/reset', [WhatsAppGatewayController::class, 'resetGateway'])->name('reset');
+        Route::get('/{gateway}/logs', [WhatsAppGatewayController::class, 'getLogs'])->name('logs');
+        Route::post('/toggle-failover', [WhatsAppGatewayController::class, 'toggleFailover'])->name('toggle-failover');
+    });
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

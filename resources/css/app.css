@@ -60,6 +60,160 @@
     --color-info: #60a5fa;
 }
 
+/* ============================================ */
+/* BOOTSTRAP CSS DARK MODE OVERRIDES            */
+/* Bootstrap CDN styles override Tailwind's     */
+/* dark: utilities. These rules fix that.       */
+/* ============================================ */
+
+/* Force dark backgrounds on all common elements */
+.dark .bg-white {
+    background-color: #1f2937 !important; /* gray-800 */
+}
+
+.dark .bg-light,
+.dark .bg-body {
+    background-color: #111827 !important; /* gray-900 */
+}
+
+/* Cards and containers */
+.dark .card,
+.dark .card-body,
+.dark .card-header,
+.dark .card-footer,
+.dark .list-group-item {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+    color: #f3f4f6 !important;
+}
+
+/* Form controls — Bootstrap sets white backgrounds */
+.dark input.form-control,
+.dark textarea.form-control,
+.dark select.form-select,
+.dark .form-control,
+.dark .form-select,
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="number"],
+.dark input[type="date"],
+.dark input[type="search"],
+.dark input[type="url"],
+.dark input[type="tel"],
+.dark textarea,
+.dark select {
+    background-color: #374151 !important; /* gray-700 */
+    border-color: #4b5563 !important; /* gray-600 */
+    color: #f3f4f6 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+    color: #9ca3af !important; /* gray-400 */
+}
+
+/* Focus states */
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+    background-color: #374151 !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3) !important;
+    color: #f3f4f6 !important;
+}
+
+/* Tables */
+.dark .table,
+.dark table {
+    color: #f3f4f6 !important;
+}
+
+.dark .table > :not(caption) > * > *,
+.dark thead th,
+.dark tbody td {
+    background-color: transparent !important;
+    border-color: #374151 !important;
+    color: inherit !important;
+}
+
+.dark .table-hover > tbody > tr:hover > * {
+    background-color: rgba(55, 65, 81, 0.3) !important;
+}
+
+/* Footer — Bootstrap overrides Tailwind dark:bg */
+.dark footer {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+}
+
+/* Modal */
+.dark .modal-content {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+    color: #f3f4f6 !important;
+}
+
+.dark .modal-header,
+.dark .modal-footer {
+    border-color: #374151 !important;
+}
+
+/* Dropdowns */
+.dark .dropdown-menu {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+}
+
+.dark .dropdown-item {
+    color: #f3f4f6 !important;
+}
+
+.dark .dropdown-item:hover,
+.dark .dropdown-item:focus {
+    background-color: #374151 !important;
+    color: #ffffff !important;
+}
+
+/* Border overrides */
+.dark .border {
+    border-color: #374151 !important;
+}
+
+/* Text color defaults for dark mode */
+.dark body {
+    color: #f3f4f6;
+}
+
+/* Alert overrides — keep alert backgrounds but fix text */
+.dark .alert {
+    border-color: #374151 !important;
+}
+
+/* Pagination */
+.dark .page-link {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+    color: #93c5fd !important;
+}
+
+.dark .page-link:hover {
+    background-color: #374151 !important;
+    color: #ffffff !important;
+}
+
+.dark .page-item.active .page-link {
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
+    color: #ffffff !important;
+}
+
+.dark .page-item.disabled .page-link {
+    background-color: #111827 !important;
+    border-color: #374151 !important;
+    color: #6b7280 !important;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
