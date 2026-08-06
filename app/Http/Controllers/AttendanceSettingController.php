@@ -27,14 +27,17 @@ class AttendanceSettingController extends Controller
     {
         // Validate all settings
         $rules = [
-            'settings.check_in_time' => 'required|date_format:H:i',
-            'settings.check_out_time' => 'required|date_format:H:i|after:settings.check_in_time',
-            'settings.tolerance_minutes' => 'required|integer|min:0|max:60',
-            'settings.cutoff_time' => 'required|date_format:H:i|after:settings.check_in_time',
-            'settings.enable_parent_notification' => 'required|boolean',
+            'settings.check_in_time'                 => 'required|date_format:H:i',
+            'settings.check_out_time'                => 'required|date_format:H:i|after:settings.check_in_time',
+            'settings.tolerance_minutes'             => 'required|integer|min:0|max:60',
+            'settings.cutoff_time'                   => 'required|date_format:H:i|after:settings.check_in_time',
+            'settings.enable_parent_notification'    => 'required|boolean',
             'settings.include_photo_in_notification' => 'required|boolean',
-            'settings.school_name' => 'required|string|max:100',
-            'settings.announcement' => 'nullable|string|max:255',
+            'settings.school_name'                   => 'required|string|max:100',
+            'settings.announcement'                  => 'nullable|string|max:255',
+            'settings.auto_absent_notify'            => 'required|boolean',
+            'settings.absent_notify_time'            => 'nullable|date_format:H:i',
+            'settings.absent_notify_days'            => 'nullable|string',
         ];
 
         $messages = [
@@ -70,6 +73,13 @@ class AttendanceSettingController extends Controller
             AttendanceSetting::set($key, $value);
         }
 
+        // Handle absent notify days (dari checkbox terpisah, sudah dikumpulkan JS)
+        // Jika kosong (semua dicentang batal), simpan string kosong
+        if ($request->has('settings') && isset($request->settings['absent_notify_days'])) {
+            $days = $request->settings['absent_notify_days'] ?? '';
+            AttendanceSetting::set('absent_notify_days', $days);
+        }
+
         // Handle logo upload
         if ($request->hasFile('school_logo')) {
             $logo = $request->file('school_logo');
@@ -97,13 +107,16 @@ class AttendanceSettingController extends Controller
     {
         // Default settings
         $defaults = [
-            'check_in_time' => '07:00',
-            'check_out_time' => '15:00',
-            'tolerance_minutes' => '15',
-            'cutoff_time' => '09:00',
-            'enable_parent_notification' => '1',
-            'include_photo_in_notification' => '0',
-            'school_name' => 'SMK Negeri 1',
+            'check_in_time'                  => '07:00',
+            'check_out_time'                 => '15:00',
+            'tolerance_minutes'              => '15',
+            'cutoff_time'                    => '09:00',
+            'enable_parent_notification'     => '1',
+            'include_photo_in_notification'  => '0',
+            'school_name'                    => 'SMK Negeri 1',
+            'auto_absent_notify'             => '0',
+            'absent_notify_time'             => '09:00',
+            'absent_notify_days'             => '1,2,3,4,5',
         ];
 
         foreach ($defaults as $key => $value) {

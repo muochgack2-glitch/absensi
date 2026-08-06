@@ -174,6 +174,102 @@
                 </div>
             </x-card>
 
+            {{-- Auto Absent Notification Settings --}}
+            <x-card>
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center text-white text-2xl mr-4">
+                        <i class="fas fa-user-times"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Notifikasi Ketidakhadiran Otomatis</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Kirim WA ke orang tua secara otomatis saat siswa alpha</p>
+                    </div>
+                </div>
+
+                <div class="space-y-5">
+                    {{-- Toggle aktif --}}
+                    <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                            <label class="text-sm font-medium text-gray-900 dark:text-white">
+                                Aktifkan Notifikasi Alpha Otomatis
+                            </label>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Sistem otomatis kirim WA ke orang tua saat siswa tidak hadir</p>
+                        </div>
+                        <div>
+                            <input type="hidden" name="settings[auto_absent_notify]" value="0">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox"
+                                       name="settings[auto_absent_notify]"
+                                       value="1"
+                                       id="autoAbsentNotify"
+                                       {{ old('settings.auto_absent_notify', $settings['notification']['auto_absent_notify'] ?? '0') == '1' ? 'checked' : '' }}
+                                       onchange="toggleAbsentNotifyFields()"
+                                       class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 dark:peer-focus:ring-red-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
+                            </label>
+                        </div>
+                    </div>
+
+                    {{-- Sub-settings (tampil jika toggle aktif) --}}
+                    <div id="absentNotifyFields" class="space-y-4 {{ old('settings.auto_absent_notify', $settings['notification']['auto_absent_notify'] ?? '0') == '1' ? '' : 'opacity-40 pointer-events-none' }}">
+
+                        {{-- Jam pengiriman --}}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <x-input
+                                type="time"
+                                name="settings[absent_notify_time]"
+                                label="Jam Pengiriman Notifikasi Alpha"
+                                :value="old('settings.absent_notify_time', $settings['notification']['absent_notify_time'] ?? '09:00')"
+                                helper="WA dikirim ke orang tua pada jam ini setiap hari aktif"
+                            />
+                        </div>
+
+                        {{-- Hari aktif --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">📅 Hari Aktif Pengiriman</label>
+                            @php
+                                $activeDays = old('settings.absent_notify_days',
+                                    $settings['notification']['absent_notify_days'] ?? '1,2,3,4,5'
+                                );
+                                $activeDaysArr = explode(',', $activeDays);
+                                $dayNames = ['1'=>'Senin','2'=>'Selasa','3'=>'Rabu','4'=>'Kamis','5'=>'Jumat','6'=>'Sabtu'];
+                            @endphp
+                            <input type="hidden" name="settings[absent_notify_days]" value="">
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($dayNames as $num => $name)
+                                    <label class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 cursor-pointer transition-all
+                                        {{ in_array($num, $activeDaysArr)
+                                            ? 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+                                            : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400' }}"
+                                        id="dayLabel{{ $num }}"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            name="absent_days[]"
+                                            value="{{ $num }}"
+                                            {{ in_array($num, $activeDaysArr) ? 'checked' : '' }}
+                                            onchange="updateDayStyle(this, '{{ $num }}')"
+                                            class="accent-red-500"
+                                        >
+                                        {{ $name }}
+                                    </label>
+                                @endforeach
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Pilih hari di mana notifikasi alpha akan dikirim</p>
+                        </div>
+
+                        {{-- Info box --}}
+                        <div class="p-4 bg-orange-50 dark:bg-orange-900/20 border-l-4 border-orange-400 rounded">
+                            <p class="text-sm text-orange-800 dark:text-orange-200">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                <strong>Syarat:</strong> Pastikan cron job sudah aktif di server:
+                                <code class="ml-1 bg-orange-100 dark:bg-orange-900/40 px-2 py-0.5 rounded text-xs font-mono">* * * * * php artisan schedule:run</code>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </x-card>
+
             {{-- General Settings --}}
             <x-card>
                 <div class="flex items-center mb-6">
@@ -343,33 +439,56 @@
 
     @push('scripts')
     <script>
+        // ===== Test Notification =====
         function testNotification() {
             const phone = document.getElementById('test_phone').value;
             if (!phone || !/^628[0-9]{9,12}$/.test(phone)) {
                 alert('Masukkan nomor WhatsApp yang valid (format: 628XXXXXXXXX)');
                 return;
             }
-
-            // Create form and submit
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '{{ route("attendance.settings.test-notification") }}';
-            
             const csrf = document.createElement('input');
-            csrf.type = 'hidden';
-            csrf.name = '_token';
-            csrf.value = '{{ csrf_token() }}';
-            
+            csrf.type = 'hidden'; csrf.name = '_token'; csrf.value = '{{ csrf_token() }}';
             const phoneInput = document.createElement('input');
-            phoneInput.type = 'hidden';
-            phoneInput.name = 'phone';
-            phoneInput.value = phone;
-            
-            form.appendChild(csrf);
-            form.appendChild(phoneInput);
-            document.body.appendChild(form);
-            form.submit();
+            phoneInput.type = 'hidden'; phoneInput.name = 'phone'; phoneInput.value = phone;
+            form.appendChild(csrf); form.appendChild(phoneInput);
+            document.body.appendChild(form); form.submit();
         }
+
+        // ===== Toggle auto absent notify fields =====
+        function toggleAbsentNotifyFields() {
+            const checkbox = document.getElementById('autoAbsentNotify');
+            const fields   = document.getElementById('absentNotifyFields');
+            if (checkbox.checked) {
+                fields.classList.remove('opacity-40', 'pointer-events-none');
+            } else {
+                fields.classList.add('opacity-40', 'pointer-events-none');
+            }
+        }
+
+        // ===== Update hari aktif style =====
+        function updateDayStyle(checkbox, num) {
+            const label = document.getElementById('dayLabel' + num);
+            if (checkbox.checked) {
+                label.className = label.className
+                    .replace('border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400',
+                             'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300');
+            } else {
+                label.className = label.className
+                    .replace('border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300',
+                             'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400');
+            }
+        }
+
+        // Sebelum form submit: kumpulkan hari aktif ke settings[absent_notify_days]
+        document.querySelector('form[action="{{ route("attendance.settings.update") }}"]')
+            ?.addEventListener('submit', function() {
+                const checked = [...document.querySelectorAll('input[name="absent_days[]"]:checked')]
+                    .map(el => el.value);
+                document.querySelector('input[name="settings[absent_notify_days]"]').value = checked.join(',');
+            });
     </script>
     @endpush
 </x-app-layout>
