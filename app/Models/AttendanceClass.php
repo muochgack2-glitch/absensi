@@ -33,6 +33,14 @@ class AttendanceClass extends Model
     }
 
     /**
+     * Get the wali kelas (homeroom teacher) for the class.
+     */
+    public function waliKelas(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'wali_kelas_id');
+    }
+
+    /**
      * Get the students for the class.
      */
     public function students(): HasMany
