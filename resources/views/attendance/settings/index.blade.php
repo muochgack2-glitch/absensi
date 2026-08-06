@@ -258,13 +258,72 @@
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Pilih hari di mana notifikasi alpha akan dikirim</p>
                         </div>
 
-                        {{-- Info box --}}
-                        <div class="p-4 bg-orange-50 dark:bg-orange-900/20 border-l-4 border-orange-400 rounded">
-                            <p class="text-sm text-orange-800 dark:text-orange-200">
-                                <i class="fas fa-info-circle mr-2"></i>
-                                <strong>Syarat:</strong> Pastikan cron job sudah aktif di server:
-                                <code class="ml-1 bg-orange-100 dark:bg-orange-900/40 px-2 py-0.5 rounded text-xs font-mono">* * * * * php artisan schedule:run</code>
-                            </p>
+                        {{-- Setup Cron Panel --}}
+                        <div class="mt-2 rounded-xl border border-orange-200 dark:border-orange-800 overflow-hidden">
+                            {{-- Header --}}
+                            <div class="flex items-center gap-3 px-4 py-3 bg-orange-50 dark:bg-orange-900/30 border-b border-orange-200 dark:border-orange-800">
+                                <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm" style="background:#ea580c;">
+                                    <i class="fas fa-terminal"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-bold text-orange-900 dark:text-orange-200">⚙️ Setup Cron Job di Server (Wajib 1x)</div>
+                                    <div class="text-xs text-orange-700 dark:text-orange-400">Tanpa ini, notifikasi otomatis tidak akan berjalan</div>
+                                </div>
+                            </div>
+
+                            {{-- Steps --}}
+                            <div class="p-4 space-y-3 bg-white dark:bg-gray-800">
+                                {{-- Step 1 --}}
+                                <div class="flex gap-3">
+                                    <span class="flex-shrink-0 w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center">1</span>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">SSH ke server lalu buka crontab:</p>
+                                        <div class="flex items-center gap-2 mt-1.5 bg-gray-900 rounded-lg px-3 py-2">
+                                            <code class="flex-1 text-xs text-green-400 font-mono select-all" id="cronStep1">crontab -e</code>
+                                            <button type="button" onclick="copyCmd('cronStep1', this)" class="flex-shrink-0 text-gray-400 hover:text-white transition-colors" title="Copy">
+                                                <i class="fas fa-copy text-xs"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Step 2 --}}
+                                <div class="flex gap-3">
+                                    <span class="flex-shrink-0 w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center">2</span>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">Tambahkan baris ini di bagian paling bawah:</p>
+                                        <div class="flex items-center gap-2 mt-1.5 bg-gray-900 rounded-lg px-3 py-2">
+                                            <code class="flex-1 text-xs text-green-400 font-mono select-all break-all" id="cronStep2">* * * * * cd /www/wwwroot/absensi &amp;&amp; php artisan schedule:run &gt;&gt; /dev/null 2&gt;&amp;1</code>
+                                            <button type="button" onclick="copyCmd('cronStep2', this)" class="flex-shrink-0 text-gray-400 hover:text-white transition-colors" title="Copy">
+                                                <i class="fas fa-copy text-xs"></i>
+                                            </button>
+                                        </div>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                            <i class="fas fa-info-circle mr-1"></i>Sesuaikan <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">/www/wwwroot/absensi</code> dengan path project di server Anda.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {{-- Step 3 --}}
+                                <div class="flex gap-3">
+                                    <span class="flex-shrink-0 w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center">3</span>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">Simpan &amp; verifikasi cron aktif:</p>
+                                        <div class="flex items-center gap-2 mt-1.5 bg-gray-900 rounded-lg px-3 py-2">
+                                            <code class="flex-1 text-xs text-green-400 font-mono select-all" id="cronStep3">crontab -l</code>
+                                            <button type="button" onclick="copyCmd('cronStep3', this)" class="flex-shrink-0 text-gray-400 hover:text-white transition-colors" title="Copy">
+                                                <i class="fas fa-copy text-xs"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Note --}}
+                                <div class="flex items-start gap-2 pt-1 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-700">
+                                    <i class="fas fa-check-circle text-green-500 mt-0.5"></i>
+                                    <span>Setelah cron aktif, sistem akan otomatis kirim WA pada jam &amp; hari yang dipilih di atas — tanpa perlu tindakan manual lagi.</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -489,6 +548,21 @@
                     .map(el => el.value);
                 document.querySelector('input[name="settings[absent_notify_days]"]').value = checked.join(',');
             });
+
+        // ===== Copy command ke clipboard =====
+        function copyCmd(elementId, btn) {
+            const text = document.getElementById(elementId).innerText;
+            // Decode HTML entities sebelum copy
+            const decoded = text
+                .replace(/&amp;/g, '&')
+                .replace(/&gt;/g, '>')
+                .replace(/&lt;/g, '<');
+            navigator.clipboard.writeText(decoded).then(() => {
+                const icon = btn.querySelector('i');
+                icon.className = 'fas fa-check text-xs text-green-400';
+                setTimeout(() => { icon.className = 'fas fa-copy text-xs'; }, 2000);
+            });
+        }
     </script>
     @endpush
 </x-app-layout>
