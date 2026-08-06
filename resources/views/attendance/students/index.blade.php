@@ -167,19 +167,41 @@
 
         @push('scripts')
         <script>
-            // Debounce function untuk search input
+            // Debounce untuk search input
             let searchTimeout;
             const searchInput = document.getElementById('searchInput');
-            const filterForm = document.getElementById('filterForm');
-            
+            const filterForm  = document.getElementById('filterForm');
+
             if (searchInput) {
                 searchInput.addEventListener('input', function() {
                     clearTimeout(searchTimeout);
                     searchTimeout = setTimeout(function() {
                         filterForm.submit();
-                    }, 500); // Submit setelah 500ms user berhenti mengetik
+                    }, 500);
                 });
             }
+
+            // ===== QR Modal =====
+            function showQrModal(imgUrl, nama, nis, downloadUrl) {
+                document.getElementById('qrImageEl').src        = imgUrl;
+                document.getElementById('qrStudentName').textContent = nama;
+                document.getElementById('qrStudentNis').textContent  = 'NIS: ' + nis;
+                document.getElementById('qrDownloadLink').href   = downloadUrl;
+                document.getElementById('modalQrViewer').classList.remove('hidden');
+            }
+
+            function closeQrModal() {
+                document.getElementById('modalQrViewer').classList.add('hidden');
+                document.getElementById('qrImageEl').src = '';
+            }
+
+            // Tutup modal QR dengan ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeQrModal();
+                    document.getElementById('modalBulkQR').classList.add('hidden');
+                }
+            });
         </script>
         @endpush
 
@@ -241,14 +263,15 @@
                         {{-- QR Code --}}
                         <x-table.cell>
                             @if($student->qr_code_path)
-                                <a 
-                                    href="{{ route('attendance.qr.show', $student->nis) }}" 
-                                    class="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm font-medium"
-                                    target="_blank"
+                                <button
+                                    type="button"
+                                    onclick="showQrModal('{{ asset('storage/' . $student->qr_code_path) }}', '{{ addslashes($student->nama) }}', '{{ $student->nis }}', '{{ route('attendance.qr.download', $student->nis) }}')"
+                                    class="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm font-medium transition-colors"
+                                    title="Lihat QR Code {{ $student->nama }}"
                                 >
                                     <i class="fas fa-qrcode mr-1"></i>
                                     Lihat
-                                </a>
+                                </button>
                             @else
                                 <span class="text-gray-400 dark:text-gray-500 text-sm">Belum ada</span>
                             @endif
@@ -343,6 +366,50 @@
                 </div>
             @endif
         </x-section-card>
+    </div>
+
+    {{-- Modal QR Viewer per Siswa --}}
+    <div id="modalQrViewer" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+        <div
+            class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onclick="closeQrModal()"
+        ></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-xs mx-4 p-6 z-10 text-center">
+            {{-- Header --}}
+            <div class="mb-4">
+                <div id="qrStudentName" class="font-bold text-gray-900 dark:text-white text-lg"></div>
+                <div id="qrStudentNis" class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">NIS: </div>
+            </div>
+
+            {{-- QR Image --}}
+            <div class="flex items-center justify-center bg-white rounded-xl p-4 mb-5 border border-gray-100 shadow-inner">
+                <img
+                    id="qrImageEl"
+                    src=""
+                    alt="QR Code"
+                    class="w-48 h-48 object-contain"
+                >
+            </div>
+
+            {{-- Tombol --}}
+            <div class="flex gap-2">
+                <a
+                    id="qrDownloadLink"
+                    href="#"
+                    class="flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm text-white shadow-md transition-all"
+                    style="background: linear-gradient(to right, #3b82f6, #2563eb);"
+                >
+                    <i class="fas fa-download mr-1"></i> Download
+                </a>
+                <button
+                    type="button"
+                    onclick="closeQrModal()"
+                    class="flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all"
+                >
+                    Tutup
+                </button>
+            </div>
+        </div>
     </div>
 
     {{-- Modal Bulk Generate QR --}}
