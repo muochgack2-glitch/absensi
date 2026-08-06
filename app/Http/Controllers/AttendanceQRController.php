@@ -123,3 +123,4 @@ class AttendanceQRController extends Controller
 
         return redirect()->back()->with('success', $message);
     }
+}
