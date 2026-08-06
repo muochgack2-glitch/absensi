@@ -62,7 +62,10 @@
                     <button
                         type="button"
                         onclick="document.getElementById('modalBulkQR').classList.remove('hidden')"
-                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 text-white"
+                        style="background: linear-gradient(to right, #0d9488, #0f766e);"
+                        onmouseover="this.style.background='linear-gradient(to right, #0f766e, #115e59)'"
+                        onmouseout="this.style.background='linear-gradient(to right, #0d9488, #0f766e)'"
                     >
                         <i class="fas fa-qrcode mr-2"></i>
                         Generate QR Massal
