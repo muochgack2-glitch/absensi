@@ -23,54 +23,59 @@
             </div>
         @endif
         {{-- Page Header --}}
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Manajemen Siswa</h1>
                 <p class="text-gray-600 dark:text-gray-400 mt-1">Kelola data siswa dan QR Code absensi</p>
             </div>
-            
-            <div class="flex flex-wrap gap-3">
-                <a
-                    href="{{ route('attendance.students.export.template') }}"
-                    class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-md hover:shadow-lg hover:-translate-y-0.5"
-                >
-                    <i class="fas fa-file-excel mr-2"></i>
-                    Download Template
-                </a>
-                
-                <a
-                    href="{{ route('attendance.students.import.form') }}"
-                    class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-md hover:shadow-lg hover:-translate-y-0.5"
-                >
-                    <i class="fas fa-file-import mr-2"></i>
-                    Import Excel
-                </a>
-                
-                <a
-                    href="{{ route('attendance.students.card') }}"
-                    class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700 shadow-md hover:shadow-lg hover:-translate-y-0.5"
-                >
-                    <i class="fas fa-id-card mr-2"></i>
-                    Cetak Kartu
-                </a>
 
-                {{-- Generate QR Massal --}}
-                <button
-                    type="button"
-                    onclick="document.getElementById('modalBulkQR').classList.remove('hidden')"
-                    class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 shadow-md hover:shadow-lg hover:-translate-y-0.5"
-                >
-                    <i class="fas fa-qrcode mr-2"></i>
-                    Generate QR Massal
-                </button>
+            <div class="flex flex-col gap-2">
+                {{-- Baris 1: Download / Import / Cetak --}}
+                <div class="flex flex-wrap gap-2">
+                    <a
+                        href="{{ route('attendance.students.export.template') }}"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    >
+                        <i class="fas fa-file-excel mr-2"></i>
+                        Download Template
+                    </a>
 
-                <a
-                    href="{{ route('attendance.students.create') }}"
-                    class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 shadow-md hover:shadow-lg hover:-translate-y-0.5"
-                >
-                    <i class="fas fa-plus mr-2"></i>
-                    Tambah Siswa
-                </a>
+                    <a
+                        href="{{ route('attendance.students.import.form') }}"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    >
+                        <i class="fas fa-file-import mr-2"></i>
+                        Import Excel
+                    </a>
+
+                    <a
+                        href="{{ route('attendance.students.card') }}"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    >
+                        <i class="fas fa-id-card mr-2"></i>
+                        Cetak Kartu
+                    </a>
+                </div>
+
+                {{-- Baris 2: Generate QR Massal + Tambah Siswa --}}
+                <div class="flex flex-wrap gap-2">
+                    <button
+                        type="button"
+                        onclick="document.getElementById('modalBulkQR').classList.remove('hidden')"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    >
+                        <i class="fas fa-qrcode mr-2"></i>
+                        Generate QR Massal
+                    </button>
+
+                    <a
+                        href="{{ route('attendance.students.create') }}"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    >
+                        <i class="fas fa-plus mr-2"></i>
+                        Tambah Siswa
+                    </a>
+                </div>
             </div>
         </div>
 
