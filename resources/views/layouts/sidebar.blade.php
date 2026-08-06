@@ -582,21 +582,6 @@
             <!-- Divider -->
             <div class="sidebar-divider"></div>
 
-            <!-- WhatsApp Gateway -->
-            <a 
-                href="{{ route('whatsapp.index') }}"
-                class="sidebar-menu-item {{ request()->routeIs('whatsapp.*') ? 'active' : '' }}"
-                data-bs-toggle="tooltip" 
-                data-bs-placement="right" 
-                title="WhatsApp Gateway"
-            >
-                <i class="fab fa-whatsapp text-lg"></i>
-                <span class="nav-text font-medium">WA Gateway</span>
-            </a>
-
-            <!-- Divider -->
-            <div class="sidebar-divider"></div>
-
             <!-- Settings -->
             <a 
                 href="{{ route('attendance.settings.index') }}"
