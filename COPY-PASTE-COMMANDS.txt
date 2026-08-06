@@ -1,0 +1,115 @@
+═══════════════════════════════════════════════════════════════
+ COPY PASTE COMMANDS - Deploy Absensi ke /www/wwwroot/absensi
+═══════════════════════════════════════════════════════════════
+
+OPSI 1: ONE-LINE COMMAND (PALING CEPAT)
+────────────────────────────────────────────────────────────────
+Copy paste command ini langsung ke terminal production:
+
+cd /tmp && wget https://raw.githubusercontent.com/muochgack2-glitch/Absensi/master/quick-deploy.sh && chmod +x quick-deploy.sh && ./quick-deploy.sh
+
+
+OPSI 2: MANUAL STEP BY STEP
+────────────────────────────────────────────────────────────────
+Kalau mau lebih kontrol, copy paste per section:
+
+# === STEP 1: Backup & Clean ===
+[ -f /www/wwwroot/absensi/.env ] && cp /www/wwwroot/absensi/.env /tmp/absensi-env-backup
+cd /www/wwwroot && rm -rf absensi && mkdir -p absensi
+
+# === STEP 2: Clone Repository ===
+cd /www/wwwroot/absensi
+git clone https://github.com/muochgack2-glitch/Absensi.git .
+
+# === STEP 3: Setup Environment ===
+if [ -f /tmp/absensi-env-backup ]; then
+    cp /tmp/absensi-env-backup .env
+    echo "✓ .env restored dari backup"
+else
+    cp .env.example .env
+    echo "⚠ EDIT .env SEKARANG:"
+    echo "   nano .env"
+    echo "   Isi DB_DATABASE, DB_USERNAME, DB_PASSWORD"
+fi
+
+# === STEP 4: Set Permissions ===
+chown -R www-data:www-data /www/wwwroot/absensi
+chmod -R 755 /www/wwwroot/absensi
+chmod -R 775 /www/wwwroot/absensi/storage
+chmod -R 775 /www/wwwroot/absensi/bootstrap/cache
+
+# === STEP 5: Install Dependencies ===
+cd /www/wwwroot/absensi
+composer install --ignore-platform-reqs --no-dev --optimize-autoloader
+npm install
+npm run build
+
+# === STEP 6: Laravel Setup ===
+php artisan key:generate --force
+php artisan storage:link
+php artisan migrate --force
+
+# === STEP 7: Clear Caches ===
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+php artisan route:clear
+
+# === STEP 8: Fix Nginx Config ===
+NGINX_CONF="/www/server/panel/vhost/nginx/absensi.smkpgriblora.sch.id.conf"
+cp "$NGINX_CONF" "$NGINX_CONF.backup"
+sed -i 's|root /www/wwwroot/absensi/.*;|root /www/wwwroot/absensi/public;|g' "$NGINX_CONF"
+
+# === STEP 9: Test & Reload Nginx ===
+nginx -t
+systemctl reload nginx
+
+# === STEP 10: Seed Admin User (Optional) ===
+php artisan db:seed --class=AdminUserSeeder
+
+
+SETELAH DEPLOY SELESAI
+────────────────────────────────────────────────────────────────
+1. Test website: https://absensi.smkpgriblora.sch.id
+
+2. Login dengan:
+   Email: admin@smkpgriblora.sch.id
+   Password: admin123
+
+3. Kalau error 500, cek log:
+   tail -f /www/wwwroot/absensi/storage/logs/laravel.log
+
+
+JIKA ADA MASALAH
+────────────────────────────────────────────────────────────────
+Permission denied:
+  chmod -R 775 /www/wwwroot/absensi/storage
+  chmod -R 775 /www/wwwroot/absensi/bootstrap/cache
+
+Database error:
+  - Pastikan database 'absensi' sudah dibuat
+  - Cek .env: nano /www/wwwroot/absensi/.env
+  - Test: php artisan migrate
+
+Assets 404:
+  cd /www/wwwroot/absensi
+  npm run build
+  php artisan view:clear
+
+Blank page / 500:
+  tail -f /www/wwwroot/absensi/storage/logs/laravel.log
+  tail -f /www/wwwlogs/absensi.smkpgriblora.sch.id.error.log
+
+
+LOKASI FILE PENTING
+────────────────────────────────────────────────────────────────
+App:          /www/wwwroot/absensi/
+Config:       /www/wwwroot/absensi/.env
+Nginx:        /www/server/panel/vhost/nginx/absensi.smkpgriblora.sch.id.conf
+PHP-FPM:      /tmp/php-cgi-83.sock
+Laravel Log:  /www/wwwroot/absensi/storage/logs/laravel.log
+Nginx Log:    /www/wwwlogs/absensi.smkpgriblora.sch.id.log
+Error Log:    /www/wwwlogs/absensi.smkpgriblora.sch.id.error.log
+
+
+═══════════════════════════════════════════════════════════════
