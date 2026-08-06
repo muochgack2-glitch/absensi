@@ -1,0 +1,119 @@
+FRESH DEPLOYMENT ABSENSI
+========================
+
+CARA 1: Gunakan Script Otomatis
+--------------------------------
+1. Upload file deploy-fresh.sh ke server
+2. Jalankan:
+   chmod +x deploy-fresh.sh
+   ./deploy-fresh.sh
+
+3. Edit .env:
+   nano /www/wwwroot/absensi/.env
+   
+   Isi:
+   APP_NAME=Absensi
+   APP_URL=https://absensi.smkpgriblora.sch.id
+   
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=absensi
+   DB_USERNAME=root
+   DB_PASSWORD=your_password
+
+4. Test: https://absensi.smkpgriblora.sch.id
+
+
+CARA 2: Manual Step by Step
+----------------------------
+# 1. Backup .env (jika ada)
+cp /www/wwwroot/absensi/.env /tmp/absensi-env-backup
+
+# 2. Hapus folder lama
+cd /www/wwwroot
+rm -rf absensi
+mkdir -p absensi
+
+# 3. Clone dari GitHub
+cd /www/wwwroot/absensi
+git clone https://github.com/muochgack2-glitch/Absensi.git .
+
+# 4. Restore .env
+cp /tmp/absensi-env-backup .env
+# ATAU copy dari example dan edit
+cp .env.example .env
+nano .env
+
+# 5. Set permissions
+chown -R www-data:www-data /www/wwwroot/absensi
+chmod -R 755 /www/wwwroot/absensi
+chmod -R 775 /www/wwwroot/absensi/storage
+chmod -R 775 /www/wwwroot/absensi/bootstrap/cache
+
+# 6. Install dependencies
+cd /www/wwwroot/absensi
+composer install --ignore-platform-reqs --no-dev --optimize-autoloader
+npm install
+npm run build
+
+# 7. Laravel setup
+php artisan key:generate --force
+php artisan migrate --force
+php artisan storage:link
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+
+# 8. Fix Nginx config
+nano /www/server/panel/vhost/nginx/absensi.smkpgriblora.sch.id.conf
+
+# Pastikan baris ini:
+root /www/wwwroot/absensi/public;
+
+# 9. Reload Nginx
+nginx -t
+systemctl reload nginx
+
+# 10. Test
+curl -I https://absensi.smkpgriblora.sch.id
+
+
+TROUBLESHOOTING
+---------------
+500 Error:
+- Cek: tail -f /www/wwwlogs/absensi.smkpgriblora.sch.id.error.log
+- Cek: tail -f /www/wwwroot/absensi/storage/logs/laravel.log
+- Fix: chmod -R 775 storage bootstrap/cache
+
+Database Error:
+- Pastikan database 'absensi' sudah dibuat di MySQL
+- Cek kredensial di .env
+- Test: php artisan migrate
+
+Assets 404:
+- Run: npm run build
+- Cek: ls -la public/build/
+- Fix: php artisan view:clear
+
+Permission Denied:
+- Run: chown -R www-data:www-data /www/wwwroot/absensi
+- Run: chmod -R 775 storage bootstrap/cache
+
+
+SETELAH DEPLOYMENT BERHASIL
+----------------------------
+1. Buat user admin:
+   php artisan db:seed --class=AdminUserSeeder
+
+2. Upload data siswa via Excel atau:
+   php artisan db:seed --class=AttendanceClassSeeder
+   php artisan db:seed --class=AttendanceStudentSeeder
+
+3. Setup WhatsApp Gateway (opsional)
+
+4. Test semua fitur:
+   - Login admin
+   - Scan QR absensi
+   - Generate laporan
+   - Dashboard statistik
