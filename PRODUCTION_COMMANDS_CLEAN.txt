@@ -1,0 +1,172 @@
+# ============================================
+# PRODUCTION COMMANDS - Copy Paste Satu-Satu
+# ============================================
+# Path: /www/wwwroot/absensi
+# Date: 2026-08-06
+# Clean clone dari GitHub (tanpa WhatsApp Gateway)
+
+# ============================================
+# STEP 1: Verify Clean Clone
+# ============================================
+cd /www/wwwroot/absensi
+git log --oneline -1
+ls -la | grep whatsapp
+
+# Seharusnya:
+# - Git commit: 79179ed "Remove all WhatsApp Gateway features"
+# - No whatsapp-server folder
+
+# ============================================
+# STEP 2: Fix Ownership FIRST (Penting!)
+# ============================================
+chown -R www-data:www-data /www/wwwroot/absensi
+
+# ============================================
+# STEP 3: Create Storage Structure
+# ============================================
+mkdir -p storage/app/public
+mkdir -p storage/framework/cache/data
+mkdir -p storage/framework/sessions
+mkdir -p storage/framework/views
+mkdir -p storage/logs
+mkdir -p bootstrap/cache
+
+# Set ownership again
+chown -R www-data:www-data storage bootstrap/cache
+
+# ============================================
+# STEP 4: Set Permissions
+# ============================================
+chmod -R 755 /www/wwwroot/absensi
+chmod -R 775 storage
+chmod -R 775 bootstrap/cache
+chmod +x artisan
+
+# ============================================
+# STEP 5: Setup .env
+# ============================================
+# Check if .env exists
+ls -la .env
+
+# If NOT exist, copy from example
+cp .env.example .env
+
+# Edit .env untuk database
+nano .env
+
+# Set database config:
+# DB_CONNECTION=mysql
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_DATABASE=absensi_db
+# DB_USERNAME=absensi_db
+# DB_PASSWORD=password
+
+# Verify
+cat .env | grep DB_
+
+# ============================================
+# STEP 6: Install Composer Dependencies
+# ============================================
+composer install --ignore-platform-reqs --no-dev --optimize-autoloader
+
+# ============================================
+# STEP 7: Laravel Setup
+# ============================================
+php artisan key:generate --force
+php artisan storage:link
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+php artisan route:clear
+
+# ============================================
+# STEP 8: Run Database Migration
+# ============================================
+php artisan migrate --force
+
+# ============================================
+# STEP 9: Seed Admin User (Optional)
+# ============================================
+# Only if admin user not exist yet
+php artisan db:seed --class=AdminUserSeeder
+
+# ============================================
+# STEP 10: Verification
+# ============================================
+# Check Laravel version
+php artisan --version
+
+# Check routes (NO whatsapp routes)
+php artisan route:list | grep -i whatsapp
+
+# Check storage permissions
+ls -la storage/ | head -5
+
+# Check if files exist
+ls -la app/Http/Controllers/ | grep -i whatsapp
+
+# ============================================
+# STEP 11: Restart PHP-FPM
+# ============================================
+systemctl restart php-fpm-83
+
+# ============================================
+# STEP 12: Test Website
+# ============================================
+# Open browser:
+# https://absensi.smkpgriblora.sch.id
+
+# Default login:
+# Email: admin@absensi.test
+# Password: password
+
+# ============================================
+# STEP 13: Monitor Logs (Optional)
+# ============================================
+# Watch for errors in real-time
+tail -f storage/logs/laravel.log
+
+# Check Nginx error log
+tail -f /www/wwwlogs/absensi.smkpgriblora.sch.id.error.log
+
+# ============================================
+# TROUBLESHOOTING
+# ============================================
+
+# If permission error:
+chown -R www-data:www-data /www/wwwroot/absensi
+chmod -R 755 /www/wwwroot/absensi
+chmod -R 775 storage bootstrap/cache
+
+# If cache error:
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+
+# If database connection error:
+cat .env | grep DB_
+php artisan migrate:status
+
+# If 500 error:
+tail -50 storage/logs/laravel.log
+tail -50 /www/wwwlogs/absensi.smkpgriblora.sch.id.error.log
+
+# ============================================
+# VERIFICATION CHECKLIST
+# ============================================
+# [x] Git commit is 79179ed (Remove WhatsApp features)
+# [x] No whatsapp-server folder exists
+# [x] Ownership is www-data:www-data
+# [x] storage/ is writable (775)
+# [x] bootstrap/cache/ is writable (775)
+# [x] .env has correct database config
+# [x] composer dependencies installed
+# [x] APP_KEY is generated
+# [x] storage link created
+# [x] Database migrated
+# [x] Admin user seeded
+# [x] No WhatsApp routes in route:list
+# [x] Website accessible in browser
+# [x] Login works with admin@absensi.test
+# [x] No errors in laravel.log
