@@ -39,8 +39,14 @@ if [ -f /tmp/absensi-env-backup ]; then
     cp /tmp/absensi-env-backup .env
     echo "   ✓ Restored .env from backup"
 else
-    cp .env.example .env
-    echo "   ⚠ Created .env from .env.example - PLEASE CONFIGURE IT!"
+    if [ -f .env.production ]; then
+        cp .env.production .env
+        echo "   ✓ Created .env from .env.production template"
+    else
+        cp .env.example .env
+        echo "   ✓ Created .env from .env.example"
+    fi
+    echo "   ⚠ PLEASE VERIFY DATABASE SETTINGS!"
 fi
 
 # 5. Set permissions

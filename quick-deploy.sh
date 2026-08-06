@@ -14,8 +14,8 @@ cd /www/wwwroot/absensi && git clone https://github.com/muochgack2-glitch/Absens
 if [ -f /tmp/absensi-env-backup ]; then
     cp /tmp/absensi-env-backup .env
 else
-    cp .env.example .env
-    echo "⚠ Edit .env file: nano .env"
+    [ -f .env.production ] && cp .env.production .env || cp .env.example .env
+    echo "⚠ Verify database settings in .env"
 fi
 
 # Permissions

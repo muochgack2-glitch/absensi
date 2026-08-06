@@ -1,6 +1,28 @@
 FRESH DEPLOYMENT ABSENSI
 ========================
 
+PERSIAPAN: Buat Database MySQL
+-------------------------------
+# Via aaPanel (Recommended):
+1. Login ke aaPanel
+2. Database > Add Database
+   - Name: absensi_db
+   - User: absensi_db
+   - Password: password
+
+# Via Script:
+chmod +x create-database.sh
+./create-database.sh
+
+# Via MySQL Command:
+mysql -u root -p
+CREATE DATABASE absensi_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'absensi_db'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON absensi_db.* TO 'absensi_db'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+
+
 CARA 1: Gunakan Script Otomatis
 --------------------------------
 1. Upload file deploy-fresh.sh ke server
@@ -11,16 +33,13 @@ CARA 1: Gunakan Script Otomatis
 3. Edit .env:
    nano /www/wwwroot/absensi/.env
    
-   Isi:
-   APP_NAME=Absensi
-   APP_URL=https://absensi.smkpgriblora.sch.id
-   
+   Setting sudah benar (dari .env.production):
    DB_CONNECTION=mysql
    DB_HOST=127.0.0.1
    DB_PORT=3306
-   DB_DATABASE=absensi
-   DB_USERNAME=root
-   DB_PASSWORD=your_password
+   DB_DATABASE=absensi_db
+   DB_USERNAME=absensi_db
+   DB_PASSWORD=password
 
 4. Test: https://absensi.smkpgriblora.sch.id
 

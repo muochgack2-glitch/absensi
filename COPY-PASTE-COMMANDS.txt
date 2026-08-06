@@ -26,10 +26,12 @@ if [ -f /tmp/absensi-env-backup ]; then
     cp /tmp/absensi-env-backup .env
     echo "✓ .env restored dari backup"
 else
-    cp .env.example .env
-    echo "⚠ EDIT .env SEKARANG:"
-    echo "   nano .env"
-    echo "   Isi DB_DATABASE, DB_USERNAME, DB_PASSWORD"
+    [ -f .env.production ] && cp .env.production .env || cp .env.example .env
+    echo "✓ .env created from template"
+    echo "⚠ Database sudah configured:"
+    echo "   DB_DATABASE=absensi_db"
+    echo "   DB_USERNAME=absensi_db"
+    echo "   DB_PASSWORD=password"
 fi
 
 # === STEP 4: Set Permissions ===
@@ -70,13 +72,18 @@ php artisan db:seed --class=AdminUserSeeder
 
 SETELAH DEPLOY SELESAI
 ────────────────────────────────────────────────────────────────
-1. Test website: https://absensi.smkpgriblora.sch.id
+1. Pastikan database MySQL sudah dibuat:
+   Database: absensi_db
+   User: absensi_db
+   Password: password
 
-2. Login dengan:
+2. Test website: https://absensi.smkpgriblora.sch.id
+
+3. Login dengan:
    Email: admin@smkpgriblora.sch.id
    Password: admin123
 
-3. Kalau error 500, cek log:
+4. Kalau error 500, cek log:
    tail -f /www/wwwroot/absensi/storage/logs/laravel.log
 
 
@@ -87,7 +94,8 @@ Permission denied:
   chmod -R 775 /www/wwwroot/absensi/bootstrap/cache
 
 Database error:
-  - Pastikan database 'absensi' sudah dibuat
+  - Pastikan database 'absensi_db' sudah dibuat
+  - User MySQL: absensi_db dengan password: password
   - Cek .env: nano /www/wwwroot/absensi/.env
   - Test: php artisan migrate
 
