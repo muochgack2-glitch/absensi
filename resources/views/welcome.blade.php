@@ -204,10 +204,15 @@
         <div class="lg:col-span-3 flex flex-col gap-4">
             {{-- Logo & School Name --}}
             <div class="bg-gradient-to-br from-primary-600 to-purple-600 rounded-xl shadow-lg p-4 text-white text-center">
-                <div class="inline-flex items-center justify-center w-12 h-12 bg-white/20 backdrop-blur-lg rounded-lg mb-2">
-                    <i class="fas fa-graduation-cap text-2xl"></i>
-                </div>
-                <h2 class="text-lg font-black mb-1">SMK PGRI BLORA</h2>
+                @if($appLogoUrl)
+                    <img src="{{ $appLogoUrl }}" alt="Logo"
+                         class="w-12 h-12 rounded-lg object-contain bg-white/20 p-1 mx-auto mb-2">
+                @else
+                    <div class="inline-flex items-center justify-center w-12 h-12 bg-white/20 backdrop-blur-lg rounded-lg mb-2">
+                        <i class="fas fa-graduation-cap text-2xl"></i>
+                    </div>
+                @endif
+                <h2 class="text-lg font-black mb-1">{{ $appSchoolName }}</h2>
                 <p class="text-xs text-primary-100">Sistem Absensi QR Code</p>
             </div>
 

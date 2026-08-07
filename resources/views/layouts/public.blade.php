@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="Sistem Absensi QR Code - SMK PGRI BLORA">
+    <meta name="description" content="Sistem Absensi QR Code - {{ $appSchoolName }}">
     <meta name="theme-color" content="#1e3a8a">
 
     <title>{{ config('app.name', 'Absensi QR') }} - QR Scanner</title>
@@ -40,11 +40,16 @@
             <div class="flex items-center justify-between">
                 {{-- Logo & School Name --}}
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-purple-500 rounded-xl flex items-center justify-center text-white shadow-lg">
-                        <i class="fas fa-graduation-cap text-2xl"></i>
-                    </div>
+                    @if($appLogoUrl)
+                        <img src="{{ $appLogoUrl }}" alt="Logo"
+                             class="w-12 h-12 rounded-xl object-contain bg-gray-100 dark:bg-gray-700 p-1 shadow-lg">
+                    @else
+                        <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-purple-500 rounded-xl flex items-center justify-center text-white shadow-lg">
+                            <i class="fas fa-graduation-cap text-2xl"></i>
+                        </div>
+                    @endif
                     <div>
-                        <h1 class="text-xl font-black text-gray-900 dark:text-white">SMK PGRI BLORA</h1>
+                        <h1 class="text-xl font-black text-gray-900 dark:text-white">{{ $appSchoolName }}</h1>
                         <p class="text-sm text-gray-600 dark:text-gray-400">Sistem Absensi QR Code</p>
                     </div>
                 </div>
@@ -69,7 +74,7 @@
     <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-4">
         <div class="max-w-screen-2xl mx-auto px-6 text-center">
             <p class="text-sm text-gray-600 dark:text-gray-400">
-                © {{ date('Y') }} SMK PGRI BLORA. Sistem Absensi QR Code.
+                © {{ date('Y') }} {{ $appSchoolName }}. Sistem Absensi QR Code.
             </p>
         </div>
     </footer>

@@ -490,14 +490,19 @@
         <!-- Logo Section with Toggle Button (SPMB Position) -->
         <div class="sidebar-brand border-b border-primary-700/50">
             <div class="sidebar-brand-logo">
-                <div class="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-lg flex items-center justify-center shadow-lg">
-                    <i class="fas fa-qrcode text-white text-xl"></i>
-                </div>
+                @if($appLogoUrl)
+                    <img src="{{ $appLogoUrl }}" alt="Logo"
+                         class="w-10 h-10 rounded-lg object-contain bg-white p-0.5 shadow-lg">
+                @else
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-lg flex items-center justify-center shadow-lg">
+                        <i class="fas fa-qrcode text-white text-xl"></i>
+                    </div>
+                @endif
             </div>
             
             <div class="sidebar-brand-text">
                 <h1 class="text-white font-bold text-lg leading-tight">Absensi QR</h1>
-                <p class="text-primary-300 text-xs">SMAN 1 Jakarta</p>
+                <p class="text-primary-300 text-xs truncate max-w-[120px]">{{ $appSchoolName }}</p>
             </div>
             
             <!-- Toggle Button (SPMB Position - Top Right Corner) -->
