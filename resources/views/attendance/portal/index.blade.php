@@ -121,23 +121,23 @@
                 Masukkan NIS siswa untuk melihat rekap kehadiran
             </p>
 
-            @if($errors->has('nis'))
+            @if($errors->has('query'))
                 <div class="flex items-center gap-2 px-4 py-3 mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-700 dark:text-red-400">
                     <i class="fas fa-exclamation-circle flex-shrink-0"></i>
-                    <span>{{ $errors->first('nis') }}</span>
+                    <span>{{ $errors->first('query') }}</span>
                 </div>
             @endif
 
             <form method="POST" action="{{ route('portal.check') }}">
                 @csrf
                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Nomor Induk Siswa (NIS)
+                    NIS atau Nama Siswa
                 </label>
                 <input type="text"
-                       name="nis"
-                       id="nisInput"
-                       value="{{ old('nis') }}"
-                       placeholder="Contoh: 1234567890"
+                       name="query"
+                       id="queryInput"
+                       value="{{ old('query') }}"
+                       placeholder="NIS: 1234567890 atau nama siswa"
                        autocomplete="off"
                        autofocus
                        class="nis-input mb-4">

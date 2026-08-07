@@ -20,31 +20,53 @@ class AttendancePortalController extends Controller
     }
 
     /**
-     * Proses cari siswa berdasarkan NIS
+     * Proses cari siswa berdasarkan NIS atau Nama
      */
     public function check(Request $request)
     {
         $request->validate([
-            'nis' => 'required|string|min:3|max:20',
+            'query' => 'required|string|min:2|max:100',
         ], [
-            'nis.required' => 'NIS siswa wajib diisi.',
-            'nis.min'      => 'NIS minimal 3 karakter.',
+            'query.required' => 'Masukkan NIS atau nama siswa.',
+            'query.min'      => 'Minimal 2 karakter.',
         ]);
 
-        $nis = trim($request->input('nis'));
+        $q = trim($request->input('query'));
 
-        $student = AttendanceStudent::with('kelas')
-            ->where('nis', $nis)
+        // Coba cari by NIS dulu (exact match)
+        $byNis = AttendanceStudent::with('kelas')
+            ->where('nis', $q)
             ->where('is_active', true)
             ->first();
 
-        if (!$student) {
-            return back()
-                ->withInput()
-                ->withErrors(['nis' => "Siswa dengan NIS \"{$nis}\" tidak ditemukan atau tidak aktif."]);
+        if ($byNis) {
+            return redirect()->route('portal.result', ['nis' => $byNis->nis]);
         }
 
-        return redirect()->route('portal.result', ['nis' => $nis]);
+        // Cari by nama (partial, case-insensitive)
+        $byNama = AttendanceStudent::with('kelas')
+            ->where('is_active', true)
+            ->where('nama', 'LIKE', '%' . $q . '%')
+            ->orderBy('kelas_id')
+            ->orderBy('nama')
+            ->get();
+
+        if ($byNama->isEmpty()) {
+            return back()
+                ->withInput()
+                ->withErrors(['query' => "Siswa \"$q\" tidak ditemukan. Coba masukkan NIS atau nama yang lebih lengkap."]);
+        }
+
+        if ($byNama->count() === 1) {
+            return redirect()->route('portal.result', ['nis' => $byNama->first()->nis]);
+        }
+
+        // Lebih dari 1 hasil — tampilkan halaman pilih siswa
+        return view('attendance.portal.select', [
+            'students'   => $byNama,
+            'query'      => $q,
+            'schoolName' => AttendanceSetting::get('school_name', 'Sekolah'),
+        ]);
     }
 
     /**
