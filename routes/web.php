@@ -63,6 +63,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/attendance/students/export/template', [AttendanceStudentController::class, 'exportTemplate'])
         ->name('attendance.students.export.template');
 
+    // Export Excel siswa (HARUS sebelum resource agar tidak tertangkap {student})
+    Route::get('/attendance/students/export/excel', [AttendanceStudentController::class, 'exportExcel'])
+        ->name('attendance.students.export.excel');
+
+    // Bulk action siswa (HARUS sebelum resource)
+    Route::post('/attendance/students/bulk-action', [AttendanceStudentController::class, 'bulkAction'])
+        ->name('attendance.students.bulk-action');
+
     Route::get('/attendance/students/{student}/print-qr', [StudentCardController::class, 'printSingle'])
         ->name('attendance.students.print-qr');
 
@@ -108,13 +116,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/attendance/reports/monthly/excel', [AttendanceReportController::class, 'exportMonthlyExcel'])
         ->name('attendance.reports.monthly.excel');
 
-    // Export siswa ke Excel
-    Route::get('/attendance/students/export/excel', [AttendanceStudentController::class, 'exportExcel'])
-        ->name('attendance.students.export.excel');
-
-    // Bulk action siswa
-    Route::post('/attendance/students/bulk-action', [AttendanceStudentController::class, 'bulkAction'])
-        ->name('attendance.students.bulk-action');
 
     // QR Code Display
     Route::get('/attendance/qr/{student}', [AttendanceQRController::class, 'show'])
