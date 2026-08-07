@@ -54,6 +54,11 @@
                     </div>
                 </div>
 
+                {{-- Cek Absensi Ortu --}}
+                <a href="{{ route('portal.index') }}" class="px-5 py-2.5 border-2 border-indigo-400 dark:border-indigo-500 text-indigo-600 dark:text-indigo-400 rounded-xl font-bold hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all text-sm">
+                    <i class="fas fa-search mr-1.5"></i>Cek Absensi
+                </a>
+
                 {{-- Login Button --}}
                 <a href="{{ route('login') }}" class="group relative px-6 py-3 bg-gradient-to-r from-primary-500 to-purple-600 hover:from-primary-600 hover:to-purple-700 text-white rounded-xl font-bold transition-all transform hover:scale-105 shadow-lg hover:shadow-2xl">
                     <i class="fas fa-sign-in-alt mr-2"></i>

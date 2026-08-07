@@ -13,12 +13,20 @@ use App\Http\Controllers\WhatsAppGatewayController;
 use App\Http\Controllers\WhatsAppDiagnosticController;
 use App\Http\Controllers\StudentCardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AttendancePortalController;
 use Illuminate\Support\Facades\Route;
 
 // Public Scanner Landing Page (no auth required)
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
+
+// ==========================================
+// Portal Publik Cek Absensi Ortu
+// ==========================================
+Route::get('/portal', [AttendancePortalController::class, 'index'])->name('portal.index');
+Route::post('/portal/check', [AttendancePortalController::class, 'check'])->name('portal.check');
+Route::get('/portal/result', [AttendancePortalController::class, 'result'])->name('portal.result');
 
 // Auth routes
 require __DIR__.'/auth.php';
