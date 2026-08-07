@@ -214,7 +214,7 @@
                     </div>
 
                     {{-- Toggle: Notifikasi Terlambat --}}
-                    <div class="flex items-center justify-between p-4 bg-yellow-50 dark:bg-yellow-950/40 rounded-lg border border-yellow-200 dark:border-yellow-700">
+                    <div class="flex items-center justify-between p-4 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg border border-yellow-200 dark:border-yellow-700">
                         <div>
                             <label class="text-sm font-medium text-gray-900 dark:text-white">
                                 ⚡ Aktifkan Notifikasi Terlambat (Real-time)
