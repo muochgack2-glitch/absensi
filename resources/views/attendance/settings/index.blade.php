@@ -11,14 +11,6 @@
                 <p class="text-gray-600 dark:text-gray-400 mt-1">Konfigurasi waktu absensi dan notifikasi</p>
             </div>
             <div class="flex items-center gap-2">
-                {{-- Backup DB --}}
-                <a href="{{ route('attendance.settings.backup') }}"
-                   class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 border-2 border-teal-300 dark:border-teal-700 text-teal-700 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20"
-                   title="Download backup database SQL">
-                    <i class="fas fa-database mr-2"></i>
-                    Backup DB
-                </a>
-
                 {{-- Reset --}}
                 <form action="{{ route('attendance.settings.reset') }}" method="POST"
                       onsubmit="return confirm('Reset semua pengaturan ke default? Tindakan ini tidak dapat dibatalkan.')">
