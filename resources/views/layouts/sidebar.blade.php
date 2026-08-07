@@ -624,6 +624,21 @@
                 @endif
             </a>
 
+            {{-- Menu Pengguna: hanya tampil untuk admin --}}
+            @if(auth()->user()?->isAdmin())
+            <!-- Pengguna -->
+            <a 
+                href="{{ route('attendance.users.index') }}"
+                class="sidebar-menu-item {{ request()->routeIs('attendance.users*') ? 'active' : '' }}"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="right" 
+                title="Pengguna"
+            >
+                <i class="fas fa-user-shield text-lg"></i>
+                <span class="nav-text font-medium">Pengguna</span>
+            </a>
+            @endif
+
             <!-- Divider -->
             <div class="sidebar-divider"></div>
 

@@ -14,9 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Exclude WhatsApp Gateway control endpoints from CSRF verification
-        // This is safe because these endpoints are only accessible by authenticated admin users
         $middleware->validateCsrfTokens(except: [
             'whatsapp/gateway/*',
+        ]);
+        // Role-based access middleware
+        $middleware->alias([
+            'role' => \App\Http\Middleware\WaliKelasMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -28,16 +28,21 @@ class AuthenticatedSessionController extends Controller
             $request->authenticate();
             $request->session()->regenerate();
 
+            $user     = $request->user();
+            $homeRoute = $user->isWaliKelas()
+                ? route('wali.dashboard', absolute: false)
+                : route('dashboard', absolute: false);
+
             // Check if request expects JSON (AJAX request)
             if ($request->expectsJson()) {
                 return response()->json([
-                    'success' => true,
-                    'message' => 'Login berhasil',
-                    'redirect' => route('dashboard', absolute: false)
+                    'success'  => true,
+                    'message'  => 'Login berhasil',
+                    'redirect' => $homeRoute,
                 ]);
             }
 
-            return redirect()->intended(route('dashboard', absolute: false));
+            return redirect()->intended($homeRoute);
             
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Handle validation error for AJAX requests

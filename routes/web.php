@@ -15,6 +15,7 @@ use App\Http\Controllers\StudentCardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AttendancePortalController;
 use App\Http\Controllers\AttendanceIzinController;
+use App\Http\Controllers\WaliKelasController;
 use Illuminate\Support\Facades\Route;
 
 // Public Scanner Landing Page (no auth required)
@@ -247,6 +248,23 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/attendance/izin', [AttendanceIzinController::class, 'adminIndex'])->name('attendance.izin.index');
     Route::post('/attendance/izin/{izin}/approve', [AttendanceIzinController::class, 'approve'])->name('attendance.izin.approve');
     Route::post('/attendance/izin/{izin}/reject', [AttendanceIzinController::class, 'reject'])->name('attendance.izin.reject');
+
+    // ==========================================
+    // Manajemen User & Wali Kelas (admin only)
+    // ==========================================
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/attendance/users', [WaliKelasController::class, 'userIndex'])->name('attendance.users.index');
+        Route::post('/attendance/users', [WaliKelasController::class, 'userStore'])->name('attendance.users.store');
+        Route::put('/attendance/users/{user}', [WaliKelasController::class, 'userUpdate'])->name('attendance.users.update');
+        Route::delete('/attendance/users/{user}', [WaliKelasController::class, 'userDestroy'])->name('attendance.users.destroy');
+    });
+
+    // ==========================================
+    // Dashboard Wali Kelas
+    // ==========================================
+    Route::middleware('role:wali_kelas')->group(function () {
+        Route::get('/wali/dashboard', [WaliKelasController::class, 'waliDashboard'])->name('wali.dashboard');
+    });
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
