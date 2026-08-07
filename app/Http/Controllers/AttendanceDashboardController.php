@@ -65,23 +65,36 @@ class AttendanceDashboardController extends Controller
     }
 
     /**
-     * Get attendance data for last 7 weekdays
+     * API: Chart data untuk AJAX filter per kelas
      */
-    private function getChartData7Days(): array
+    public function chartApi(Request $request): \Illuminate\Http\JsonResponse
     {
-        $days   = [];
-        $labels = [];
-        $hadir  = [];
-        $alpha  = [];
+        $classId = $request->input('class_id');
+        return response()->json($this->getChartData7Days($classId));
+    }
+
+    /**
+     * Get attendance data for last 7 weekdays, optional filter by class
+     */
+    private function getChartData7Days(?int $classId = null): array
+    {
+        $labels    = [];
+        $hadir     = [];
+        $alpha     = [];
         $terlambat = [];
 
-        $date = Carbon::today();
+        $date      = Carbon::today();
         $collected = 0;
 
-        // Ambil 7 hari ke belakang (skip hari Minggu)
         while ($collected < 7) {
             if ($date->dayOfWeek !== Carbon::SUNDAY) {
-                $records = AttendanceRecord::whereDate('date', $date)->get();
+                $query = AttendanceRecord::whereDate('date', $date);
+
+                if ($classId) {
+                    $query->whereHas('student', fn($q) => $q->where('kelas_id', $classId));
+                }
+
+                $records   = $query->get();
                 $labels[]    = $date->translatedFormat('d M');
                 $hadir[]     = $records->where('status', 'hadir')->count()
                              + $records->where('status', 'terlambat')->count();

@@ -14,7 +14,8 @@ class AttendanceService
 {
     public function __construct(
         private PhotoCaptureService $photoCaptureService,
-        private AttendanceStatusService $statusService
+        private AttendanceStatusService $statusService,
+        private AttendanceNotificationService $notificationService
     ) {}
 
     /**
@@ -171,6 +172,19 @@ class AttendanceService
 
         DB::commit();
 
+        // Kirim notifikasi WA jika terlambat dan fitur aktif
+        if ($status === 'terlambat') {
+            $lateNotifyEnabled = AttendanceSetting::get('late_notify_enabled', 'false');
+            if ($lateNotifyEnabled === 'true') {
+                $record->refresh(); // pastikan data terbaru
+                try {
+                    $this->notificationService->notifyCheckIn($student->load('kelas'), $record);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::warning('Late WA notification failed: ' . $e->getMessage());
+                }
+            }
+        }
+
         // Log success
         $this->logAction(
             $student->id,
@@ -184,12 +198,12 @@ class AttendanceService
             'success' => true,
             'message' => "Check-in berhasil! Status: {$this->statusService->getStatusLabel($status)}",
             'data' => [
-                'nama' => $student->nama,
-                'nis' => $student->nis,
-                'kelas' => $student->kelas->nama_kelas ?? '-',
-                'status' => $status,
+                'nama'         => $student->nama,
+                'nis'          => $student->nis,
+                'kelas'        => $student->kelas->nama_kelas ?? '-',
+                'status'       => $status,
                 'status_label' => $this->statusService->getStatusLabel($status),
-                'time' => Carbon::parse($currentTime)->format('H:i'),
+                'time'         => Carbon::parse($currentTime)->format('H:i'),
             ],
         ];
     }

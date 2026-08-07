@@ -10,15 +10,26 @@
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">⚙️ Pengaturan Sistem</h1>
                 <p class="text-gray-600 dark:text-gray-400 mt-1">Konfigurasi waktu absensi dan notifikasi</p>
             </div>
-            <form action="{{ route('attendance.settings.reset') }}" method="POST" 
-                  onsubmit="return confirm('Reset semua pengaturan ke default? Tindakan ini tidak dapat dibatalkan.')">
-                @csrf
-                <button type="submit" 
-                        class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 border-2 border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
-                    <i class="fas fa-redo mr-2"></i>
-                    Reset ke Default
-                </button>
-            </form>
+            <div class="flex items-center gap-2">
+                {{-- Backup DB --}}
+                <a href="{{ route('attendance.settings.backup') }}"
+                   class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 border-2 border-teal-300 dark:border-teal-700 text-teal-700 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20"
+                   title="Download backup database SQL">
+                    <i class="fas fa-database mr-2"></i>
+                    Backup DB
+                </a>
+
+                {{-- Reset --}}
+                <form action="{{ route('attendance.settings.reset') }}" method="POST"
+                      onsubmit="return confirm('Reset semua pengaturan ke default? Tindakan ini tidak dapat dibatalkan.')">
+                    @csrf
+                    <button type="submit"
+                            class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 border-2 border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
+                        <i class="fas fa-redo mr-2"></i>
+                        Reset ke Default
+                    </button>
+                </form>
+            </div>
         </div>
 
 
@@ -206,6 +217,30 @@
                                        onchange="toggleAbsentNotifyFields()"
                                        class="sr-only peer">
                                 <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 dark:peer-focus:ring-red-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
+                            </label>
+                        </div>
+                    </div>
+
+                    {{-- Toggle: Notifikasi Terlambat --}}
+                    <div class="flex items-center justify-between p-4 bg-yellow-50 dark:bg-yellow-900/10 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                        <div>
+                            <label class="text-sm font-medium text-gray-900 dark:text-white">
+                                ⚡ Aktifkan Notifikasi Terlambat (Real-time)
+                            </label>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                WA langsung terkirim ke ortu saat siswa scan QR dan statusnya <strong>Terlambat</strong>
+                            </p>
+                        </div>
+                        <div>
+                            <input type="hidden" name="settings[late_notify_enabled]" value="false">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox"
+                                       name="settings[late_notify_enabled]"
+                                       value="true"
+                                       id="lateNotifyEnabled"
+                                       {{ old('settings.late_notify_enabled', $settings['notification']['late_notify_enabled'] ?? 'false') === 'true' ? 'checked' : '' }}
+                                       class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 dark:peer-focus:ring-yellow-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
                             </label>
                         </div>
                     </div>

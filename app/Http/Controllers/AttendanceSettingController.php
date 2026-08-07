@@ -38,6 +38,7 @@ class AttendanceSettingController extends Controller
             'settings.auto_absent_notify'            => 'required|boolean',
             'settings.absent_notify_time'            => 'nullable|date_format:H:i',
             'settings.absent_notify_days'            => 'nullable|string',
+            'settings.late_notify_enabled'           => 'nullable|string|in:true,false',
         ];
 
         $messages = [
@@ -208,5 +209,57 @@ class AttendanceSettingController extends Controller
         } else {
             return back()->withErrors(['notification' => 'Gagal mengirim notifikasi: ' . $result['message']]);
         }
+    }
+
+    /**
+     * Download database backup as SQL file (via PHP PDO — no mysqldump needed)
+     */
+    public function downloadBackup()
+    {
+        $filename = 'backup_absensi_' . now()->format('Ymd_His') . '.sql';
+        $db = config('database.connections.' . config('database.default'));
+
+        $pdo = new \PDO(
+            "mysql:host={$db['host']};port={$db['port']};dbname={$db['database']};charset=utf8mb4",
+            $db['username'],
+            $db['password']
+        );
+        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+        $sql  = "-- Backup Database: {$db['database']}\n";
+        $sql .= "-- Generated: " . now()->toDateTimeString() . "\n";
+        $sql .= "-- System: Sistem Absensi QR — " . AttendanceSetting::get('school_name', 'Sekolah') . "\n\n";
+        $sql .= "SET FOREIGN_KEY_CHECKS=0;\n\n";
+
+        // Ambil semua tabel
+        $tables = $pdo->query("SHOW TABLES")->fetchAll(\PDO::FETCH_COLUMN);
+
+        foreach ($tables as $table) {
+            // CREATE TABLE
+            $createRow = $pdo->query("SHOW CREATE TABLE `{$table}`")->fetch(\PDO::FETCH_ASSOC);
+            $sql .= "DROP TABLE IF EXISTS `{$table}`;\n";
+            $sql .= $createRow['Create Table'] . ";\n\n";
+
+            // INSERT DATA
+            $rows = $pdo->query("SELECT * FROM `{$table}`")->fetchAll(\PDO::FETCH_ASSOC);
+            if (!empty($rows)) {
+                $cols = '`' . implode('`, `', array_keys($rows[0])) . '`';
+                $sql .= "INSERT INTO `{$table}` ({$cols}) VALUES\n";
+                $values = [];
+                foreach ($rows as $row) {
+                    $escaped = array_map(fn($v) => is_null($v) ? 'NULL' : $pdo->quote($v), $row);
+                    $values[] = '(' . implode(', ', $escaped) . ')';
+                }
+                $sql .= implode(",\n", $values) . ";\n\n";
+            }
+        }
+
+        $sql .= "SET FOREIGN_KEY_CHECKS=1;\n";
+
+        return response($sql, 200, [
+            'Content-Type'        => 'application/sql',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Content-Length'      => strlen($sql),
+        ]);
     }
 }

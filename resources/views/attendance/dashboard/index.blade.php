@@ -83,6 +83,15 @@
                                 <p class="text-xs text-gray-500 dark:text-gray-400">Hadir vs Alpha (hari kerja)</p>
                             </div>
                         </div>
+                        {{-- Filter Kelas --}}
+                        <select id="chartClassFilter"
+                                onchange="loadChartByClass(this.value)"
+                                class="text-xs px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-400">
+                            <option value="">Semua Kelas</option>
+                            @foreach($classes as $cls)
+                                <option value="{{ $cls->id }}">{{ $cls->nama_kelas }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div style="height:220px; position:relative;">
                         <canvas id="chartBar"></canvas>
@@ -405,46 +414,8 @@
         const gridColor  = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
         const labelColor = isDark ? '#9ca3af' : '#6b7280';
 
-        // ===== Bar Chart: 7 Hari Terakhir =====
+        // ===== Data Bar Chart =====
         const chartBarData = @json($chartData);
-
-        new Chart(document.getElementById('chartBar'), {
-            type: 'bar',
-            data: {
-                labels: chartBarData.labels,
-                datasets: [
-                    {
-                        label: 'Hadir',
-                        data: chartBarData.hadir,
-                        backgroundColor: 'rgba(34,197,94,0.8)',
-                        borderRadius: 5,
-                    },
-                    {
-                        label: 'Terlambat',
-                        data: chartBarData.terlambat,
-                        backgroundColor: 'rgba(245,158,11,0.8)',
-                        borderRadius: 5,
-                    },
-                    {
-                        label: 'Alpha',
-                        data: chartBarData.alpha,
-                        backgroundColor: 'rgba(239,68,68,0.8)',
-                        borderRadius: 5,
-                    },
-                ],
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { labels: { color: labelColor, font: { size: 11 } } },
-                },
-                scales: {
-                    x: { grid: { color: gridColor }, ticks: { color: labelColor } },
-                    y: { grid: { color: gridColor }, ticks: { color: labelColor, stepSize: 1 }, beginAtZero: true },
-                },
-            },
-        });
 
         // ===== Donut Chart: Status Hari Ini =====
         const donutData = @json(array_values($donutData));
@@ -477,6 +448,67 @@
                 },
             },
         });
+
+        // ===== Bar Chart: bisa diupdate via AJAX =====
+        const barChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { color: labelColor, font: { size: 11 } } },
+            },
+            scales: {
+                x: { grid: { color: gridColor }, ticks: { color: labelColor } },
+                y: { grid: { color: gridColor }, ticks: { color: labelColor, stepSize: 1 }, beginAtZero: true },
+            },
+        };
+
+        function makeBarDatasets(d) {
+            return [
+                { label: 'Hadir',     data: d.hadir,     backgroundColor: 'rgba(34,197,94,0.8)',  borderRadius: 5 },
+                { label: 'Terlambat', data: d.terlambat, backgroundColor: 'rgba(245,158,11,0.8)', borderRadius: 5 },
+                { label: 'Alpha',     data: d.alpha,     backgroundColor: 'rgba(239,68,68,0.8)',  borderRadius: 5 },
+            ];
+        }
+
+        const barChart = new Chart(document.getElementById('chartBar'), {
+            type: 'bar',
+            data: {
+                labels:   chartBarData.labels,
+                datasets: makeBarDatasets(chartBarData),
+            },
+            options: barChartOptions,
+        });
+
+        // ===== AJAX: Filter Per Kelas =====
+        async function loadChartByClass(classId) {
+            const select = document.getElementById('chartClassFilter');
+            select.disabled = true;
+
+            try {
+                const url = `{{ route('attendance.dashboard.chart-data') }}?class_id=${classId}`;
+                const resp = await fetch(url, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const data = await resp.json();
+
+                barChart.data.labels   = data.labels;
+                barChart.data.datasets = makeBarDatasets(data);
+                barChart.update('active');
+
+                // Update judul subtitle
+                const subtitle = document.querySelector('#chartBar').closest('.x-card, div[class*="card"]')
+                    ?.querySelector('p.text-xs');
+                if (subtitle) {
+                    subtitle.textContent = classId
+                        ? select.options[select.selectedIndex].text + ' — 7 hari terakhir'
+                        : 'Hadir vs Alpha (hari kerja)';
+                }
+            } catch(e) {
+                console.error('Gagal load chart data:', e);
+            } finally {
+                select.disabled = false;
+            }
+        }
     </script>
     @endpush
 </x-app-layout>

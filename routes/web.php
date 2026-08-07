@@ -49,6 +49,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/attendance/scan', [AttendanceScanController::class, 'scan'])
         ->name('attendance.scan');
 
+    // Dashboard Chart API (AJAX)
+    Route::get('/attendance/dashboard/chart-data', [AttendanceDashboardController::class, 'chartApi'])
+        ->name('attendance.dashboard.chart-data');
+
     // Input Absensi Manual
     Route::get('/attendance/manual', [AttendanceManualController::class, 'index'])
         ->name('attendance.manual.index');
@@ -151,6 +155,9 @@ Route::middleware(['auth'])->group(function () {
     
     Route::post('/attendance/settings/test-notification', [AttendanceSettingController::class, 'testNotification'])
         ->name('attendance.settings.test-notification');
+
+    Route::get('/attendance/settings/backup', [AttendanceSettingController::class, 'downloadBackup'])
+        ->name('attendance.settings.backup');
 
     // ==========================================
     // WhatsApp Gateway Management
