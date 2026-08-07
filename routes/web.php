@@ -14,6 +14,7 @@ use App\Http\Controllers\WhatsAppDiagnosticController;
 use App\Http\Controllers\StudentCardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AttendancePortalController;
+use App\Http\Controllers\AttendanceIzinController;
 use Illuminate\Support\Facades\Route;
 
 // Public Scanner Landing Page (no auth required)
@@ -27,6 +28,13 @@ Route::get('/', function () {
 Route::get('/portal', [AttendancePortalController::class, 'index'])->name('portal.index');
 Route::post('/portal/check', [AttendancePortalController::class, 'check'])->name('portal.check');
 Route::get('/portal/result', [AttendancePortalController::class, 'result'])->name('portal.result');
+
+// ==========================================
+// Form Izin Online Publik
+// ==========================================
+Route::get('/izin', [AttendanceIzinController::class, 'publicForm'])->name('izin.form');
+Route::get('/izin/search', [AttendanceIzinController::class, 'publicSearch'])->name('izin.search');
+Route::post('/izin/submit', [AttendanceIzinController::class, 'publicSubmit'])->name('izin.submit');
 
 // Auth routes
 require __DIR__.'/auth.php';
@@ -234,6 +242,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{gateway}/logs', [WhatsAppGatewayController::class, 'getLogs'])->name('logs');
         Route::post('/toggle-failover', [WhatsAppGatewayController::class, 'toggleFailover'])->name('toggle-failover');
     });
+
+    // Izin Online — Admin
+    Route::get('/attendance/izin', [AttendanceIzinController::class, 'adminIndex'])->name('attendance.izin.index');
+    Route::post('/attendance/izin/{izin}/approve', [AttendanceIzinController::class, 'approve'])->name('attendance.izin.approve');
+    Route::post('/attendance/izin/{izin}/reject', [AttendanceIzinController::class, 'reject'])->name('attendance.izin.reject');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
