@@ -262,4 +262,83 @@ class AttendanceSettingController extends Controller
             'Content-Length'      => strlen($sql),
         ]);
     }
+
+    /**
+     * Restore database dari file SQL yang diupload.
+     * ⚠️ BERBAHAYA: akan DROP dan recreate semua tabel dalam file SQL.
+     */
+    public function restoreBackup(Request $request)
+    {
+        $request->validate([
+            'sql_file' => 'required|file|mimes:sql,txt|max:51200', // max 50MB
+        ], [
+            'sql_file.required' => 'Pilih file SQL backup terlebih dahulu.',
+            'sql_file.mimes'    => 'File harus berekstensi .sql atau .txt',
+            'sql_file.max'      => 'Ukuran file maksimal 50MB.',
+        ]);
+
+        $file    = $request->file('sql_file');
+        $sqlContent = file_get_contents($file->getRealPath());
+
+        if (empty(trim($sqlContent))) {
+            return back()->withErrors(['sql_file' => 'File SQL kosong.']);
+        }
+
+        // Validasi sederhana: harus ada kata kunci SQL
+        if (!str_contains($sqlContent, 'CREATE TABLE') && !str_contains($sqlContent, 'INSERT INTO')) {
+            return back()->withErrors(['sql_file' => 'File bukan SQL backup yang valid.']);
+        }
+
+        $db = config('database.connections.' . config('database.default'));
+
+        try {
+            $pdo = new \PDO(
+                "mysql:host={$db['host']};port={$db['port']};dbname={$db['database']};charset=utf8mb4",
+                $db['username'],
+                $db['password']
+            );
+            $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+            // Nonaktifkan foreign key check selama restore
+            $pdo->exec('SET FOREIGN_KEY_CHECKS=0;');
+            $pdo->exec('SET sql_mode="";');
+
+            // Pisahkan statement SQL berdasarkan ";"
+            // Hapus komentar SQL (-- ...) dan baris kosong
+            $lines = explode("\n", $sqlContent);
+            $cleanLines = [];
+            foreach ($lines as $line) {
+                $trimmed = trim($line);
+                if (str_starts_with($trimmed, '--') || $trimmed === '') continue;
+                $cleanLines[] = $trimmed;
+            }
+            $cleanSql = implode("\n", $cleanLines);
+
+            // Split per statement
+            $statements = array_filter(
+                array_map('trim', explode(';', $cleanSql)),
+                fn($s) => !empty($s)
+            );
+
+            $executed = 0;
+            foreach ($statements as $stmt) {
+                if (!empty(trim($stmt))) {
+                    $pdo->exec($stmt);
+                    $executed++;
+                }
+            }
+
+            $pdo->exec('SET FOREIGN_KEY_CHECKS=1;');
+
+            // Clear semua cache settings setelah restore
+            AttendanceSetting::clearCache();
+
+            return back()->with('success', "✅ Restore berhasil! {$executed} statement SQL dieksekusi. Silakan refresh halaman.");
+
+        } catch (\Exception $e) {
+            return back()->withErrors([
+                'sql_file' => '❌ Restore gagal: ' . $e->getMessage()
+            ]);
+        }
+    }
 }

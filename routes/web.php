@@ -159,6 +159,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/attendance/settings/backup', [AttendanceSettingController::class, 'downloadBackup'])
         ->name('attendance.settings.backup');
 
+    Route::post('/attendance/settings/restore', [AttendanceSettingController::class, 'restoreBackup'])
+        ->name('attendance.settings.restore');
+
     // ==========================================
     // WhatsApp Gateway Management
     // ==========================================

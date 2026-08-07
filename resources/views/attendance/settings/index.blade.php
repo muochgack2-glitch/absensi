@@ -531,6 +531,114 @@
         </x-card>
     </div>
 
+    {{-- ====================== BACKUP & RESTORE CARD ====================== --}}
+    <div class="max-w-5xl mt-6">
+        <x-card>
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white text-2xl mr-4">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Backup & Restore Database</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Download backup atau pulihkan data dari file SQL</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                {{-- BACKUP --}}
+                <div class="bg-teal-50 dark:bg-teal-900/10 border border-teal-200 dark:border-teal-800 rounded-xl p-5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-9 h-9 bg-teal-500 rounded-lg flex items-center justify-center text-white">
+                            <i class="fas fa-download text-sm"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900 dark:text-white text-sm">Download Backup</h4>
+                            <p class="text-xs text-gray-500">Export semua data ke file .sql</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-4">
+                        Backup mencakup seluruh tabel: siswa, absensi, settings, log, dan semua data sistem.
+                        Simpan file di tempat aman.
+                    </p>
+                    <a href="{{ route('attendance.settings.backup') }}"
+                       class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow hover:shadow-lg">
+                        <i class="fas fa-database mr-2"></i>
+                        Download Backup (.sql)
+                    </a>
+                </div>
+
+                {{-- RESTORE --}}
+                <div class="bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-800 rounded-xl p-5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-9 h-9 bg-orange-500 rounded-lg flex items-center justify-center text-white">
+                            <i class="fas fa-upload text-sm"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900 dark:text-white text-sm">Restore dari Backup</h4>
+                            <p class="text-xs text-gray-500">Pulihkan data dari file .sql</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-4">
+                        <p class="text-xs text-red-700 dark:text-red-400 font-medium">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                            <strong>PERINGATAN:</strong> Restore akan menimpa data yang ada saat ini!
+                            Pastikan sudah download backup terbaru sebelum restore.
+                        </p>
+                    </div>
+
+                    @error('sql_file')
+                        <div class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs rounded-lg px-3 py-2 mb-3">
+                            <i class="fas fa-times-circle mr-1"></i> {{ $message }}
+                        </div>
+                    @enderror
+
+                    <form action="{{ route('attendance.settings.restore') }}"
+                          method="POST"
+                          enctype="multipart/form-data"
+                          id="restoreForm"
+                          onsubmit="return confirmRestore()">
+                        @csrf
+                        <div class="flex flex-col gap-3">
+                            <label class="block">
+                                <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Pilih file backup (.sql)</span>
+                                <input type="file"
+                                       name="sql_file"
+                                       id="sqlFileInput"
+                                       accept=".sql,.txt"
+                                       required
+                                       class="mt-1 block w-full text-xs text-gray-600 dark:text-gray-400
+                                              file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0
+                                              file:text-xs file:font-medium file:bg-orange-100 file:text-orange-700
+                                              hover:file:bg-orange-200 dark:file:bg-orange-900/30 dark:file:text-orange-400
+                                              cursor-pointer">
+                            </label>
+                            <div id="fileInfo" class="text-xs text-gray-500 hidden">
+                                <i class="fas fa-file-code mr-1"></i>
+                                <span id="fileName"></span>
+                                <span id="fileSize" class="ml-2 text-gray-400"></span>
+                            </div>
+                            <button type="submit"
+                                    class="inline-flex items-center justify-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow hover:shadow-lg">
+                                <i class="fas fa-upload mr-2"></i>
+                                Restore Database
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {{-- Info keterangan --}}
+            <div class="mt-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg px-4 py-3">
+                <p class="text-xs text-gray-600 dark:text-gray-400">
+                    <i class="fas fa-info-circle text-blue-400 mr-2"></i>
+                    <strong>Tips:</strong> Lakukan backup rutin setiap minggu. Setelah restore berhasil, <strong>refresh halaman</strong> untuk memuat ulang semua data.
+                </p>
+            </div>
+        </x-card>
+    </div>
+
     @push('scripts')
     <script>
         // ===== Test Notification =====
@@ -597,6 +705,35 @@
                 icon.className = 'fas fa-check text-xs text-green-400';
                 setTimeout(() => { icon.className = 'fas fa-copy text-xs'; }, 2000);
             });
+        }
+
+        // ===== Restore: konfirmasi & preview file =====
+        document.getElementById('sqlFileInput')?.addEventListener('change', function () {
+            const file = this.files[0];
+            const info = document.getElementById('fileInfo');
+            if (file) {
+                document.getElementById('fileName').textContent = file.name;
+                const sizeMb = (file.size / 1024 / 1024).toFixed(2);
+                document.getElementById('fileSize').textContent = `(${sizeMb} MB)`;
+                info.classList.remove('hidden');
+            } else {
+                info.classList.add('hidden');
+            }
+        });
+
+        function confirmRestore() {
+            const file = document.getElementById('sqlFileInput').files[0];
+            if (!file) {
+                alert('Pilih file SQL backup terlebih dahulu.');
+                return false;
+            }
+            return confirm(
+                '⚠️ PERINGATAN!\n\n' +
+                'Restore akan MENIMPA semua data yang ada saat ini!\n' +
+                'File: ' + file.name + '\n\n' +
+                'Sudah download backup terbaru?\n\n' +
+                'Klik OK untuk melanjutkan restore.'
+            );
         }
     </script>
     @endpush
