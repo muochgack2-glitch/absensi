@@ -38,14 +38,66 @@ class AttendanceDashboardController extends Controller
             ->orderBy('nama_kelas', 'asc')
             ->get();
 
+        // Data chart 7 hari terakhir
+        $chartData = $this->getChartData7Days();
+
+        // Persentase per status hari ini
+        $totalToday = collect($stats)->only(['hadir','terlambat','alpha','izin','sakit'])->sum();
+        $donutData  = [
+            'hadir'     => $stats['hadir']     ?? 0,
+            'terlambat' => $stats['terlambat'] ?? 0,
+            'alpha'     => $stats['alpha']     ?? 0,
+            'izin'      => $stats['izin']      ?? 0,
+            'sakit'     => $stats['sakit']     ?? 0,
+        ];
+
         return view('attendance.dashboard.index', compact(
             'selectedDate',
             'selectedClass',
             'stats',
             'attendanceRecords',
             'absentStudents',
-            'classes'
+            'classes',
+            'chartData',
+            'donutData',
+            'totalToday'
         ));
+    }
+
+    /**
+     * Get attendance data for last 7 weekdays
+     */
+    private function getChartData7Days(): array
+    {
+        $days   = [];
+        $labels = [];
+        $hadir  = [];
+        $alpha  = [];
+        $terlambat = [];
+
+        $date = Carbon::today();
+        $collected = 0;
+
+        // Ambil 7 hari ke belakang (skip hari Minggu)
+        while ($collected < 7) {
+            if ($date->dayOfWeek !== Carbon::SUNDAY) {
+                $records = AttendanceRecord::whereDate('date', $date)->get();
+                $labels[]    = $date->translatedFormat('d M');
+                $hadir[]     = $records->where('status', 'hadir')->count()
+                             + $records->where('status', 'terlambat')->count();
+                $alpha[]     = $records->where('status', 'alpha')->count();
+                $terlambat[] = $records->where('status', 'terlambat')->count();
+                $collected++;
+            }
+            $date->subDay();
+        }
+
+        return [
+            'labels'    => array_reverse($labels),
+            'hadir'     => array_reverse($hadir),
+            'alpha'     => array_reverse($alpha),
+            'terlambat' => array_reverse($terlambat),
+        ];
     }
 
     /**

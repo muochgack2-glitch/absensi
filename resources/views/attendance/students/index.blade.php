@@ -78,6 +78,14 @@
                         <i class="fas fa-plus mr-2"></i>
                         Tambah Siswa
                     </a>
+
+                    <a
+                        href="{{ route('attendance.students.export.excel') }}"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-teal-500 to-teal-600 text-white hover:from-teal-600 hover:to-teal-700 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    >
+                        <i class="fas fa-file-excel mr-2"></i>
+                        Export Excel
+                    </a>
                 </div>
             </div>
         </div>
@@ -202,13 +210,76 @@
                     document.getElementById('modalBulkQR').classList.add('hidden');
                 }
             });
+
+            // ===== Bulk Action =====
+            function updateBulkToolbar() {
+                const checked = document.querySelectorAll('.row-check:checked');
+                const toolbar = document.getElementById('bulkToolbar');
+                const counter = document.getElementById('selectedCount');
+                const master  = document.getElementById('selectAll');
+
+                counter.textContent = checked.length;
+
+                if (checked.length > 0) {
+                    toolbar.classList.remove('hidden');
+                    toolbar.classList.add('flex');
+                } else {
+                    toolbar.classList.add('hidden');
+                    toolbar.classList.remove('flex');
+                    master.checked = false;
+                }
+
+                // Update master checkbox state
+                const allChecks = document.querySelectorAll('.row-check');
+                master.indeterminate = checked.length > 0 && checked.length < allChecks.length;
+                if (checked.length === allChecks.length && allChecks.length > 0) master.checked = true;
+            }
+
+            function toggleSelectAll(master) {
+                document.querySelectorAll('.row-check').forEach(cb => cb.checked = master.checked);
+                updateBulkToolbar();
+            }
         </script>
         @endpush
 
         {{-- Students Table --}}
+        <form action="{{ route('attendance.students.bulk-action') }}" method="POST" id="bulkForm">
+        @csrf
+
+        {{-- Bulk Action Toolbar (muncul saat ada yang dipilih) --}}
+        <div id="bulkToolbar"
+             class="hidden items-center justify-between p-4 mb-3 rounded-xl border-2 border-primary-400 bg-primary-50 dark:bg-primary-900/20 shadow-md">
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-semibold text-primary-700 dark:text-primary-300">
+                    <span id="selectedCount">0</span> siswa dipilih
+                </span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="submit" name="action" value="activate"
+                        onclick="return confirm('Aktifkan siswa yang dipilih?')"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-green-600 hover:bg-green-700 text-white transition-all shadow">
+                    <i class="fas fa-user-check mr-2"></i> Aktifkan
+                </button>
+                <button type="submit" name="action" value="deactivate"
+                        onclick="return confirm('Nonaktifkan siswa yang dipilih?')"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-yellow-500 hover:bg-yellow-600 text-white transition-all shadow">
+                    <i class="fas fa-user-minus mr-2"></i> Nonaktifkan
+                </button>
+                <button type="submit" name="action" value="delete"
+                        onclick="return confirm('HAPUS PERMANEN siswa yang dipilih? Data tidak bisa dikembalikan!')"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-red-600 hover:bg-red-700 text-white transition-all shadow">
+                    <i class="fas fa-trash mr-2"></i> Hapus
+                </button>
+            </div>
+        </div>
+
         <x-section-card title="Daftar Siswa">
             <x-table>
                 <x-slot name="header">
+                    <x-table.header class="w-10">
+                        <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"
+                               class="rounded border-gray-300 dark:border-gray-600 text-primary-500 focus:ring-primary-400">
+                    </x-table.header>
                     <x-table.header>Foto</x-table.header>
                     <x-table.header>NIS</x-table.header>
                     <x-table.header>Nama</x-table.header>
@@ -221,6 +292,12 @@
 
                 @forelse($students as $student)
                     <x-table.row>
+                        {{-- Checkbox --}}
+                        <x-table.cell>
+                            <input type="checkbox" name="student_ids[]" value="{{ $student->id }}"
+                                   class="row-check rounded border-gray-300 dark:border-gray-600 text-primary-500 focus:ring-primary-400"
+                                   onchange="updateBulkToolbar()">
+                        </x-table.cell>
                         {{-- Photo --}}
                         <x-table.cell>
                             @if($student->foto_profil)
@@ -366,6 +443,7 @@
                 </div>
             @endif
         </x-section-card>
+        </form> {{-- /bulkForm --}}
     </div>
 
     {{-- Modal QR Viewer per Siswa --}}

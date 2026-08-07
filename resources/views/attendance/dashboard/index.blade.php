@@ -67,6 +67,64 @@
             />
         </div>
 
+        {{-- ======================== CHARTS ======================== --}}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            {{-- Bar Chart: 7 Hari Terakhir --}}
+            <div class="lg:col-span-2">
+                <x-card>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 dark:text-white text-base">Tren Kehadiran 7 Hari</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Hadir vs Alpha (hari kerja)</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="height:220px; position:relative;">
+                        <canvas id="chartBar"></canvas>
+                    </div>
+                </x-card>
+            </div>
+
+            {{-- Donut Chart: Status Hari Ini --}}
+            <div>
+                <x-card>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-900 dark:text-white text-base">Status Hari Ini</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                Total: {{ $totalToday }} record
+                            </p>
+                        </div>
+                    </div>
+                    <div style="height:200px; position:relative;">
+                        <canvas id="chartDonut"></canvas>
+                    </div>
+                    {{-- Legend --}}
+                    <div class="mt-3 grid grid-cols-2 gap-1 text-xs">
+                        @php
+                            $statusColors = ['hadir'=>'#22c55e','terlambat'=>'#f59e0b','alpha'=>'#ef4444','izin'=>'#3b82f6','sakit'=>'#a855f7'];
+                            $statusLabels = ['hadir'=>'Hadir','terlambat'=>'Terlambat','alpha'=>'Alpha','izin'=>'Izin','sakit'=>'Sakit'];
+                        @endphp
+                        @foreach($donutData as $key => $val)
+                            <div class="flex items-center gap-1.5">
+                                <span class="inline-block w-3 h-3 rounded-full" style="background:{{ $statusColors[$key] }}"></span>
+                                <span class="text-gray-600 dark:text-gray-400">{{ $statusLabels[$key] }}: <strong class="text-gray-800 dark:text-white">{{ $val }}</strong></span>
+                            </div>
+                        @endforeach
+                    </div>
+                </x-card>
+            </div>
+        </div>
+        {{-- ======================== END CHARTS ======================== --}}
+
         {{-- Attendance Records Table --}}
         <x-card>
             <div class="flex items-center justify-between mb-6">
@@ -338,6 +396,88 @@
             }
         }
     </style>
+    @endpush
+
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script>
+        const isDark = document.documentElement.classList.contains('dark');
+        const gridColor  = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+        const labelColor = isDark ? '#9ca3af' : '#6b7280';
+
+        // ===== Bar Chart: 7 Hari Terakhir =====
+        const chartBarData = @json($chartData);
+
+        new Chart(document.getElementById('chartBar'), {
+            type: 'bar',
+            data: {
+                labels: chartBarData.labels,
+                datasets: [
+                    {
+                        label: 'Hadir',
+                        data: chartBarData.hadir,
+                        backgroundColor: 'rgba(34,197,94,0.8)',
+                        borderRadius: 5,
+                    },
+                    {
+                        label: 'Terlambat',
+                        data: chartBarData.terlambat,
+                        backgroundColor: 'rgba(245,158,11,0.8)',
+                        borderRadius: 5,
+                    },
+                    {
+                        label: 'Alpha',
+                        data: chartBarData.alpha,
+                        backgroundColor: 'rgba(239,68,68,0.8)',
+                        borderRadius: 5,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: labelColor, font: { size: 11 } } },
+                },
+                scales: {
+                    x: { grid: { color: gridColor }, ticks: { color: labelColor } },
+                    y: { grid: { color: gridColor }, ticks: { color: labelColor, stepSize: 1 }, beginAtZero: true },
+                },
+            },
+        });
+
+        // ===== Donut Chart: Status Hari Ini =====
+        const donutData = @json(array_values($donutData));
+        const donutLabels = ['Hadir','Terlambat','Alpha','Izin','Sakit'];
+        const donutColors = ['#22c55e','#f59e0b','#ef4444','#3b82f6','#a855f7'];
+
+        new Chart(document.getElementById('chartDonut'), {
+            type: 'doughnut',
+            data: {
+                labels: donutLabels,
+                datasets: [{
+                    data: donutData,
+                    backgroundColor: donutColors,
+                    borderWidth: 2,
+                    borderColor: isDark ? '#1f2937' : '#ffffff',
+                    hoverOffset: 8,
+                }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ` ${ctx.label}: ${ctx.raw} siswa`
+                        }
+                    }
+                },
+            },
+        });
+    </script>
     @endpush
 </x-app-layout>
 
