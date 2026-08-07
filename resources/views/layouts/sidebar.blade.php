@@ -536,6 +536,18 @@
                 <span class="nav-text font-medium">QR Scanner</span>
             </a>
 
+            <!-- Input Absensi Manual -->
+            <a 
+                href="{{ route('attendance.manual.index') }}"
+                class="sidebar-menu-item {{ request()->routeIs('attendance.manual.*') ? 'active' : '' }}"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="right" 
+                title="Input Manual"
+            >
+                <i class="fas fa-clipboard-check text-lg"></i>
+                <span class="nav-text font-medium">Input Manual</span>
+            </a>
+
             <!-- Divider -->
             <div class="sidebar-divider"></div>
 

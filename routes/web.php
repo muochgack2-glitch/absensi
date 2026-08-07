@@ -7,6 +7,7 @@ use App\Http\Controllers\AttendanceClassController;
 use App\Http\Controllers\AttendanceReportController;
 use App\Http\Controllers\AttendanceQRController;
 use App\Http\Controllers\AttendanceSettingController;
+use App\Http\Controllers\AttendanceManualController;
 use App\Http\Controllers\WhatsAppController;
 use App\Http\Controllers\WhatsAppGatewayController;
 use App\Http\Controllers\WhatsAppDiagnosticController;
@@ -47,6 +48,14 @@ Route::middleware(['auth'])->group(function () {
     
     Route::post('/attendance/scan', [AttendanceScanController::class, 'scan'])
         ->name('attendance.scan');
+
+    // Input Absensi Manual
+    Route::get('/attendance/manual', [AttendanceManualController::class, 'index'])
+        ->name('attendance.manual.index');
+    Route::post('/attendance/manual', [AttendanceManualController::class, 'store'])
+        ->name('attendance.manual.store');
+    Route::delete('/attendance/manual/{record}', [AttendanceManualController::class, 'destroy'])
+        ->name('attendance.manual.destroy');
 
     // Students Management - Custom routes BEFORE resource (prevent {student} catching)
     Route::get('/attendance/students/card', [StudentCardController::class, 'index'])
