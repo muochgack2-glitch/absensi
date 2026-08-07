@@ -490,19 +490,19 @@
         <!-- Logo Section with Toggle Button (SPMB Position) -->
         <div class="sidebar-brand border-b border-primary-700/50">
             <div class="sidebar-brand-logo">
-                @if($appLogoUrl)
-                    <img src="{{ $appLogoUrl }}" alt="Logo"
+                <?php if($appLogoUrl): ?>
+                    <img src="<?php echo e($appLogoUrl); ?>" alt="Logo"
                          class="w-10 h-10 rounded-lg object-contain bg-white p-0.5 shadow-lg">
-                @else
+                <?php else: ?>
                     <div class="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-lg flex items-center justify-center shadow-lg">
                         <i class="fas fa-qrcode text-white text-xl"></i>
                     </div>
-                @endif
+                <?php endif; ?>
             </div>
             
             <div class="sidebar-brand-text">
                 <h1 class="text-white font-bold text-lg leading-tight">Absensi QR</h1>
-                <p class="text-primary-300 text-xs truncate max-w-[120px]">{{ $appSchoolName }}</p>
+                <p class="text-primary-300 text-xs truncate max-w-[120px]"><?php echo e($appSchoolName); ?></p>
             </div>
             
             <!-- Toggle Button (SPMB Position - Top Right Corner) -->
@@ -519,8 +519,8 @@
             
             <!-- Dashboard -->
             <a 
-                href="{{ route('attendance.dashboard') }}"
-                class="sidebar-menu-item {{ (request()->routeIs('attendance.dashboard') || request()->routeIs('dashboard')) ? 'active' : '' }}"
+                href="<?php echo e(route('attendance.dashboard')); ?>"
+                class="sidebar-menu-item <?php echo e((request()->routeIs('attendance.dashboard') || request()->routeIs('dashboard')) ? 'active' : ''); ?>"
                 data-bs-toggle="tooltip" 
                 data-bs-placement="right" 
                 title="Dashboard"
@@ -531,8 +531,8 @@
 
             <!-- QR Scanner -->
             <a 
-                href="{{ route('attendance.scanner') }}"
-                class="sidebar-menu-item {{ request()->routeIs('attendance.scanner') ? 'active' : '' }}"
+                href="<?php echo e(route('attendance.scanner')); ?>"
+                class="sidebar-menu-item <?php echo e(request()->routeIs('attendance.scanner') ? 'active' : ''); ?>"
                 data-bs-toggle="tooltip" 
                 data-bs-placement="right" 
                 title="QR Scanner"
@@ -543,8 +543,8 @@
 
             <!-- Input Absensi Manual -->
             <a 
-                href="{{ route('attendance.manual.index') }}"
-                class="sidebar-menu-item {{ request()->routeIs('attendance.manual.*') ? 'active' : '' }}"
+                href="<?php echo e(route('attendance.manual.index')); ?>"
+                class="sidebar-menu-item <?php echo e(request()->routeIs('attendance.manual.*') ? 'active' : ''); ?>"
                 data-bs-toggle="tooltip" 
                 data-bs-placement="right" 
                 title="Input Manual"
@@ -558,8 +558,8 @@
 
             <!-- Data Siswa -->
             <a 
-                href="{{ route('attendance.students.index') }}"
-                class="sidebar-menu-item {{ request()->routeIs('attendance.students.*') ? 'active' : '' }}"
+                href="<?php echo e(route('attendance.students.index')); ?>"
+                class="sidebar-menu-item <?php echo e(request()->routeIs('attendance.students.*') ? 'active' : ''); ?>"
                 data-bs-toggle="tooltip" 
                 data-bs-placement="right" 
                 title="Data Siswa"
@@ -570,8 +570,8 @@
 
             <!-- Data Kelas -->
             <a 
-                href="{{ route('attendance.classes.index') }}"
-                class="sidebar-menu-item {{ request()->routeIs('attendance.classes.*') ? 'active' : '' }}"
+                href="<?php echo e(route('attendance.classes.index')); ?>"
+                class="sidebar-menu-item <?php echo e(request()->routeIs('attendance.classes.*') ? 'active' : ''); ?>"
                 data-bs-toggle="tooltip" 
                 data-bs-placement="right" 
                 title="Data Kelas"
@@ -583,8 +583,8 @@
 
             <!-- Laporan -->
             <a 
-                href="{{ route('attendance.reports.index') }}"
-                class="sidebar-menu-item {{ request()->routeIs('attendance.reports.*') && !request()->routeIs('attendance.reports.semester*') ? 'active' : '' }}"
+                href="<?php echo e(route('attendance.reports.index')); ?>"
+                class="sidebar-menu-item <?php echo e(request()->routeIs('attendance.reports.*') && !request()->routeIs('attendance.reports.semester*') ? 'active' : ''); ?>"
                 data-bs-toggle="tooltip" 
                 data-bs-placement="right" 
                 title="Laporan"
@@ -598,8 +598,8 @@
 
             <!-- Rekap Semester -->
             <a 
-                href="{{ route('attendance.reports.semester') }}"
-                class="sidebar-menu-item {{ request()->routeIs('attendance.reports.semester*') ? 'active' : '' }}"
+                href="<?php echo e(route('attendance.reports.semester')); ?>"
+                class="sidebar-menu-item <?php echo e(request()->routeIs('attendance.reports.semester*') ? 'active' : ''); ?>"
                 data-bs-toggle="tooltip" 
                 data-bs-placement="right" 
                 title="Rekap Semester"
@@ -618,8 +618,8 @@
 
             <!-- WA Dashboard -->
             <a 
-                href="{{ route('whatsapp.index') }}"
-                class="sidebar-menu-item {{ request()->routeIs('whatsapp.index') ? 'active' : '' }}"
+                href="<?php echo e(route('whatsapp.index')); ?>"
+                class="sidebar-menu-item <?php echo e(request()->routeIs('whatsapp.index') ? 'active' : ''); ?>"
                 data-bs-toggle="tooltip" 
                 data-bs-placement="right" 
                 title="WA Gateway"
@@ -630,8 +630,8 @@
 
             <!-- Kirim Pesan -->
             <a 
-                href="{{ route('whatsapp.send') }}"
-                class="sidebar-menu-item {{ request()->routeIs('whatsapp.send') ? 'active' : '' }}"
+                href="<?php echo e(route('whatsapp.send')); ?>"
+                class="sidebar-menu-item <?php echo e(request()->routeIs('whatsapp.send') ? 'active' : ''); ?>"
                 data-bs-toggle="tooltip" 
                 data-bs-placement="right" 
                 title="Kirim Pesan"
@@ -642,8 +642,8 @@
 
             <!-- Log Pesan -->
             <a 
-                href="{{ route('whatsapp.logs') }}"
-                class="sidebar-menu-item {{ request()->routeIs('whatsapp.logs') ? 'active' : '' }}"
+                href="<?php echo e(route('whatsapp.logs')); ?>"
+                class="sidebar-menu-item <?php echo e(request()->routeIs('whatsapp.logs') ? 'active' : ''); ?>"
                 data-bs-toggle="tooltip" 
                 data-bs-placement="right" 
                 title="Log Pesan"
@@ -654,8 +654,8 @@
 
             <!-- Templates -->
             <a 
-                href="{{ route('whatsapp.templates') }}"
-                class="sidebar-menu-item {{ request()->routeIs('whatsapp.templates*') ? 'active' : '' }}"
+                href="<?php echo e(route('whatsapp.templates')); ?>"
+                class="sidebar-menu-item <?php echo e(request()->routeIs('whatsapp.templates*') ? 'active' : ''); ?>"
                 data-bs-toggle="tooltip" 
                 data-bs-placement="right" 
                 title="Templates"
@@ -666,8 +666,8 @@
 
             <!-- Broadcast -->
             <a 
-                href="{{ route('whatsapp.broadcast') }}"
-                class="sidebar-menu-item {{ request()->routeIs('whatsapp.broadcast') ? 'active' : '' }}"
+                href="<?php echo e(route('whatsapp.broadcast')); ?>"
+                class="sidebar-menu-item <?php echo e(request()->routeIs('whatsapp.broadcast') ? 'active' : ''); ?>"
                 data-bs-toggle="tooltip" 
                 data-bs-placement="right" 
                 title="Broadcast"
@@ -678,8 +678,8 @@
 
             <!-- Gateway Management -->
             <a 
-                href="{{ route('gateway.index') }}"
-                class="sidebar-menu-item {{ request()->routeIs('gateway.*') ? 'active' : '' }}"
+                href="<?php echo e(route('gateway.index')); ?>"
+                class="sidebar-menu-item <?php echo e(request()->routeIs('gateway.*') ? 'active' : ''); ?>"
                 data-bs-toggle="tooltip" 
                 data-bs-placement="right" 
                 title="Gateway"
@@ -693,8 +693,8 @@
 
             <!-- Settings -->
             <a 
-                href="{{ route('attendance.settings.index') }}"
-                class="sidebar-menu-item {{ request()->routeIs('attendance.settings.*') ? 'active' : '' }}"
+                href="<?php echo e(route('attendance.settings.index')); ?>"
+                class="sidebar-menu-item <?php echo e(request()->routeIs('attendance.settings.*') ? 'active' : ''); ?>"
                 data-bs-toggle="tooltip" 
                 data-bs-placement="right" 
                 title="Settings"
@@ -705,8 +705,8 @@
 
             <!-- WA Settings -->
             <a 
-                href="{{ route('whatsapp.settings') }}"
-                class="sidebar-menu-item {{ request()->routeIs('whatsapp.settings') ? 'active' : '' }}"
+                href="<?php echo e(route('whatsapp.settings')); ?>"
+                class="sidebar-menu-item <?php echo e(request()->routeIs('whatsapp.settings') ? 'active' : ''); ?>"
                 data-bs-toggle="tooltip" 
                 data-bs-placement="right" 
                 title="Settings WA"
@@ -723,14 +723,15 @@
                 
                 <!-- User Profile Icon -->
                 <a 
-                    href="{{ route('profile.edit') }}"
+                    href="<?php echo e(route('profile.edit')); ?>"
                     class="bottom-icon-btn"
                     data-bs-toggle="tooltip" 
                     data-bs-placement="top" 
-                    title="{{ auth()->user()->name ?? 'User' }} - Profile"
+                    title="<?php echo e(auth()->user()->name ?? 'User'); ?> - Profile"
                 >
                     <div class="avatar-icon bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
-                        {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+                        <?php echo e(strtoupper(substr(auth()->user()->name ?? 'U', 0, 1))); ?>
+
                     </div>
                     <span class="btn-text">Profile</span>
                 </a>
@@ -748,8 +749,8 @@
                 </button>
 
                 <!-- Logout Icon -->
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
+                <form method="POST" action="<?php echo e(route('logout')); ?>">
+                    <?php echo csrf_field(); ?>
                     <button 
                         type="submit"
                         class="bottom-icon-btn logout-btn"
@@ -768,3 +769,4 @@
     </div>
 </aside>
 
+<?php /**PATH C:\Users\DMCenter\Music\SPMB2\SPMB\absensi\resources\views/layouts/sidebar.blade.php ENDPATH**/ ?>

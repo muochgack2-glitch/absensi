@@ -401,4 +401,191 @@ class AttendanceReportController extends Controller
             'class_id'   => $classId,
         ]);
     }
+
+    // ================================================================
+    // REKAP SEMESTER
+    // ================================================================
+
+    /**
+     * Halaman rekap semester — form filter + tabel preview
+     */
+    public function semester(Request $request)
+    {
+        $classes      = AttendanceClass::where('is_active', true)->orderBy('tingkat')->orderBy('nama_kelas')->get();
+        $schoolName   = AttendanceSetting::get('school_name', 'Sekolah');
+        $currentYear  = Carbon::now()->year;
+
+        // Tentukan range default: semester ganjil (Juli–Des) atau genap (Jan–Jun)
+        $semester     = $request->input('semester', Carbon::now()->month >= 7 ? 'ganjil' : 'genap');
+        $tahunAjaran  = $request->input('tahun_ajaran', $currentYear . '/' . ($currentYear + 1));
+        $classId      = $request->input('class_id');
+
+        [$startDate, $endDate] = $this->getSemesterRange($semester, $tahunAjaran);
+
+        $rekap = [];
+        if ($request->isMethod('get') && ($request->has('semester') || $request->has('class_id'))) {
+            $rekap = $this->buildSemesterRekap($startDate, $endDate, $classId);
+        }
+
+        // Hitung total hari sekolah (hari kerja dalam range)
+        $totalHari = 0;
+        $d = Carbon::parse($startDate);
+        $end = Carbon::parse($endDate);
+        while ($d->lte($end)) {
+            if ($d->isWeekday()) $totalHari++;
+            $d->addDay();
+        }
+
+        return view('attendance.reports.semester', compact(
+            'classes', 'schoolName', 'semester', 'tahunAjaran',
+            'classId', 'startDate', 'endDate', 'rekap', 'totalHari', 'currentYear'
+        ));
+    }
+
+    /**
+     * Export rekap semester ke PDF
+     */
+    public function exportSemesterPdf(Request $request)
+    {
+        $semester    = $request->input('semester', 'ganjil');
+        $tahunAjaran = $request->input('tahun_ajaran');
+        $classId     = $request->input('class_id');
+
+        [$startDate, $endDate] = $this->getSemesterRange($semester, $tahunAjaran);
+        $rekap      = $this->buildSemesterRekap($startDate, $endDate, $classId);
+        $schoolName = AttendanceSetting::get('school_name', 'Sekolah');
+
+        $kelas = $classId ? AttendanceClass::find($classId)?->nama_kelas : 'Semua Kelas';
+
+        $totalHari = 0;
+        $d = Carbon::parse($startDate);
+        while ($d->lte(Carbon::parse($endDate))) {
+            if ($d->isWeekday()) $totalHari++;
+            $d->addDay();
+        }
+
+        $pdf = Pdf::loadView('attendance.reports.pdf-semester', compact(
+            'rekap', 'schoolName', 'semester', 'tahunAjaran',
+            'startDate', 'endDate', 'kelas', 'totalHari'
+        ))->setPaper('a4', 'landscape');
+
+        $filename = "rekap_semester_{$semester}_{$tahunAjaran}.pdf";
+        return $pdf->download(str_replace('/', '-', $filename));
+    }
+
+    /**
+     * Export rekap semester ke Excel
+     */
+    public function exportSemesterExcel(Request $request)
+    {
+        $semester    = $request->input('semester', 'ganjil');
+        $tahunAjaran = $request->input('tahun_ajaran');
+        $classId     = $request->input('class_id');
+
+        [$startDate, $endDate] = $this->getSemesterRange($semester, $tahunAjaran);
+        $rekap      = $this->buildSemesterRekap($startDate, $endDate, $classId);
+        $schoolName = AttendanceSetting::get('school_name', 'Sekolah');
+        $kelas      = $classId ? AttendanceClass::find($classId)?->nama_kelas : 'Semua Kelas';
+
+        $totalHari = 0;
+        $d = Carbon::parse($startDate);
+        while ($d->lte(Carbon::parse($endDate))) {
+            if ($d->isWeekday()) $totalHari++;
+            $d->addDay();
+        }
+
+        $filename  = 'rekap_semester_' . $semester . '_' . str_replace('/', '-', $tahunAjaran) . '.xlsx';
+        $headers   = [
+            'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($rekap, $schoolName, $semester, $tahunAjaran, $kelas, $startDate, $endDate, $totalHari) {
+            $handle = fopen('php://output', 'w');
+
+            // Header info
+            fputcsv($handle, [$schoolName]);
+            fputcsv($handle, ["REKAP KEHADIRAN SEMESTER " . strtoupper($semester)]);
+            fputcsv($handle, ["Tahun Ajaran: {$tahunAjaran} | Kelas: {$kelas}"]);
+            fputcsv($handle, ["Periode: {$startDate} s/d {$endDate} | Total Hari: {$totalHari} hari"]);
+            fputcsv($handle, []);
+
+            // Kolom header
+            fputcsv($handle, ['No', 'NIS', 'Nama Siswa', 'Kelas', 'Hadir', 'Terlambat', 'Izin', 'Sakit', 'Alpha', 'Total Hadir', '% Kehadiran', 'Keterangan']);
+
+            foreach ($rekap as $i => $row) {
+                $persen = $totalHari > 0 ? round(($row['hadir'] / $totalHari) * 100, 1) : 0;
+                $ket    = $persen >= 75 ? 'BAIK' : ($persen >= 50 ? 'CUKUP' : 'KURANG');
+                fputcsv($handle, [
+                    $i + 1,
+                    $row['nis'],
+                    $row['nama'],
+                    $row['kelas'],
+                    $row['hadir'],
+                    $row['terlambat'],
+                    $row['izin'],
+                    $row['sakit'],
+                    $row['alpha'],
+                    $row['hadir'] + $row['terlambat'],
+                    $persen . '%',
+                    $ket,
+                ]);
+            }
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Build rekap data per siswa untuk satu semester
+     */
+    private function buildSemesterRekap(string $startDate, string $endDate, ?string $classId): array
+    {
+        $query = AttendanceStudent::with('kelas')
+            ->where('is_active', true);
+
+        if ($classId) {
+            $query->where('kelas_id', $classId);
+        }
+
+        $students = $query->orderBy('kelas_id')->orderBy('nama')->get();
+        $rekap    = [];
+
+        foreach ($students as $student) {
+            $records = AttendanceRecord::where('student_id', $student->id)
+                ->whereBetween('date', [$startDate, $endDate])
+                ->get();
+
+            $rekap[] = [
+                'id'        => $student->id,
+                'nis'       => $student->nis,
+                'nama'      => $student->nama,
+                'kelas'     => $student->kelas->nama_kelas ?? '-',
+                'hadir'     => $records->where('status', 'hadir')->count(),
+                'terlambat' => $records->where('status', 'terlambat')->count(),
+                'izin'      => $records->where('status', 'izin')->count(),
+                'sakit'     => $records->where('status', 'sakit')->count(),
+                'alpha'     => $records->where('status', 'alpha')->count(),
+            ];
+        }
+
+        return $rekap;
+    }
+
+    /**
+     * Hitung range tanggal semester
+     */
+    private function getSemesterRange(string $semester, ?string $tahunAjaran): array
+    {
+        $years = explode('/', $tahunAjaran ?? (Carbon::now()->year . '/' . (Carbon::now()->year + 1)));
+        $startYear = (int) ($years[0] ?? Carbon::now()->year);
+        $endYear   = (int) ($years[1] ?? ($startYear + 1));
+
+        if ($semester === 'ganjil') {
+            return ["{$startYear}-07-01", "{$startYear}-12-31"];
+        } else {
+            return ["{$endYear}-01-01", "{$endYear}-06-30"];
+        }
+    }
 }

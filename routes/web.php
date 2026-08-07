@@ -129,6 +129,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/attendance/reports/monthly/excel', [AttendanceReportController::class, 'exportMonthlyExcel'])
         ->name('attendance.reports.monthly.excel');
 
+    // Rekap Semester
+    Route::get('/attendance/reports/semester', [AttendanceReportController::class, 'semester'])
+        ->name('attendance.reports.semester');
+    Route::get('/attendance/reports/semester/pdf', [AttendanceReportController::class, 'exportSemesterPdf'])
+        ->name('attendance.reports.semester.pdf');
+    Route::get('/attendance/reports/semester/excel', [AttendanceReportController::class, 'exportSemesterExcel'])
+        ->name('attendance.reports.semester.excel');
+
 
     // QR Code Display
     Route::get('/attendance/qr/{student}', [AttendanceQRController::class, 'show'])
