@@ -6,18 +6,26 @@ use App\Http\Requests\GenerateReportRequest;
 use App\Models\AttendanceClass;
 use App\Models\AttendanceRecord;
 use App\Models\AttendanceStudent;
+use App\Models\AttendanceSetting;
 use App\Services\AttendanceExportService;
+use App\Services\AttendanceNotificationService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AttendanceReportController extends Controller
 {
     protected $exportService;
+    protected $notificationService;
 
-    public function __construct(AttendanceExportService $exportService)
-    {
-        $this->exportService = $exportService;
+    public function __construct(
+        AttendanceExportService $exportService,
+        AttendanceNotificationService $notificationService
+    ) {
+        $this->exportService       = $exportService;
+        $this->notificationService = $notificationService;
     }
 
     /**
@@ -232,5 +240,165 @@ class AttendanceReportController extends Controller
         ];
 
         return view('attendance.reports.student-history', compact('student', 'records', 'stats'));
+    }
+
+    // ================================================================
+    // LAPORAN ALPHA — Siswa Paling Sering Tidak Hadir
+    // ================================================================
+
+    public function alphaReport(Request $request)
+    {
+        $month   = $request->input('month', Carbon::now()->format('Y-m'));
+        $classId = $request->input('class_id');
+        $minAlpha = (int) $request->input('min_alpha', 1);
+
+        $startDate = Carbon::parse($month)->startOfMonth();
+        $endDate   = Carbon::parse($month)->endOfMonth();
+
+        $query = AttendanceStudent::with('kelas')
+            ->where('is_active', true)
+            ->withCount(['attendanceRecords as alpha_count' => function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('date', [$startDate, $endDate])
+                  ->where('status', 'alpha');
+            }])
+            ->having('alpha_count', '>=', $minAlpha)
+            ->orderByDesc('alpha_count');
+
+        if ($classId) {
+            $query->where('kelas_id', $classId);
+        }
+
+        $students = $query->get();
+        $classes  = AttendanceClass::where('is_active', true)
+            ->orderBy('nama_kelas')->get();
+
+        return view('attendance.reports.alpha', compact(
+            'students', 'classes', 'month', 'classId', 'minAlpha'
+        ));
+    }
+
+    public function sendAlphaNotification(Request $request)
+    {
+        $validated = $request->validate([
+            'student_ids'   => 'required|array',
+            'student_ids.*' => 'exists:attendance_students,id',
+        ]);
+
+        $month     = $request->input('month', Carbon::now()->format('Y-m'));
+        $startDate = Carbon::parse($month)->startOfMonth();
+        $success   = 0;
+        $failed    = 0;
+
+        foreach ($validated['student_ids'] as $id) {
+            $student = AttendanceStudent::with('kelas')->find($id);
+            if (!$student || empty($student->no_hp_ortu)) { $failed++; continue; }
+
+            $alphaCount = AttendanceRecord::where('student_id', $id)
+                ->whereMonth('date', $startDate->month)
+                ->whereYear('date', $startDate->year)
+                ->where('status', 'alpha')->count();
+
+            // Kirim WA custom dengan info alpha bulan ini
+            $schoolName = AttendanceSetting::get('school_name', 'Sekolah');
+            $message    = "🏫 *{$schoolName}*\n";
+            $message   .= "⚠️ *Laporan Ketidakhadiran Bulan " . Carbon::parse($month)->translatedFormat('F Y') . "*\n\n";
+            $message   .= "Siswa: *{$student->nama}*\n";
+            $message   .= "Kelas: {$student->kelas->nama_kelas}\n";
+            $message   .= "Total Alpha bulan ini: *{$alphaCount} hari*\n\n";
+            $message   .= "Mohon segera menghubungi pihak sekolah.\n";
+            $message   .= "\n_Pesan otomatis dari sistem absensi_";
+
+            $whatsapp = app(\App\Services\AttendanceWhatsAppService::class);
+            $result   = $whatsapp->sendParentNotification($student->no_hp_ortu, $message);
+            $result['success'] ? $success++ : $failed++;
+        }
+
+        return back()->with('success', "Notifikasi WA terkirim: ✓ {$success} berhasil, ✗ {$failed} gagal.");
+    }
+
+    // ================================================================
+    // EXPORT PDF
+    // ================================================================
+
+    public function exportMonthlyPdf(Request $request)
+    {
+        $month   = $request->input('month', Carbon::now()->format('Y-m'));
+        $classId = $request->input('class_id');
+
+        $startDate = Carbon::parse($month)->startOfMonth();
+        $endDate   = Carbon::parse($month)->endOfMonth();
+
+        $studentsQuery = AttendanceStudent::with('kelas')->where('is_active', true);
+        if ($classId) $studentsQuery->where('kelas_id', $classId);
+        $students = $studentsQuery->get();
+
+        $records = AttendanceRecord::whereBetween('date', [$startDate, $endDate])
+            ->whereIn('student_id', $students->pluck('id'))
+            ->get()->groupBy('student_id');
+
+        $summary = $students->map(function ($student) use ($records) {
+            $r = $records->get($student->id, collect());
+            return [
+                'student'   => $student,
+                'hadir'     => $r->where('status', 'hadir')->count(),
+                'terlambat' => $r->where('status', 'terlambat')->count(),
+                'sakit'     => $r->where('status', 'sakit')->count(),
+                'izin'      => $r->where('status', 'izin')->count(),
+                'alpha'     => $r->where('status', 'alpha')->count(),
+                'total'     => $r->count(),
+            ];
+        });
+
+        $schoolName = AttendanceSetting::get('school_name', 'Sekolah');
+        $className  = $classId
+            ? AttendanceClass::find($classId)?->nama_kelas
+            : 'Semua Kelas';
+
+        $pdf = Pdf::loadView('attendance.reports.pdf-monthly', compact(
+            'summary', 'month', 'schoolName', 'className'
+        ))->setPaper('a4', 'landscape');
+
+        $filename = 'laporan-bulanan-' . $month . '.pdf';
+        return $pdf->download($filename);
+    }
+
+    public function exportDailyPdf(Request $request)
+    {
+        $date    = $request->input('date', Carbon::today()->format('Y-m-d'));
+        $classId = $request->input('class_id');
+
+        $query = AttendanceRecord::with(['student.kelas'])->whereDate('date', $date);
+        if ($classId) {
+            $query->whereHas('student', fn($q) => $q->where('kelas_id', $classId));
+        }
+        $records = $query->orderBy('check_in_time')->get();
+
+        $schoolName = AttendanceSetting::get('school_name', 'Sekolah');
+        $className  = $classId
+            ? AttendanceClass::find($classId)?->nama_kelas
+            : 'Semua Kelas';
+
+        $pdf = Pdf::loadView('attendance.reports.pdf-daily', compact(
+            'records', 'date', 'schoolName', 'className'
+        ))->setPaper('a4', 'portrait');
+
+        $filename = 'laporan-harian-' . $date . '.pdf';
+        return $pdf->download($filename);
+    }
+
+    // ================================================================
+    // EXPORT EXCEL BULANAN
+    // ================================================================
+
+    public function exportMonthlyExcel(Request $request)
+    {
+        $month   = $request->input('month', Carbon::now()->format('Y-m'));
+        $classId = $request->input('class_id');
+
+        return $this->exportService->exportToExcel([
+            'start_date' => Carbon::parse($month)->startOfMonth()->format('Y-m-d'),
+            'end_date'   => Carbon::parse($month)->endOfMonth()->format('Y-m-d'),
+            'class_id'   => $classId,
+        ]);
     }
 }

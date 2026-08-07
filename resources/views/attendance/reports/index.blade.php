@@ -69,6 +69,37 @@
             </a>
         </div>
 
+        {{-- Baris kedua: Laporan Alpha --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {{-- Laporan Alpha --}}
+            <a href="{{ route('attendance.reports.alpha') }}"
+               class="group relative bg-gradient-to-br from-red-500 to-orange-500 rounded-2xl p-6 text-white hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div class="flex flex-col h-full">
+                    <div class="text-4xl mb-4 transform group-hover:scale-110 transition-transform">⚠️</div>
+                    <h3 class="text-lg font-bold mb-2">Laporan Alpha</h3>
+                    <p class="text-sm text-red-100 flex-grow">Siswa sering tidak hadir + kirim WA ke ortu</p>
+                    <div class="mt-4 flex items-center text-sm font-medium">
+                        <span>Lihat & Kirim WA</span>
+                        <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-2 transition-transform"></i>
+                    </div>
+                </div>
+            </a>
+
+            {{-- Export Siswa Excel --}}
+            <a href="{{ route('attendance.students.export.excel') }}"
+               class="group relative bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl p-6 text-white hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div class="flex flex-col h-full">
+                    <div class="text-4xl mb-4 transform group-hover:scale-110 transition-transform">👥</div>
+                    <h3 class="text-lg font-bold mb-2">Export Data Siswa</h3>
+                    <p class="text-sm text-teal-100 flex-grow">Download daftar semua siswa ke Excel</p>
+                    <div class="mt-4 flex items-center text-sm font-medium">
+                        <span>Download</span>
+                        <i class="fas fa-download ml-2 transform group-hover:translate-y-1 transition-transform"></i>
+                    </div>
+                </div>
+            </a>
+        </div>
+
         {{-- Generate Report Form --}}
         <x-card id="custom">
             <div class="flex items-center mb-6">
