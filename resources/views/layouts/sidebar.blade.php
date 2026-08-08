@@ -542,7 +542,7 @@
     /* Collapsed state: still hidden */
     .sidebar.collapsed .bottom-icon-btn {
         justify-content: center;
-        padding: 0.75rem;
+        padding: 0.75rem 10px;
         width: 100%;
     }
     
