@@ -452,30 +452,17 @@
     
     .bottom-icons-container {
         display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-evenly;
+        gap: 0.5rem;
         width: 100%;
     }
     
-    /* Collapsed: keep vertical, center icons */
+    /* Collapsed: vertical stack */
     .sidebar.collapsed .bottom-icons-container {
         flex-direction: column;
-        gap: 0.25rem;
-    }
-    
-    .sidebar.collapsed .bottom-icon-btn {
-        justify-content: center;
-        padding: 0.75rem 10px;
-    }
-    
-    /* Hover expand: stay vertical, left-aligned */
-    .sidebar.collapsed:hover .bottom-icons-container {
-        flex-direction: column;
-    }
-    
-    .sidebar.collapsed:hover .bottom-icon-btn {
-        justify-content: flex-start;
-        padding: 0.75rem 1rem;
+        gap: 0.5rem;
     }
     
     /* Bottom section form - ensure it participates in flex layout properly */

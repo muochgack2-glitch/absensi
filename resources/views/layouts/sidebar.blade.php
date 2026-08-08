@@ -459,6 +459,12 @@
         width: 100%;
     }
     
+    /* Collapsed: vertical stack */
+    .sidebar.collapsed .bottom-icons-container {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
     /* Bottom section form - ensure it participates in flex layout properly */
     .bottom-icons-container > form {
         display: contents; /* Makes form transparent to flexbox */
