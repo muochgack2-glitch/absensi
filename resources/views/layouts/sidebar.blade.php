@@ -951,8 +951,8 @@
             </div>
 
             <!-- Notifikasi -->
-            <a href="{{ route('attendance.izin.index') }}"
-               class="sidebar-menu-item {{ request()->routeIs('attendance.izin.*') ? 'active' : '' }}"
+            <a href="{{ route('attendance.notifications.index') }}"
+               class="sidebar-menu-item {{ request()->routeIs('attendance.notifications.*') ? 'active' : '' }}"
                id="notifMenuItem"
                data-bs-toggle="tooltip" 
                data-bs-placement="right" 

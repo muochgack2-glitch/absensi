@@ -951,8 +951,8 @@
             </div>
 
             <!-- Notifikasi -->
-            <a href="<?php echo e(route('attendance.izin.index')); ?>"
-               class="sidebar-menu-item <?php echo e(request()->routeIs('attendance.izin.*') ? 'active' : ''); ?>"
+            <a href="<?php echo e(route('attendance.notifications.index')); ?>"
+               class="sidebar-menu-item <?php echo e(request()->routeIs('attendance.notifications.*') ? 'active' : ''); ?>"
                id="notifMenuItem"
                data-bs-toggle="tooltip" 
                data-bs-placement="right" 
