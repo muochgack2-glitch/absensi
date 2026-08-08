@@ -450,6 +450,14 @@
         border-top: 1px solid rgba(59, 130, 246, 0.5);
     }
     
+    .sidebar.collapsed .bottom-section {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .sidebar.collapsed:hover .bottom-section {
+        padding: 0.75rem;
+    }
+    
     .bottom-icons-container {
         display: flex;
         flex-direction: row;
