@@ -870,16 +870,16 @@
                 <span class="nav-text font-medium">Pengguna</span>
             </a>
 
-            <!-- Tahun Ajaran -->
+            <!-- Tahun Pelajaran -->
             <a 
                 href="{{ route('attendance.tahun-ajaran.index') }}"
                 class="sidebar-menu-item {{ request()->routeIs('attendance.tahun-ajaran*') ? 'active' : '' }}"
                 data-bs-toggle="tooltip" 
                 data-bs-placement="right" 
-                title="Tahun Ajaran"
+                title="Tahun Pelajaran"
             >
                 <i class="fas fa-calendar-alt text-lg"></i>
-                <span class="nav-text font-medium">Tahun Ajaran</span>
+                <span class="nav-text font-medium">Tahun Pelajaran</span>
             </a>
             @endif
 

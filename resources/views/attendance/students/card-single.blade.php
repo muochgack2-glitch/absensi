@@ -243,7 +243,7 @@
             </div>
             <div class="card-header-text">
                 <div class="school-name">{{ strtoupper($schoolName) }}</div>
-                <div class="card-title">Kartu Pelajar &bull; Tahun Ajaran {{ $tahunAjaran }}</div>
+                <div class="card-title">Kartu Pelajar &bull; Tahun Pelajaran {{ $tahunAjaran }}</div>
             </div>
         </div>
 

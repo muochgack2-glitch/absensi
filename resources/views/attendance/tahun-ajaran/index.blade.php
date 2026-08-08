@@ -1,6 +1,6 @@
 <x-app-layout>
-    <x-slot name="title">Tahun Ajaran</x-slot>
-    <x-slot name="pageTitle">Manajemen Tahun Ajaran</x-slot>
+    <x-slot name="title">Tahun Pelajaran</x-slot>
+    <x-slot name="pageTitle">Manajemen Tahun Pelajaran</x-slot>
 
     <div class="space-y-6">
 
@@ -25,7 +25,7 @@
         </div>
         @endif
 
-        {{-- TAHUN AJARAN AKTIF --}}
+        {{-- TAHUN PELAJARAN AKTIF --}}
         <x-card>
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div class="flex items-center gap-4">
@@ -33,7 +33,7 @@
                         <i class="fas fa-calendar-alt"></i>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Tahun Ajaran Aktif</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Tahun Pelajaran Aktif</p>
                         <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $activeTahun }}</h2>
                     </div>
                 </div>
@@ -52,7 +52,7 @@
             </div>
         </x-card>
 
-        {{-- DAFTAR TAHUN AJARAN --}}
+        {{-- DAFTAR TAHUN PELAJARAN --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             @foreach($tahunList as $ta)
             <div class="rounded-2xl border {{ $ta->isActive() ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/50 dark:bg-indigo-900/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800' }} p-5 shadow-sm hover:shadow-md transition-shadow">
@@ -87,7 +87,7 @@
 
                 @if(!$ta->isActive())
                 <form method="POST" action="{{ route('attendance.tahun-ajaran.activate', $ta) }}"
-                      onsubmit="return confirm('Aktifkan tahun ajaran {{ $ta->tahun }}?')">
+                      onsubmit="return confirm('Aktifkan tahun pelajaran {{ $ta->tahun }}?')">
                     @csrf
                     <button type="submit" class="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-all">
                         <i class="fas fa-power-off mr-1"></i> Aktifkan
@@ -116,7 +116,7 @@
                             <th class="py-2 px-2 text-gray-500 dark:text-gray-400 font-medium text-xs">NIS</th>
                             <th class="py-2 px-2 text-gray-500 dark:text-gray-400 font-medium text-xs">Nama</th>
                             <th class="py-2 px-2 text-gray-500 dark:text-gray-400 font-medium text-xs">Kelas Terakhir</th>
-                            <th class="py-2 px-2 text-gray-500 dark:text-gray-400 font-medium text-xs">Tahun Ajaran</th>
+                            <th class="py-2 px-2 text-gray-500 dark:text-gray-400 font-medium text-xs">Tahun Pelajaran</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -220,7 +220,7 @@
     </div>
 
     {{-- ============================================ --}}
-    {{-- MODAL: Buat Tahun Ajaran Baru --}}
+    {{-- MODAL: Buat Tahun Pelajaran Baru --}}
     {{-- ============================================ --}}
     <div id="modalBuatBaru" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="document.getElementById('modalBuatBaru').classList.add('hidden')"></div>
@@ -230,7 +230,7 @@
                     <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white">
                         <i class="fas fa-plus"></i>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Tahun Ajaran Baru</h3>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Tahun Pelajaran Baru</h3>
                 </div>
                 <button onclick="document.getElementById('modalBuatBaru').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                     <i class="fas fa-times text-lg"></i>
@@ -238,10 +238,10 @@
             </div>
 
             <form method="POST" action="{{ route('attendance.tahun-ajaran.create') }}"
-                  onsubmit="return confirm('Buat tahun ajaran baru? Tahun aktif saat ini ({{ $activeTahun }}) akan diarsipkan.')">
+                  onsubmit="return confirm('Buat tahun pelajaran baru? Tahun aktif saat ini ({{ $activeTahun }}) akan diarsipkan.')">
                 @csrf
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tahun Ajaran Baru</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tahun Pelajaran Baru</label>
                     <input type="text" name="tahun" value="{{ $suggestNext }}" placeholder="Contoh: 2027/2028"
                            pattern="\d{4}/\d{4}" required
                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-lg font-bold text-center focus:ring-2 focus:ring-indigo-400">

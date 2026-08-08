@@ -13,7 +13,7 @@
                 </div>
                 <div>
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white">Filter Rekap Semester</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Pilih semester, tahun ajaran, dan kelas</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Pilih semester, tahun pelajaran, dan kelas</p>
                 </div>
             </div>
 
@@ -28,9 +28,9 @@
                     </select>
                 </div>
 
-                {{-- Tahun Ajaran --}}
+                {{-- Tahun Pelajaran --}}
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tahun Ajaran</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tahun Pelajaran</label>
                     <select name="tahun_ajaran"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 text-sm">
                         @for ($y = $currentYear + 1; $y >= $currentYear - 3; $y--)
@@ -169,7 +169,7 @@
         <x-card>
             <div class="text-center py-12 text-gray-400 dark:text-gray-500">
                 <i class="fas fa-graduation-cap text-5xl mb-4 block opacity-30"></i>
-                <p class="text-base font-medium">Pilih semester, tahun ajaran, dan kelas lalu klik <strong>Tampilkan</strong></p>
+                <p class="text-base font-medium">Pilih semester, tahun pelajaran, dan kelas lalu klik <strong>Tampilkan</strong></p>
                 <p class="text-sm mt-1">Data rekap kehadiran se-semester akan muncul di sini</p>
             </div>
         </x-card>

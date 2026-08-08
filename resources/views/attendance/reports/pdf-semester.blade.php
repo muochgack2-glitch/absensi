@@ -54,7 +54,7 @@
     <div class="header">
         <h1>{{ strtoupper($schoolName) }}</h1>
         <h2>REKAP KEHADIRAN SEMESTER {{ strtoupper($semester) }}</h2>
-        <p>Tahun Ajaran {{ $tahunAjaran }} &bull; {{ $kelas }}</p>
+        <p>Tahun Pelajaran {{ $tahunAjaran }} &bull; {{ $kelas }}</p>
     </div>
 
     {{-- META --}}
