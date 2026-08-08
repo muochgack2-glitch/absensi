@@ -460,15 +460,26 @@
         transition: flex-direction 0.3s ease;
     }
     
-    /* Collapsed: vertical stack */
+    /* Collapsed: vertical stack, match top menu styling */
     .sidebar.collapsed .bottom-icons-container {
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.25rem;
+    }
+    
+    .sidebar.collapsed .bottom-icon-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 0.75rem 10px;
     }
     
     /* Hover expand: back to row */
     .sidebar.collapsed:hover .bottom-icons-container {
         flex-direction: row;
+    }
+    
+    .sidebar.collapsed:hover .bottom-icon-btn {
+        width: auto;
+        padding: 0.5rem;
     }
     
     /* Bottom section form - ensure it participates in flex layout properly */
