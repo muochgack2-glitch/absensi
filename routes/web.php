@@ -63,11 +63,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/attendance/notifications', [AttendanceDashboardController::class, 'notifications'])
         ->name('api.attendance.notifications');
 
-    // Notifications page
-    Route::get('/attendance/notifications', function () {
-        return view('attendance.notifications.index');
-    })->name('attendance.notifications.index');
-
     // QR Scanner
     Route::get('/attendance/scanner', [AttendanceScanController::class, 'showScanner'])
         ->name('attendance.scanner');

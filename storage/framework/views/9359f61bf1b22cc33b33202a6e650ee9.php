@@ -848,7 +848,9 @@
                 <i class="fas fa-file-medical text-lg"></i>
                 <span class="nav-text font-medium">Izin Online</span>
                 <?php if($pendingIzin > 0): ?>
-                    <span class="sidebar-badge"><?php echo e($pendingIzin); ?></span>
+                    <span class="sidebar-badge" id="notifBadgeNav"><?php echo e($pendingIzin); ?></span>
+                <?php else: ?>
+                    <span class="sidebar-badge" id="notifBadgeNav" style="display: none;">0</span>
                 <?php endif; ?>
             </a>
 
@@ -949,19 +951,6 @@
                     </a>
                 </div>
             </div>
-
-            <!-- Notifikasi -->
-            <a href="<?php echo e(route('attendance.notifications.index')); ?>"
-               class="sidebar-menu-item <?php echo e(request()->routeIs('attendance.notifications.*') ? 'active' : ''); ?>"
-               id="notifMenuItem"
-               data-bs-toggle="tooltip" 
-               data-bs-placement="right" 
-               title="Notifikasi"
-            >
-                <i class="fas fa-bell text-lg"></i>
-                <span class="nav-text font-medium">Notifikasi</span>
-                <span id="notifBadgeNav" class="nav-text ml-auto bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center" style="display: none;">0</span>
-            </a>
 
         </nav>
 
