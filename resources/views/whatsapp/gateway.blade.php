@@ -139,6 +139,194 @@
             </div>
             @endforeach
         </div>
+
+        {{-- ============================================ --}}
+        {{-- PANDUAN MENGAKTIFKAN GATEWAY --}}
+        {{-- ============================================ --}}
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <button onclick="document.getElementById('guideContent').classList.toggle('hidden'); this.querySelector('.fa-chevron-down')?.classList.toggle('rotate-180')" 
+                    class="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                        <i class="fas fa-terminal text-emerald-600 dark:text-emerald-400"></i>
+                    </div>
+                    <div class="text-left">
+                        <h3 class="font-bold text-gray-900 dark:text-white">📖 Panduan Mengaktifkan Gateway</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Langkah-langkah menjalankan gateway via console/terminal</p>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down text-gray-400 transition-transform duration-200"></i>
+            </button>
+
+            <div id="guideContent" class="hidden border-t border-gray-200 dark:border-gray-700">
+                <div class="p-5 space-y-6">
+
+                    {{-- Gateway Utama (Absensi - Port 3001) --}}
+                    <div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="w-7 h-7 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                            <h4 class="font-bold text-gray-900 dark:text-white">Gateway Utama — Absensi (Port 3001)</h4>
+                        </div>
+
+                        <div class="space-y-2 ml-9">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                                <i class="fas fa-info-circle mr-1 text-blue-400"></i>
+                                Gateway utama untuk sistem absensi, berjalan di <strong>port 3001</strong>
+                            </p>
+
+                            {{-- Development --}}
+                            <div class="bg-gray-900 rounded-lg p-3">
+                                <p class="text-[10px] uppercase tracking-wide text-gray-400 mb-1.5 font-bold">⚡ Development (Manual)</p>
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2">
+                                        <code class="text-xs text-green-400 flex-1 font-mono">cd whatsapp-server</code>
+                                        <button onclick="copyCmd(this, 'cd whatsapp-server')" class="text-gray-500 hover:text-white text-xs"><i class="fas fa-copy"></i></button>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <code class="text-xs text-green-400 flex-1 font-mono">PORT=3001 node server.js</code>
+                                        <button onclick="copyCmd(this, 'PORT=3001 node server.js')" class="text-gray-500 hover:text-white text-xs"><i class="fas fa-copy"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Windows --}}
+                            <div class="bg-gray-900 rounded-lg p-3">
+                                <p class="text-[10px] uppercase tracking-wide text-gray-400 mb-1.5 font-bold">🪟 Windows (CMD/PowerShell)</p>
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2">
+                                        <code class="text-xs text-yellow-400 flex-1 font-mono">set PORT=3001 && node server.js</code>
+                                        <button onclick="copyCmd(this, 'set PORT=3001 && node server.js')" class="text-gray-500 hover:text-white text-xs"><i class="fas fa-copy"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- PM2 Production --}}
+                            <div class="bg-gray-900 rounded-lg p-3">
+                                <p class="text-[10px] uppercase tracking-wide text-gray-400 mb-1.5 font-bold">🚀 Production (PM2)</p>
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2">
+                                        <code class="text-xs text-cyan-400 flex-1 font-mono">pm2 start server.js --name wa-absensi -- --port 3001</code>
+                                        <button onclick="copyCmd(this, 'pm2 start server.js --name wa-absensi -- --port 3001')" class="text-gray-500 hover:text-white text-xs"><i class="fas fa-copy"></i></button>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <code class="text-xs text-gray-500 flex-1 font-mono"># atau jika sudah ada:</code>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <code class="text-xs text-cyan-400 flex-1 font-mono">pm2 restart wa-absensi</code>
+                                        <button onclick="copyCmd(this, 'pm2 restart wa-absensi')" class="text-gray-500 hover:text-white text-xs"><i class="fas fa-copy"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-200 dark:border-gray-700">
+
+                    {{-- Gateway Backup (SPMB - Port 3000) --}}
+                    <div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="w-7 h-7 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                            <h4 class="font-bold text-gray-900 dark:text-white">Gateway Backup — SPMB (Port 3000)</h4>
+                        </div>
+
+                        <div class="space-y-2 ml-9">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                                <i class="fas fa-info-circle mr-1 text-amber-400"></i>
+                                Gateway backup dari SPMB, berjalan di <strong>port 3000</strong>. Digunakan otomatis jika gateway utama down.
+                            </p>
+
+                            {{-- Development --}}
+                            <div class="bg-gray-900 rounded-lg p-3">
+                                <p class="text-[10px] uppercase tracking-wide text-gray-400 mb-1.5 font-bold">⚡ Development (Manual)</p>
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2">
+                                        <code class="text-xs text-green-400 flex-1 font-mono">cd ../whatsapp-server</code>
+                                        <button onclick="copyCmd(this, 'cd ../whatsapp-server')" class="text-gray-500 hover:text-white text-xs"><i class="fas fa-copy"></i></button>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <code class="text-xs text-green-400 flex-1 font-mono">PORT=3000 node server.js</code>
+                                        <button onclick="copyCmd(this, 'PORT=3000 node server.js')" class="text-gray-500 hover:text-white text-xs"><i class="fas fa-copy"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- PM2 Production --}}
+                            <div class="bg-gray-900 rounded-lg p-3">
+                                <p class="text-[10px] uppercase tracking-wide text-gray-400 mb-1.5 font-bold">🚀 Production (PM2)</p>
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2">
+                                        <code class="text-xs text-cyan-400 flex-1 font-mono">pm2 start server.js --name wa-spmb -- --port 3000</code>
+                                        <button onclick="copyCmd(this, 'pm2 start server.js --name wa-spmb -- --port 3000')" class="text-gray-500 hover:text-white text-xs"><i class="fas fa-copy"></i></button>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <code class="text-xs text-gray-500 flex-1 font-mono"># atau jika sudah ada:</code>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <code class="text-xs text-cyan-400 flex-1 font-mono">pm2 restart wa-spmb</code>
+                                        <button onclick="copyCmd(this, 'pm2 restart wa-spmb')" class="text-gray-500 hover:text-white text-xs"><i class="fas fa-copy"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-200 dark:border-gray-700">
+
+                    {{-- Monitoring Commands --}}
+                    <div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="w-7 h-7 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                            <h4 class="font-bold text-gray-900 dark:text-white">Monitoring & Troubleshooting</h4>
+                        </div>
+
+                        <div class="space-y-2 ml-9">
+                            <div class="bg-gray-900 rounded-lg p-3">
+                                <p class="text-[10px] uppercase tracking-wide text-gray-400 mb-1.5 font-bold">📊 PM2 Commands</p>
+                                <div class="space-y-1.5">
+                                    <div class="flex items-center gap-2">
+                                        <code class="text-xs text-cyan-400 flex-1 font-mono">pm2 status</code>
+                                        <span class="text-[10px] text-gray-500">Lihat semua proses</span>
+                                        <button onclick="copyCmd(this, 'pm2 status')" class="text-gray-500 hover:text-white text-xs"><i class="fas fa-copy"></i></button>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <code class="text-xs text-cyan-400 flex-1 font-mono">pm2 logs wa-absensi</code>
+                                        <span class="text-[10px] text-gray-500">Log gateway utama</span>
+                                        <button onclick="copyCmd(this, 'pm2 logs wa-absensi')" class="text-gray-500 hover:text-white text-xs"><i class="fas fa-copy"></i></button>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <code class="text-xs text-cyan-400 flex-1 font-mono">pm2 logs wa-spmb</code>
+                                        <span class="text-[10px] text-gray-500">Log gateway backup</span>
+                                        <button onclick="copyCmd(this, 'pm2 logs wa-spmb')" class="text-gray-500 hover:text-white text-xs"><i class="fas fa-copy"></i></button>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <code class="text-xs text-cyan-400 flex-1 font-mono">pm2 save</code>
+                                        <span class="text-[10px] text-gray-500">Simpan agar auto-start</span>
+                                        <button onclick="copyCmd(this, 'pm2 save')" class="text-gray-500 hover:text-white text-xs"><i class="fas fa-copy"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                                <p class="text-xs text-amber-700 dark:text-amber-400">
+                                    <i class="fas fa-lightbulb mr-1"></i>
+                                    <strong>Tips:</strong> Pastikan kedua gateway menggunakan <strong>nomor WA berbeda</strong>.
+                                    Gateway utama (3001) dan backup (3000) masing-masing punya session & QR sendiri.
+                                </p>
+                            </div>
+
+                            <div class="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                                <p class="text-xs text-blue-700 dark:text-blue-400">
+                                    <i class="fas fa-shield-alt mr-1"></i>
+                                    <strong>Failover:</strong> Jika Auto Failover diaktifkan, ketika gateway utama (3001) tidak merespon dalam 5 detik,
+                                    sistem otomatis mengirim pesan melalui gateway backup SPMB (3000).
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
     </div>
 
     {{-- QR Modal --}}
@@ -238,6 +426,14 @@
                 body: JSON.stringify({ enabled })
             }).then(r => r.json()).then(data => {
                 // Visual feedback
+            });
+        }
+
+        function copyCmd(btn, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const icon = btn.querySelector('i');
+                icon.className = 'fas fa-check text-green-400';
+                setTimeout(() => { icon.className = 'fas fa-copy'; }, 1500);
             });
         }
     </script>
