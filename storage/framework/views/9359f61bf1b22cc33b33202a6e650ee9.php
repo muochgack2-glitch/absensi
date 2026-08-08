@@ -768,8 +768,11 @@
                 <i class="fas fa-chart-bar text-lg"></i>
                 <span class="nav-text font-medium">Laporan</span>
                 
-                <!-- Badge for absent count -->
-                <span class="sidebar-badge">0</span>
+                
+                <?php $todayAlphaCount = \App\Models\AttendanceRecord::today()->where('status','alpha')->count(); ?>
+                <?php if($todayAlphaCount > 0): ?>
+                    <span class="sidebar-badge"><?php echo e($todayAlphaCount); ?></span>
+                <?php endif; ?>
             </a>
 
             <!-- Rekap Semester -->
@@ -922,13 +925,14 @@
                 <!-- Dark Mode Toggle Icon -->
                 <button 
                     id="darkModeToggle"
+                    onclick="toggleDarkMode(); updateToggleIcon();"
                     class="bottom-icon-btn"
                     data-bs-toggle="tooltip" 
                     data-bs-placement="top" 
                     title="Toggle Dark Mode"
                 >
-                    <i class="fas fa-moon text-primary-200"></i>
-                    <span class="btn-text">Dark Mode</span>
+                    <i id="darkModeIcon" class="fas fa-moon text-primary-200"></i>
+                    <span class="btn-text" id="darkModeText">Dark Mode</span>
                 </button>
 
                 <!-- Logout Icon -->
@@ -951,5 +955,21 @@
 
     </div>
 </aside>
+
+<script>
+    function updateToggleIcon() {
+        const isDark = document.documentElement.classList.contains('dark');
+        const icon = document.getElementById('darkModeIcon');
+        const text = document.getElementById('darkModeText');
+        if (icon) {
+            icon.className = isDark ? 'fas fa-sun text-yellow-300' : 'fas fa-moon text-primary-200';
+        }
+        if (text) {
+            text.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+        }
+    }
+    // Set correct icon on page load
+    document.addEventListener('DOMContentLoaded', updateToggleIcon);
+</script>
 
 <?php /**PATH C:\Users\DMCenter\Music\SPMB2\SPMB\absensi\resources\views/layouts/sidebar.blade.php ENDPATH**/ ?>

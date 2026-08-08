@@ -263,43 +263,19 @@ class AttendanceStudentController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $classId   = $request->input('class_id');
-        $isActive  = $request->input('is_active', ''); // '' = semua, '1' = aktif, '0' = nonaktif
+        $classId = $request->get('class') ?? $request->get('class_id');
+        $status = $request->get('status') ?? $request->get('is_active');
 
-        $query = AttendanceStudent::with('kelas')->orderBy('nama');
-        if ($classId)       $query->where('kelas_id', $classId);
-        if ($isActive !== '') $query->where('is_active', $isActive);
+        // Map status values
+        if ($status === '1') $status = 'active';
+        if ($status === '0') $status = 'inactive';
 
-        $students = $query->get();
+        $fileName = 'data_siswa_' . date('Y-m-d_His') . '.xlsx';
 
-        // Build array data
-        $rows   = [['No', 'NIS', 'Nama', 'Kelas', 'No HP Ortu', 'Status', 'Tgl Daftar']];
-        foreach ($students as $i => $s) {
-            $rows[] = [
-                $i + 1,
-                $s->nis,
-                $s->nama,
-                $s->kelas->nama_kelas ?? '-',
-                $s->no_hp_ortu ?? '',
-                $s->is_active ? 'Aktif' : 'Nonaktif',
-                $s->created_at->format('d/m/Y'),
-            ];
-        }
-
-        // Generate Excel manual (tanpa class export terpisah)
-        $filename = 'data-siswa-' . now()->format('Ymd_His') . '.csv';
-        $handle   = fopen('php://temp', 'r+');
-        foreach ($rows as $row) {
-            fputcsv($handle, $row);
-        }
-        rewind($handle);
-        $csv = stream_get_contents($handle);
-        fclose($handle);
-
-        return response($csv, 200, [
-            'Content-Type'        => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-        ]);
+        return Excel::download(
+            new \App\Exports\StudentsExport($classId, $status),
+            $fileName
+        );
     }
 
     // ================================================================

@@ -49,6 +49,14 @@
                     </a>
 
                     <a
+                        href="{{ route('attendance.students.export.excel', request()->only('class', 'status')) }}"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    >
+                        <i class="fas fa-file-download mr-2"></i>
+                        Export Excel
+                    </a>
+
+                    <a
                         href="{{ route('attendance.students.card') }}"
                         class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700 shadow-md hover:shadow-lg hover:-translate-y-0.5"
                     >
