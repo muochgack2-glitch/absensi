@@ -1,4 +1,17 @@
 <x-guest-layout>
+    {{-- School Branding --}}
+    <div class="text-center mb-6">
+        @if(isset($appLogoUrl) && $appLogoUrl)
+            <img src="{{ $appLogoUrl }}" alt="Logo" class="w-16 h-16 mx-auto rounded-xl object-contain mb-3">
+        @else
+            <div class="w-16 h-16 mx-auto bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mb-3">
+                <i class="fas fa-qrcode text-white text-2xl"></i>
+            </div>
+        @endif
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ $appSchoolName ?? 'Absensi QR' }}</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Sistem Absensi Digital</p>
+    </div>
+
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 

@@ -13,11 +13,11 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16">
                     <div class="flex items-center">
-                        <h1 class="text-xl font-bold text-gray-800">📊 Sistem Absensi QR</h1>
+                        <h1 class="text-lg sm:text-xl font-bold text-gray-800">📊 Sistem Absensi QR</h1>
                     </div>
-                    <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2 sm:space-x-4 text-sm">
                         <a href="{{ route('attendance.dashboard') }}" class="text-gray-600 hover:text-gray-900">Dashboard</a>
-                        <a href="{{ route('attendance.students.index') }}" class="text-gray-600 hover:text-gray-900">Siswa</a>
+                        <a href="{{ route('attendance.students.index') }}" class="text-gray-600 hover:text-gray-900 hidden sm:inline">Siswa</a>
                         <a href="{{ route('attendance.reports.daily') }}" class="text-blue-600 font-semibold">Laporan</a>
                     </div>
                 </div>
@@ -27,8 +27,8 @@
         <!-- Main Content -->
         <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
             <!-- Student Info Card -->
-            <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
-                <div class="flex items-center justify-between">
+            <div class="bg-white shadow-lg rounded-lg p-4 sm:p-6 mb-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div class="flex items-center space-x-4">
                         @if($student->foto_profil)
                             <img src="{{ Storage::url($student->foto_profil) }}" 
@@ -41,7 +41,7 @@
                         @endif
                         
                         <div>
-                            <h2 class="text-2xl font-bold text-gray-800">{{ $student->nama }}</h2>
+                            <h2 class="text-xl sm:text-2xl font-bold text-gray-800">{{ $student->nama }}</h2>
                             <p class="text-gray-600">NIS: {{ $student->nis }}</p>
                             <p class="text-gray-600">Kelas: {{ $student->kelas->nama_kelas }}</p>
                         </div>

@@ -9,8 +9,43 @@
             <p class="text-gray-600 dark:text-gray-400 mt-1">Generate dan export laporan absensi siswa</p>
         </div>
 
+        {{-- Flash Messages --}}
+        @if(session('success'))
+            <div class="flex items-center gap-3 p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-300">
+                <i class="fas fa-check-circle text-green-500 text-lg"></i>
+                <span class="font-medium">{{ session('success') }}</span>
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="flex items-center gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300">
+                <i class="fas fa-times-circle text-red-500 text-lg"></i>
+                <span class="font-medium">{{ session('error') }}</span>
+            </div>
+        @endif
+        @if(session('info'))
+            <div class="flex items-center gap-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300">
+                <i class="fas fa-info-circle text-blue-500 text-lg"></i>
+                <span class="font-medium">{{ session('info') }}</span>
+            </div>
+        @endif
+
+        {{-- Quick Stats Hari Ini --}}
+        @php
+            $todayRecords = \App\Models\AttendanceRecord::today();
+            $todayHadir = (clone $todayRecords)->where('status', 'hadir')->count();
+            $todayTerlambat = (clone $todayRecords)->where('status', 'terlambat')->count();
+            $todayIzinSakit = (clone $todayRecords)->whereIn('status', ['izin', 'sakit'])->count();
+            $todayAlpha = (clone $todayRecords)->where('status', 'alpha')->count();
+        @endphp
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <x-stat-card title="Hadir Hari Ini" :value="$todayHadir" icon="fas fa-check-circle" color="success" />
+            <x-stat-card title="Terlambat" :value="$todayTerlambat" icon="fas fa-clock" color="warning" />
+            <x-stat-card title="Izin / Sakit" :value="$todayIzinSakit" icon="fas fa-file-medical" color="info" />
+            <x-stat-card title="Alpha" :value="$todayAlpha" icon="fas fa-times-circle" color="danger" />
+        </div>
+
         {{-- Quick Links Grid --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {{-- Daily Report --}}
             <a href="{{ route('attendance.reports.daily') }}" 
                class="group relative bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
@@ -70,7 +105,7 @@
         </div>
 
         {{-- Baris kedua: Laporan Alpha --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
             {{-- Laporan Alpha --}}
             <a href="{{ route('attendance.reports.alpha') }}"
                class="group relative bg-gradient-to-br from-red-500 to-orange-500 rounded-2xl p-6 text-white hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
@@ -187,15 +222,30 @@
                         </a>
                         <button
                             type="submit"
+                            id="btnGenerate"
                             class="inline-flex items-center justify-center px-6 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 shadow-md hover:shadow-lg"
                         >
-                            <i class="fas fa-search mr-2"></i>
-                            Generate Laporan
+                            <i class="fas fa-search mr-2" id="btnIcon"></i>
+                            <span id="btnText">Generate Laporan</span>
                         </button>
                     </div>
                 </div>
             </form>
         </x-card>
+
+        @push('scripts')
+        <script>
+            document.querySelector('form[action*="generate"]').addEventListener('submit', function() {
+                const btn = document.getElementById('btnGenerate');
+                const icon = document.getElementById('btnIcon');
+                const text = document.getElementById('btnText');
+                btn.disabled = true;
+                btn.classList.add('opacity-75', 'cursor-not-allowed');
+                icon.className = 'fas fa-spinner fa-spin mr-2';
+                text.textContent = 'Memproses...';
+            });
+        </script>
+        @endpush
 
         {{-- Instructions --}}
         <x-card>

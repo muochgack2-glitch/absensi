@@ -121,6 +121,17 @@
             <i class="fas fa-arrow-left"></i> Cari Siswa Lain
         </a>
 
+        {{-- School Header --}}
+        @if(isset($appLogoUrl) && $appLogoUrl)
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+            <img src="{{ $appLogoUrl }}" alt="Logo" style="width:40px; height:40px; object-fit:contain;">
+            <div>
+                <p style="font-size:15px; font-weight:700;" class="text-gray-900 dark:text-white">{{ $appSchoolName ?? 'Sekolah' }}</p>
+                <p style="font-size:12px;" class="text-gray-500 dark:text-gray-400">Rekap Kehadiran Siswa</p>
+            </div>
+        </div>
+        @endif
+
         {{-- Student Card --}}
         <div class="student-card mb-4">
             <div style="position:relative;z-index:1">

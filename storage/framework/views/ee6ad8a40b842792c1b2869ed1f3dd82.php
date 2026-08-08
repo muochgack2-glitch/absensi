@@ -47,7 +47,7 @@
                             <thead>
                                 <tr class="bg-gray-50 dark:bg-gray-800">
                                     <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 rounded-l-lg">Nama</th>
-                                    <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Email</th>
+                                    <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 hidden sm:table-cell">Email</th>
                                     <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Role</th>
                                     <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Kelas</th>
                                     <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 rounded-r-lg">Aksi</th>
@@ -57,7 +57,7 @@
                                 <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $u): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                                     <td class="px-4 py-3 font-medium text-gray-900 dark:text-white"><?php echo e($u->name); ?></td>
-                                    <td class="px-4 py-3 text-gray-600 dark:text-gray-400 text-xs"><?php echo e($u->email); ?></td>
+                                    <td class="px-4 py-3 text-gray-600 dark:text-gray-400 text-xs hidden sm:table-cell"><?php echo e($u->email); ?></td>
                                     <td class="px-4 py-3">
                                         <?php if($u->role === 'admin'): ?>
                                             <span class="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-bold rounded-full">Admin</span>

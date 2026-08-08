@@ -110,9 +110,15 @@
 
     <div class="portal-hero">
         <div class="portal-card">
-            <div class="icon-ring">
-                <i class="fas fa-search"></i>
-            </div>
+            @if(isset($appLogoUrl) && $appLogoUrl)
+                <div class="icon-ring" style="background: white; box-shadow: 0 8px 24px rgba(0,0,0,0.12);">
+                    <img src="{{ $appLogoUrl }}" alt="Logo" style="width: 48px; height: 48px; object-fit: contain;">
+                </div>
+            @else
+                <div class="icon-ring">
+                    <i class="fas fa-search"></i>
+                </div>
+            @endif
 
             <h1 class="text-center text-2xl font-bold text-gray-900 dark:text-white mb-1">
                 Cek Absensi Siswa

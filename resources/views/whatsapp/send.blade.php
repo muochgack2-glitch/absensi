@@ -2,11 +2,11 @@
     <x-slot name="title">Kirim Pesan</x-slot>
     <x-slot name="pageTitle">Kirim Pesan WhatsApp</x-slot>
 
-    <div class="max-w-4xl space-y-6">
-        <div class="flex items-center justify-between">
+    <div class="max-w-4xl mx-auto space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">📤 Kirim Pesan</h1>
-                <p class="text-gray-600 dark:text-gray-400 mt-1">Kirim pesan WhatsApp manual atau menggunakan template</p>
+                <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">📤 Kirim Pesan</h1>
+                <p class="text-gray-600 dark:text-gray-400 mt-1 text-sm">Kirim pesan WhatsApp manual atau menggunakan template</p>
             </div>
             <a href="{{ route('whatsapp.index') }}" class="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition">
                 <i class="fas fa-arrow-left mr-2"></i>Kembali

@@ -62,8 +62,8 @@
                             <th class="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 rounded-l-lg">Siswa</th>
                             <th class="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400">Jenis</th>
                             <th class="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400">Tanggal</th>
-                            <th class="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400">Alasan</th>
-                            <th class="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400">Pelapor</th>
+                            <th class="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 hidden md:table-cell">Alasan</th>
+                            <th class="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 hidden sm:table-cell">Pelapor</th>
                             <th class="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400">Status</th>
                             <th class="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 rounded-r-lg">Aksi</th>
                         </tr>
@@ -93,7 +93,7 @@
                                 @endif
                                 <div class="text-indigo-500 font-medium">{{ $izin->durasi }} hari</div>
                             </td>
-                            <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-400 max-w-xs">
+                            <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-400 max-w-xs hidden md:table-cell">
                                 <p class="line-clamp-2">{{ $izin->alasan }}</p>
                                 @if($izin->lampiran)
                                     <a href="{{ Storage::url($izin->lampiran) }}" target="_blank"
@@ -102,7 +102,7 @@
                                     </a>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-400">
+                            <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-400 hidden sm:table-cell">
                                 <p class="font-medium">{{ $izin->nama_pelapor }}</p>
                                 <p>{{ $izin->no_hp_pelapor }}</p>
                                 <p class="text-gray-400">{{ $izin->created_at->format('d M H:i') }}</p>

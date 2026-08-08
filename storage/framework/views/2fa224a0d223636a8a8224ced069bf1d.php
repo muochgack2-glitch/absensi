@@ -40,8 +40,18 @@ unset($__defined_vars, $__key, $__value); ?>
 
 <div class="overflow-x-auto">
     <table <?php echo e($attributes->merge(['class' => $classes])); ?>>
-        <?php echo e($slot); ?>
+        <?php if(isset($header)): ?>
+        <thead class="bg-gray-50 dark:bg-gray-800/50">
+            <tr>
+                <?php echo e($header); ?>
 
+            </tr>
+        </thead>
+        <?php endif; ?>
+        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <?php echo e($slot); ?>
+
+        </tbody>
     </table>
 </div>
 <?php /**PATH C:\Users\DMCenter\Music\SPMB2\SPMB\absensi\resources\views/components/table.blade.php ENDPATH**/ ?>

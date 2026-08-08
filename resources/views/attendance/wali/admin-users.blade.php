@@ -24,12 +24,27 @@
                     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                         <i class="fas fa-users text-indigo-500"></i> Daftar Pengguna
                     </h3>
+
+                    {{-- Search & Filter --}}
+                    <div class="flex flex-col sm:flex-row gap-3 mb-4">
+                        <div class="flex-1 relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                            <input type="text" id="userSearch" placeholder="Cari nama atau email..."
+                                   class="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                        </div>
+                        <select id="roleFilter" 
+                                class="px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="">Semua Role</option>
+                            <option value="admin">Admin</option>
+                            <option value="wali_kelas">Wali Kelas</option>
+                        </select>
+                    </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
                             <thead>
                                 <tr class="bg-gray-50 dark:bg-gray-800">
                                     <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 rounded-l-lg">Nama</th>
-                                    <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Email</th>
+                                    <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 hidden sm:table-cell">Email</th>
                                     <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Role</th>
                                     <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Kelas</th>
                                     <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 rounded-r-lg">Aksi</th>
@@ -37,9 +52,9 @@
                             </thead>
                             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                 @foreach($users as $u)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 user-row" data-name="{{ strtolower($u->name) }}" data-email="{{ strtolower($u->email) }}" data-role="{{ $u->role }}">
                                     <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ $u->name }}</td>
-                                    <td class="px-4 py-3 text-gray-600 dark:text-gray-400 text-xs">{{ $u->email }}</td>
+                                    <td class="px-4 py-3 text-gray-600 dark:text-gray-400 text-xs hidden sm:table-cell">{{ $u->email }}</td>
                                     <td class="px-4 py-3">
                                         @if($u->role === 'admin')
                                             <span class="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-bold rounded-full">Admin</span>
@@ -206,6 +221,21 @@
             document.getElementById('editModal').classList.add('hidden');
             document.getElementById('editModal').classList.remove('flex');
         }
+        // Search & Filter
+        function filterUsers() {
+            const q = document.getElementById('userSearch').value.toLowerCase();
+            const role = document.getElementById('roleFilter').value;
+            document.querySelectorAll('.user-row').forEach(row => {
+                const name = row.dataset.name;
+                const email = row.dataset.email;
+                const r = row.dataset.role;
+                const matchSearch = !q || name.includes(q) || email.includes(q);
+                const matchRole = !role || r === role;
+                row.style.display = (matchSearch && matchRole) ? '' : 'none';
+            });
+        }
+        document.getElementById('userSearch').addEventListener('input', filterUsers);
+        document.getElementById('roleFilter').addEventListener('change', filterUsers);
     </script>
     @endpush
 </x-app-layout>

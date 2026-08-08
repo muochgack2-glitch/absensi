@@ -19,13 +19,16 @@
     const sidebarOpen = localStorage.getItem('sidebarOpen') !== 'false';
     const sidebar = document.getElementById('adminSidebar');
     
-    // Apply width before page render to prevent flash
-    if (sidebar) {
+    // Apply width before page render to prevent flash (desktop only - SPMB approach)
+    if (sidebar && window.innerWidth >= 1024) {
         sidebar.style.width = sidebarOpen ? '16rem' : '5rem';
         if (!sidebarOpen) {
             sidebar.classList.add('collapsed');
             document.body.classList.add('sidebar-collapsed');
         }
+    } else if (sidebar) {
+        // Mobile: always full-width, use transform for show/hide
+        sidebar.style.width = '16rem';
     }
     
     // ============================================
@@ -36,6 +39,14 @@
         initializeTooltips();
         initializeMobileMenu();
         initializeDarkMode();
+        
+        // Enable transitions after initial state is set (SPMB approach)
+        const sb = document.getElementById('adminSidebar');
+        const mainContent = document.getElementById('mainContent');
+        setTimeout(function() {
+            if (sb) sb.classList.add('transitions-enabled');
+            if (mainContent) mainContent.classList.add('transitions-enabled');
+        }, 50);
     });
     
     // ============================================
@@ -140,16 +151,9 @@
             overlay.addEventListener('click', closeMobileMenu);
         }
         
-        // Close menu when clicking nav links (mobile)
-        if (menuLinks) {
-            menuLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    if (window.innerWidth < 1024) {
-                        closeMobileMenu();
-                    }
-                });
-            });
-        }
+        // SPMB approach: Do NOT close sidebar on menu link clicks.
+        // In multi-page apps, page reloads naturally.
+        // Closing the sidebar immediately cancels navigation on mobile WebKit.
         
         // Close mobile menu on window resize to desktop
         window.addEventListener('resize', function() {
@@ -192,6 +196,105 @@
             openMobileMenu();
         }
     };
+    
+    // Expose closeMobileMenu globally (for close button in sidebar)
+    window.closeMobileMenu = closeMobileMenu;
+
+    // ============================================
+    // SWIPE GESTURE (Mobile - Swipe Left to Close)
+    // ============================================
+    (function initSwipeGesture() {
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let isSwiping = false;
+
+        const sidebar = document.getElementById('adminSidebar');
+        if (!sidebar) return;
+
+        sidebar.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+            isSwiping = true;
+        }, { passive: true });
+
+        sidebar.addEventListener('touchmove', function(e) {
+            if (!isSwiping) return;
+            touchEndX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        sidebar.addEventListener('touchend', function(e) {
+            if (!isSwiping) return;
+            isSwiping = false;
+            
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = Math.abs(e.changedTouches[0].screenY - touchStartY);
+            
+            // Swipe left (negative deltaX) with enough distance and mostly horizontal
+            if (deltaX < -80 && deltaY < 100 && window.innerWidth < 1024) {
+                closeMobileMenu();
+            }
+        }, { passive: true });
+
+        // Swipe right from left edge to OPEN sidebar
+        document.addEventListener('touchstart', function(e) {
+            if (window.innerWidth >= 1024) return;
+            const touch = e.changedTouches[0];
+            if (touch.screenX < 25) { // Within 25px of left edge
+                touchStartX = touch.screenX;
+                isSwiping = true;
+            }
+        }, { passive: true });
+
+        document.addEventListener('touchend', function(e) {
+            if (!isSwiping || window.innerWidth >= 1024) return;
+            isSwiping = false;
+            const deltaX = e.changedTouches[0].screenX - touchStartX;
+            
+            // Swipe right from edge
+            if (deltaX > 80) {
+                const sidebar = document.getElementById('adminSidebar');
+                if (sidebar && !sidebar.classList.contains('mobile-show')) {
+                    openMobileMenu();
+                }
+            }
+        }, { passive: true });
+    })();
+
+    // ============================================
+    // ESCAPE KEY TO CLOSE (Mobile)
+    // ============================================
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const sidebar = document.getElementById('adminSidebar');
+            if (sidebar && sidebar.classList.contains('mobile-show')) {
+                closeMobileMenu();
+            }
+        }
+    });
+
+    // ============================================
+    // SUBMENU TOGGLE (Collapsible Accordion)
+    // ============================================
+    window.toggleSubmenu = function(name) {
+        const submenu = document.getElementById('submenu-' + name);
+        const group = document.querySelector('[data-submenu="' + name + '"]');
+        const arrow = group?.querySelector('.submenu-arrow');
+        
+        if (!submenu) return;
+        
+        const isOpen = submenu.classList.contains('submenu-open');
+        
+        if (isOpen) {
+            submenu.classList.remove('submenu-open');
+            arrow?.classList.remove('rotate-180');
+            group?.querySelector('.sidebar-submenu-toggle')?.classList.remove('submenu-active');
+        } else {
+            submenu.classList.add('submenu-open');
+            arrow?.classList.add('rotate-180');
+            group?.querySelector('.sidebar-submenu-toggle')?.classList.add('submenu-active');
+        }
+    };
 
     
     // ============================================
@@ -209,7 +312,10 @@
             document.documentElement.classList.add('dark');
         }
         
-        // Toggle button click
+        // Update all dark mode icons on init
+        updateDarkModeIcons(isDark);
+        
+        // Toggle button click (sidebar)
         darkModeBtn.addEventListener('click', function() {
             const isCurrentlyDark = document.documentElement.classList.contains('dark');
             
@@ -220,8 +326,50 @@
                 document.documentElement.classList.add('dark');
                 localStorage.setItem('darkMode', 'true');
             }
+            
+            updateDarkModeIcons(!isCurrentlyDark);
         });
     }
+    
+    // Update dark mode icons across sidebar + navbar
+    function updateDarkModeIcons(isDark) {
+        // Sidebar icon
+        const sidebarIcon = document.querySelector('#darkModeToggle i');
+        if (sidebarIcon) {
+            sidebarIcon.className = isDark 
+                ? 'fas fa-sun text-amber-300' 
+                : 'fas fa-moon text-primary-200';
+        }
+        
+        // Sidebar text
+        const sidebarText = document.querySelector('#darkModeToggle .btn-text');
+        if (sidebarText) {
+            sidebarText.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+        }
+        
+        // Navbar icons (separate moon/sun elements)
+        const navMoon = document.getElementById('dark-icon-moon');
+        const navSun = document.getElementById('dark-icon-sun');
+        if (navMoon && navSun) {
+            navMoon.classList.toggle('hidden', isDark);
+            navSun.classList.toggle('hidden', !isDark);
+        }
+    }
+    
+    // Expose for navbar dark mode button
+    window.toggleDarkMode = function() {
+        const isCurrentlyDark = document.documentElement.classList.contains('dark');
+        
+        if (isCurrentlyDark) {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('darkMode', 'false');
+        } else {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('darkMode', 'true');
+        }
+        
+        updateDarkModeIcons(!isCurrentlyDark);
+    };
     
     // ============================================
     // BADGE COUNT LOADING

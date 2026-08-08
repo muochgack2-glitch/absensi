@@ -65,7 +65,12 @@
 
         {{-- Header hasil pencarian --}}
         <div class="search-header mb-5">
-            <p class="text-purple-200 text-xs uppercase tracking-widest mb-1">Hasil Pencarian</p>
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                @if(isset($appLogoUrl) && $appLogoUrl)
+                    <img src="{{ $appLogoUrl }}" alt="Logo" style="width:36px; height:36px; object-fit:contain; background:rgba(255,255,255,0.2); border-radius:8px; padding:3px;">
+                @endif
+                <p class="text-purple-200 text-xs uppercase tracking-widest">Hasil Pencarian</p>
+            </div>
             <h2 class="text-xl font-bold text-white">{{ $students->count() }} siswa ditemukan</h2>
             <p class="text-purple-200 text-sm mt-1">
                 <i class="fas fa-search mr-1"></i>Kata kunci: <strong>"{{ $query }}"</strong>

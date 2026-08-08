@@ -46,9 +46,9 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b border-gray-200 dark:border-gray-700">
-                            <th class="text-left py-3 px-3 text-gray-600 dark:text-gray-400 font-medium">No HP</th>
+                            <th class="text-left py-3 px-3 text-gray-600 dark:text-gray-400 font-medium hidden sm:table-cell">No HP</th>
                             <th class="text-left py-3 px-3 text-gray-600 dark:text-gray-400 font-medium">Siswa</th>
-                            <th class="text-left py-3 px-3 text-gray-600 dark:text-gray-400 font-medium">Pesan</th>
+                            <th class="text-left py-3 px-3 text-gray-600 dark:text-gray-400 font-medium hidden md:table-cell">Pesan</th>
                             <th class="text-left py-3 px-3 text-gray-600 dark:text-gray-400 font-medium">Tipe</th>
                             <th class="text-left py-3 px-3 text-gray-600 dark:text-gray-400 font-medium">Status</th>
                             <th class="text-left py-3 px-3 text-gray-600 dark:text-gray-400 font-medium">Waktu</th>
@@ -57,9 +57,9 @@
                     <tbody>
                         @forelse($logs as $log)
                         <tr class="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition">
-                            <td class="py-3 px-3 font-mono text-xs text-gray-900 dark:text-white">{{ $log->phone }}</td>
+                            <td class="py-3 px-3 font-mono text-xs text-gray-900 dark:text-white hidden sm:table-cell">{{ $log->phone }}</td>
                             <td class="py-3 px-3 text-gray-600 dark:text-gray-400">{{ $log->student->nama ?? '-' }}</td>
-                            <td class="py-3 px-3 text-gray-600 dark:text-gray-400 max-w-xs">
+                            <td class="py-3 px-3 text-gray-600 dark:text-gray-400 max-w-xs hidden md:table-cell">
                                 <span class="truncate block" title="{{ $log->message }}">{{ Str::limit($log->message, 60) }}</span>
                             </td>
                             <td class="py-3 px-3">

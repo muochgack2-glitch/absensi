@@ -2,7 +2,7 @@
     <x-slot name="title">{{ $template ? 'Edit Template' : 'Buat Template' }}</x-slot>
     <x-slot name="pageTitle">{{ $template ? 'Edit Template' : 'Buat Template Baru' }}</x-slot>
 
-    <div class="max-w-3xl space-y-6">
+    <div class="max-w-3xl mx-auto space-y-6">
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $template ? '✏️ Edit Template' : '➕ Buat Template' }}</h1>

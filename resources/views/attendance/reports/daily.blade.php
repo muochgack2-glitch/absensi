@@ -5,13 +5,13 @@
     <div class="space-y-6">
         {{-- Page Header with Filters --}}
         <x-card>
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
                 <div class="flex items-center">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-2xl mr-4">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-xl sm:text-2xl mr-3 sm:mr-4">
                         <i class="fas fa-calendar-day"></i>
                     </div>
                     <div>
-                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">📅 Laporan Absensi Harian</h2>
+                        <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">📅 Laporan Absensi Harian</h2>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Data real-time absensi siswa hari ini</p>
                     </div>
                 </div>
@@ -82,12 +82,12 @@
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
                             <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 60px;">No</th>
-                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 100px;">NIS</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell" style="width: 100px;">NIS</th>
                             <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="min-width: 180px;">Nama</th>
-                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 130px;">Kelas</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden md:table-cell" style="width: 130px;">Kelas</th>
                             <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 80px;">Masuk</th>
-                            <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 80px;">Pulang</th>
-                            <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 80px;">Foto</th>
+                            <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell" style="width: 80px;">Pulang</th>
+                            <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden md:table-cell" style="width: 80px;">Foto</th>
                             <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 100px;">Status</th>
                         </tr>
                     </thead>
@@ -96,22 +96,22 @@
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                             <td class="px-4 py-3 text-center text-sm text-gray-900 dark:text-white">{{ $index + 1 }}</td>
                             
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white font-medium">{{ $record->student->nis }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white font-medium hidden sm:table-cell">{{ $record->student->nis }}</td>
                             
                             <td class="px-4 py-3 text-sm text-gray-900 dark:text-white font-medium">{{ $record->student->nama }}</td>
                             
-                            <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $record->student->kelas->nama_kelas }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 hidden md:table-cell">{{ $record->student->kelas->nama_kelas }}</td>
                             
                             <td class="px-4 py-3 text-center text-sm text-gray-900 dark:text-white font-mono">
                                 {{ $record->check_in_time ? \Carbon\Carbon::parse($record->check_in_time)->format('H:i') : '-' }}
                             </td>
                             
-                            <td class="px-4 py-3 text-center text-sm text-gray-900 dark:text-white font-mono">
+                            <td class="px-4 py-3 text-center text-sm text-gray-900 dark:text-white font-mono hidden sm:table-cell">
                                 {{ $record->check_out_time ? \Carbon\Carbon::parse($record->check_out_time)->format('H:i') : '-' }}
                             </td>
                             
                             {{-- Foto Icons --}}
-                            <td class="px-4 py-3 text-center">
+                            <td class="px-4 py-3 text-center hidden md:table-cell">
                                 <div class="flex items-center justify-center gap-1">
                                     @if($record->check_in_photo)
                                         <button onclick="showPhotoModal('{{ $record->check_in_photo_url }}', '{{ addslashes($record->student->nama) }}', 'Check In')"

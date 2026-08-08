@@ -42,7 +42,29 @@ class AttendanceStudentController extends Controller
             $query->where('is_active', $isActive);
         }
 
-        $students = $query->orderBy('nama')->paginate(15);
+        // Filter by QR Code
+        if ($qr = $request->input('qr')) {
+            if ($qr === 'has_qr') {
+                $query->whereNotNull('qr_code_path');
+            } elseif ($qr === 'no_qr') {
+                $query->whereNull('qr_code_path');
+            }
+        }
+
+        // Filter by tingkat
+        if ($tingkat = $request->input('tingkat')) {
+            $query->whereHas('kelas', function ($q) use ($tingkat) {
+                $q->where('tingkat', $tingkat);
+            });
+        }
+
+        // Sortable columns
+        $sortable = ['nis', 'nama', 'kelas_id'];
+        $sortBy = in_array($request->input('sort_by'), $sortable) ? $request->input('sort_by') : 'nama';
+        $sortDir = $request->input('sort_dir') === 'desc' ? 'desc' : 'asc';
+
+        $perPage = $request->input('per_page', 15);
+        $students = $query->orderBy($sortBy, $sortDir)->paginate($perPage)->withQueryString();
 
         return view('attendance.students.index', compact('students'));
     }

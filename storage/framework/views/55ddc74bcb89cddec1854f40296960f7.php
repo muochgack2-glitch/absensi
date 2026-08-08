@@ -11,8 +11,8 @@
      <?php $__env->slot('title', null, []); ?> Settings WA <?php $__env->endSlot(); ?>
      <?php $__env->slot('pageTitle', null, []); ?> Pengaturan WhatsApp Gateway <?php $__env->endSlot(); ?>
 
-    <div class="max-w-4xl space-y-6">
-        <div class="flex items-center justify-between">
+    <div class="max-w-5xl mx-auto space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">⚙️ Pengaturan Gateway</h1>
                 <p class="text-gray-600 dark:text-gray-400 mt-1">Konfigurasi WhatsApp Gateway server</p>

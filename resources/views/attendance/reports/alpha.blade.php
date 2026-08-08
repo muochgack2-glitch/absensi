@@ -5,13 +5,13 @@
     <div class="space-y-6">
 
         {{-- Header --}}
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">⚠️ Laporan Siswa Alpha</h1>
+                <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">⚠️ Laporan Siswa Alpha</h1>
                 <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Daftar siswa yang paling sering tidak hadir — kirim notifikasi WA ke orang tua langsung dari sini</p>
             </div>
             <a href="{{ route('attendance.reports.index') }}"
-               class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+               class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
                 <i class="fas fa-arrow-left mr-2"></i> Kembali
             </a>
         </div>
@@ -63,7 +63,7 @@
                 <input type="hidden" name="month" value="{{ $month }}">
 
                 {{-- Toolbar --}}
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg"
                              style="background: linear-gradient(135deg, #ef4444, #f97316);">
@@ -80,7 +80,7 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
                         {{-- Select all --}}
                         <label class="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
                             <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"
@@ -113,11 +113,11 @@
                                         <i class="fas fa-check-square text-gray-400"></i>
                                     </th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">No</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">NIS</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">NIS</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nama Siswa</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kelas</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">Kelas</th>
                                     <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Jml Alpha</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">No HP Ortu</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">No HP Ortu</th>
                                     <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
@@ -131,18 +131,18 @@
                                                    onchange="updateBtnState()">
                                         </td>
                                         <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ $i + 1 }}</td>
-                                        <td class="px-4 py-3 font-mono text-gray-700 dark:text-gray-300">{{ $student->nis }}</td>
+                                        <td class="px-4 py-3 font-mono text-gray-700 dark:text-gray-300 hidden sm:table-cell">{{ $student->nis }}</td>
                                         <td class="px-4 py-3">
                                             <div class="font-medium text-gray-900 dark:text-white">{{ $student->nama }}</div>
                                         </td>
-                                        <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $student->kelas->nama_kelas }}</td>
+                                        <td class="px-4 py-3 text-gray-600 dark:text-gray-400 hidden md:table-cell">{{ $student->kelas->nama_kelas }}</td>
                                         <td class="px-4 py-3 text-center">
                                             <span class="inline-flex items-center justify-center w-9 h-9 rounded-full text-sm font-bold text-white"
                                                   style="background: {{ $student->alpha_count >= 5 ? '#dc2626' : ($student->alpha_count >= 3 ? '#f97316' : '#eab308') }}">
                                                 {{ $student->alpha_count }}
                                             </span>
                                         </td>
-                                        <td class="px-4 py-3">
+                                        <td class="px-4 py-3 hidden sm:table-cell">
                                             @if($student->no_hp_ortu)
                                                 <span class="text-gray-700 dark:text-gray-300 text-xs font-mono">{{ $student->no_hp_ortu }}</span>
                                             @else

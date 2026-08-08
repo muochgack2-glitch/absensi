@@ -50,8 +50,8 @@ class AttendanceClassController extends Controller
      */
     public function create()
     {
-        // Get all users as potential wali kelas (since role column doesn't exist)
-        $teachers = User::orderBy('name', 'asc')->get();
+        // Get users with wali_kelas role
+        $teachers = User::where('role', 'wali_kelas')->orderBy('name', 'asc')->get();
 
         return view('attendance.classes.create', compact('teachers'));
     }
@@ -110,8 +110,8 @@ class AttendanceClassController extends Controller
      */
     public function edit(AttendanceClass $class)
     {
-        // Get all users as potential wali kelas (since role column doesn't exist)
-        $teachers = User::orderBy('name', 'asc')->get();
+        // Get users with wali_kelas role
+        $teachers = User::where('role', 'wali_kelas')->orderBy('name', 'asc')->get();
 
         return view('attendance.classes.edit', compact('class', 'teachers'));
     }

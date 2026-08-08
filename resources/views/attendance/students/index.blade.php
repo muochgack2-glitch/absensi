@@ -91,7 +91,7 @@
         </div>
 
         {{-- Stats Cards --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <x-stat-card
                 title="Total Siswa"
                 :value="\App\Models\AttendanceStudent::count()"
@@ -107,6 +107,13 @@
             />
             
             <x-stat-card
+                title="Tidak Aktif"
+                :value="\App\Models\AttendanceStudent::where('is_active', false)->count()"
+                icon="fas fa-user-slash"
+                color="danger"
+            />
+            
+            <x-stat-card
                 title="QR Code Dibuat"
                 :value="\App\Models\AttendanceStudent::whereNotNull('qr_code_path')->count()"
                 icon="fas fa-qrcode"
@@ -114,10 +121,36 @@
             />
         </div>
 
+        {{-- Quick Filter Tingkat --}}
+        @php
+            $tingkatList = \App\Models\AttendanceClass::select('tingkat')->distinct()->orderBy('tingkat')->pluck('tingkat');
+        @endphp
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route('attendance.students.index', request()->except(['tingkat', 'page'])) }}"
+               class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {{ !request('tingkat') ? 'bg-primary-600 text-white shadow-md' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700' }}">
+                Semua Tingkat
+            </a>
+            @foreach($tingkatList as $tkt)
+                <a href="{{ route('attendance.students.index', array_merge(request()->except('page'), ['tingkat' => $tkt])) }}"
+                   class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {{ request('tingkat') == $tkt ? 'bg-primary-600 text-white shadow-md' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700' }}">
+                    Kelas {{ $tkt }}
+                </a>
+            @endforeach
+        </div>
+
         {{-- Search & Filter Card --}}
         <x-card>
             <form method="GET" action="{{ route('attendance.students.index') }}" class="space-y-4" id="filterForm">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {{-- Preserve tingkat filter --}}
+                @if(request('tingkat'))
+                    <input type="hidden" name="tingkat" value="{{ request('tingkat') }}">
+                @endif
+                {{-- Preserve sort params --}}
+                @if(request('sort_by'))
+                    <input type="hidden" name="sort_by" value="{{ request('sort_by') }}">
+                    <input type="hidden" name="sort_dir" value="{{ request('sort_dir', 'asc') }}">
+                @endif
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                     {{-- Search Input --}}
                     <div class="md:col-span-2">
                         <x-input
@@ -159,9 +192,34 @@
                             <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Tidak Aktif</option>
                         </x-select>
                     </div>
+                    
+                    {{-- QR Code Filter --}}
+                    <div>
+                        <x-select
+                            name="qr"
+                            label="QR Code"
+                            onchange="document.getElementById('filterForm').submit()"
+                        >
+                            <option value="">Semua</option>
+                            <option value="has_qr" {{ request('qr') == 'has_qr' ? 'selected' : '' }}>Sudah Punya QR</option>
+                            <option value="no_qr" {{ request('qr') == 'no_qr' ? 'selected' : '' }}>Belum Punya QR</option>
+                        </x-select>
+                    </div>
                 </div>
                 
-                <div class="flex justify-end gap-2">
+                <div class="flex items-center justify-between">
+                    {{-- Per-page Selector --}}
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">Tampilkan</span>
+                        <select name="per_page" onchange="document.getElementById('filterForm').submit()"
+                                class="rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-primary-500 focus:border-primary-500 py-1.5 px-2">
+                            @foreach([15, 25, 50, 100] as $pp)
+                                <option value="{{ $pp }}" {{ request('per_page', 15) == $pp ? 'selected' : '' }}>{{ $pp }}</option>
+                            @endforeach
+                        </select>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">data</span>
+                    </div>
+                    
                     <a
                         href="{{ route('attendance.students.index') }}"
                         class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 border-2 border-primary-500 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20"
@@ -281,11 +339,46 @@
                                class="rounded border-gray-300 dark:border-gray-600 text-primary-500 focus:ring-primary-400">
                     </x-table.header>
                     <x-table.header>Foto</x-table.header>
-                    <x-table.header>NIS</x-table.header>
-                    <x-table.header>Nama</x-table.header>
-                    <x-table.header>Kelas</x-table.header>
-                    <x-table.header>No HP Ortu</x-table.header>
-                    <x-table.header>QR Code</x-table.header>
+                    @php
+                        $currentSort = request('sort_by', 'nama');
+                        $currentDir = request('sort_dir', 'asc');
+                        $sortParams = request()->except(['sort_by', 'sort_dir', 'page']);
+                    @endphp
+                    <x-table.header>
+                        <a href="{{ route('attendance.students.index', array_merge($sortParams, ['sort_by' => 'nis', 'sort_dir' => ($currentSort === 'nis' && $currentDir === 'asc') ? 'desc' : 'asc'])) }}"
+                           class="flex items-center gap-1 hover:text-primary-500 transition-colors">
+                            NIS
+                            @if($currentSort === 'nis')
+                                <i class="fas fa-sort-{{ $currentDir === 'asc' ? 'up' : 'down' }} text-primary-500"></i>
+                            @else
+                                <i class="fas fa-sort text-gray-400 text-xs"></i>
+                            @endif
+                        </a>
+                    </x-table.header>
+                    <x-table.header>
+                        <a href="{{ route('attendance.students.index', array_merge($sortParams, ['sort_by' => 'nama', 'sort_dir' => ($currentSort === 'nama' && $currentDir === 'asc') ? 'desc' : 'asc'])) }}"
+                           class="flex items-center gap-1 hover:text-primary-500 transition-colors">
+                            Nama
+                            @if($currentSort === 'nama')
+                                <i class="fas fa-sort-{{ $currentDir === 'asc' ? 'up' : 'down' }} text-primary-500"></i>
+                            @else
+                                <i class="fas fa-sort text-gray-400 text-xs"></i>
+                            @endif
+                        </a>
+                    </x-table.header>
+                    <x-table.header>
+                        <a href="{{ route('attendance.students.index', array_merge($sortParams, ['sort_by' => 'kelas_id', 'sort_dir' => ($currentSort === 'kelas_id' && $currentDir === 'asc') ? 'desc' : 'asc'])) }}"
+                           class="flex items-center gap-1 hover:text-primary-500 transition-colors">
+                            Kelas
+                            @if($currentSort === 'kelas_id')
+                                <i class="fas fa-sort-{{ $currentDir === 'asc' ? 'up' : 'down' }} text-primary-500"></i>
+                            @else
+                                <i class="fas fa-sort text-gray-400 text-xs"></i>
+                            @endif
+                        </a>
+                    </x-table.header>
+                    <x-table.header class="hidden md:table-cell">No HP Ortu</x-table.header>
+                    <x-table.header class="hidden md:table-cell">QR Code</x-table.header>
                     <x-table.header>Status</x-table.header>
                     <x-table.header>Aksi</x-table.header>
                 </x-slot>
@@ -307,7 +400,21 @@
                                     class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-600"
                                 >
                             @else
-                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-sm font-semibold">
+                                @php
+                                    $avatarColors = [
+                                        ['from-blue-400', 'to-blue-600'],
+                                        ['from-emerald-400', 'to-emerald-600'],
+                                        ['from-purple-400', 'to-purple-600'],
+                                        ['from-rose-400', 'to-rose-600'],
+                                        ['from-amber-400', 'to-amber-600'],
+                                        ['from-cyan-400', 'to-cyan-600'],
+                                        ['from-indigo-400', 'to-indigo-600'],
+                                        ['from-pink-400', 'to-pink-600'],
+                                    ];
+                                    $colorIdx = crc32($student->nama) % count($avatarColors);
+                                    $colorIdx = abs($colorIdx);
+                                @endphp
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br {{ $avatarColors[$colorIdx][0] }} {{ $avatarColors[$colorIdx][1] }} flex items-center justify-center text-white text-sm font-semibold">
                                     {{ strtoupper(substr($student->nama, 0, 1)) }}
                                 </div>
                             @endif
@@ -330,15 +437,15 @@
                             </span>
                         </x-table.cell>
                         
-                        {{-- Parent Phone --}}
-                        <x-table.cell>
+                        {{-- Parent Phone (hidden on mobile) --}}
+                        <x-table.cell class="hidden md:table-cell">
                             <span class="text-gray-600 dark:text-gray-400">
                                 {{ $student->no_hp_ortu ?? '-' }}
                             </span>
                         </x-table.cell>
                         
-                        {{-- QR Code --}}
-                        <x-table.cell>
+                        {{-- QR Code (hidden on mobile) --}}
+                        <x-table.cell class="hidden md:table-cell">
                             @if($student->qr_code_path)
                                 <button
                                     type="button"
@@ -394,23 +501,15 @@
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 
-                                {{-- Delete --}}
-                                <form 
-                                    method="POST" 
-                                    action="{{ route('attendance.students.destroy', $student->id) }}" 
-                                    onsubmit="return confirm('Yakin ingin menghapus siswa {{ $student->nama }}?')"
-                                    class="inline"
+                                {{-- Delete (via JS to avoid nested form) --}}
+                                <button 
+                                    type="button"
+                                    onclick="deleteStudent('{{ route('attendance.students.destroy', $student->id) }}', '{{ addslashes($student->nama) }}')"
+                                    class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+                                    title="Hapus"
                                 >
-                                    @csrf
-                                    @method('DELETE')
-                                    <button 
-                                        type="submit" 
-                                        class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
-                                        title="Hapus"
-                                    >
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
                         </x-table.cell>
                     </x-table.row>
@@ -436,15 +535,36 @@
                 @endforelse
             </x-table>
             
-            {{-- Pagination --}}
-            @if($students->hasPages())
-                <div class="mt-6">
-                    {{ $students->links() }}
-                </div>
-            @endif
+            {{-- Pagination Info + Links --}}
+            <div class="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Menampilkan {{ $students->firstItem() ?? 0 }}-{{ $students->lastItem() ?? 0 }} dari {{ $students->total() }} siswa
+                </p>
+                @if($students->hasPages())
+                    <div>{{ $students->links() }}</div>
+                @endif
+            </div>
         </x-section-card>
         </form> {{-- /bulkForm --}}
+
+        {{-- Hidden Delete Form (outside bulkForm to avoid nesting) --}}
+        <form id="deleteStudentForm" method="POST" action="" class="hidden">
+            @csrf
+            @method('DELETE')
+        </form>
     </div>
+
+    @push('scripts')
+    <script>
+        function deleteStudent(url, name) {
+            if (confirm('Yakin ingin menghapus siswa ' + name + '?')) {
+                const form = document.getElementById('deleteStudentForm');
+                form.action = url;
+                form.submit();
+            }
+        }
+    </script>
+    @endpush
 
     {{-- Modal QR Viewer per Siswa --}}
     <div id="modalQrViewer" class="hidden fixed inset-0 z-50 flex items-center justify-center">

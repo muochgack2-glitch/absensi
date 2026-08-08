@@ -3,9 +3,9 @@
     <x-slot name="title">Settings</x-slot>
     <x-slot name="pageTitle">Pengaturan Sistem</x-slot>
 
-    <div class="max-w-5xl space-y-6">
+    <div class="max-w-5xl mx-auto space-y-6">
         {{-- Page Header --}}
-        <div class="flex justify-between items-center">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">⚙️ Pengaturan Sistem</h1>
                 <p class="text-gray-600 dark:text-gray-400 mt-1">Konfigurasi waktu absensi dan notifikasi</p>

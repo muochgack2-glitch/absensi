@@ -21,12 +21,15 @@
         left: 0;
         height: 100vh;
         background: linear-gradient(to bottom, #1e3a8a, #1e40af, #1e3a8a);
-        transition: width 0.3s ease;
+        transition: none; /* Disabled on load to prevent flash */
         overflow: hidden;
         z-index: 50;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        will-change: transform;
-        backface-visibility: hidden;
+    }
+    
+    /* Enable transitions after page load (added by JS after 50ms) */
+    .sidebar.transitions-enabled {
+        transition: width 0.3s ease !important;
     }
     
     /* Collapsed State */
@@ -35,59 +38,64 @@
     }
     
     /* ============================================ */
-    /* HOVER EXPAND FEATURE (SPMB Technology) */
+    /* SPMB: No hover-expand. Toggle only. */
     /* ============================================ */
-    .sidebar.collapsed:hover {
-        width: 16rem !important;
-    }
     
-    /* Hide nav text when collapsed */
-    .sidebar.collapsed .nav-text {
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.2s ease, visibility 0.2s ease;
-    }
-    
-    /* Show nav text on hover when collapsed */
-    .sidebar.collapsed:hover .nav-text {
+    /* Nav text: width+opacity approach (SPMB - both animatable) */
+    .sidebar .nav-text {
+        display: inline-block;
         opacity: 1;
-        visibility: visible;
-        transition-delay: 0.15s;
+        width: auto;
+        overflow: hidden;
+        white-space: nowrap;
+        transition: opacity 0.3s ease, width 0.3s ease;
     }
     
-    /* Section labels hidden when collapsed */
+    .sidebar.collapsed .nav-text {
+        opacity: 0 !important;
+        width: 0 !important;
+        overflow: hidden !important;
+    }
+    
+
+    
+    /* Section labels */
+    .sidebar-section-label {
+        transition: opacity 0.3s ease;
+    }
+    
     .sidebar.collapsed .sidebar-section-label {
         opacity: 0;
-        visibility: hidden;
+        height: 0;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: hidden;
     }
     
-    .sidebar.collapsed:hover .sidebar-section-label {
-        opacity: 1;
-        visibility: visible;
-        transition-delay: 0.15s;
+
+    
+    /* Badges */
+    .sidebar-badge {
+        transition: opacity 0.3s ease;
     }
     
-    /* Hide badges when collapsed (show on hover) */
     .sidebar.collapsed .sidebar-badge {
         opacity: 0;
     }
     
-    .sidebar.collapsed:hover .sidebar-badge {
-        opacity: 1;
-        transition-delay: 0.15s;
-    }
+
     
     /* ============================================ */
-    /* SIDEBAR BRAND SECTION */
+    /* SIDEBAR BRAND (SPMB Approach) */
     /* ============================================ */
     .sidebar-brand {
         position: relative;
         display: flex;
         align-items: center;
-        justify-content: flex-start;
-        gap: 0.75rem;
-        padding: 1.5rem 1rem;
-        height: 80px;
+        gap: 12px;
+        padding: 20px 1rem;
+        min-height: 80px;
+        transition: padding 0.3s ease;
     }
     
     .sidebar-brand-logo {
@@ -98,59 +106,57 @@
     }
     
     .sidebar-brand-text {
-        flex: 1;
+        color: white;
+        font-weight: 700;
+        line-height: 1.2;
         overflow: hidden;
-        transition: opacity 0.3s ease, visibility 0.3s ease;
+        white-space: nowrap;
+        transition: opacity 0.3s ease, width 0.3s ease;
     }
     
-    /* Collapsed: center logo */
+    /* Collapsed brand: center logo, shrink text to 0 */
     .sidebar.collapsed .sidebar-brand {
+        padding: 20px 10px;
         justify-content: center;
     }
     
-    /* Hide brand text when collapsed */
     .sidebar.collapsed .sidebar-brand-text {
         opacity: 0;
-        visibility: hidden;
+        width: 0;
+        overflow: hidden;
     }
     
-    .sidebar.collapsed:hover .sidebar-brand-text {
-        opacity: 1;
-        visibility: visible;
-        transition-delay: 0.15s;
-    }
+
     
     /* ============================================ */
-    /* TOGGLE BUTTON (SPMB Position - Top Right) */
+    /* TOGGLE BUTTON (SPMB Style) */
     /* ============================================ */
     .sidebar-toggle-btn {
         position: absolute;
         right: 0.75rem;
         top: 50%;
         transform: translateY(-50%);
-        width: 2rem;
-        height: 2rem;
-        border: none;
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
+        width: 28px;
+        height: 28px;
         border-radius: 50%;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: none;
+        background: transparent;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: rgba(255, 255, 255, 0.7);
+        display: flex;
         align-items: center;
         justify-content: center;
+        cursor: pointer;
+        transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, opacity 0.3s ease;
+        z-index: 10;
+        font-size: 10px;
+        padding: 0;
         opacity: 1;
-        visibility: visible;
-        z-index: 100;
     }
     
     .sidebar-toggle-btn:hover {
-        background: rgba(255, 255, 255, 0.2);
-        transform: translateY(-50%) scale(1.1);
-    }
-    
-    .sidebar-toggle-btn:active {
-        transform: translateY(-50%) scale(0.95);
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.6);
+        color: white;
     }
     
     /* Show toggle button only on desktop */
@@ -160,36 +166,33 @@
         }
     }
     
-    /* Hide button when collapsed (SPMB behavior) */
+    /* When collapsed, keep toggle visible (SPMB: no hover needed) */
     .sidebar.collapsed .sidebar-toggle-btn {
-        opacity: 0 !important;
-        visibility: hidden !important;
-        pointer-events: none !important;
-    }
-    
-    /* Show button when collapsed sidebar is hovered */
-    .sidebar.collapsed:hover .sidebar-toggle-btn {
-        opacity: 1 !important;
-        visibility: visible !important;
-        pointer-events: auto !important;
-        right: 0.75rem !important;
-        transform: translateY(-50%) !important;
+        opacity: 1;
+        pointer-events: auto;
     }
     
     /* ============================================ */
-    /* MENU ITEMS */
+    /* MENU ITEMS (SPMB Approach) */
     /* ============================================ */
     .sidebar-menu-item {
         position: relative;
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 12px;
         padding: 0.75rem 1rem;
         color: rgba(191, 219, 254, 0.9);
         text-decoration: none;
         border-radius: 0.5rem;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.3s ease;
         cursor: pointer;
+        white-space: nowrap;
+    }
+    
+    /* Collapsed: center icons */
+    .sidebar.collapsed .sidebar-menu-item {
+        justify-content: center !important;
+        padding: 0.75rem 10px !important;
     }
     
     .sidebar-menu-item:hover {
@@ -302,7 +305,10 @@
         position: fixed;
         inset: 0;
         background: rgba(0, 0, 0, 0.5);
-        z-index: 1040; /* Below sidebar but high enough */
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        z-index: 1040;
+        transition: opacity 0.3s ease;
     }
     
     .sidebar-overlay.show {
@@ -310,19 +316,65 @@
     }
     
     /* ============================================ */
-    /* MOBILE MENU STATE (SPMB Style) */
+    /* MOBILE CLOSE BUTTON */
+    /* ============================================ */
+    .sidebar-close-btn {
+        display: none;
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 2rem;
+        height: 2rem;
+        border: none;
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+        z-index: 100;
+    }
+    
+    .sidebar-close-btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-50%) scale(1.1);
+    }
+    
+    .sidebar-close-btn:active {
+        transform: translateY(-50%) scale(0.95);
+    }
+    
+    /* Only show close button on mobile */
+    @media (max-width: 1023px) {
+        .sidebar-close-btn {
+            display: flex !important;
+        }
+        .sidebar-toggle-btn {
+            display: none !important;
+        }
+    }
+    
+    /* ============================================ */
+    /* MOBILE MENU STATE (SPMB Approach - Clean) */
     /* ============================================ */
     @media (max-width: 1023px) {
         .sidebar {
             transform: translateX(-100%);
             transition: transform 0.3s ease;
             width: 16rem !important;
-            z-index: 1050 !important; /* Above overlay */
+            z-index: 1050 !important;
         }
         
         .sidebar.mobile-show {
             transform: translateX(0);
-            z-index: 1050 !important; /* Stay on top */
+        }
+        
+        /* Disable desktop toggle on mobile */
+        .sidebar-toggle-btn {
+            display: none !important;
         }
     }
     
@@ -482,6 +534,120 @@
         background: rgba(220, 38, 38, 0.2);
         color: #fef2f2;
     }
+    /* ============================================ */
+    /* COLLAPSIBLE SUBMENU */
+    /* ============================================ */
+    .sidebar-submenu-group {
+        margin-top: 0.25rem;
+    }
+    
+    .sidebar-submenu-toggle {
+        text-align: left;
+        border: none;
+        background: none;
+    }
+    
+    .sidebar-submenu-toggle.submenu-active {
+        color: white;
+    }
+    
+    .sidebar-submenu-toggle .submenu-arrow {
+        margin-left: auto;
+    }
+    
+    .sidebar-submenu {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease, opacity 0.3s ease;
+        opacity: 0;
+        padding-left: 0.5rem;
+    }
+    
+    .sidebar-submenu.submenu-open {
+        max-height: 400px;
+        opacity: 1;
+    }
+    
+    .sidebar-submenu-item {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        padding: 0.5rem 0.75rem 0.5rem 1.75rem;
+        color: rgba(191, 219, 254, 0.7);
+        text-decoration: none;
+        border-radius: 0.375rem;
+        transition: all 0.2s ease;
+        font-size: 0.8125rem;
+        position: relative;
+    }
+    
+    .sidebar-submenu-item::before {
+        content: '';
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: rgba(191, 219, 254, 0.3);
+        transition: all 0.2s ease;
+    }
+    
+    .sidebar-submenu-item:hover {
+        background: rgba(30, 64, 175, 0.25);
+        color: white;
+        padding-left: 2rem;
+    }
+    
+    .sidebar-submenu-item:hover::before {
+        background: white;
+        box-shadow: 0 0 6px rgba(255,255,255,0.4);
+    }
+    
+    .sidebar-submenu-item.active {
+        background: rgba(255, 255, 255, 0.08);
+        color: white;
+    }
+    
+    .sidebar-submenu-item.active::before {
+        background: #60a5fa;
+        width: 6px;
+        height: 6px;
+        box-shadow: 0 0 8px rgba(96, 165, 250, 0.6);
+    }
+    
+    .sidebar-submenu-item i {
+        width: 1rem;
+        text-align: center;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+    }
+    
+    /* Collapsed: hide submenu completely */
+    .sidebar.collapsed .sidebar-submenu {
+        max-height: 0 !important;
+        opacity: 0 !important;
+    }
+    
+    /* Collapsed hover: show submenu */
+    .sidebar.collapsed:hover .sidebar-submenu.submenu-open {
+        max-height: 400px !important;
+        opacity: 1 !important;
+    }
+    
+    /* Collapsed: hide arrow */
+    .sidebar.collapsed .submenu-arrow {
+        opacity: 0;
+        visibility: hidden;
+    }
+    
+    .sidebar.collapsed:hover .submenu-arrow {
+        opacity: 1;
+        visibility: visible;
+        transition-delay: 0.15s;
+    }
+
 </style>
 
 
@@ -511,6 +677,16 @@
                     id="sidebarToggle" 
                     title="Toggle Sidebar">
                 <i class="fas fa-circle text-xs"></i>
+            </button>
+
+            <!-- Mobile Close Button -->
+            <button 
+                onclick="closeMobileMenu()"
+                class="sidebar-close-btn"
+                type="button"
+                aria-label="Close menu"
+            >
+                <i class="fas fa-times"></i>
             </button>
         </div>
 
@@ -639,112 +815,88 @@
             </a>
             <?php endif; ?>
 
-            <!-- Divider -->
-            <div class="sidebar-divider"></div>
-
-            <!-- Section Label: WhatsApp -->
-            <div class="sidebar-section-label px-3 py-1">
-                <span class="text-xs font-semibold text-primary-400 uppercase tracking-wider">WhatsApp</span>
+            <!-- WhatsApp Collapsible Menu -->
+            <?php $waOpen = request()->routeIs('whatsapp.*') || request()->routeIs('gateway.*'); ?>
+            <div class="sidebar-submenu-group" data-submenu="whatsapp">
+                <button 
+                    type="button"
+                    class="sidebar-menu-item sidebar-submenu-toggle w-full <?php echo e($waOpen ? 'submenu-active' : ''); ?>"
+                    onclick="toggleSubmenu('whatsapp')"
+                    data-bs-toggle="tooltip" 
+                    data-bs-placement="right" 
+                    title="WhatsApp"
+                >
+                    <i class="fab fa-whatsapp text-lg text-green-400"></i>
+                    <span class="nav-text font-medium flex-1 text-left">WhatsApp</span>
+                    <i class="fas fa-chevron-down nav-text text-xs submenu-arrow transition-transform duration-200 <?php echo e($waOpen ? 'rotate-180' : ''); ?>"></i>
+                </button>
+                
+                <div class="sidebar-submenu <?php echo e($waOpen ? 'submenu-open' : ''); ?>" id="submenu-whatsapp">
+                    <a href="<?php echo e(route('whatsapp.index')); ?>"
+                       class="sidebar-submenu-item <?php echo e(request()->routeIs('whatsapp.index') ? 'active' : ''); ?>">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                    <a href="<?php echo e(route('whatsapp.send')); ?>"
+                       class="sidebar-submenu-item <?php echo e(request()->routeIs('whatsapp.send') ? 'active' : ''); ?>">
+                        <i class="fas fa-paper-plane"></i>
+                        <span class="nav-text">Kirim Pesan</span>
+                    </a>
+                    <a href="<?php echo e(route('whatsapp.logs')); ?>"
+                       class="sidebar-submenu-item <?php echo e(request()->routeIs('whatsapp.logs') ? 'active' : ''); ?>">
+                        <i class="fas fa-history"></i>
+                        <span class="nav-text">Log Pesan</span>
+                    </a>
+                    <a href="<?php echo e(route('whatsapp.templates')); ?>"
+                       class="sidebar-submenu-item <?php echo e(request()->routeIs('whatsapp.templates*') ? 'active' : ''); ?>">
+                        <i class="fas fa-file-alt"></i>
+                        <span class="nav-text">Templates</span>
+                    </a>
+                    <a href="<?php echo e(route('whatsapp.broadcast')); ?>"
+                       class="sidebar-submenu-item <?php echo e(request()->routeIs('whatsapp.broadcast') ? 'active' : ''); ?>">
+                        <i class="fas fa-bullhorn"></i>
+                        <span class="nav-text">Broadcast</span>
+                    </a>
+                    <a href="<?php echo e(route('gateway.index')); ?>"
+                       class="sidebar-submenu-item <?php echo e(request()->routeIs('gateway.*') ? 'active' : ''); ?>">
+                        <i class="fas fa-server"></i>
+                        <span class="nav-text">Gateway</span>
+                    </a>
+                </div>
             </div>
 
-            <!-- WA Dashboard -->
-            <a 
-                href="<?php echo e(route('whatsapp.index')); ?>"
-                class="sidebar-menu-item <?php echo e(request()->routeIs('whatsapp.index') ? 'active' : ''); ?>"
-                data-bs-toggle="tooltip" 
-                data-bs-placement="right" 
-                title="WA Gateway"
-            >
-                <i class="fab fa-whatsapp text-lg"></i>
-                <span class="nav-text font-medium">WA Gateway</span>
-            </a>
-
-            <!-- Kirim Pesan -->
-            <a 
-                href="<?php echo e(route('whatsapp.send')); ?>"
-                class="sidebar-menu-item <?php echo e(request()->routeIs('whatsapp.send') ? 'active' : ''); ?>"
-                data-bs-toggle="tooltip" 
-                data-bs-placement="right" 
-                title="Kirim Pesan"
-            >
-                <i class="fas fa-paper-plane text-lg"></i>
-                <span class="nav-text font-medium">Kirim Pesan</span>
-            </a>
-
-            <!-- Log Pesan -->
-            <a 
-                href="<?php echo e(route('whatsapp.logs')); ?>"
-                class="sidebar-menu-item <?php echo e(request()->routeIs('whatsapp.logs') ? 'active' : ''); ?>"
-                data-bs-toggle="tooltip" 
-                data-bs-placement="right" 
-                title="Log Pesan"
-            >
-                <i class="fas fa-history text-lg"></i>
-                <span class="nav-text font-medium">Log Pesan</span>
-            </a>
-
-            <!-- Templates -->
-            <a 
-                href="<?php echo e(route('whatsapp.templates')); ?>"
-                class="sidebar-menu-item <?php echo e(request()->routeIs('whatsapp.templates*') ? 'active' : ''); ?>"
-                data-bs-toggle="tooltip" 
-                data-bs-placement="right" 
-                title="Templates"
-            >
-                <i class="fas fa-file-alt text-lg"></i>
-                <span class="nav-text font-medium">Templates</span>
-            </a>
-
-            <!-- Broadcast -->
-            <a 
-                href="<?php echo e(route('whatsapp.broadcast')); ?>"
-                class="sidebar-menu-item <?php echo e(request()->routeIs('whatsapp.broadcast') ? 'active' : ''); ?>"
-                data-bs-toggle="tooltip" 
-                data-bs-placement="right" 
-                title="Broadcast"
-            >
-                <i class="fas fa-bullhorn text-lg"></i>
-                <span class="nav-text font-medium">Broadcast</span>
-            </a>
-
-            <!-- Gateway Management -->
-            <a 
-                href="<?php echo e(route('gateway.index')); ?>"
-                class="sidebar-menu-item <?php echo e(request()->routeIs('gateway.*') ? 'active' : ''); ?>"
-                data-bs-toggle="tooltip" 
-                data-bs-placement="right" 
-                title="Gateway"
-            >
-                <i class="fas fa-server text-lg"></i>
-                <span class="nav-text font-medium">Gateway</span>
-            </a>
-
             <!-- Divider -->
             <div class="sidebar-divider"></div>
 
-            <!-- Settings -->
-            <a 
-                href="<?php echo e(route('attendance.settings.index')); ?>"
-                class="sidebar-menu-item <?php echo e(request()->routeIs('attendance.settings.*') ? 'active' : ''); ?>"
-                data-bs-toggle="tooltip" 
-                data-bs-placement="right" 
-                title="Settings"
-            >
-                <i class="fas fa-cog text-lg"></i>
-                <span class="nav-text font-medium">Settings</span>
-            </a>
-
-            <!-- WA Settings -->
-            <a 
-                href="<?php echo e(route('whatsapp.settings')); ?>"
-                class="sidebar-menu-item <?php echo e(request()->routeIs('whatsapp.settings') ? 'active' : ''); ?>"
-                data-bs-toggle="tooltip" 
-                data-bs-placement="right" 
-                title="Settings WA"
-            >
-                <i class="fas fa-sliders-h text-lg"></i>
-                <span class="nav-text font-medium">Settings WA</span>
-            </a>
+            <!-- Settings Collapsible Menu -->
+            <?php $settingsOpen = request()->routeIs('attendance.settings.*') || request()->routeIs('whatsapp.settings'); ?>
+            <div class="sidebar-submenu-group" data-submenu="settings">
+                <button 
+                    type="button"
+                    class="sidebar-menu-item sidebar-submenu-toggle w-full <?php echo e($settingsOpen ? 'submenu-active' : ''); ?>"
+                    onclick="toggleSubmenu('settings')"
+                    data-bs-toggle="tooltip" 
+                    data-bs-placement="right" 
+                    title="Settings"
+                >
+                    <i class="fas fa-cog text-lg"></i>
+                    <span class="nav-text font-medium flex-1 text-left">Settings</span>
+                    <i class="fas fa-chevron-down nav-text text-xs submenu-arrow transition-transform duration-200 <?php echo e($settingsOpen ? 'rotate-180' : ''); ?>"></i>
+                </button>
+                
+                <div class="sidebar-submenu <?php echo e($settingsOpen ? 'submenu-open' : ''); ?>" id="submenu-settings">
+                    <a href="<?php echo e(route('attendance.settings.index')); ?>"
+                       class="sidebar-submenu-item <?php echo e(request()->routeIs('attendance.settings.*') ? 'active' : ''); ?>">
+                        <i class="fas fa-sliders-h"></i>
+                        <span class="nav-text">Setting Sistem</span>
+                    </a>
+                    <a href="<?php echo e(route('whatsapp.settings')); ?>"
+                       class="sidebar-submenu-item <?php echo e(request()->routeIs('whatsapp.settings') ? 'active' : ''); ?>">
+                        <i class="fab fa-whatsapp"></i>
+                        <span class="nav-text">Setting WA</span>
+                    </a>
+                </div>
+            </div>
 
         </nav>
 

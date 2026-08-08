@@ -100,7 +100,7 @@
         </div>
 
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <?php if (isset($component)) { $__componentOriginal527fae77f4db36afc8c8b7e9f5f81682 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal527fae77f4db36afc8c8b7e9f5f81682 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.stat-card','data' => ['title' => 'Total Siswa','value' => \App\Models\AttendanceStudent::count(),'icon' => 'fas fa-users','color' => 'blue']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
@@ -145,6 +145,27 @@
             
             <?php if (isset($component)) { $__componentOriginal527fae77f4db36afc8c8b7e9f5f81682 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal527fae77f4db36afc8c8b7e9f5f81682 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.stat-card','data' => ['title' => 'Tidak Aktif','value' => \App\Models\AttendanceStudent::where('is_active', false)->count(),'icon' => 'fas fa-user-slash','color' => 'danger']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('stat-card'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['title' => 'Tidak Aktif','value' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(\App\Models\AttendanceStudent::where('is_active', false)->count()),'icon' => 'fas fa-user-slash','color' => 'danger']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal527fae77f4db36afc8c8b7e9f5f81682)): ?>
+<?php $attributes = $__attributesOriginal527fae77f4db36afc8c8b7e9f5f81682; ?>
+<?php unset($__attributesOriginal527fae77f4db36afc8c8b7e9f5f81682); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal527fae77f4db36afc8c8b7e9f5f81682)): ?>
+<?php $component = $__componentOriginal527fae77f4db36afc8c8b7e9f5f81682; ?>
+<?php unset($__componentOriginal527fae77f4db36afc8c8b7e9f5f81682); ?>
+<?php endif; ?>
+            
+            <?php if (isset($component)) { $__componentOriginal527fae77f4db36afc8c8b7e9f5f81682 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal527fae77f4db36afc8c8b7e9f5f81682 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.stat-card','data' => ['title' => 'QR Code Dibuat','value' => \App\Models\AttendanceStudent::whereNotNull('qr_code_path')->count(),'icon' => 'fas fa-qrcode','color' => 'purple']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('stat-card'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -166,6 +187,24 @@
         </div>
 
         
+        <?php
+            $tingkatList = \App\Models\AttendanceClass::select('tingkat')->distinct()->orderBy('tingkat')->pluck('tingkat');
+        ?>
+        <div class="flex flex-wrap gap-2">
+            <a href="<?php echo e(route('attendance.students.index', request()->except(['tingkat', 'page']))); ?>"
+               class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 <?php echo e(!request('tingkat') ? 'bg-primary-600 text-white shadow-md' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'); ?>">
+                Semua Tingkat
+            </a>
+            <?php $__currentLoopData = $tingkatList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tkt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <a href="<?php echo e(route('attendance.students.index', array_merge(request()->except('page'), ['tingkat' => $tkt]))); ?>"
+                   class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 <?php echo e(request('tingkat') == $tkt ? 'bg-primary-600 text-white shadow-md' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'); ?>">
+                    Kelas <?php echo e($tkt); ?>
+
+                </a>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        </div>
+
+        
         <?php if (isset($component)) { $__componentOriginal53747ceb358d30c0105769f8471417f6 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal53747ceb358d30c0105769f8471417f6 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.card','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
@@ -177,7 +216,16 @@
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
             <form method="GET" action="<?php echo e(route('attendance.students.index')); ?>" class="space-y-4" id="filterForm">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                
+                <?php if(request('tingkat')): ?>
+                    <input type="hidden" name="tingkat" value="<?php echo e(request('tingkat')); ?>">
+                <?php endif; ?>
+                
+                <?php if(request('sort_by')): ?>
+                    <input type="hidden" name="sort_by" value="<?php echo e(request('sort_by')); ?>">
+                    <input type="hidden" name="sort_dir" value="<?php echo e(request('sort_dir', 'asc')); ?>">
+                <?php endif; ?>
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                     
                     <div class="md:col-span-2">
                         <?php if (isset($component)) { $__componentOriginalc2fcfa88dc54fee60e0757a7e0572df1 = $component; } ?>
@@ -259,9 +307,48 @@
 <?php unset($__componentOriginaled2cde6083938c436304f332ba96bb7c); ?>
 <?php endif; ?>
                     </div>
+                    
+                    
+                    <div>
+                        <?php if (isset($component)) { $__componentOriginaled2cde6083938c436304f332ba96bb7c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginaled2cde6083938c436304f332ba96bb7c = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select','data' => ['name' => 'qr','label' => 'QR Code','onchange' => 'document.getElementById(\'filterForm\').submit()']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('select'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['name' => 'qr','label' => 'QR Code','onchange' => 'document.getElementById(\'filterForm\').submit()']); ?>
+                            <option value="">Semua</option>
+                            <option value="has_qr" <?php echo e(request('qr') == 'has_qr' ? 'selected' : ''); ?>>Sudah Punya QR</option>
+                            <option value="no_qr" <?php echo e(request('qr') == 'no_qr' ? 'selected' : ''); ?>>Belum Punya QR</option>
+                         <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginaled2cde6083938c436304f332ba96bb7c)): ?>
+<?php $attributes = $__attributesOriginaled2cde6083938c436304f332ba96bb7c; ?>
+<?php unset($__attributesOriginaled2cde6083938c436304f332ba96bb7c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginaled2cde6083938c436304f332ba96bb7c)): ?>
+<?php $component = $__componentOriginaled2cde6083938c436304f332ba96bb7c; ?>
+<?php unset($__componentOriginaled2cde6083938c436304f332ba96bb7c); ?>
+<?php endif; ?>
+                    </div>
                 </div>
                 
-                <div class="flex justify-end gap-2">
+                <div class="flex items-center justify-between">
+                    
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">Tampilkan</span>
+                        <select name="per_page" onchange="document.getElementById('filterForm').submit()"
+                                class="rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-primary-500 focus:border-primary-500 py-1.5 px-2">
+                            <?php $__currentLoopData = [15, 25, 50, 100]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($pp); ?>" <?php echo e(request('per_page', 15) == $pp ? 'selected' : ''); ?>><?php echo e($pp); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </select>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">data</span>
+                    </div>
+                    
                     <a
                         href="<?php echo e(route('attendance.students.index')); ?>"
                         class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 border-2 border-primary-500 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20"
@@ -444,6 +531,11 @@
 <?php $component = $__componentOriginalbc087b098ac654841a8659b533bc9309; ?>
 <?php unset($__componentOriginalbc087b098ac654841a8659b533bc9309); ?>
 <?php endif; ?>
+                    <?php
+                        $currentSort = request('sort_by', 'nama');
+                        $currentDir = request('sort_dir', 'asc');
+                        $sortParams = request()->except(['sort_by', 'sort_dir', 'page']);
+                    ?>
                     <?php if (isset($component)) { $__componentOriginalbc087b098ac654841a8659b533bc9309 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalbc087b098ac654841a8659b533bc9309 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.header','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
@@ -453,7 +545,17 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes([]); ?>NIS <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes([]); ?>
+                        <a href="<?php echo e(route('attendance.students.index', array_merge($sortParams, ['sort_by' => 'nis', 'sort_dir' => ($currentSort === 'nis' && $currentDir === 'asc') ? 'desc' : 'asc']))); ?>"
+                           class="flex items-center gap-1 hover:text-primary-500 transition-colors">
+                            NIS
+                            <?php if($currentSort === 'nis'): ?>
+                                <i class="fas fa-sort-<?php echo e($currentDir === 'asc' ? 'up' : 'down'); ?> text-primary-500"></i>
+                            <?php else: ?>
+                                <i class="fas fa-sort text-gray-400 text-xs"></i>
+                            <?php endif; ?>
+                        </a>
+                     <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalbc087b098ac654841a8659b533bc9309)): ?>
 <?php $attributes = $__attributesOriginalbc087b098ac654841a8659b533bc9309; ?>
@@ -472,7 +574,17 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes([]); ?>Nama <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes([]); ?>
+                        <a href="<?php echo e(route('attendance.students.index', array_merge($sortParams, ['sort_by' => 'nama', 'sort_dir' => ($currentSort === 'nama' && $currentDir === 'asc') ? 'desc' : 'asc']))); ?>"
+                           class="flex items-center gap-1 hover:text-primary-500 transition-colors">
+                            Nama
+                            <?php if($currentSort === 'nama'): ?>
+                                <i class="fas fa-sort-<?php echo e($currentDir === 'asc' ? 'up' : 'down'); ?> text-primary-500"></i>
+                            <?php else: ?>
+                                <i class="fas fa-sort text-gray-400 text-xs"></i>
+                            <?php endif; ?>
+                        </a>
+                     <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalbc087b098ac654841a8659b533bc9309)): ?>
 <?php $attributes = $__attributesOriginalbc087b098ac654841a8659b533bc9309; ?>
@@ -491,7 +603,17 @@
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes([]); ?>Kelas <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes([]); ?>
+                        <a href="<?php echo e(route('attendance.students.index', array_merge($sortParams, ['sort_by' => 'kelas_id', 'sort_dir' => ($currentSort === 'kelas_id' && $currentDir === 'asc') ? 'desc' : 'asc']))); ?>"
+                           class="flex items-center gap-1 hover:text-primary-500 transition-colors">
+                            Kelas
+                            <?php if($currentSort === 'kelas_id'): ?>
+                                <i class="fas fa-sort-<?php echo e($currentDir === 'asc' ? 'up' : 'down'); ?> text-primary-500"></i>
+                            <?php else: ?>
+                                <i class="fas fa-sort text-gray-400 text-xs"></i>
+                            <?php endif; ?>
+                        </a>
+                     <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalbc087b098ac654841a8659b533bc9309)): ?>
 <?php $attributes = $__attributesOriginalbc087b098ac654841a8659b533bc9309; ?>
@@ -503,14 +625,14 @@
 <?php endif; ?>
                     <?php if (isset($component)) { $__componentOriginalbc087b098ac654841a8659b533bc9309 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalbc087b098ac654841a8659b533bc9309 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.header','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.header','data' => ['class' => 'hidden md:table-cell']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('table.header'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes([]); ?>No HP Ortu <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['class' => 'hidden md:table-cell']); ?>No HP Ortu <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalbc087b098ac654841a8659b533bc9309)): ?>
 <?php $attributes = $__attributesOriginalbc087b098ac654841a8659b533bc9309; ?>
@@ -522,14 +644,14 @@
 <?php endif; ?>
                     <?php if (isset($component)) { $__componentOriginalbc087b098ac654841a8659b533bc9309 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalbc087b098ac654841a8659b533bc9309 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.header','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.header','data' => ['class' => 'hidden md:table-cell']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('table.header'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes([]); ?>QR Code <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['class' => 'hidden md:table-cell']); ?>QR Code <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalbc087b098ac654841a8659b533bc9309)): ?>
 <?php $attributes = $__attributesOriginalbc087b098ac654841a8659b533bc9309; ?>
@@ -632,7 +754,21 @@
                                     class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-600"
                                 >
                             <?php else: ?>
-                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-sm font-semibold">
+                                <?php
+                                    $avatarColors = [
+                                        ['from-blue-400', 'to-blue-600'],
+                                        ['from-emerald-400', 'to-emerald-600'],
+                                        ['from-purple-400', 'to-purple-600'],
+                                        ['from-rose-400', 'to-rose-600'],
+                                        ['from-amber-400', 'to-amber-600'],
+                                        ['from-cyan-400', 'to-cyan-600'],
+                                        ['from-indigo-400', 'to-indigo-600'],
+                                        ['from-pink-400', 'to-pink-600'],
+                                    ];
+                                    $colorIdx = crc32($student->nama) % count($avatarColors);
+                                    $colorIdx = abs($colorIdx);
+                                ?>
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br <?php echo e($avatarColors[$colorIdx][0]); ?> <?php echo e($avatarColors[$colorIdx][1]); ?> flex items-center justify-center text-white text-sm font-semibold">
                                     <?php echo e(strtoupper(substr($student->nama, 0, 1))); ?>
 
                                 </div>
@@ -723,14 +859,14 @@
                         
                         <?php if (isset($component)) { $__componentOriginalc607f3dbbf983abb970b49dd6ee66681 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc607f3dbbf983abb970b49dd6ee66681 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.cell','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.cell','data' => ['class' => 'hidden md:table-cell']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('table.cell'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes([]); ?>
+<?php $component->withAttributes(['class' => 'hidden md:table-cell']); ?>
                             <span class="text-gray-600 dark:text-gray-400">
                                 <?php echo e($student->no_hp_ortu ?? '-'); ?>
 
@@ -749,14 +885,14 @@
                         
                         <?php if (isset($component)) { $__componentOriginalc607f3dbbf983abb970b49dd6ee66681 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc607f3dbbf983abb970b49dd6ee66681 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.cell','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.cell','data' => ['class' => 'hidden md:table-cell']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('table.cell'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes([]); ?>
+<?php $component->withAttributes(['class' => 'hidden md:table-cell']); ?>
                             <?php if($student->qr_code_path): ?>
                                 <button
                                     type="button"
@@ -885,22 +1021,14 @@
                                 </a>
                                 
                                 
-                                <form 
-                                    method="POST" 
-                                    action="<?php echo e(route('attendance.students.destroy', $student->id)); ?>" 
-                                    onsubmit="return confirm('Yakin ingin menghapus siswa <?php echo e($student->nama); ?>?')"
-                                    class="inline"
+                                <button 
+                                    type="button"
+                                    onclick="deleteStudent('<?php echo e(route('attendance.students.destroy', $student->id)); ?>', '<?php echo e(addslashes($student->nama)); ?>')"
+                                    class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+                                    title="Hapus"
                                 >
-                                    <?php echo csrf_field(); ?>
-                                    <?php echo method_field('DELETE'); ?>
-                                    <button 
-                                        type="submit" 
-                                        class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
-                                        title="Hapus"
-                                    >
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
                          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
@@ -1005,12 +1133,14 @@
 <?php endif; ?>
             
             
-            <?php if($students->hasPages()): ?>
-                <div class="mt-6">
-                    <?php echo e($students->links()); ?>
-
-                </div>
-            <?php endif; ?>
+            <div class="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Menampilkan <?php echo e($students->firstItem() ?? 0); ?>-<?php echo e($students->lastItem() ?? 0); ?> dari <?php echo e($students->total()); ?> siswa
+                </p>
+                <?php if($students->hasPages()): ?>
+                    <div><?php echo e($students->links()); ?></div>
+                <?php endif; ?>
+            </div>
          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal7b08d167d6a62f650d5e2a092984a448)): ?>
@@ -1022,7 +1152,25 @@
 <?php unset($__componentOriginal7b08d167d6a62f650d5e2a092984a448); ?>
 <?php endif; ?>
         </form> 
+
+        
+        <form id="deleteStudentForm" method="POST" action="" class="hidden">
+            <?php echo csrf_field(); ?>
+            <?php echo method_field('DELETE'); ?>
+        </form>
     </div>
+
+    <?php $__env->startPush('scripts'); ?>
+    <script>
+        function deleteStudent(url, name) {
+            if (confirm('Yakin ingin menghapus siswa ' + name + '?')) {
+                const form = document.getElementById('deleteStudentForm');
+                form.action = url;
+                form.submit();
+            }
+        }
+    </script>
+    <?php $__env->stopPush(); ?>
 
     
     <div id="modalQrViewer" class="hidden fixed inset-0 z-50 flex items-center justify-center">

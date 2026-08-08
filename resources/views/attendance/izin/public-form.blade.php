@@ -113,9 +113,13 @@
             {{-- Header --}}
             <div class="form-header">
                 <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center text-xl">
-                        <i class="fas fa-file-medical"></i>
-                    </div>
+                    @if(isset($appLogoUrl) && $appLogoUrl)
+                        <img src="{{ $appLogoUrl }}" alt="Logo" class="w-12 h-12 rounded-xl object-contain bg-white/20 p-1">
+                    @else
+                        <div class="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center text-xl">
+                            <i class="fas fa-file-medical"></i>
+                        </div>
+                    @endif
                     <div>
                         <h1 class="text-xl font-bold">Form Izin / Sakit Online</h1>
                         <p class="text-green-100 text-sm mt-0.5">{{ $schoolName }}</p>

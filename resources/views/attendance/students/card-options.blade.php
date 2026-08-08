@@ -2,7 +2,7 @@
     <x-slot name="title">Cetak Kartu Pelajar</x-slot>
     <x-slot name="pageTitle">Cetak Kartu Pelajar</x-slot>
 
-    <div class="max-w-4xl space-y-6" x-data="{ mode: 'class', layout: '2x5' }">
+    <div class="max-w-4xl mx-auto space-y-6" x-data="{ mode: 'class', layout: '2x5' }">
         {{-- Page Header --}}
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>

@@ -13,13 +13,13 @@
         @endif
 
         {{-- Header --}}
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">📝 Input Absensi Manual</h1>
+                <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">📝 Input Absensi Manual</h1>
                 <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Tandai hadir / izin / sakit / alpha langsung dari admin — tanpa QR scan</p>
             </div>
             <a href="{{ route('attendance.dashboard') }}"
-               class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+               class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
                 <i class="fas fa-arrow-left mr-2"></i> Dashboard
             </a>
         </div>
@@ -61,7 +61,7 @@
 
                 <x-card>
                     {{-- Info header --}}
-                    <div class="flex items-center justify-between mb-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white">
                                 <i class="fas fa-clipboard-check"></i>

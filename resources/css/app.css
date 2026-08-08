@@ -508,261 +508,99 @@ body.sidebar-collapsed .main-content {
 }
 
 
+
+
 /* ============================================ */
-/* DYNAMIC FLOATING NAVBAR (MODERN PREMIUM) */
+/* RESPONSIVE UTILITIES                         */
 /* ============================================ */
-.dynamic-navbar {
-    position: fixed;
-    top: 1rem;
-    left: calc(16rem + 1rem); /* Sidebar width + gap */
-    right: 1rem;
-    z-index: 40;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: translateY(0);
-}
 
-/* When sidebar collapsed */
-body.sidebar-collapsed .dynamic-navbar {
-    left: calc(5rem + 1rem);
+/* Page Header — responsive wrap */
+.page-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
-
-/* Hide on scroll down */
-.dynamic-navbar.navbar-hidden {
-    transform: translateY(-120%);
-}
-
-/* Mobile: full width with gap */
-@media (max-width: 1023px) {
-    .dynamic-navbar {
-        left: 1rem;
-        right: 1rem;
+@media (min-width: 640px) {
+    .page-header {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
     }
 }
 
-/* Navbar Container - Glassmorphism */
-.navbar-container {
+/* Button Group — always wrap on small screens */
+.btn-group-responsive {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.5rem;
-    padding: 0.75rem 1.5rem;
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 1rem;
-    box-shadow: 
-        0 4px 6px -1px rgba(0, 0, 0, 0.05),
-        0 10px 20px -3px rgba(0, 0, 0, 0.08);
-}
-
-.dark .navbar-container {
-    background: rgba(31, 41, 55, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow:
-        0 4px 6px -1px rgba(0, 0, 0, 0.3),
-        0 10px 20px -3px rgba(0, 0, 0, 0.5);
-}
-
-/* ============================================ */
-/* NAVBAR LEFT - BREADCRUMB */
-/* ============================================ */
-.navbar-left {
-    flex-shrink: 0;
-}
-
-.breadcrumb {
-    display: flex;
-    align-items: center;
+    flex-wrap: wrap;
     gap: 0.5rem;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
 }
 
-.breadcrumb i {
-    font-size: 1rem;
+/* Table: hide columns on mobile */
+@media (max-width: 639px) {
+    .hide-mobile {
+        display: none !important;
+    }
+}
+@media (max-width: 767px) {
+    .hide-tablet {
+        display: none !important;
+    }
 }
 
-.breadcrumb .separator {
-    color: var(--color-primary-300);
-    opacity: 0.5;
+/* Modal — responsive sizing */
+@media (max-width: 639px) {
+    .modal-responsive {
+        margin: 0.5rem !important;
+        max-height: calc(100vh - 1rem) !important;
+        width: calc(100vw - 1rem) !important;
+    }
+    .modal-responsive .modal-body {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
 }
 
-.breadcrumb .page-title {
-    font-weight: 600;
-    color: var(--text-primary);
+/* Mobile padding reductions */
+@media (max-width: 639px) {
+    .main-content main {
+        padding: 0.75rem !important;
+        padding-top: 4.5rem !important;
+    }
+    /* Smaller stat cards on mobile */
+    .stat-card-value {
+        font-size: 1.25rem !important;
+    }
+    /* Reduce card padding */
+    .x-card, [class*="rounded-xl"][class*="p-6"] {
+        padding: 1rem !important;
+    }
+}
+@media (min-width: 640px) and (max-width: 767px) {
+    .main-content main {
+        padding: 1rem !important;
+        padding-top: 5rem !important;
+    }
 }
 
-/* ============================================ */
-/* NAVBAR CENTER - SEARCH BAR */
-/* ============================================ */
-.navbar-center {
-    flex: 1;
-    max-width: 500px;
+/* Table sticky first column on mobile */
+.table-sticky-name th:first-child,
+.table-sticky-name td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    background-color: inherit;
 }
 
-.search-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-}
-
-.search-icon {
-    position: absolute;
-    left: 1rem;
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-}
-
-.search-input {
-    width: 100%;
-    padding: 0.625rem 3.5rem 0.625rem 2.75rem;
-    font-size: 0.875rem;
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.5);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 0.625rem;
-    outline: none;
-    transition: all 0.2s ease;
-}
-
-.dark .search-input {
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.search-input:focus {
-    background: rgba(255, 255, 255, 0.9);
-    border-color: var(--color-primary-500);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.dark .search-input:focus {
-    background: rgba(0, 0, 0, 0.4);
-    border-color: var(--color-primary-400);
-}
-
-.search-input::placeholder {
-    color: var(--text-secondary);
-    opacity: 0.6;
-}
-
-.search-shortcut {
-    position: absolute;
-    right: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    background: rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 0.375rem;
-}
-
-.dark .search-shortcut {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.1);
+/* Touch-friendly tap targets */
+@media (max-width: 767px) {
+    .tap-target {
+        min-height: 44px;
+        min-width: 44px;
+    }
 }
 
 /* ============================================ */
-/* NAVBAR RIGHT - QUICK ACTIONS */
-/* ============================================ */
-.navbar-right {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-shrink: 0;
-}
-
-/* Icon Buttons */
-.navbar-icon-btn {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    color: var(--text-secondary);
-    background: transparent;
-    border: none;
-    border-radius: 0.625rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.navbar-icon-btn:hover {
-    background: rgba(59, 130, 246, 0.1);
-    color: var(--color-primary-600);
-}
-
-.dark .navbar-icon-btn:hover {
-    background: rgba(59, 130, 246, 0.2);
-    color: var(--color-primary-400);
-}
-
-/* Notification Badge */
-.notification-badge {
-    position: absolute;
-    top: 0.25rem;
-    right: 0.25rem;
-    min-width: 1.125rem;
-    height: 1.125rem;
-    padding: 0 0.25rem;
-    font-size: 0.625rem;
-    font-weight: 700;
-    color: white;
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    border-radius: 9999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
-}
-
-/* User Profile */
-.user-profile {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.375rem 0.375rem 0.375rem 0.5rem;
-    background: rgba(59, 130, 246, 0.08);
-    border-radius: 0.75rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.user-profile:hover {
-    background: rgba(59, 130, 246, 0.15);
-}
-
-.user-avatar {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 0.5rem;
-    border: 2px solid rgba(59, 130, 246, 0.3);
-    object-fit: cover;
-}
-
-.user-info {
-    text-align: left;
-}
-
-.user-name {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    line-height: 1.2;
-}
-
-.user-role {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    line-height: 1.2;
-}
-
-/* ============================================ */
-/* RESPONSIVE */
+/* RESPONSIVE — NAVBAR                          */
 /* ============================================ */
 @media (max-width: 1023px) {
     .navbar-container {
