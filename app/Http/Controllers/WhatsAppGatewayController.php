@@ -16,14 +16,14 @@ class WhatsAppGatewayController extends Controller
     {
         return [
             'primary' => [
-                'name' => 'Gateway Utama',
+                'name' => 'Gateway Utama (Absensi)',
                 'url' => WhatsAppSetting::get('wa_server_url', 'http://localhost:3001'),
-                'purpose' => 'Primary - Absensi System',
+                'purpose' => 'Primary - Absensi System (Port 3001)',
             ],
             'backup' => [
-                'name' => 'Gateway Backup',
-                'url' => WhatsAppSetting::get('wa_server_url_backup', ''),
-                'purpose' => 'Backup / Failover',
+                'name' => 'Gateway Backup (SPMB)',
+                'url' => WhatsAppSetting::get('wa_server_url_backup', 'http://localhost:3000'),
+                'purpose' => 'Backup / Failover - SPMB System (Port 3000)',
             ],
         ];
     }

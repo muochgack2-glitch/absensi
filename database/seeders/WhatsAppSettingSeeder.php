@@ -25,11 +25,11 @@ class WhatsAppSettingSeeder extends Seeder
             ],
             [
                 'key' => 'wa_server_url_backup',
-                'value' => '',
+                'value' => 'http://localhost:3000',
                 'type' => 'string',
                 'group' => 'general',
-                'label' => 'WhatsApp Server Backup URL',
-                'description' => 'URL backup gateway untuk failover',
+                'label' => 'WhatsApp Server Backup URL (SPMB)',
+                'description' => 'URL backup gateway SPMB (port 3000) untuk failover otomatis',
                 'is_public' => false,
             ],
             [

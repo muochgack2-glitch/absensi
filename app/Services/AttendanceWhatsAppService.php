@@ -45,7 +45,7 @@ class AttendanceWhatsAppService
     protected function getActiveServerUrl(?string $context = null): string
     {
         $primary = WhatsAppSetting::get('wa_server_url', 'http://localhost:3001');
-        $backup = WhatsAppSetting::get('wa_server_url_backup');
+        $backup = WhatsAppSetting::get('wa_server_url_backup', 'http://localhost:3000');
         $failoverEnabled = WhatsAppSetting::get('wa_failover_enabled', false);
 
         // If failover not enabled or no backup configured, always use primary
