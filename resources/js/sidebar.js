@@ -397,5 +397,103 @@
     } else {
         loadBadgeCounts();
     }
+
+    // ============================================
+    // NOTIFICATION BELL
+    // ============================================
+    function initNotificationBell() {
+        var bellBtn = document.getElementById('notifBellBtn');
+        var dropdown = document.getElementById('notifDropdown');
+        if (!bellBtn || !dropdown) return;
+
+        // Toggle dropdown
+        bellBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var isHidden = dropdown.classList.contains('hidden');
+            dropdown.classList.toggle('hidden');
+            if (isHidden) {
+                loadNotifications();
+            }
+        });
+
+        // Close on outside click
+        document.addEventListener('click', function(e) {
+            var wrapper = document.getElementById('notifWrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Initial load for badge count
+        loadNotificationBadge();
+        // Auto-refresh every 60s
+        setInterval(loadNotificationBadge, 60000);
+    }
+
+    function loadNotificationBadge() {
+        fetch('/api/attendance/notifications')
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (!data.success) return;
+                var badge = document.getElementById('notifBadge');
+                if (badge) {
+                    if (data.total > 0) {
+                        badge.textContent = data.total;
+                        badge.style.display = 'flex';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+            })
+            .catch(function() {});
+    }
+
+    function loadNotifications() {
+        var list = document.getElementById('notifList');
+        if (!list) return;
+
+        list.innerHTML = '<div class="p-4 text-center text-gray-400 text-sm"><i class="fas fa-spinner fa-spin"></i> Memuat...</div>';
+
+        fetch('/api/attendance/notifications')
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (!data.success || !data.items.length) {
+                    list.innerHTML = '<div class="p-4 text-center text-gray-400 text-sm"><i class="fas fa-check-circle mr-1"></i> Tidak ada notifikasi</div>';
+                    return;
+                }
+
+                var colorMap = {
+                    yellow: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400',
+                    red: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400',
+                    blue: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
+                    green: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400',
+                };
+
+                var html = '';
+                data.items.forEach(function(item) {
+                    var cls = colorMap[item.color] || colorMap.blue;
+                    html += '<a href="' + item.url + '" class="flex items-start gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-0">';
+                    html += '<div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ' + cls + '">';
+                    html += '<i class="fas ' + item.icon + ' text-xs"></i></div>';
+                    html += '<div class="flex-1 min-w-0">';
+                    html += '<p class="text-sm text-gray-700 dark:text-gray-300 truncate">' + item.text + '</p>';
+                    if (item.time) {
+                        html += '<p class="text-xs text-gray-400 mt-0.5">' + item.time + '</p>';
+                    }
+                    html += '</div></a>';
+                });
+
+                list.innerHTML = html;
+            })
+            .catch(function() {
+                list.innerHTML = '<div class="p-4 text-center text-red-400 text-sm"><i class="fas fa-exclamation-circle mr-1"></i> Gagal memuat</div>';
+            });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initNotificationBell);
+    } else {
+        initNotificationBell();
+    }
     
 })();

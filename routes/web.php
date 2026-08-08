@@ -59,6 +59,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/attendance/today-stats', [AttendanceDashboardController::class, 'todayStats'])
         ->name('api.attendance.today-stats');
 
+    // API endpoint for notification bell
+    Route::get('/api/attendance/notifications', [AttendanceDashboardController::class, 'notifications'])
+        ->name('api.attendance.notifications');
+
     // QR Scanner
     Route::get('/attendance/scanner', [AttendanceScanController::class, 'showScanner'])
         ->name('attendance.scanner');

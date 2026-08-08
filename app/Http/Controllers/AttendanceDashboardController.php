@@ -184,5 +184,59 @@ class AttendanceDashboardController extends Controller
             'total' => $stats['total_students'] ?? 0,
         ]);
     }
+
+    /**
+     * API: Get notification data for sidebar bell
+     */
+    public function notifications()
+    {
+        $pendingIzin = \App\Models\AttendanceIzin::where('status', 'pending')->count();
+        
+        $todayAlpha = AttendanceRecord::whereDate('date', Carbon::today())
+            ->where('status', 'alpha')->count();
+        
+        $items = [];
+        
+        if ($pendingIzin > 0) {
+            $items[] = [
+                'icon' => 'fa-envelope',
+                'color' => 'yellow',
+                'text' => "{$pendingIzin} izin menunggu persetujuan",
+                'url' => route('attendance.izin.index'),
+            ];
+        }
+        
+        if ($todayAlpha > 0) {
+            $items[] = [
+                'icon' => 'fa-user-times',
+                'color' => 'red',
+                'text' => "{$todayAlpha} siswa alpha hari ini",
+                'url' => route('attendance.dashboard'),
+            ];
+        }
+
+        // Recent izin (last 5)
+        $recentIzin = \App\Models\AttendanceIzin::with('student')
+            ->where('status', 'pending')
+            ->orderByDesc('created_at')
+            ->take(5)
+            ->get();
+
+        foreach ($recentIzin as $izin) {
+            $items[] = [
+                'icon' => 'fa-file-alt',
+                'color' => 'blue',
+                'text' => ($izin->student->nama ?? 'Siswa') . ' — ' . ucfirst($izin->jenis),
+                'url' => route('attendance.izin.index'),
+                'time' => $izin->created_at->diffForHumans(),
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'total' => $pendingIzin + ($todayAlpha > 0 ? 1 : 0),
+            'items' => $items,
+        ]);
+    }
 }
 
