@@ -38,8 +38,13 @@
     }
     
     /* ============================================ */
-    /* SPMB: No hover-expand. Toggle only. */
+    /* HOVER EXPAND: Collapsed sidebar expands on hover */
     /* ============================================ */
+    @media (min-width: 1024px) {
+        .sidebar.collapsed:hover {
+            width: 16rem !important;
+        }
+    }
     
     /* Nav text: width+opacity approach (SPMB - both animatable) */
     .sidebar .nav-text {
@@ -57,6 +62,12 @@
         overflow: hidden !important;
     }
     
+    /* Hover: show nav text again */
+    .sidebar.collapsed:hover .nav-text {
+        opacity: 1 !important;
+        width: auto !important;
+    }
+    
 
     
     /* Section labels */
@@ -72,6 +83,13 @@
         overflow: hidden;
     }
     
+    .sidebar.collapsed:hover .sidebar-section-label {
+        opacity: 1;
+        height: auto;
+        padding: revert !important;
+        margin: revert !important;
+    }
+    
 
     
     /* Badges */
@@ -81,6 +99,10 @@
     
     .sidebar.collapsed .sidebar-badge {
         opacity: 0;
+    }
+    
+    .sidebar.collapsed:hover .sidebar-badge {
+        opacity: 1;
     }
     
 
@@ -126,6 +148,16 @@
         overflow: hidden;
     }
     
+    /* Hover: show brand text again */
+    .sidebar.collapsed:hover .sidebar-brand {
+        padding: 20px 1rem;
+        justify-content: flex-start;
+    }
+    
+    .sidebar.collapsed:hover .sidebar-brand-text {
+        opacity: 1;
+        width: auto;
+    }
 
     
     /* ============================================ */
@@ -166,8 +198,14 @@
         }
     }
     
-    /* When collapsed, keep toggle visible (SPMB: no hover needed) */
+    /* When collapsed, HIDE toggle button */
     .sidebar.collapsed .sidebar-toggle-btn {
+        opacity: 0;
+        pointer-events: none;
+    }
+    
+    /* Show toggle button again on hover */
+    .sidebar.collapsed:hover .sidebar-toggle-btn {
         opacity: 1;
         pointer-events: auto;
     }
@@ -924,10 +962,9 @@
                 <!-- Dark Mode Toggle Icon -->
                 <button 
                     id="darkModeToggle"
+                    type="button"
                     onclick="toggleDarkMode(); updateToggleIcon();"
                     class="bottom-icon-btn"
-                    data-bs-toggle="tooltip" 
-                    data-bs-placement="top" 
                     title="Toggle Dark Mode"
                 >
                     <i id="darkModeIcon" class="fas fa-moon text-primary-200"></i>
