@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\AttendanceStudent;
 use App\Models\AttendanceClass;
+use App\Models\AttendanceSetting;
 use App\Services\QRCodeService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 
 class AttendanceStudentController extends Controller
@@ -93,7 +95,11 @@ class AttendanceStudentController extends Controller
     {
         // Validate request
         $validated = $request->validate([
-            'nis' => 'required|string|max:50|unique:attendance_students,nis',
+            'nis' => [
+                'required', 'string', 'max:50',
+                Rule::unique('attendance_students', 'nis')
+                    ->where('tahun_ajaran', AttendanceSetting::get('active_tahun_ajaran')),
+            ],
             'nama' => 'required|string|max:255',
             'kelas_id' => 'required|exists:attendance_classes,id',
             'no_hp_ortu' => 'nullable|string|max:20',
@@ -157,7 +163,12 @@ class AttendanceStudentController extends Controller
     {
         // Validate request
         $validated = $request->validate([
-            'nis' => 'required|string|max:50|unique:attendance_students,nis,' . $student->id,
+            'nis' => [
+                'required', 'string', 'max:50',
+                Rule::unique('attendance_students', 'nis')
+                    ->where('tahun_ajaran', AttendanceSetting::get('active_tahun_ajaran'))
+                    ->ignore($student->id),
+            ],
             'nama' => 'required|string|max:255',
             'kelas_id' => 'required|exists:attendance_classes,id',
             'no_hp_ortu' => 'nullable|string|max:20',

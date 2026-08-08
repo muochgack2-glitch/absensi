@@ -451,7 +451,7 @@
     }
     
     .sidebar.collapsed .bottom-section {
-        padding: 0.5rem 0;
+        padding: 0.5rem 0.75rem;
     }
     
     .sidebar.collapsed:hover .bottom-section {
@@ -868,6 +868,18 @@
             >
                 <i class="fas fa-user-shield text-lg"></i>
                 <span class="nav-text font-medium">Pengguna</span>
+            </a>
+
+            <!-- Tahun Ajaran -->
+            <a 
+                href="<?php echo e(route('attendance.tahun-ajaran.index')); ?>"
+                class="sidebar-menu-item <?php echo e(request()->routeIs('attendance.tahun-ajaran*') ? 'active' : ''); ?>"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="right" 
+                title="Tahun Ajaran"
+            >
+                <i class="fas fa-calendar-alt text-lg"></i>
+                <span class="nav-text font-medium">Tahun Ajaran</span>
             </a>
             <?php endif; ?>
 

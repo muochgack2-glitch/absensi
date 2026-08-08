@@ -16,6 +16,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AttendancePortalController;
 use App\Http\Controllers\AttendanceIzinController;
 use App\Http\Controllers\WaliKelasController;
+use App\Http\Controllers\TahunAjaranController;
 use Illuminate\Support\Facades\Route;
 
 // Public Scanner Landing Page (no auth required)
@@ -27,15 +28,21 @@ Route::get('/', function () {
 // Portal Publik Cek Absensi Ortu
 // ==========================================
 Route::get('/portal', [AttendancePortalController::class, 'index'])->name('portal.index');
-Route::post('/portal/check', [AttendancePortalController::class, 'check'])->name('portal.check');
+Route::post('/portal/check', [AttendancePortalController::class, 'check'])
+    ->middleware('throttle:10,1') // max 10 cek per menit per IP
+    ->name('portal.check');
 Route::get('/portal/result', [AttendancePortalController::class, 'result'])->name('portal.result');
 
 // ==========================================
 // Form Izin Online Publik
 // ==========================================
 Route::get('/izin', [AttendanceIzinController::class, 'publicForm'])->name('izin.form');
-Route::get('/izin/search', [AttendanceIzinController::class, 'publicSearch'])->name('izin.search');
-Route::post('/izin/submit', [AttendanceIzinController::class, 'publicSubmit'])->name('izin.submit');
+Route::get('/izin/search', [AttendanceIzinController::class, 'publicSearch'])
+    ->middleware('throttle:15,1') // max 15 pencarian per menit per IP
+    ->name('izin.search');
+Route::post('/izin/submit', [AttendanceIzinController::class, 'publicSubmit'])
+    ->middleware('throttle:3,1')  // max 3 submit izin per menit per IP
+    ->name('izin.submit');
 
 // Auth routes
 require __DIR__.'/auth.php';
@@ -261,6 +268,14 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/attendance/users', [WaliKelasController::class, 'userStore'])->name('attendance.users.store');
         Route::put('/attendance/users/{user}', [WaliKelasController::class, 'userUpdate'])->name('attendance.users.update');
         Route::delete('/attendance/users/{user}', [WaliKelasController::class, 'userDestroy'])->name('attendance.users.destroy');
+
+        // Tahun Ajaran Management
+        Route::get('/attendance/tahun-ajaran', [TahunAjaranController::class, 'index'])->name('attendance.tahun-ajaran.index');
+        Route::post('/attendance/tahun-ajaran', [TahunAjaranController::class, 'create'])->name('attendance.tahun-ajaran.create');
+        Route::post('/attendance/tahun-ajaran/{tahunAjaran}/activate', [TahunAjaranController::class, 'activate'])->name('attendance.tahun-ajaran.activate');
+        Route::post('/attendance/tahun-ajaran/preview', [TahunAjaranController::class, 'previewNaikKelas'])->name('attendance.tahun-ajaran.preview');
+        Route::post('/attendance/tahun-ajaran/naik-kelas', [TahunAjaranController::class, 'naikKelas'])->name('attendance.tahun-ajaran.naik-kelas');
+        Route::post('/attendance/tahun-ajaran/rollback', [TahunAjaranController::class, 'rollback'])->name('attendance.tahun-ajaran.rollback');
     });
 
     // ==========================================

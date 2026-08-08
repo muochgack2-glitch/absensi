@@ -869,6 +869,18 @@
                 <i class="fas fa-user-shield text-lg"></i>
                 <span class="nav-text font-medium">Pengguna</span>
             </a>
+
+            <!-- Tahun Ajaran -->
+            <a 
+                href="{{ route('attendance.tahun-ajaran.index') }}"
+                class="sidebar-menu-item {{ request()->routeIs('attendance.tahun-ajaran*') ? 'active' : '' }}"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="right" 
+                title="Tahun Ajaran"
+            >
+                <i class="fas fa-calendar-alt text-lg"></i>
+                <span class="nav-text font-medium">Tahun Ajaran</span>
+            </a>
             @endif
 
             <!-- WhatsApp Collapsible Menu -->

@@ -20,6 +20,26 @@ class AttendanceRecord extends Model
     protected $table = 'attendance_records';
 
     /**
+     * Auto-filter records berdasarkan tahun ajaran aktif.
+     * Auto-set tahun_ajaran saat create record baru.
+     */
+    protected static function booted(): void
+    {
+        static::addGlobalScope('tahun_ajaran', function ($query) {
+            $activeTahun = AttendanceSetting::get('active_tahun_ajaran');
+            if ($activeTahun) {
+                $query->where('attendance_records.tahun_ajaran', $activeTahun);
+            }
+        });
+
+        static::creating(function ($record) {
+            if (empty($record->tahun_ajaran)) {
+                $record->tahun_ajaran = AttendanceSetting::get('active_tahun_ajaran', '2026/2027');
+            }
+        });
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
@@ -33,6 +53,7 @@ class AttendanceRecord extends Model
         'check_out_photo',
         'status',
         'notes',
+        'tahun_ajaran',
     ];
 
     /**

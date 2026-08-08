@@ -9,6 +9,18 @@ class AttendanceIzin extends Model
 {
     protected $table = 'attendance_izin';
 
+    /**
+     * Auto-set tahun_ajaran saat membuat izin baru.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function ($izin) {
+            if (empty($izin->tahun_ajaran)) {
+                $izin->tahun_ajaran = AttendanceSetting::get('active_tahun_ajaran', '2026/2027');
+            }
+        });
+    }
+
     protected $fillable = [
         'student_id',
         'tanggal_mulai',
@@ -22,6 +34,7 @@ class AttendanceIzin extends Model
         'catatan_admin',
         'approved_by',
         'approved_at',
+        'tahun_ajaran',
     ];
 
     protected $casts = [

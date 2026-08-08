@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,10 +9,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
-#[Fillable(['nis', 'nama', 'kelas_id', 'no_hp_ortu', 'qr_code_path', 'foto_profil', 'is_active'])]
 class AttendanceStudent extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'nis', 'nama', 'kelas_id', 'no_hp_ortu',
+        'qr_code_path', 'foto_profil', 'is_active', 'tahun_ajaran',
+    ];
 
     /**
      * The table associated with the model.
@@ -21,6 +24,20 @@ class AttendanceStudent extends Model
      * @var string
      */
     protected $table = 'attendance_students';
+
+    /**
+     * Auto-filter siswa berdasarkan tahun ajaran aktif.
+     * Bypass dengan: AttendanceStudent::withoutGlobalScope('tahun_ajaran')
+     */
+    protected static function booted(): void
+    {
+        static::addGlobalScope('tahun_ajaran', function ($query) {
+            $activeTahun = AttendanceSetting::get('active_tahun_ajaran');
+            if ($activeTahun) {
+                $query->where('tahun_ajaran', $activeTahun);
+            }
+        });
+    }
 
     /**
      * Get the attributes that should be cast.

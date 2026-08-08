@@ -280,6 +280,11 @@
                     const resp = await fetch(`{{ route('izin.search') }}?query=${encodeURIComponent(q)}`, {
                         headers: { 'X-Requested-With': 'XMLHttpRequest' }
                     });
+                    if (resp.status === 429) {
+                        results.innerHTML = '<div class="search-result-item text-red-500 text-sm"><i class="fas fa-clock mr-2"></i>Terlalu cepat! Tunggu sebentar sebelum mencari lagi.</div>';
+                        results.classList.remove('hidden');
+                        return;
+                    }
                     const data = await resp.json();
                     renderResults(data);
                 } catch(e) { console.error(e); }
