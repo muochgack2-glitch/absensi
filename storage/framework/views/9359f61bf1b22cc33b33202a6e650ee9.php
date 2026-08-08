@@ -452,34 +452,30 @@
     
     .bottom-icons-container {
         display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-evenly;
-        gap: 0.5rem;
+        flex-direction: column;
+        gap: 0.25rem;
         width: 100%;
-        transition: flex-direction 0.3s ease;
     }
     
-    /* Collapsed: vertical stack, match top menu styling */
+    /* Collapsed: keep vertical, center icons */
     .sidebar.collapsed .bottom-icons-container {
         flex-direction: column;
         gap: 0.25rem;
     }
     
     .sidebar.collapsed .bottom-icon-btn {
-        width: 100%;
         justify-content: center;
         padding: 0.75rem 10px;
     }
     
-    /* Hover expand: back to row */
+    /* Hover expand: stay vertical, left-aligned */
     .sidebar.collapsed:hover .bottom-icons-container {
-        flex-direction: row;
+        flex-direction: column;
     }
     
     .sidebar.collapsed:hover .bottom-icon-btn {
-        width: auto;
-        padding: 0.5rem;
+        justify-content: flex-start;
+        padding: 0.75rem 1rem;
     }
     
     /* Bottom section form - ensure it participates in flex layout properly */
