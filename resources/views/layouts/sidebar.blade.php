@@ -950,6 +950,19 @@
                 </div>
             </div>
 
+            <!-- Notifikasi -->
+            <a href="{{ route('attendance.izin.index') }}"
+               class="sidebar-menu-item {{ request()->routeIs('attendance.izin.*') ? 'active' : '' }}"
+               id="notifMenuItem"
+               data-bs-toggle="tooltip" 
+               data-bs-placement="right" 
+               title="Notifikasi"
+            >
+                <i class="fas fa-bell text-lg"></i>
+                <span class="nav-text font-medium">Notifikasi</span>
+                <span id="notifBadgeNav" class="nav-text ml-auto bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center" style="display: none;">0</span>
+            </a>
+
         </nav>
 
         <!-- Bottom Section: Compact Icon-Only (Horizontal) -->
@@ -969,21 +982,6 @@
                     </div>
                     <span class="btn-text">Profile</span>
                 </a>
-
-                <!-- Notification Bell -->
-                <div class="relative" id="notifWrapper">
-                    <button 
-                        type="button"
-                        id="notifBellBtn"
-                        class="bottom-icon-btn"
-                        title="Notifikasi"
-                    >
-                        <i class="fas fa-bell text-primary-200"></i>
-                        <span id="notifBadge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full items-center justify-center" style="display: none;">0</span>
-                        <span class="btn-text">Notifikasi</span>
-                    </button>
-
-                </div>
 
                 <!-- Dark Mode Toggle Icon -->
                 <button 
@@ -1016,17 +1014,3 @@
 
     </div>
 </aside>
-
-<!-- Notification Dropdown (Fixed - outside sidebar to avoid overflow clip) -->
-<div id="notifDropdown" class="hidden fixed bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden" style="width: 300px; z-index: 9999;">
-    <div class="p-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white">
-        <h4 class="font-bold text-sm flex items-center">
-            <i class="fas fa-bell mr-2"></i> Notifikasi
-        </h4>
-    </div>
-    <div id="notifList" class="max-h-64 overflow-y-auto">
-        <div class="p-4 text-center text-gray-400 text-sm">
-            <i class="fas fa-spinner fa-spin"></i> Memuat...
-        </div>
-    </div>
-</div>
