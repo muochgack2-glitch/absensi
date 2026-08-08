@@ -412,6 +412,12 @@
             var isHidden = dropdown.classList.contains('hidden');
             dropdown.classList.toggle('hidden');
             if (isHidden) {
+                // Position dropdown above the bell button
+                var rect = bellBtn.getBoundingClientRect();
+                var dropdownHeight = 280; // approximate
+                dropdown.style.left = rect.left + 'px';
+                dropdown.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
+                dropdown.style.top = 'auto';
                 loadNotifications();
             }
         });

@@ -984,19 +984,6 @@
                         <span class="btn-text">Notifikasi</span>
                     </button>
 
-                    <!-- Notification Dropdown -->
-                    <div id="notifDropdown" class="hidden absolute bottom-full left-0 mb-2 w-72 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden" style="min-width: 280px;">
-                        <div class="p-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white">
-                            <h4 class="font-bold text-sm flex items-center">
-                                <i class="fas fa-bell mr-2"></i> Notifikasi
-                            </h4>
-                        </div>
-                        <div id="notifList" class="max-h-64 overflow-y-auto">
-                            <div class="p-4 text-center text-gray-400 text-sm">
-                                <i class="fas fa-spinner fa-spin"></i> Memuat...
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Dark Mode Toggle Icon -->
@@ -1030,4 +1017,18 @@
 
     </div>
 </aside>
+
+<!-- Notification Dropdown (Fixed - outside sidebar to avoid overflow clip) -->
+<div id="notifDropdown" class="hidden fixed bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden" style="width: 300px; z-index: 9999;">
+    <div class="p-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white">
+        <h4 class="font-bold text-sm flex items-center">
+            <i class="fas fa-bell mr-2"></i> Notifikasi
+        </h4>
+    </div>
+    <div id="notifList" class="max-h-64 overflow-y-auto">
+        <div class="p-4 text-center text-gray-400 text-sm">
+            <i class="fas fa-spinner fa-spin"></i> Memuat...
+        </div>
+    </div>
+</div>
 <?php /**PATH C:\Users\DMCenter\Music\SPMB2\SPMB\absensi\resources\views/layouts/sidebar.blade.php ENDPATH**/ ?>
