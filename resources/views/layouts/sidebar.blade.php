@@ -451,7 +451,7 @@
     }
     
     .sidebar.collapsed .bottom-section {
-        padding: 0.5rem 0;
+        padding: 0.5rem 0.75rem;
     }
     
     .sidebar.collapsed:hover .bottom-section {
