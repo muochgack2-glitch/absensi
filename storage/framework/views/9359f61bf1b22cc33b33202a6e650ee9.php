@@ -450,6 +450,14 @@
         border-top: 1px solid rgba(59, 130, 246, 0.5);
     }
     
+    .sidebar.collapsed .bottom-section {
+        padding: 0.5rem 0;
+    }
+    
+    .sidebar.collapsed:hover .bottom-section {
+        padding: 0.75rem;
+    }
+    
     .bottom-icons-container {
         display: flex;
         flex-direction: row;
@@ -459,10 +467,10 @@
         width: 100%;
     }
     
-    /* Collapsed: vertical stack */
+    /* Collapsed: vertical stack like nav */
     .sidebar.collapsed .bottom-icons-container {
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.125rem;
     }
     
     /* Bottom section form - ensure it participates in flex layout properly */

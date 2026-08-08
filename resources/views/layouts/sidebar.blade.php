@@ -451,7 +451,7 @@
     }
     
     .sidebar.collapsed .bottom-section {
-        padding: 0.75rem 0.5rem;
+        padding: 0.5rem 0;
     }
     
     .sidebar.collapsed:hover .bottom-section {
@@ -467,10 +467,10 @@
         width: 100%;
     }
     
-    /* Collapsed: vertical stack */
+    /* Collapsed: vertical stack like nav */
     .sidebar.collapsed .bottom-icons-container {
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.125rem;
     }
     
     /* Bottom section form - ensure it participates in flex layout properly */
