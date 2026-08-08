@@ -143,6 +143,115 @@
                     />
                 </div>
 
+                {{-- Calendar Heatmap --}}
+                @php
+                    $startDate = now()->subMonths(3)->startOfMonth();
+                    $endDate = now();
+                    $records = $student->attendanceRecords
+                        ->where('date', '>=', $startDate)
+                        ->keyBy(fn($r) => $r->date->format('Y-m-d'));
+                    
+                    $statusColors = [
+                        'hadir' => '#22c55e',
+                        'terlambat' => '#eab308',
+                        'izin' => '#3b82f6',
+                        'sakit' => '#a855f7',
+                        'alpha' => '#ef4444',
+                    ];
+                    $statusLabels = [
+                        'hadir' => 'Hadir',
+                        'terlambat' => 'Terlambat',
+                        'izin' => 'Izin',
+                        'sakit' => 'Sakit',
+                        'alpha' => 'Alpha',
+                    ];
+                @endphp
+                <x-card>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-calendar-alt mr-2 text-primary-500"></i>
+                        Peta Kehadiran (3 Bulan Terakhir)
+                    </h3>
+                    
+                    {{-- Legend --}}
+                    <div class="flex flex-wrap gap-3 mb-4 text-xs">
+                        @foreach($statusColors as $status => $color)
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-3 h-3 rounded-sm" style="background: {{ $color }}"></div>
+                            <span class="text-gray-600 dark:text-gray-400">{{ $statusLabels[$status] }}</span>
+                        </div>
+                        @endforeach
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-3 h-3 rounded-sm bg-gray-200 dark:bg-gray-700"></div>
+                            <span class="text-gray-600 dark:text-gray-400">Tidak Ada Data</span>
+                        </div>
+                    </div>
+
+                    {{-- Heatmap Grid --}}
+                    <div class="overflow-x-auto">
+                        <div style="display: flex; gap: 3px; min-width: 600px;">
+                            @php
+                                $current = $startDate->copy()->startOfWeek(\Carbon\Carbon::MONDAY);
+                                $endWeek = $endDate->copy()->endOfWeek(\Carbon\Carbon::SUNDAY);
+                                $dayLabels = ['S', 'S', 'R', 'K', 'J', 'S', 'M'];
+                            @endphp
+                            
+                            {{-- Day labels --}}
+                            <div style="display: flex; flex-direction: column; gap: 3px; margin-right: 4px;">
+                                @foreach($dayLabels as $i => $label)
+                                <div style="width: 14px; height: 14px; font-size: 9px; display: flex; align-items: center; justify-content: center; color: #9ca3af;">
+                                    @if($i % 2 == 0){{ $label }}@endif
+                                </div>
+                                @endforeach
+                            </div>
+
+                            @while($current->lte($endWeek))
+                            <div style="display: flex; flex-direction: column; gap: 3px;">
+                                @for($day = 0; $day < 7; $day++)
+                                    @php
+                                        $dateKey = $current->format('Y-m-d');
+                                        $record = $records->get($dateKey);
+                                        $isInRange = $current->gte($startDate) && $current->lte($endDate);
+                                        $isWeekend = $current->isWeekend();
+                                        
+                                        if (!$isInRange) {
+                                            $bgColor = 'transparent';
+                                            $tooltip = '';
+                                        } elseif ($record) {
+                                            $bgColor = $statusColors[$record->status] ?? '#d1d5db';
+                                            $tooltip = $current->format('d M Y') . ' — ' . ucfirst($record->status);
+                                        } else {
+                                            $bgColor = $isWeekend ? '#f3f4f6' : '#e5e7eb';
+                                            $tooltip = $current->format('d M Y') . ($isWeekend ? ' (Libur)' : ' — Tidak ada data');
+                                        }
+                                    @endphp
+                                    <div 
+                                        style="width: 14px; height: 14px; border-radius: 3px; background: {{ $bgColor }}; cursor: {{ $tooltip ? 'pointer' : 'default' }};"
+                                        @if($tooltip) title="{{ $tooltip }}" @endif
+                                        class="{{ !$isInRange ? '' : 'dark:opacity-90 hover:ring-2 hover:ring-gray-400 transition-all' }}"
+                                    ></div>
+                                    @php $current->addDay(); @endphp
+                                @endfor
+                            </div>
+                            @endwhile
+                        </div>
+                    </div>
+
+                    {{-- Month labels --}}
+                    <div class="flex mt-2 text-xs text-gray-400" style="padding-left: 18px; gap: 0;">
+                        @php
+                            $monthCurrent = $startDate->copy()->startOfMonth();
+                        @endphp
+                        @while($monthCurrent->lte($endDate))
+                            @php
+                                $daysInMonth = $monthCurrent->daysInMonth;
+                                $weeksSpan = ceil($daysInMonth / 7);
+                            @endphp
+                            <div style="width: {{ $weeksSpan * 17 }}px;">{{ $monthCurrent->translatedFormat('M') }}</div>
+                            @php $monthCurrent->addMonth(); @endphp
+                        @endwhile
+                    </div>
+                </x-card>
+
                 {{-- Attendance History --}}
                 <x-card>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
