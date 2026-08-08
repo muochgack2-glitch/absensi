@@ -233,6 +233,12 @@
         padding: 0.75rem 10px !important;
     }
     
+    /* Hover expand: back to left-aligned */
+    .sidebar.collapsed:hover .sidebar-menu-item {
+        justify-content: flex-start !important;
+        padding: 0.75rem 1rem !important;
+    }
+    
     .sidebar-menu-item:hover {
         background: rgba(30, 64, 175, 0.3);
         color: white;
@@ -458,6 +464,11 @@
     .sidebar.collapsed .bottom-icons-container {
         flex-direction: column;
         gap: 0.5rem;
+    }
+    
+    /* Hover expand: back to row */
+    .sidebar.collapsed:hover .bottom-icons-container {
+        flex-direction: row;
     }
     
     /* Bottom section form - ensure it participates in flex layout properly */
@@ -963,7 +974,6 @@
                 <button 
                     id="darkModeToggle"
                     type="button"
-                    onclick="toggleDarkMode(); updateToggleIcon();"
                     class="bottom-icon-btn"
                     title="Toggle Dark Mode"
                 >
@@ -991,20 +1001,3 @@
 
     </div>
 </aside>
-
-<script>
-    function updateToggleIcon() {
-        const isDark = document.documentElement.classList.contains('dark');
-        const icon = document.getElementById('darkModeIcon');
-        const text = document.getElementById('darkModeText');
-        if (icon) {
-            icon.className = isDark ? 'fas fa-sun text-yellow-300' : 'fas fa-moon text-primary-200';
-        }
-        if (text) {
-            text.textContent = isDark ? 'Light Mode' : 'Dark Mode';
-        }
-    }
-    // Set correct icon on page load
-    document.addEventListener('DOMContentLoaded', updateToggleIcon);
-</script>
-
