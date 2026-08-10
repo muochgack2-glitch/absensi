@@ -49,7 +49,7 @@
                             type="time"
                             name="settings[check_in_time]"
                             label="Jam Masuk"
-                            :value="old('settings.check_in_time', $settings['schedule']['check_in_time'] ?? '07:00')"
+                            :value="old('settings.check_in_time', $settings['time']['check_in_time'] ?? $settings['schedule']['check_in_time'] ?? '07:00')"
                             helper="Jam mulai absensi masuk"
                             required
                         />
@@ -59,7 +59,7 @@
                             type="time"
                             name="settings[check_out_time]"
                             label="Jam Pulang"
-                            :value="old('settings.check_out_time', $settings['schedule']['check_out_time'] ?? '15:00')"
+                            :value="old('settings.check_out_time', $settings['time']['check_out_time'] ?? $settings['schedule']['check_out_time'] ?? '15:00')"
                             helper="Jam mulai absensi pulang"
                             required
                         />
@@ -69,7 +69,7 @@
                             type="number"
                             name="settings[tolerance_minutes]"
                             label="Toleransi Keterlambatan (menit)"
-                            :value="old('settings.tolerance_minutes', $settings['schedule']['tolerance_minutes'] ?? '15')"
+                            :value="old('settings.tolerance_minutes', $settings['tolerance']['tolerance_minutes'] ?? $settings['schedule']['tolerance_minutes'] ?? '15')"
                             min="0"
                             max="60"
                             helper="Siswa dianggap terlambat jika melewati toleransi ini"
@@ -81,7 +81,7 @@
                             type="time"
                             name="settings[cutoff_time]"
                             label="Batas Waktu Alpha"
-                            :value="old('settings.cutoff_time', $settings['schedule']['cutoff_time'] ?? '09:00')"
+                            :value="old('settings.cutoff_time', $settings['time']['cutoff_time'] ?? $settings['schedule']['cutoff_time'] ?? '09:00')"
                             helper="Siswa otomatis alpha jika belum absen sampai jam ini"
                             required
                         />
