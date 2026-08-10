@@ -385,8 +385,8 @@
                             @endif
                         </a>
                     </x-table.header>
-                    <x-table.header class="hidden md:table-cell">No HP Ortu</x-table.header>
-                    <x-table.header class="hidden md:table-cell">QR Code</x-table.header>
+                    <x-table.header>No HP Ortu</x-table.header>
+                    <x-table.header class="hidden lg:table-cell">QR Code</x-table.header>
                     <x-table.header>Status</x-table.header>
                     <x-table.header>Aksi</x-table.header>
                 </x-slot>
@@ -445,15 +445,15 @@
                             </span>
                         </x-table.cell>
                         
-                        {{-- Parent Phone (hidden on mobile) --}}
-                        <x-table.cell class="hidden md:table-cell">
-                            <span class="text-gray-600 dark:text-gray-400">
+                        {{-- Parent Phone (shown on all devices) --}}
+                        <x-table.cell>
+                            <span class="text-gray-600 dark:text-gray-400 text-sm">
                                 {{ $student->no_hp_ortu ?? '-' }}
                             </span>
                         </x-table.cell>
                         
-                        {{-- QR Code (hidden on mobile) --}}
-                        <x-table.cell class="hidden md:table-cell">
+                        {{-- QR Code (hidden on mobile/tablet, shown on desktop) --}}
+                        <x-table.cell class="hidden lg:table-cell">
                             @if($student->qr_code_path)
                                 <button
                                     type="button"
