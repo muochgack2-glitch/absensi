@@ -13,11 +13,6 @@ use Exception;
 class AttendanceWhatsAppService
 {
     /**
-     * WhatsApp server URL
-     */
-    protected string $serverUrl;
-
-    /**
      * Connection timeout
      */
     protected int $timeout;
@@ -32,7 +27,7 @@ class AttendanceWhatsAppService
      */
     public function __construct()
     {
-        $this->serverUrl = $this->getActiveServerUrl();
+        // Don't set serverUrl in constructor - use getActiveServerUrl() dynamically
         $this->timeout = WhatsAppSetting::getTimeout();
         $this->retryAttempts = WhatsAppSetting::getRetryAttempts();
     }
@@ -116,13 +111,15 @@ class AttendanceWhatsAppService
     public function getStatus(): array
     {
         try {
+            $serverUrl = $this->getActiveServerUrl();
             $response = Http::timeout($this->timeout)
-                ->get("{$this->serverUrl}/status");
+                ->get("{$serverUrl}/status");
 
             if ($response->successful()) {
                 return [
                     'success' => true,
                     'data' => $response->json(),
+                    'server_url' => $serverUrl,
                 ];
             }
 
@@ -130,6 +127,7 @@ class AttendanceWhatsAppService
                 'success' => false,
                 'message' => 'Failed to get status',
                 'error' => $response->body(),
+                'server_url' => $serverUrl,
             ];
         } catch (Exception $e) {
             Log::error('WhatsApp status check failed', [
@@ -152,8 +150,9 @@ class AttendanceWhatsAppService
     public function getHealth(): array
     {
         try {
+            $serverUrl = $this->getActiveServerUrl();
             $response = Http::timeout($this->timeout)
-                ->get("{$this->serverUrl}/health");
+                ->get("{$serverUrl}/health");
 
             if ($response->successful()) {
                 return [
@@ -184,8 +183,9 @@ class AttendanceWhatsAppService
     public function getQRCode(): array
     {
         try {
+            $serverUrl = $this->getActiveServerUrl();
             $response = Http::timeout($this->timeout)
-                ->get("{$this->serverUrl}/qr");
+                ->get("{$serverUrl}/qr");
 
             if ($response->successful()) {
                 return [
@@ -583,8 +583,9 @@ class AttendanceWhatsAppService
     public function logout(): array
     {
         try {
+            $serverUrl = $this->getActiveServerUrl();
             $response = Http::timeout($this->timeout)
-                ->post("{$this->serverUrl}/logout");
+                ->post("{$serverUrl}/logout");
 
             if ($response->successful()) {
                 return [
@@ -616,8 +617,9 @@ class AttendanceWhatsAppService
     public function restart(): array
     {
         try {
+            $serverUrl = $this->getActiveServerUrl();
             $response = Http::timeout($this->timeout)
-                ->post("{$this->serverUrl}/restart");
+                ->post("{$serverUrl}/restart");
 
             if ($response->successful()) {
                 return [
