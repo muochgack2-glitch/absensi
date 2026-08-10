@@ -549,6 +549,7 @@
         let html5QrCode = null;
         let lastScannedNis = null;
         let recentScans = [];
+        let autoCloseTimer = null; // Timer untuk auto-close modal
 
         // Real-time clock
         function updateClock() {
@@ -666,23 +667,19 @@
         function onScanSuccess(decodedText, decodedResult) {
             const now = Date.now();
             
-            // IMMEDIATE LOCK: Block all scans if processing or within cooldown
-            if (window.isProcessingScan) {
-                return; // Silent block - no log spam
+            // Only block if same NIS scanned within 1 second (prevent double scan)
+            if (lastScannedNis === decodedText && window.lastScanTime && (now - window.lastScanTime) < 1000) {
+                return; // Silent block - same QR within 1 second
             }
             
-            if (lastScannedNis === decodedText && window.lastScanTime && (now - window.lastScanTime) < 3000) {
-                return; // Silent block - within cooldown
-            }
-            
-            // LOCK IMMEDIATELY before any async operation
-            window.isProcessingScan = true;
+            // Allow processing even if previous scan is still processing
+            // This enables rapid scanning without waiting for modal to close
             lastScannedNis = decodedText;
             window.lastScanTime = now;
             
             console.log('✅ QR Code detected:', decodedText);
             
-            // Process the scan (lock is already set)
+            // Process the scan
             processScan(decodedText);
         }
 
@@ -717,7 +714,6 @@
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.error('Server error response:', errorText);
-                    window.isProcessingScan = false;
                     
                     // Try to parse as JSON for better error message
                     try {
@@ -732,9 +728,6 @@
                 const result = await response.json();
                 console.log('Server response:', result);
 
-                // Clear processing flag
-                window.isProcessingScan = false;
-
                 if (result.success) {
                     showSuccess(result);
                 } else {
@@ -742,12 +735,8 @@
                     showError(result.message || 'Gagal memproses absensi', result.data);
                 }
 
-                // Note: Scanner resume is handled by showSuccess/showError
-                // No longer pause scanner here for faster throughput
-
             } catch (error) {
                 console.error('Scan processing error:', error);
-                window.isProcessingScan = false;
                 showError('Terjadi kesalahan saat memproses scan', null);
             }
         }
@@ -799,7 +788,13 @@
                 result.message || actionMessage
             );
 
-            // 2. Show detailed modal overlay
+            // 2. Clear any existing auto-close timer
+            if (autoCloseTimer) {
+                clearTimeout(autoCloseTimer);
+                autoCloseTimer = null;
+            }
+
+            // 3. Show/Update modal overlay with new data
             const modalOverlay = document.getElementById('modalOverlay');
             const modalContent = document.getElementById('modalContent');
 
@@ -872,45 +867,25 @@
                     <!-- Auto close indicator -->
                     <p class="text-xs text-gray-400 dark:text-gray-500">
                         <i class="fas fa-circle-notch fa-spin mr-1"></i>
-                        Auto-close dalam 2 detik...
+                        Auto-close dalam <span id="countdownTimer">3</span> detik...
                     </p>
                 </div>
             `;
 
-            // Show modal
+            // Show modal if hidden
             modalOverlay.classList.remove('hidden');
 
-            // 3. Add to recent scans
+            // 4. Add to recent scans
             addToRecentScans(result.data);
 
-            // 4. Update stats
+            // 5. Update stats
             loadTodayStats();
 
-            // 5. Play sound (if exists)
+            // 6. Play sound (if exists)
             playNotificationSound();
 
-            // 6. Auto-close after 2 seconds
-            setTimeout(() => {
-                hideModal();
-            }, 2000);
-
-            // 7. Resume scanner after 2.5 seconds (give time for modal to close)
-            setTimeout(() => {
-                lastScannedNis = null;
-                window.lastScanTime = null;
-                console.log('Scanner cooldown cleared, ready for next scan');
-                
-                // Try to resume scanner if it was paused
-                try {
-                    if (html5QrCode && html5QrCode.resume) {
-                        html5QrCode.resume();
-                        console.log('Scanner resumed successfully');
-                    }
-                } catch (e) {
-                    // Scanner already running or error, ignore
-                    console.log('Scanner resume skipped:', e.message);
-                }
-            }, 2500);
+            // 7. Start countdown timer (3 seconds)
+            startAutoCloseCountdown(3);
         }
 
         function showError(message, errorData = null) {
@@ -923,7 +898,13 @@
                 message || 'Terjadi kesalahan'
             );
 
-            // 2. Show error modal overlay
+            // 2. Clear any existing auto-close timer
+            if (autoCloseTimer) {
+                clearTimeout(autoCloseTimer);
+                autoCloseTimer = null;
+            }
+
+            // 3. Show/Update error modal overlay
             const modalOverlay = document.getElementById('modalOverlay');
             const modalContent = document.getElementById('modalContent');
 
@@ -979,7 +960,7 @@
                         <!-- Auto close indicator -->
                         <p class="text-xs text-gray-400 dark:text-gray-500">
                             <i class="fas fa-circle-notch fa-spin mr-1"></i>
-                            Auto-close dalam 3 detik...
+                            Auto-close dalam <span id="countdownTimer">3</span> detik...
                         </p>
                     </div>
                 `;
@@ -1003,42 +984,28 @@
                         <!-- Auto close indicator -->
                         <p class="text-xs text-gray-400 dark:text-gray-500">
                             <i class="fas fa-circle-notch fa-spin mr-1"></i>
-                            Auto-close dalam 3 detik...
+                            Auto-close dalam <span id="countdownTimer">3</span> detik...
                         </p>
                     </div>
                 `;
             }
 
-            // Show modal
+            // Show modal if hidden
             modalOverlay.classList.remove('hidden');
 
-            // Auto-close after 3 seconds (longer for error so user can read)
-            setTimeout(() => {
-                hideModal();
-            }, 3000);
-
-            // Resume scanner after 3.5 seconds
-            setTimeout(() => {
-                lastScannedNis = null;
-                window.lastScanTime = null;
-                console.log('Scanner cooldown cleared after error, ready for next scan');
-                
-                // Try to resume scanner if it was paused
-                try {
-                    if (html5QrCode && html5QrCode.resume) {
-                        html5QrCode.resume();
-                        console.log('Scanner resumed successfully after error');
-                    }
-                } catch (e) {
-                    // Scanner already running or error, ignore
-                    console.log('Scanner resume skipped:', e.message);
-                }
-            }, 3500);
+            // 4. Start countdown timer (3 seconds for errors)
+            startAutoCloseCountdown(3);
         }
 
         function hideModal() {
             const modalOverlay = document.getElementById('modalOverlay');
             const modalContent = document.getElementById('modalContent');
+
+            // Clear any existing timer
+            if (autoCloseTimer) {
+                clearTimeout(autoCloseTimer);
+                autoCloseTimer = null;
+            }
 
             // Add fade-out animation
             modalOverlay.classList.add('modal-fade-out');
@@ -1050,6 +1017,43 @@
                 modalOverlay.classList.remove('modal-fade-out');
                 modalContent.classList.remove('modal-scale-out');
             }, 200);
+        }
+
+        /**
+         * Start auto-close countdown timer
+         * Timer resets if a new scan comes in
+         * @param {number} seconds - Countdown duration in seconds
+         */
+        function startAutoCloseCountdown(seconds) {
+            // Clear any existing timer first
+            if (autoCloseTimer) {
+                clearTimeout(autoCloseTimer);
+                autoCloseTimer = null;
+            }
+
+            let countdown = seconds;
+            const timerElement = document.getElementById('countdownTimer');
+            
+            // Update countdown display every second
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                if (timerElement) {
+                    timerElement.textContent = countdown;
+                }
+                
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
+
+            // Set auto-close timer
+            autoCloseTimer = setTimeout(() => {
+                clearInterval(countdownInterval);
+                hideModal();
+                console.log('✅ Modal auto-closed after', seconds, 'seconds of no activity');
+            }, seconds * 1000);
+
+            console.log('⏱️ Auto-close countdown started:', seconds, 'seconds');
         }
 
         // Legacy functions (keep for compatibility but not used)
