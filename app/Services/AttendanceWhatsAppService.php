@@ -7,6 +7,7 @@ use App\Models\WhatsAppTemplate;
 use App\Models\WhatsAppSetting;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Exception;
 
 class AttendanceWhatsAppService
@@ -316,15 +317,128 @@ class AttendanceWhatsAppService
      * 
      * @param string $phone Parent phone number
      * @param string $message Notification message
-     * @param string|null $photoPath Optional photo path (not used in current WA gateway)
+     * @param string|null $photoPath Optional photo path
      * @return array
      */
     public function sendParentNotification(string $phone, string $message, ?string $photoPath = null): array
     {
+        // If photo path provided, send with media
+        if ($photoPath && Storage::disk('public')->exists($photoPath)) {
+            return $this->sendWithMedia($phone, $message, $photoPath, [
+                'type' => 'check_in',
+                'sent_by' => null,
+            ]);
+        }
+        
+        // Otherwise, send text only
         return $this->send($phone, $message, [
             'type' => 'check_in',
-            'sent_by' => null, // System-generated
+            'sent_by' => null,
         ]);
+    }
+
+    /**
+     * Send WhatsApp message with media (image)
+     * 
+     * @param string $phone Phone number
+     * @param string $caption Message caption
+     * @param string $mediaPath Path to media file in storage
+     * @param array $options Additional options
+     * @return array
+     */
+    public function sendWithMedia(string $phone, string $caption, string $mediaPath, array $options = []): array
+    {
+        // Get appropriate gateway URL
+        $serverUrl = $this->getActiveServerUrl($options['type'] ?? null);
+        
+        // Create log entry
+        $log = WhatsAppLog::create([
+            'phone' => $phone,
+            'message' => $caption,
+            'status' => 'pending',
+            'type' => $options['type'] ?? 'manual',
+            'student_id' => $options['student_id'] ?? null,
+            'template_id' => $options['template_id'] ?? null,
+            'sent_by' => $options['sent_by'] ?? auth()->id(),
+        ]);
+
+        try {
+            // Get full file path
+            $fullPath = Storage::disk('public')->path($mediaPath);
+            
+            if (!file_exists($fullPath)) {
+                throw new Exception("Media file not found: {$fullPath}");
+            }
+
+            Log::info('Attempting to send WhatsApp message with media', [
+                'phone' => $phone,
+                'caption_length' => strlen($caption),
+                'media_path' => $mediaPath,
+                'log_id' => $log->id,
+                'server_url' => $serverUrl,
+            ]);
+
+            // Send with multipart/form-data
+            $response = Http::timeout($this->timeout * 2) // Double timeout for media upload
+                ->retry($this->retryAttempts, 1000)
+                ->attach('media', file_get_contents($fullPath), basename($fullPath))
+                ->post("{$serverUrl}/send-media", [
+                    'phone' => $phone,
+                    'caption' => $caption,
+                ]);
+
+            if ($response->successful()) {
+                $responseData = $response->json();
+                
+                // Check if server actually sent the message
+                if (isset($responseData['success']) && $responseData['success'] === false) {
+                    $errorMessage = $responseData['message'] ?? $responseData['error'] ?? 'Message failed on WhatsApp server';
+                    $log->markAsFailed($errorMessage, $responseData);
+
+                    return [
+                        'success' => false,
+                        'message' => $errorMessage,
+                        'log_id' => $log->id,
+                        'debug' => $responseData,
+                    ];
+                }
+                
+                // Mark as sent
+                $log->markAsSent($responseData);
+
+                return [
+                    'success' => true,
+                    'message' => 'Message with media sent successfully',
+                    'data' => $responseData,
+                    'log_id' => $log->id,
+                ];
+            }
+
+            // Mark as failed
+            $errorMessage = $response->json()['message'] ?? 'Failed to send message with media';
+            $log->markAsFailed($errorMessage, $response->json());
+
+            return [
+                'success' => false,
+                'message' => $errorMessage,
+                'log_id' => $log->id,
+            ];
+        } catch (Exception $e) {
+            $log->markAsFailed($e->getMessage());
+
+            Log::error('WhatsApp media message send exception', [
+                'phone' => $phone,
+                'error' => $e->getMessage(),
+                'log_id' => $log->id,
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Connection failed: ' . $e->getMessage(),
+                'error' => $e->getMessage(),
+                'log_id' => $log->id,
+            ];
+        }
     }
 
     /**

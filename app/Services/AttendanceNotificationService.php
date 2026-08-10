@@ -25,7 +25,8 @@ class AttendanceNotificationService
     {
         // Check if parent notification is enabled
         $enabled = AttendanceSetting::get('enable_parent_notification', 'true');
-        if ($enabled !== 'true') {
+        if ($enabled !== 'true' && $enabled !== '1' && $enabled !== 1) {
+            Log::debug("Parent notification disabled", ['enabled' => $enabled]);
             return;
         }
 
@@ -42,8 +43,9 @@ class AttendanceNotificationService
         $message = $this->formatCheckInMessage($student, $record, $schoolName);
 
         // Check if photo should be included
-        $includePhoto = AttendanceSetting::get('include_photo_in_notification', 'false') === 'true';
-        $photoPath = $includePhoto ? $record->check_in_photo : null;
+        $includePhoto = AttendanceSetting::get('include_photo_in_notification', 'false');
+        $shouldIncludePhoto = in_array($includePhoto, ['true', '1', 1, true], true);
+        $photoPath = $shouldIncludePhoto ? $record->check_in_photo : null;
 
         // Send notification
         $result = $this->whatsAppService->sendParentNotification(
@@ -67,7 +69,7 @@ class AttendanceNotificationService
     {
         // Check if parent notification is enabled
         $enabled = AttendanceSetting::get('enable_parent_notification', 'true');
-        if ($enabled !== 'true') {
+        if ($enabled !== 'true' && $enabled !== '1' && $enabled !== 1) {
             return;
         }
 
@@ -83,8 +85,9 @@ class AttendanceNotificationService
         $message = $this->formatCheckOutMessage($student, $record, $schoolName);
 
         // Check if photo should be included
-        $includePhoto = AttendanceSetting::get('include_photo_in_notification', 'false') === 'true';
-        $photoPath = $includePhoto ? $record->check_out_photo : null;
+        $includePhoto = AttendanceSetting::get('include_photo_in_notification', 'false');
+        $shouldIncludePhoto = in_array($includePhoto, ['true', '1', 1, true], true);
+        $photoPath = $shouldIncludePhoto ? $record->check_out_photo : null;
 
         // Send notification
         $result = $this->whatsAppService->sendParentNotification(
@@ -169,7 +172,7 @@ class AttendanceNotificationService
     {
         // Check if parent notification is enabled
         $enabled = AttendanceSetting::get('enable_parent_notification', 'true');
-        if ($enabled !== 'true') {
+        if ($enabled !== 'true' && $enabled !== '1' && $enabled !== 1) {
             return;
         }
 
