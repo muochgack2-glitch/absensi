@@ -172,16 +172,27 @@ class AttendanceService
 
         DB::commit();
 
-        // Kirim notifikasi WA jika terlambat dan fitur aktif
-        if ($status === 'terlambat') {
-            $lateNotifyEnabled = AttendanceSetting::get('late_notify_enabled', 'false');
-            if ($lateNotifyEnabled === 'true') {
-                $record->refresh(); // pastikan data terbaru
-                try {
-                    $this->notificationService->notifyCheckIn($student->load('kelas'), $record);
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::warning('Late WA notification failed: ' . $e->getMessage());
-                }
+        // Kirim notifikasi WA untuk check-in
+        // Cek apakah notifikasi aktif untuk semua check-in atau hanya terlambat
+        $notifyAllCheckIn = AttendanceSetting::get('notify_all_checkin', 'false');
+        $lateNotifyEnabled = AttendanceSetting::get('late_notify_enabled', 'false');
+        
+        $shouldNotify = false;
+        
+        if ($notifyAllCheckIn === 'true') {
+            // Kirim notifikasi untuk semua check-in (hadir dan terlambat)
+            $shouldNotify = true;
+        } elseif ($status === 'terlambat' && $lateNotifyEnabled === 'true') {
+            // Kirim notifikasi hanya untuk terlambat
+            $shouldNotify = true;
+        }
+        
+        if ($shouldNotify) {
+            $record->refresh(); // pastikan data terbaru
+            try {
+                $this->notificationService->notifyCheckIn($student->load('kelas'), $record);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('Check-in WA notification failed: ' . $e->getMessage());
             }
         }
 
@@ -272,6 +283,17 @@ class AttendanceService
         ]);
 
         DB::commit();
+
+        // Kirim notifikasi WA untuk check-out (jika fitur aktif)
+        $notifyCheckOut = AttendanceSetting::get('notify_checkout', 'false');
+        if ($notifyCheckOut === 'true') {
+            $record->refresh(); // pastikan data terbaru
+            try {
+                $this->notificationService->notifyCheckOut($student->load('kelas'), $record);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('Check-out WA notification failed: ' . $e->getMessage());
+            }
+        }
 
         // Log success
         $this->logAction(
