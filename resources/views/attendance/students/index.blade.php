@@ -386,7 +386,7 @@
                         </a>
                     </x-table.header>
                     <x-table.header>No HP Ortu</x-table.header>
-                    <x-table.header class="hidden lg:table-cell">QR Code</x-table.header>
+                    <x-table.header>QR Code</x-table.header>
                     <x-table.header>Status</x-table.header>
                     <x-table.header>Aksi</x-table.header>
                 </x-slot>
@@ -452,8 +452,8 @@
                             </span>
                         </x-table.cell>
                         
-                        {{-- QR Code (hidden on mobile/tablet, shown on desktop) --}}
-                        <x-table.cell class="hidden lg:table-cell">
+                        {{-- QR Code (shown on all devices) --}}
+                        <x-table.cell>
                             @if($student->qr_code_path)
                                 <button
                                     type="button"
