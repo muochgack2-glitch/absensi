@@ -3,7 +3,7 @@
     <x-slot name="title">Settings</x-slot>
     <x-slot name="pageTitle">Pengaturan Sistem</x-slot>
 
-    <div class="max-w-5xl mx-auto space-y-6">
+    <div class="space-y-6">
         {{-- Page Header --}}
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <div>
@@ -621,7 +621,6 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
         </x-card>
     </div>
 
-    {{-- ====================== BACKUP & RESTORE CARD ====================== --}}
     <div class="max-w-5xl mt-6">
         <x-card>
             <div class="flex items-center mb-6">
