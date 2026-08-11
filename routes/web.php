@@ -170,11 +170,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/attendance/qr/bulk-generate', [AttendanceQRController::class, 'bulkGenerate'])
         ->name('attendance.qr.bulk-generate');
 
-    Route::post('/attendance/qr/cards-pdf', [AttendanceQRController::class, 'generateCardsPDF'])
-        ->name('attendance.qr.cards-pdf');
-
-    Route::get('/attendance/qr/cards-preview', [AttendanceQRController::class, 'previewCardsHTML'])
-        ->name('attendance.qr.cards-preview');
+    // DISABLED: PDF bulk generation routes
+    // Route::post('/attendance/qr/cards-pdf', [AttendanceQRController::class, 'generateCardsPDF'])
+    //     ->name('attendance.qr.cards-pdf');
+    // Route::get('/attendance/qr/cards-preview', [AttendanceQRController::class, 'previewCardsHTML'])
+    //     ->name('attendance.qr.cards-preview');
 
     // Generic routes AFTER specific ones
     Route::get('/attendance/qr/{student}', [AttendanceQRController::class, 'show'])
@@ -185,9 +185,6 @@ Route::middleware(['auth'])->group(function () {
     
     Route::post('/attendance/qr/{student}/regenerate', [AttendanceQRController::class, 'regenerate'])
         ->name('attendance.qr.regenerate');
-
-    Route::get('/attendance/qr/cards-preview', [AttendanceQRController::class, 'previewCardsHTML'])
-        ->name('attendance.qr.cards-preview');
 
     // Settings
     Route::get('/attendance/settings', [AttendanceSettingController::class, 'index'])

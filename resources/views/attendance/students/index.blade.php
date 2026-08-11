@@ -65,7 +65,7 @@
                     </a>
                 </div>
 
-                {{-- Baris 2: Generate QR Massal + Cetak Kartu QR + Tambah Siswa --}}
+                {{-- Baris 2: Generate QR Massal + Tambah Siswa --}}
                 <div class="flex flex-wrap gap-2">
                     <button
                         type="button"
@@ -77,18 +77,6 @@
                     >
                         <i class="fas fa-qrcode mr-2"></i>
                         Generate QR Massal
-                    </button>
-
-                    <button
-                        type="button"
-                        onclick="document.getElementById('modalQRCardsPDF').classList.remove('hidden')"
-                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 text-white"
-                        style="background: linear-gradient(to right, #dc2626, #991b1b);"
-                        onmouseover="this.style.background='linear-gradient(to right, #991b1b, #7f1d1d)'"
-                        onmouseout="this.style.background='linear-gradient(to right, #dc2626, #991b1b)'"
-                    >
-                        <i class="fas fa-file-pdf mr-2"></i>
-                        Cetak Kartu QR (PDF)
                     </button>
 
                     <a
