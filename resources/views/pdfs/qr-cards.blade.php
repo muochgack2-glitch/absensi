@@ -36,7 +36,7 @@
         td {
             border: 1px solid #000;
             width: 33.333%;
-            height: 79mm;
+            height: 72mm;
             padding: 2mm;
             text-align: center;
             vertical-align: top;
@@ -52,13 +52,13 @@
         }
 
         .qr-img {
-            width: 45mm;
-            height: 45mm;
+            width: 50mm;
+            height: 50mm;
             border: 1px dashed #666;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 2mm;
+            margin-bottom: 1mm;
             background: #fff;
         }
 
@@ -69,23 +69,23 @@
 
         .text-nis {
             font-weight: bold;
-            font-size: 11px;
+            font-size: 10px;
             font-family: monospace;
-            margin-bottom: 1mm;
+            margin-bottom: 0.5mm;
             color: #000;
         }
 
         .text-nama {
-            font-size: 10px;
-            margin-bottom: 1mm;
+            font-size: 9px;
+            margin-bottom: 0.5mm;
             color: #000;
-            line-height: 1.3;
+            line-height: 1.2;
         }
 
         .text-sekolah {
-            font-size: 9px;
+            font-size: 8px;
             color: #333;
-            line-height: 1.3;
+            line-height: 1.2;
         }
 
         @page {

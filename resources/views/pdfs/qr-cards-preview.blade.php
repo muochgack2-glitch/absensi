@@ -47,8 +47,8 @@
         td {
             border: 2px solid #333;
             width: 33.333%;
-            height: 79mm;
-            padding: 3mm;
+            height: 72mm;
+            padding: 2mm;
             text-align: center;
             vertical-align: top;
             page-break-inside: avoid;
@@ -64,13 +64,13 @@
         }
 
         .qr-img {
-            width: 45mm;
-            height: 45mm;
+            width: 50mm;
+            height: 50mm;
             border: 2px dashed #666;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 3mm;
+            margin-bottom: 1mm;
             background: #f9f9f9;
         }
 
