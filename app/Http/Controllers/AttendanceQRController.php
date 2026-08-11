@@ -337,3 +337,4 @@ class AttendanceQRController extends Controller
             'schoolName' => config('app.school_name', 'SMK SPMB'),
         ]);
     }
+}
