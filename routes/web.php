@@ -88,8 +88,11 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/attendance/manual/{record}', [AttendanceManualController::class, 'destroy'])
         ->name('attendance.manual.destroy');
 
-    // QR Card Generation - NOW using new AttendanceQRController
-    // Old StudentCardController routes removed - unified to new system
+    // Students Management - Custom routes BEFORE resource (prevent {student} catching)
+    Route::get('/attendance/students/card', function() {
+        // Redirect old StudentCardController route to new QR system
+        return view('attendance.students.index');
+    })->name('attendance.students.card');
     
     Route::get('/attendance/students/import/form', [AttendanceStudentController::class, 'importForm'])
         ->name('attendance.students.import.form');
@@ -99,8 +102,6 @@ Route::middleware(['auth'])->group(function () {
     
     Route::get('/attendance/students/export/template', [AttendanceStudentController::class, 'exportTemplate'])
         ->name('attendance.students.export.template');
-
-    // Export Excel siswa (HARUS sebelum resource agar tidak tertangkap {student})
     Route::get('/attendance/students/export/excel', [AttendanceStudentController::class, 'exportExcel'])
         ->name('attendance.students.export.excel');
 
