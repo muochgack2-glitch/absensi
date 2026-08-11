@@ -240,4 +240,100 @@ class AttendanceQRController extends Controller
             return redirect()->back()->with('error', 'Gagal generate PDF: ' . $e->getMessage());
         }
     }
-}
+
+    /**
+     * Preview QR cards as HTML (untuk debugging layout)
+     * 
+     * GET /attendance/qr/cards-preview?class_id=...&layout=...&include_class=...
+     */
+    public function previewCardsHTML(Request $request)
+    {
+        $classId = $request->input('class_id');
+        $layout = $request->input('layout', '3x3');
+        $includeClass = $request->boolean('include_class', true);
+
+        // Get students
+        $query = AttendanceStudent::where('is_active', true);
+        
+        if ($classId) {
+            $query->where('kelas_id', $classId);
+            $kelas = AttendanceClass::find($classId);
+            $className = $kelas ? $kelas->nama_kelas : 'AllClasses';
+        } else {
+            $className = 'Semua';
+        }
+
+        $students = $query
+            ->with('kelas')
+            ->orderBy('kelas_id')
+            ->orderBy('nis')
+            ->get();
+
+        if ($students->isEmpty()) {
+            return response()->view('errors.404', [], 404);
+        }
+
+        // Ensure all students have QR codes
+        foreach ($students as $student) {
+            if (!$student->qr_code_path || !file_exists(storage_path('app/public/' . $student->qr_code_path))) {
+                $path = $this->qrCodeService->generateQRCode($student->nis);
+                $student->update(['qr_code_path' => $path]);
+                $student->refresh();
+            }
+        }
+
+        // Convert to array with base64 QR
+        $studentsArray = $students->map(function($student) {
+            $qrBase64 = null;
+            
+            if ($student->qr_code_path && file_exists(storage_path('app/public/' . $student->qr_code_path))) {
+                $qrPath = storage_path('app/public/' . $student->qr_code_path);
+                
+                if (str_ends_with($qrPath, '.svg')) {
+                    try {
+                        if (extension_loaded('imagick')) {
+                            $imagick = new \Imagick();
+                            $imagick->setBackgroundColor('white');
+                            $imagick->readImage($qrPath);
+                            $imagick->setImageFormat('png');
+                            $qrBase64 = base64_encode($imagick->getImageBlob());
+                        } else {
+                            $svg = file_get_contents($qrPath);
+                            $qrBase64 = base64_encode($svg);
+                        }
+                    } catch (\Exception $e) {
+                        $qrBase64 = null;
+                    }
+                } else if (file_exists($qrPath)) {
+                    $qrBase64 = base64_encode(file_get_contents($qrPath));
+                }
+            }
+            
+            return [
+                'nis' => $student->nis,
+                'nama' => $student->nama,
+                'qr_code_path' => $student->qr_code_path,
+                'qr_code_base64' => $qrBase64,
+                'kelas' => $student->kelas ? [
+                    'nama_kelas' => $student->kelas->nama_kelas
+                ] : null,
+            ];
+        })->toArray();
+
+        // Chunk into pages (9 per page for 3x3)
+        $pages = [];
+        $chunk = array_chunk($studentsArray, 9);
+        foreach ($chunk as $page) {
+            while (count($page) < 9) {
+                $page[] = null;
+            }
+            $pages[] = $page;
+        }
+
+        return view('pdfs.qr-cards-preview', [
+            'pages' => $pages,
+            'layout' => $layout,
+            'includeClass' => $includeClass,
+            'schoolName' => config('app.school_name', 'SMK SPMB'),
+        ]);
+    }

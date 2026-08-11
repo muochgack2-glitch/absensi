@@ -182,6 +182,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/attendance/qr/cards-pdf', [AttendanceQRController::class, 'generateCardsPDF'])
         ->name('attendance.qr.cards-pdf');
 
+    Route::get('/attendance/qr/cards-preview', [AttendanceQRController::class, 'previewCardsHTML'])
+        ->name('attendance.qr.cards-preview');
+
     // Settings
     Route::get('/attendance/settings', [AttendanceSettingController::class, 'index'])
         ->name('attendance.settings.index');
