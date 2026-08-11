@@ -170,11 +170,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/attendance/qr/bulk-generate', [AttendanceQRController::class, 'bulkGenerate'])
         ->name('attendance.qr.bulk-generate');
 
-    // DISABLED: PDF bulk generation routes
-    // Route::post('/attendance/qr/cards-pdf', [AttendanceQRController::class, 'generateCardsPDF'])
-    //     ->name('attendance.qr.cards-pdf');
-    // Route::get('/attendance/qr/cards-preview', [AttendanceQRController::class, 'previewCardsHTML'])
-    //     ->name('attendance.qr.cards-preview');
+    // PDF bulk generation routes - ENABLED
+    Route::post('/attendance/qr/cards-pdf', [AttendanceQRController::class, 'generateCardsPDF'])
+        ->name('attendance.qr.cards-pdf');
+    Route::get('/attendance/qr/cards-preview', [AttendanceQRController::class, 'previewCardsHTML'])
+        ->name('attendance.qr.cards-preview');
 
     // Single student QR card preview & PDF download (BEFORE generic {student} route)
     Route::get('/attendance/qr/{student}/preview-card', [AttendanceQRController::class, 'previewCardHTML'])
