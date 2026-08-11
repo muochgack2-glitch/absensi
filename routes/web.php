@@ -176,12 +176,22 @@ Route::middleware(['auth'])->group(function () {
     // Route::get('/attendance/qr/cards-preview', [AttendanceQRController::class, 'previewCardsHTML'])
     //     ->name('attendance.qr.cards-preview');
 
+    // Single student QR card preview & PDF download (BEFORE generic {student} route)
+    Route::get('/attendance/qr/{student}/preview-card', [AttendanceQRController::class, 'previewCardHTML'])
+        ->name('attendance.qr.preview-card');
+    
+    Route::get('/attendance/qr/{student}/download-card-pdf', [AttendanceQRController::class, 'downloadCardPDF'])
+        ->name('attendance.qr.download-card-pdf');
+
     // Generic routes AFTER specific ones
     Route::get('/attendance/qr/{student}', [AttendanceQRController::class, 'show'])
         ->name('attendance.qr.show');
     
     Route::get('/attendance/qr/{student}/download', [AttendanceQRController::class, 'download'])
         ->name('attendance.qr.download');
+
+    Route::get('/attendance/qr/{student}/download-card-pdf', [AttendanceQRController::class, 'downloadCardPDF'])
+        ->name('attendance.qr.download-card-pdf');
     
     Route::post('/attendance/qr/{student}/regenerate', [AttendanceQRController::class, 'regenerate'])
         ->name('attendance.qr.regenerate');

@@ -481,6 +481,17 @@
                         {{-- Actions --}}
                         <x-table.cell>
                             <div class="flex items-center space-x-2">
+                                {{-- Download QR Card PDF --}}
+                                @if($student->qr_code_path)
+                                    <a 
+                                        href="{{ route('attendance.qr.download-card-pdf', $student->nis) }}" 
+                                        class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+                                        title="Unduh Kartu QR PDF"
+                                    >
+                                        <i class="fas fa-file-pdf"></i>
+                                    </a>
+                                @endif
+
                                 {{-- Print QR Kartu --}}
                                 <a 
                                     href="{{ route('attendance.students.print-qr', $student->id) }}" 

@@ -64,6 +64,103 @@ class AttendanceQRController extends Controller
     }
 
     /**
+     * Generate and download QR card as PDF for single student
+     */
+    public function downloadCardPDF(string $nis)
+    {
+        $student = AttendanceStudent::where('nis', $nis)->firstOrFail();
+
+        // Generate QR if not exists
+        if (!$student->qr_code_path || !Storage::disk('public')->exists($student->qr_code_path)) {
+            $path = $this->qrCodeService->generateQRCode($student->nis);
+            $student->update(['qr_code_path' => $path]);
+        }
+
+        // Convert QR to base64
+        $qrBase64 = null;
+        $qrPath = storage_path('app/public/' . $student->qr_code_path);
+        
+        if (file_exists($qrPath)) {
+            try {
+                if (str_ends_with($qrPath, '.svg')) {
+                    if (extension_loaded('imagick')) {
+                        $imagick = new \Imagick();
+                        $imagick->setBackgroundColor('white');
+                        $imagick->readImage($qrPath);
+                        $imagick->setImageFormat('png');
+                        $qrBase64 = base64_encode($imagick->getImageBlob());
+                    } else {
+                        $qrBase64 = base64_encode(file_get_contents($qrPath));
+                    }
+                } else {
+                    $qrBase64 = base64_encode(file_get_contents($qrPath));
+                }
+            } catch (\Exception $e) {
+                \Log::warning('QR conversion failed: ' . $e->getMessage());
+            }
+        }
+
+        // Generate PDF using Spatie with Browsershot
+        $pdf = Pdf::view('pdfs.qr-card-single', [
+            'student' => $student,
+            'qr_code_base64' => $qrBase64,
+        ])
+        ->paperSize('a4')
+        ->margins(10, 10, 10, 10)
+        ->download("QR_Kartu_{$student->nis}_{$student->nama}.pdf");
+
+        return $pdf;
+    }
+
+    /**
+     * Preview QR Card as HTML (for debugging).
+     * 
+     * GET /attendance/qr/{nis}/preview-card
+     * 
+     * @param string $nis
+     * @return \Illuminate\View\View
+     */
+    public function previewCardHTML(string $nis)
+    {
+        $student = AttendanceStudent::where('nis', $nis)->firstOrFail();
+
+        // Generate QR if not exists
+        if (!$student->qr_code_path || !Storage::disk('public')->exists($student->qr_code_path)) {
+            $path = $this->qrCodeService->generateQRCode($student->nis);
+            $student->update(['qr_code_path' => $path]);
+        }
+
+        // Convert QR to base64
+        $qrBase64 = null;
+        $qrPath = storage_path('app/public/' . $student->qr_code_path);
+        
+        if (file_exists($qrPath)) {
+            try {
+                if (str_ends_with($qrPath, '.svg')) {
+                    if (extension_loaded('imagick')) {
+                        $imagick = new \Imagick();
+                        $imagick->setBackgroundColor('white');
+                        $imagick->readImage($qrPath);
+                        $imagick->setImageFormat('png');
+                        $qrBase64 = base64_encode($imagick->getImageBlob());
+                    } else {
+                        $qrBase64 = base64_encode(file_get_contents($qrPath));
+                    }
+                } else {
+                    $qrBase64 = base64_encode(file_get_contents($qrPath));
+                }
+            } catch (\Exception $e) {
+                \Log::warning('QR conversion failed: ' . $e->getMessage());
+            }
+        }
+
+        return view('pdfs.qr-card-single', [
+            'student' => $student,
+            'qr_code_base64' => $qrBase64,
+        ]);
+    }
+
+    /**
      * Regenerate QR Code for a student (admin only).
      * 
      * POST /attendance/qr/{nis}/regenerate

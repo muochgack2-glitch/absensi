@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kartu QR Code Siswa</title>
     <style>
         * {
@@ -10,8 +11,13 @@
             box-sizing: border-box;
         }
 
-        body {
+        html, body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
             background: white;
         }
 
@@ -20,6 +26,7 @@
             height: 297mm;
             padding: 5mm;
             page-break-after: always;
+            background: white;
         }
 
         .cards-table {
@@ -39,6 +46,7 @@
             padding: 0.5mm;
             text-align: center;
             vertical-align: top;
+            background: white;
         }
 
         .card-inner {
@@ -59,11 +67,13 @@
             align-items: center;
             justify-content: center;
             margin-bottom: 0.2mm;
+            background: white;
         }
 
         .card-qr img {
             width: 40mm;
             height: 40mm;
+            object-fit: contain;
         }
 
         .card-text {
@@ -78,16 +88,32 @@
             font-size: 7px;
             margin-bottom: 0.1mm;
             line-height: 1;
+            text-transform: uppercase;
         }
 
         .card-kelas {
             font-size: 7px;
             line-height: 1;
+            text-transform: uppercase;
         }
 
         @page {
             size: A4 portrait;
             margin: 0;
+        }
+
+        @media print {
+            body {
+                background: white;
+                margin: 0;
+                padding: 0;
+            }
+            .page {
+                margin: 0;
+                padding: 5mm;
+                box-shadow: none;
+                page-break-after: always;
+            }
         }
     </style>
 </head>
@@ -105,15 +131,15 @@
                     <div class="card-inner">
                         <div class="card-qr">
                             @if(!empty($student['qr_code_base64']))
-                            <img src="data:image/png;base64,{{ $student['qr_code_base64'] }}" />
+                            <img src="data:image/png;base64,{{ $student['qr_code_base64'] }}" alt="QR" />
                             @else
                             <span style="color: #ccc; font-size: 8px;">-</span>
                             @endif
                         </div>
                         <div class="card-text">{{ $student['nis'] }}</div>
-                        <div class="card-nama" style="text-transform: uppercase;">{{ $student['nama'] }}</div>
+                        <div class="card-nama">{{ $student['nama'] }}</div>
                         @if($includeClass && $student['kelas'])
-                        <div class="card-kelas" style="text-transform: uppercase;">{{ $student['kelas']['nama_kelas'] }}</div>
+                        <div class="card-kelas">{{ $student['kelas']['nama_kelas'] }}</div>
                         @endif
                     </div>
                     @endif

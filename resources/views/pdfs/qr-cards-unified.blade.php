@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kartu QR Code Siswa</title>
+    <title>Kartu QR Code Siswa - Preview</title>
     <style>
         * {
             margin: 0;
@@ -18,26 +18,27 @@
         }
 
         body {
-            background: #eee;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
+            background: #f0f0f0;
             padding: 20px;
         }
 
-        h1 {
+        .preview-header {
             text-align: center;
-            margin-bottom: 10px;
-            color: #333;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .page-info {
-            text-align: center;
+        .preview-header h1 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .preview-header p {
             color: #666;
-            margin-bottom: 30px;
-            font-size: 12px;
+            font-size: 14px;
         }
 
         .page {
@@ -45,12 +46,11 @@
             height: 297mm;
             padding: 5mm;
             page-break-after: always;
+            background: white;
             margin: 20px auto;
             box-shadow: 0 0 10px rgba(0,0,0,0.2);
-            background: white;
         }
 
-        /* Simple table for 3x3 grid */
         .cards-table {
             width: 100%;
             border-collapse: collapse;
@@ -95,6 +95,7 @@
         .card-qr img {
             width: 40mm;
             height: 40mm;
+            object-fit: contain;
         }
 
         .card-text {
@@ -120,9 +121,10 @@
 
         .page-number {
             text-align: center;
-            margin-top: 5px;
+            margin-top: 10px;
             color: #999;
-            font-size: 11px;
+            font-size: 12px;
+            margin-bottom: 30px;
         }
 
         @page {
@@ -136,62 +138,60 @@
                 margin: 0;
                 padding: 0;
             }
-            .container {
-                margin: 0;
-                padding: 0;
-            }
-            h1, .page-info, .page-number {
+            .preview-header {
                 display: none;
             }
             .page {
                 margin: 0;
                 padding: 5mm;
                 box-shadow: none;
-                height: auto;
+                page-break-after: always;
+            }
+            .page-number {
+                display: none;
             }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="preview-header">
     <h1>Kartu QR Code Siswa</h1>
-    <p class="page-info">3x3 Layout - 9 kartu per halaman</p>
+    <p>Layout 3x3 - 9 kartu per halaman A4 - Preview</p>
+</div>
 
-    @foreach($pages as $pageIdx => $cards)
-    <div class="page">
-        <table class="cards-table" cellpadding="0" cellspacing="0" border="0">
-            @for($i = 0; $i < 3; $i++)
-            <tr>
-                @for($j = 0; $j < 3; $j++)
-                    @php $idx = ($i * 3) + $j; $student = $cards[$idx] ?? null; @endphp
-                    <td>
-                        @if($student)
-                        <div class="card-inner">
-                            <div class="card-qr">
-                                @if(!empty($student['qr_code_base64']))
-                                <img src="data:image/png;base64,{{ $student['qr_code_base64'] }}" />
-                                @else
-                                <span style="color: #ccc;">-</span>
-                                @endif
-                            </div>
-                            <div class="card-text">{{ $student['nis'] }}</div>
-                            <div class="card-nama">{{ $student['nama'] }}</div>
-                            @if($includeClass && $student['kelas'])
-                            <div class="card-kelas">{{ $student['kelas']['nama_kelas'] }}</div>
+@foreach($pages as $pageIdx => $cards)
+<div class="page">
+    <table class="cards-table" cellpadding="0" cellspacing="0" border="0">
+        @for($i = 0; $i < 3; $i++)
+        <tr>
+            @for($j = 0; $j < 3; $j++)
+                @php $idx = ($i * 3) + $j; $student = $cards[$idx] ?? null; @endphp
+                <td>
+                    @if($student)
+                    <div class="card-inner">
+                        <div class="card-qr">
+                            @if(!empty($student['qr_code_base64']))
+                            <img src="data:image/png;base64,{{ $student['qr_code_base64'] }}" alt="QR" />
+                            @else
+                            <span style="color: #ccc; font-size: 8px;">-</span>
                             @endif
                         </div>
+                        <div class="card-text">{{ $student['nis'] }}</div>
+                        <div class="card-nama">{{ $student['nama'] }}</div>
+                        @if($includeClass && $student['kelas'])
+                        <div class="card-kelas">{{ $student['kelas']['nama_kelas'] }}</div>
                         @endif
-                    </td>
-                @endfor
-            </tr>
+                    </div>
+                    @endif
+                </td>
             @endfor
-        </table>
-    </div>
-    <div class="page-number">Halaman {{ $pageIdx + 1 }}</div>
-    @endforeach
-
+        </tr>
+        @endfor
+    </table>
 </div>
+<div class="page-number">Halaman {{ $pageIdx + 1 }}</div>
+@endforeach
 
 </body>
 </html>
