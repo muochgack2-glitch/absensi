@@ -80,22 +80,22 @@ class QRCardPdfService
                 'rows' => 3,
                 'cards_per_page' => 9,
                 'card_width_mm' => 50,      // 5cm
-                'card_height_mm' => 60,     // 6cm (updated from 72mm)
-                'card_width_px' => 189,     // 50mm in pixels (at 96dpi)
-                'card_height_px' => 227,    // 60mm in pixels (at 96dpi)
-                'gap_mm' => 4,
-                'margin_mm' => 10,
+                'card_height_mm' => 50,     // 5cm
+                'card_width_px' => 189,     
+                'card_height_px' => 189,    
+                'gap_mm' => 0,
+                'margin_mm' => 5,
             ],
             default => [
                 'cols' => 3,
                 'rows' => 3,
                 'cards_per_page' => 9,
                 'card_width_mm' => 50,
-                'card_height_mm' => 60,
+                'card_height_mm' => 50,
                 'card_width_px' => 189,
-                'card_height_px' => 227,
-                'gap_mm' => 4,
-                'margin_mm' => 10,
+                'card_height_px' => 189,
+                'gap_mm' => 0,
+                'margin_mm' => 5,
             ],
         };
     }

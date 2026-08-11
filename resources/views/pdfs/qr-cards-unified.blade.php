@@ -15,7 +15,6 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            width: 100%;
         }
 
         body {
@@ -32,14 +31,13 @@
             text-align: center;
             margin-bottom: 10px;
             color: #333;
-            font-size: 24px;
         }
 
         .page-info {
             text-align: center;
             color: #666;
             margin-bottom: 30px;
-            font-size: 14px;
+            font-size: 12px;
         }
 
         .page {
@@ -52,98 +50,79 @@
             background: white;
         }
 
-        /* Table untuk grid 3x3 */
-        .grid-table {
+        /* Simple table for 3x3 grid */
+        .cards-table {
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
         }
 
-        .grid-table tr {
-            height: 60mm;
+        .cards-table tr {
             page-break-inside: avoid;
         }
 
-        .grid-table td {
-            width: 66.666mm;
-            height: 60mm;
+        .cards-table td {
+            width: 50mm;
+            height: 50mm;
             border: 1px solid #000;
-            padding: 1.5mm;
-            vertical-align: top;
+            padding: 0.5mm;
             text-align: center;
-            background: #fff;
+            vertical-align: top;
+            background: white;
         }
 
-        /* Card content */
-        .card {
+        .card-inner {
             width: 100%;
             height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
+            padding: 0.3mm;
         }
 
         .card-qr {
-            width: 47mm;
-            height: 47mm;
+            width: 40mm;
+            height: 40mm;
             border: 1px dashed #999;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 0.5mm;
-            background: #fff;
-            flex-shrink: 0;
+            margin-bottom: 0.2mm;
+            background: white;
         }
 
         .card-qr img {
-            max-width: 47mm;
-            max-height: 47mm;
-            width: auto;
-            height: auto;
-        }
-
-        .card-qr span {
-            color: #ccc;
-            font-size: 10px;
+            width: 40mm;
+            height: 40mm;
         }
 
         .card-text {
-            width: 100%;
-            font-size: 10px;
+            font-size: 8px;
             font-weight: bold;
-            font-family: 'Courier New', monospace;
-            margin-bottom: 0.3mm;
-            color: #000;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            font-family: monospace;
+            margin-bottom: 0.1mm;
+            line-height: 1;
         }
 
         .card-nama {
-            width: 100%;
-            font-size: 9px;
-            margin-bottom: 0.3mm;
-            color: #000;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            font-size: 7px;
+            margin-bottom: 0.1mm;
+            line-height: 1;
+            text-transform: uppercase;
         }
 
         .card-kelas {
-            width: 100%;
-            font-size: 9px;
-            color: #000;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            font-size: 7px;
+            line-height: 1;
+            text-transform: uppercase;
         }
 
         .page-number {
             text-align: center;
-            margin-top: 10px;
+            margin-top: 5px;
             color: #999;
-            font-size: 12px;
+            font-size: 11px;
         }
 
         @page {
@@ -158,18 +137,17 @@
                 padding: 0;
             }
             .container {
-                max-width: 100%;
                 margin: 0;
                 padding: 0;
             }
             h1, .page-info, .page-number {
-                display: none !important;
+                display: none;
             }
             .page {
-                box-shadow: none;
                 margin: 0;
                 padding: 5mm;
-                page-break-after: always;
+                box-shadow: none;
+                height: auto;
             }
         }
     </style>
@@ -178,29 +156,29 @@
 
 <div class="container">
     <h1>Kartu QR Code Siswa</h1>
-    <p class="page-info">Layout: 3x3 (9 kartu per halaman A4)</p>
+    <p class="page-info">3x3 Layout - 9 kartu per halaman</p>
 
     @foreach($pages as $pageIdx => $cards)
     <div class="page">
-        <table class="grid-table" cellspacing="0" cellpadding="0">
-            @for($row = 0; $row < 3; $row++)
+        <table class="cards-table" cellpadding="0" cellspacing="0" border="0">
+            @for($i = 0; $i < 3; $i++)
             <tr>
-                @for($col = 0; $col < 3; $col++)
-                    @php $cardIdx = ($row * 3) + $col; $student = $cards[$cardIdx] ?? null; @endphp
+                @for($j = 0; $j < 3; $j++)
+                    @php $idx = ($i * 3) + $j; $student = $cards[$idx] ?? null; @endphp
                     <td>
                         @if($student)
-                        <div class="card">
+                        <div class="card-inner">
                             <div class="card-qr">
                                 @if(!empty($student['qr_code_base64']))
-                                <img src="data:image/png;base64,{{ $student['qr_code_base64'] }}" alt="QR" />
+                                <img src="data:image/png;base64,{{ $student['qr_code_base64'] }}" />
                                 @else
-                                <span>-</span>
+                                <span style="color: #ccc;">-</span>
                                 @endif
                             </div>
-                            <div class="card-text">{{ $student['nis'] ?? '' }}</div>
-                            <div class="card-nama" style="text-transform: uppercase;">{{ $student['nama'] ?? '' }}</div>
-                            @if($includeClass && !empty($student['kelas']['nama_kelas']))
-                            <div class="card-kelas" style="text-transform: uppercase;">{{ $student['kelas']['nama_kelas'] ?? '' }}</div>
+                            <div class="card-text">{{ $student['nis'] }}</div>
+                            <div class="card-nama">{{ $student['nama'] }}</div>
+                            @if($includeClass && $student['kelas'])
+                            <div class="card-kelas">{{ $student['kelas']['nama_kelas'] }}</div>
                             @endif
                         </div>
                         @endif

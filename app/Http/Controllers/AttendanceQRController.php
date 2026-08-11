@@ -6,7 +6,7 @@ use App\Models\AttendanceClass;
 use App\Models\AttendanceStudent;
 use App\Services\QRCardPdfService;
 use App\Services\QRCodeService;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Spatie\LaravelPdf\Facades\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -237,18 +237,17 @@ class AttendanceQRController extends Controller
                 $pages[] = $page;
             }
 
-            $pdf = Pdf::loadView('pdfs.qr-cards-unified', [
+            $pdf = Pdf::view('pdfs.qr-cards-spatie', [
                 'pages' => $pages,
                 'layout' => $layout,
                 'includeClass' => $includeClass,
                 'schoolName' => config('app.school_name', 'SMK SPMB'),
-            ]);
-
-            $pdf->setPaper('A4', 'portrait');
+            ])
+            ->paperSize('a4')
+            ->margins(5, 5, 5, 5)
+            ->download("QR_Kartu_Siswa_{$className}_" . now()->format('Y-m-d') . '.pdf');
             
-            $filename = "QR_Kartu_Siswa_{$className}_" . now()->format('Y-m-d') . '.pdf';
-            
-            return $pdf->download($filename);
+            return $pdf;
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal generate PDF: ' . $e->getMessage());
         }
