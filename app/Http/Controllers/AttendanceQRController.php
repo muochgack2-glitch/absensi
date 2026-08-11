@@ -185,10 +185,41 @@ class AttendanceQRController extends Controller
         try {
             // Convert to array with proper structure
             $studentsArray = $students->map(function($student) {
+                $qrBase64 = null;
+                
+                // Convert SVG QR to PNG base64 for PDF compatibility
+                if ($student->qr_code_path && file_exists(storage_path('app/public/' . $student->qr_code_path))) {
+                    $qrPath = storage_path('app/public/' . $student->qr_code_path);
+                    
+                    if (str_ends_with($qrPath, '.svg')) {
+                        // Convert SVG to PNG using imagick or gd
+                        try {
+                            if (extension_loaded('imagick')) {
+                                $imagick = new \Imagick();
+                                $imagick->setBackgroundColor('white');
+                                $imagick->readImage($qrPath);
+                                $imagick->setImageFormat('png');
+                                $qrBase64 = base64_encode($imagick->getImageBlob());
+                            } else {
+                                // Fallback: read SVG as data URI
+                                $svg = file_get_contents($qrPath);
+                                $qrBase64 = base64_encode($svg);
+                            }
+                        } catch (\Exception $e) {
+                            // If conversion fails, leave it null
+                            $qrBase64 = null;
+                        }
+                    } else if (file_exists($qrPath)) {
+                        // If already PNG or other format
+                        $qrBase64 = base64_encode(file_get_contents($qrPath));
+                    }
+                }
+                
                 return [
                     'nis' => $student->nis,
                     'nama' => $student->nama,
                     'qr_code_path' => $student->qr_code_path,
+                    'qr_code_base64' => $qrBase64,
                     'kelas' => $student->kelas ? [
                         'nama_kelas' => $student->kelas->nama_kelas
                     ] : null,

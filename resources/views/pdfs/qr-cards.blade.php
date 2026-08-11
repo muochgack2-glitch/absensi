@@ -155,14 +155,8 @@
                     @if($student)
                         <div class="card">
                             <div class="card-qr">
-                                            @if(!empty($student['qr_code_path']) && file_exists(storage_path('app/public/' . $student['qr_code_path'])))
-                                    {{-- Jika file SVG, embed langsung --}}
-                                    @if(str_ends_with($student['qr_code_path'], '.svg'))
-                                        {!! file_get_contents(storage_path('app/public/' . $student['qr_code_path'])) !!}
-                                    @else
-                                        {{-- Jika PNG atau format lain --}}
-                                        <img src="{{ asset('storage/' . $student['qr_code_path']) }}" alt="QR Code">
-                                    @endif
+                                @if(!empty($student['qr_code_base64']))
+                                    <img src="data:image/png;base64,{{ $student['qr_code_base64'] }}" alt="QR Code" style="width: 100%; height: 100%;">
                                 @else
                                     {{-- Fallback: placeholder jika QR belum ada --}}
                                     <div style="width: 100%; height: 100%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 8pt; color: #999;">
