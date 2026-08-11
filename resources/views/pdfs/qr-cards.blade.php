@@ -13,23 +13,25 @@
         body {
             font-family: Arial, sans-serif;
             background: white;
+            margin: 0;
+            padding: 0;
         }
 
         .page {
             width: 210mm;
             height: 297mm;
-            padding: 5mm;
+            padding: 4mm;
             page-break-after: always;
-            page-break-inside: avoid;
+            margin: 0;
         }
 
-        table {
+        .cards-table {
             width: 100%;
             border-collapse: collapse;
         }
 
-        td {
-            width: 33.33%;
+        .card-cell {
+            width: 33.333%;
             height: 99mm;
             border: 1px solid #ccc;
             padding: 2mm;
@@ -38,32 +40,34 @@
             page-break-inside: avoid;
         }
 
-        .card-content {
+        .card-inner {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: flex-start;
             height: 100%;
-            font-size: 10px;
         }
 
-        .qr-img {
+        .qr-container {
             width: 45mm;
             height: 45mm;
-            margin-bottom: 2mm;
             border: 1px dashed #999;
+            background: #f9f9f9;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-bottom: 2mm;
+            flex-shrink: 0;
         }
 
-        .qr-img img {
+        .qr-container img {
             max-width: 100%;
             max-height: 100%;
         }
 
         .nis {
             font-weight: bold;
-            font-family: monospace;
+            font-family: 'Courier New', monospace;
             font-size: 9px;
             margin-bottom: 1mm;
         }
@@ -71,12 +75,13 @@
         .nama {
             font-size: 8px;
             margin-bottom: 1mm;
-            line-height: 1.2;
+            word-wrap: break-word;
         }
 
         .sekolah {
             font-size: 8px;
             color: #666;
+            word-wrap: break-word;
         }
 
         @page {
@@ -88,38 +93,38 @@
 <body>
 @foreach($pages as $pageIndex => $cards)
     <div class="page">
-        <table>
-            @php $row = 0; @endphp
-            @foreach($cards as $idx => $student)
-                @if($idx % 3 == 0)
-                    @if($idx > 0)
-                        </tr>
-                    @endif
-                    <tr>
-                @endif
-                <td>
-                    @if($student)
-                        <div class="card-content">
-                            <div class="qr-img">
-                                @if(!empty($student['qr_code_base64']))
-                                    <img src="data:image/png;base64,{{ $student['qr_code_base64'] }}" alt="QR">
-                                @else
-                                    <span style="color: #999; font-size: 8px;">No QR</span>
-                                @endif
+        <table class="cards-table">
+            @php $cardIndex = 0; @endphp
+            @while($cardIndex < count($cards))
+            <tr>
+                @php $colsInRow = 0; @endphp
+                @while($colsInRow < 3 && $cardIndex < count($cards))
+                    <td class="card-cell">
+                        @php $student = $cards[$cardIndex]; @endphp
+                        @if($student)
+                            <div class="card-inner">
+                                <div class="qr-container">
+                                    @if(!empty($student['qr_code_base64']))
+                                        <img src="data:image/png;base64,{{ $student['qr_code_base64'] }}" alt="QR Code" />
+                                    @else
+                                        <span style="color: #ccc; font-size: 10px;">No QR</span>
+                                    @endif
+                                </div>
+                                <div class="nis">{{ $student['nis'] ?? '-' }}</div>
+                                <div class="nama">
+                                    {{ $student['nama'] ?? '-' }}
+                                    @if($includeClass && !empty($student['kelas']['nama_kelas']))
+                                        <br/>{{ $student['kelas']['nama_kelas'] ?? '-' }}
+                                    @endif
+                                </div>
+                                <div class="sekolah">{{ $schoolName }}</div>
                             </div>
-                            <div class="nis">{{ $student['nis'] ?? 'N/A' }}</div>
-                            <div class="nama">
-                                {{ $student['nama'] ?? 'N/A' }}
-                                @if($includeClass && !empty($student['kelas']['nama_kelas']))
-                                    / {{ $student['kelas']['nama_kelas'] ?? 'N/A' }}
-                                @endif
-                            </div>
-                            <div class="sekolah">{{ $schoolName }}</div>
-                        </div>
-                    @endif
-                </td>
-            @endforeach
+                        @endif
+                    </td>
+                    @php $cardIndex++; $colsInRow++; @endphp
+                @endwhile
             </tr>
+            @endwhile
         </table>
     </div>
 @endforeach
