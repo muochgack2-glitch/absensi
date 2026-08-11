@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AttendanceClass;
 use App\Models\AttendanceStudent;
-use App\Services\QRCodeService;
 use App\Services\QRCardPdfService;
+use App\Services\QRCodeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -136,8 +137,8 @@ class AttendanceQRController extends Controller
      */
     public function generateCardsPDF(Request $request)
     {
-        ini_set('memory_limit', '256M');
-        ini_set('max_execution_time', '300');
+        ini_set('memory_limit', '512M');
+        ini_set('max_execution_time', '600');
 
         // Validate input
         $validated = $request->validate([
@@ -154,34 +155,40 @@ class AttendanceQRController extends Controller
         $query = AttendanceStudent::where('is_active', true);
         
         if ($classId) {
-            $query->where('class_id', $classId);
-            $kelas = \App\Models\AttendanceClass::find($classId);
-            $className = $kelas ? $kelas->nama_kelas : 'All';
+            $query->where('kelas_id', $classId);
+            $kelas = AttendanceClass::find($classId);
+            $className = $kelas ? $kelas->nama_kelas : 'AllClasses';
         } else {
             $className = 'Semua';
         }
 
         $students = $query
             ->with('kelas')
-            ->orderBy('class_id')
+            ->orderBy('kelas_id')
             ->orderBy('nis')
-            ->get()
-            ->map(function ($student) {
-                return [
-                    'nis' => $student->nis,
-                    'nama' => $student->nama,
-                    'kelas' => $student->kelas,
-                ];
-            })
-            ->toArray();
+            ->get();
 
-        if (empty($students)) {
+        if ($students->isEmpty()) {
             return redirect()->back()->with('warning', 'Tidak ada siswa aktif untuk di-generate.');
+        }
+
+        // Ensure all students have QR codes
+        foreach ($students as $student) {
+            if (!$student->qr_code_path || !file_exists(storage_path('app/public/' . $student->qr_code_path))) {
+                $path = $this->qrCodeService->generateQRCode($student->nis);
+                $student->update(['qr_code_path' => $path]);
+                $student->refresh();
+            }
         }
 
         // Generate PDF
         try {
-            $pdf = $this->qrCardPdfService->generatePDF($students, $layout, $includeClass);
+            $pdf = $this->qrCardPdfService->generatePDF(
+                $students->toArray(),
+                $layout,
+                $includeClass,
+                config('app.school_name', 'SMK SPMB')
+            );
             
             $filename = "QR_Kartu_Siswa_{$className}_" . now()->format('Y-m-d') . '.pdf';
             

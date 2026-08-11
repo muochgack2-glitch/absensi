@@ -217,16 +217,16 @@ Add button in students page header:
 
 ## Implementation Checklist
 
-- [ ] Create `QRCardPdfService.php` with PDF generation logic
-- [ ] Create Blade template for PDF layout (`resources/views/pdfs/qr-cards.blade.php`)
-- [ ] Add new route `attendance.qr.cards-pdf`
-- [ ] Add new controller method `generateCardsPDF()`
-- [ ] Update modal in `students/index.blade.php`
-- [ ] Add button in students page header
+- [x] Create `QRCardPdfService.php` with PDF generation logic
+- [x] Create Blade template for PDF layout (`resources/views/pdfs/qr-cards.blade.php`)
+- [x] Add new route `attendance.qr.cards-pdf`
+- [x] Add new controller method `generateCardsPDF()`
+- [x] Update modal in `students/index.blade.php`
+- [x] Add button in students page header
 - [ ] Test PDF generation with different layouts
 - [ ] Test with different screen sizes and browsers
 - [ ] Handle error cases (no students, invalid class)
-- [ ] Document the feature
+- [ ] Document the feature in user guide
 
 ---
 
