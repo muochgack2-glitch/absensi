@@ -11,7 +11,6 @@ use App\Http\Controllers\AttendanceManualController;
 use App\Http\Controllers\WhatsAppController;
 use App\Http\Controllers\WhatsAppGatewayController;
 use App\Http\Controllers\WhatsAppDiagnosticController;
-use App\Http\Controllers\StudentCardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AttendancePortalController;
 use App\Http\Controllers\AttendanceIzinController;
@@ -89,11 +88,8 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/attendance/manual/{record}', [AttendanceManualController::class, 'destroy'])
         ->name('attendance.manual.destroy');
 
-    // Students Management - Custom routes BEFORE resource (prevent {student} catching)
-    Route::get('/attendance/students/card', [StudentCardController::class, 'index'])
-        ->name('attendance.students.card');
-    Route::post('/attendance/students/card/generate', [StudentCardController::class, 'generate'])
-        ->name('attendance.students.card.generate');
+    // QR Card Generation - NOW using new AttendanceQRController
+    // Old StudentCardController routes removed - unified to new system
     
     Route::get('/attendance/students/import/form', [AttendanceStudentController::class, 'importForm'])
         ->name('attendance.students.import.form');
