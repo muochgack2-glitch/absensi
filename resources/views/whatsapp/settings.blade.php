@@ -21,8 +21,8 @@
 
         @php
             $settings = [];
-            $settings['notification'] = \App\Models\AttendanceSetting::getGroup('notification');
-            $settings['general'] = \App\Models\AttendanceSetting::getGroup('general');
+            $settings['notification'] = \App\Models\AttendanceSetting::getByGroup('notification');
+            $settings['general'] = \App\Models\AttendanceSetting::getByGroup('general');
         @endphp
 
         <form action="{{ route('attendance.settings.update') }}" method="POST">
