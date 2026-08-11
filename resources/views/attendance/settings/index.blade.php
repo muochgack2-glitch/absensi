@@ -836,6 +836,15 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                 'Klik OK untuk melanjutkan restore.'
             );
         }
+
+        // ===== Initialize toggle states on page load =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize auto absent notify toggle
+            toggleAbsentNotifyFields();
+            
+            // Initialize late warning toggle
+            toggleLateWarningFields();
+        });
     </script>
     @endpush
 </x-app-layout>
