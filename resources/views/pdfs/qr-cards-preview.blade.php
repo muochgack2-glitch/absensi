@@ -145,9 +145,9 @@
                                 @endif
                             </div>
                             <div class="text-nis">{{ $student['nis'] ?? '' }}</div>
-                            <div class="text-nama">{{ $student['nama'] ?? '' }}</div>
+                            <div class="text-nama" style="text-transform: uppercase;">{{ $student['nama'] ?? '' }}</div>
                             @if($includeClass && !empty($student['kelas']['nama_kelas']))
-                            <div class="text-kelas">{{ $student['kelas']['nama_kelas'] ?? '' }}</div>
+                            <div class="text-kelas" style="text-transform: uppercase;">{{ $student['kelas']['nama_kelas'] ?? '' }}</div>
                             @endif
                         </div>
                         @endif
