@@ -22,7 +22,7 @@
             width: 210mm;
             height: 297mm;
             margin: 0;
-            padding: 10mm;
+            padding: 5mm;
             page-break-after: always;
             position: relative;
         }
@@ -30,16 +30,16 @@
         /* Grid 3x3 Layout */
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(3, 50mm);
-            grid-template-rows: repeat(3, 60mm);
-            gap: 4mm;
-            justify-content: center;
-            height: 100%;
+            grid-template-columns: repeat(3, 1fr);
+            grid-auto-rows: 60mm;
+            gap: 3mm;
+            width: 100%;
         }
 
         /* Kartu Individual */
         .card {
-            width: 50mm;
+            width: 100%;
+            max-width: 50mm;
             height: 60mm;
             border: 1px solid #ddd;
             display: flex;
@@ -47,21 +47,21 @@
             align-items: center;
             justify-content: flex-start;
             background: white;
-            padding: 1.5mm;
+            padding: 1mm;
             box-sizing: border-box;
             page-break-inside: avoid;
         }
 
         /* QR Code Container */
         .card-qr {
-            width: 47mm;
-            height: 47mm;
+            width: 45mm;
+            height: 45mm;
             background: #f5f5f5;
             border: 1px dashed #999;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 1mm;
+            margin-bottom: 0.5mm;
             margin-top: 0;
             flex-shrink: 0;
             overflow: hidden;
@@ -76,37 +76,38 @@
 
         /* NIS */
         .card-nis {
-            font-size: 10pt;
+            font-size: 9pt;
             font-weight: bold;
             font-family: 'Courier New', monospace;
-            margin-bottom: 0.5mm;
-            letter-spacing: 0.5px;
+            margin-bottom: 0.3mm;
+            letter-spacing: 0.3px;
             text-align: center;
+            line-height: 1;
         }
 
         /* Nama / Kelas (1 baris) */
         .card-nama {
-            font-size: 9pt;
+            font-size: 8pt;
             text-align: center;
-            line-height: 1.2;
-            max-width: 44mm;
+            line-height: 1;
+            max-width: 43mm;
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
             -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
             line-clamp: 1;
-            margin-bottom: 0.5mm;
+            margin-bottom: 0.2mm;
             font-weight: 500;
         }
 
         /* Sekolah */
         .card-sekolah {
-            font-size: 9pt;
+            font-size: 8pt;
             color: #666;
             text-align: center;
-            line-height: 1.2;
-            max-width: 44mm;
+            line-height: 1;
+            max-width: 43mm;
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
