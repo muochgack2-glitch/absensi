@@ -82,6 +82,16 @@ class AttendanceSettingController extends Controller
             AttendanceSetting::set('late_warning_enabled', '0');
         }
 
+        // Handle late_notify_enabled checkbox (jika unchecked, tidak ada di request)
+        if (!isset($request->settings['late_notify_enabled'])) {
+            AttendanceSetting::set('late_notify_enabled', 'false');
+        }
+
+        // Handle auto_absent_notify checkbox (jika unchecked, tidak ada di request)
+        if (!isset($request->settings['auto_absent_notify'])) {
+            AttendanceSetting::set('auto_absent_notify', '0');
+        }
+
         // Handle absent notify days (dari checkbox terpisah, sudah dikumpulkan JS)
         // Jika kosong (semua dicentang batal), simpan string kosong
         if ($request->has('settings') && isset($request->settings['absent_notify_days'])) {
