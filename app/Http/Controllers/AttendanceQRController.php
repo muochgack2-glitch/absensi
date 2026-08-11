@@ -183,8 +183,20 @@ class AttendanceQRController extends Controller
 
         // Generate PDF
         try {
+            // Convert to array with proper structure
+            $studentsArray = $students->map(function($student) {
+                return [
+                    'nis' => $student->nis,
+                    'nama' => $student->nama,
+                    'qr_code_path' => $student->qr_code_path,
+                    'kelas' => $student->kelas ? [
+                        'nama_kelas' => $student->kelas->nama_kelas
+                    ] : null,
+                ];
+            })->toArray();
+
             $pdf = $this->qrCardPdfService->generatePDF(
-                $students->toArray(),
+                $studentsArray,
                 $layout,
                 $includeClass,
                 config('app.school_name', 'SMK SPMB')

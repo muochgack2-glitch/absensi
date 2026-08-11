@@ -155,13 +155,13 @@
                     @if($student)
                         <div class="card">
                             <div class="card-qr">
-                                @if($student->qr_code_path && file_exists(storage_path('app/public/' . $student->qr_code_path)))
+                                            @if(!empty($student['qr_code_path']) && file_exists(storage_path('app/public/' . $student['qr_code_path'])))
                                     {{-- Jika file SVG, embed langsung --}}
-                                    @if(str_ends_with($student->qr_code_path, '.svg'))
-                                        {!! file_get_contents(storage_path('app/public/' . $student->qr_code_path)) !!}
+                                    @if(str_ends_with($student['qr_code_path'], '.svg'))
+                                        {!! file_get_contents(storage_path('app/public/' . $student['qr_code_path'])) !!}
                                     @else
                                         {{-- Jika PNG atau format lain --}}
-                                        <img src="{{ asset('storage/' . $student->qr_code_path) }}" alt="QR Code">
+                                        <img src="{{ asset('storage/' . $student['qr_code_path']) }}" alt="QR Code">
                                     @endif
                                 @else
                                     {{-- Fallback: placeholder jika QR belum ada --}}
@@ -170,11 +170,11 @@
                                     </div>
                                 @endif
                             </div>
-                            <div class="card-nis">{{ $student->nis ?? 'N/A' }}</div>
+                            <div class="card-nis">{{ $student['nis'] ?? 'N/A' }}</div>
                             <div class="card-nama">
-                                {{ $student->nama ?? 'N/A' }}
-                                @if($includeClass && $student->kelas)
-                                    / {{ $student->kelas->nama_kelas ?? 'N/A' }}
+                                {{ $student['nama'] ?? 'N/A' }}
+                                @if($includeClass && !empty($student['kelas']))
+                                    / {{ $student['kelas']['nama_kelas'] ?? 'N/A' }}
                                 @endif
                             </div>
                             <div class="card-sekolah">{{ $schoolName }}</div>
