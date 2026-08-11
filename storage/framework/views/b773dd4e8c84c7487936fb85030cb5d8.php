@@ -88,18 +88,6 @@
                         Generate QR Massal
                     </button>
 
-                    <button
-                        type="button"
-                        onclick="document.getElementById('modalQRCardsPDF').classList.remove('hidden')"
-                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 text-white"
-                        style="background: linear-gradient(to right, #dc2626, #991b1b);"
-                        onmouseover="this.style.background='linear-gradient(to right, #991b1b, #7f1d1d)'"
-                        onmouseout="this.style.background='linear-gradient(to right, #dc2626, #991b1b)'"
-                    >
-                        <i class="fas fa-file-pdf mr-2"></i>
-                        Cetak Kartu QR (PDF)
-                    </button>
-
                     <a
                         href="<?php echo e(route('attendance.students.create')); ?>"
                         class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 shadow-md hover:shadow-lg hover:-translate-y-0.5"
@@ -1236,31 +1224,6 @@
         </div>
     </div>
 
-    
-    <div id="modalQRCardsPDF" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
-        
-        <div
-            class="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onclick="document.getElementById('modalQRCardsPDF').classList.add('hidden')"
-        ></div>
-
-        
-        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-auto my-8 p-6 z-10 max-h-[90vh] overflow-y-auto">
-            
-            <div class="flex items-center justify-center w-14 h-14 rounded-full bg-red-100 dark:bg-red-900/40 mx-auto mb-4">
-                <i class="fas fa-file-pdf text-2xl text-red-600 dark:text-red-400"></i>
-            </div>
-
-            <h3 class="text-lg font-bold text-center text-gray-900 dark:text-white mb-1">Cetak Kartu QR (PDF)</h3>
-            <p class="text-sm text-center text-gray-500 dark:text-gray-400 mb-6">
-                Generate PDF dengan kartu QR untuk distribusi ke siswa.
-            </p>
-
-            
-            <form id="formQRCardsPDF" method="POST" action="<?php echo e(route('attendance.qr.cards-pdf')); ?>">
-                <?php echo csrf_field(); ?>
-
-                
                 <div class="mb-5">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Kelas
@@ -1365,9 +1328,6 @@
                         Batal
                     </button>
                 </div>
-            </form>
-        </div>
-    </div>
 
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>

@@ -618,31 +618,6 @@
         </div>
     </div>
 
-    {{-- Modal Generate QR Cards PDF --}}
-    <div id="modalQRCardsPDF" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
-        {{-- Backdrop --}}
-        <div
-            class="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onclick="document.getElementById('modalQRCardsPDF').classList.add('hidden')"
-        ></div>
-
-        {{-- Modal Box --}}
-        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-auto my-8 p-6 z-10 max-h-[90vh] overflow-y-auto">
-            {{-- Icon --}}
-            <div class="flex items-center justify-center w-14 h-14 rounded-full bg-red-100 dark:bg-red-900/40 mx-auto mb-4">
-                <i class="fas fa-file-pdf text-2xl text-red-600 dark:text-red-400"></i>
-            </div>
-
-            <h3 class="text-lg font-bold text-center text-gray-900 dark:text-white mb-1">Cetak Kartu QR (PDF)</h3>
-            <p class="text-sm text-center text-gray-500 dark:text-gray-400 mb-6">
-                Generate PDF dengan kartu QR untuk distribusi ke siswa.
-            </p>
-
-            {{-- Form --}}
-            <form id="formQRCardsPDF" method="POST" action="{{ route('attendance.qr.cards-pdf') }}">
-                @csrf
-
-                {{-- Select Class --}}
                 <div class="mb-5">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Kelas
@@ -747,8 +722,5 @@
                         Batal
                     </button>
                 </div>
-            </form>
-        </div>
-    </div>
 
 </x-app-layout>
