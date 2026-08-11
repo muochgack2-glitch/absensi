@@ -39,6 +39,9 @@ class AttendanceSettingController extends Controller
             'settings.absent_notify_time'            => 'nullable|date_format:H:i',
             'settings.absent_notify_days'            => 'nullable|string',
             'settings.late_notify_enabled'           => 'nullable|string|in:true,false',
+            'settings.late_warning_enabled'          => 'nullable|boolean',
+            'settings.late_warning_threshold_minutes' => 'nullable|integer|min:1|max:120',
+            'settings.late_warning_min_count'        => 'nullable|integer|min:1|max:20',
         ];
 
         $messages = [

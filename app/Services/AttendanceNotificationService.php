@@ -56,6 +56,200 @@ class AttendanceNotificationService
 
         // Log notification attempt
         $this->logNotification($student->id, 'check_in', $result);
+
+        // Check if late warning should be sent
+        if ($record->status === 'terlambat') {
+            $this->checkAndSendLateWarning($student, $record);
+        }
+    }
+
+    /**
+     * Check and send late warning notification if conditions are met.
+     *
+     * @param AttendanceStudent $student
+     * @param AttendanceRecord $record
+     * @return void
+     */
+    private function checkAndSendLateWarning(AttendanceStudent $student, AttendanceRecord $record): void
+    {
+        // Check if late warning is enabled
+        $enabled = AttendanceSetting::get('late_warning_enabled', 'false');
+        if ($enabled !== 'true' && $enabled !== '1' && $enabled !== 1) {
+            Log::debug("Late warning disabled");
+            return;
+        }
+
+        // Check if student has parent phone number
+        if (empty($student->no_hp_ortu)) {
+            return;
+        }
+
+        // Get threshold settings
+        $thresholdMinutes = (int) AttendanceSetting::get('late_warning_threshold_minutes', 30);
+        $minCount = (int) AttendanceSetting::get('late_warning_min_count', 3);
+
+        // Calculate how late the student is
+        $checkInTime = \Carbon\Carbon::parse($record->check_in_time);
+        $targetTime = \Carbon\Carbon::parse(AttendanceSetting::get('check_in_time', '07:00:00'));
+        $minutesLate = $checkInTime->diffInMinutes($targetTime, false);
+
+        // If not late enough, skip
+        if ($minutesLate < $thresholdMinutes) {
+            Log::debug("Student not late enough for warning", [
+                'minutes_late' => $minutesLate,
+                'threshold' => $thresholdMinutes
+            ]);
+            return;
+        }
+
+        // Count late records in current month
+        $startOfMonth = \Carbon\Carbon::now()->startOfMonth();
+        $endOfMonth = \Carbon\Carbon::now()->endOfMonth();
+
+        $lateRecords = AttendanceRecord::where('student_id', $student->id)
+            ->where('status', 'terlambat')
+            ->whereBetween('date', [$startOfMonth, $endOfMonth])
+            ->get();
+
+        $lateCount = $lateRecords->count();
+
+        // If not enough late occurrences, skip
+        if ($lateCount < $minCount) {
+            Log::debug("Student not late enough times for warning", [
+                'late_count' => $lateCount,
+                'min_count' => $minCount
+            ]);
+            return;
+        }
+
+        // Calculate statistics
+        $totalMinutesLate = 0;
+        $lateMinutesByDate = [];
+
+        foreach ($lateRecords as $lateRecord) {
+            $lateCheckIn = \Carbon\Carbon::parse($lateRecord->check_in_time);
+            $target = \Carbon\Carbon::parse($lateRecord->date->format('Y-m-d') . ' ' . AttendanceSetting::get('check_in_time', '07:00:00'));
+            $minutes = $lateCheckIn->diffInMinutes($target, false);
+            
+            if ($minutes > 0) {
+                $totalMinutesLate += $minutes;
+                $lateMinutesByDate[$lateRecord->date->format('Y-m-d')] = $minutes;
+            }
+        }
+
+        // Calculate trend (comparing first half vs second half of the month)
+        $trend = $this->calculateLateTrend($lateMinutesByDate);
+
+        // Format and send warning message
+        $schoolName = AttendanceSetting::get('school_name', 'Sekolah');
+        $message = $this->formatLateWarningMessage(
+            $student,
+            $schoolName,
+            $lateCount,
+            $totalMinutesLate,
+            $trend
+        );
+
+        // Send notification
+        $result = $this->whatsAppService->sendParentNotification(
+            $student->no_hp_ortu,
+            $message
+        );
+
+        // Log notification attempt
+        $this->logNotification($student->id, 'late_warning', $result);
+
+        Log::info("Late warning sent", [
+            'student_id' => $student->id,
+            'late_count' => $lateCount,
+            'total_minutes' => $totalMinutesLate,
+            'trend' => $trend
+        ]);
+    }
+
+    /**
+     * Calculate late trend based on dates.
+     *
+     * @param array $lateMinutesByDate
+     * @return string
+     */
+    private function calculateLateTrend(array $lateMinutesByDate): string
+    {
+        if (count($lateMinutesByDate) < 2) {
+            return 'stable';
+        }
+
+        // Sort by date
+        ksort($lateMinutesByDate);
+        $dates = array_keys($lateMinutesByDate);
+        $values = array_values($lateMinutesByDate);
+
+        // Split into two halves
+        $midpoint = (int) floor(count($values) / 2);
+        $firstHalf = array_slice($values, 0, $midpoint);
+        $secondHalf = array_slice($values, $midpoint);
+
+        if (empty($firstHalf) || empty($secondHalf)) {
+            return 'stable';
+        }
+
+        $avgFirst = array_sum($firstHalf) / count($firstHalf);
+        $avgSecond = array_sum($secondHalf) / count($secondHalf);
+
+        // Calculate percentage change
+        $percentageChange = (($avgSecond - $avgFirst) / $avgFirst) * 100;
+
+        if ($percentageChange > 20) {
+            return 'meningkat';
+        } elseif ($percentageChange < -20) {
+            return 'menurun';
+        } else {
+            return 'stabil';
+        }
+    }
+
+    /**
+     * Format late warning message.
+     *
+     * @param AttendanceStudent $student
+     * @param string $schoolName
+     * @param int $lateCount
+     * @param int $totalMinutes
+     * @param string $trend
+     * @return string
+     */
+    private function formatLateWarningMessage(
+        AttendanceStudent $student,
+        string $schoolName,
+        int $lateCount,
+        int $totalMinutes,
+        string $trend
+    ): string {
+        $trendEmoji = match ($trend) {
+            'meningkat' => '📈',
+            'menurun' => '📉',
+            default => '➡️',
+        };
+
+        $trendLabel = match ($trend) {
+            'meningkat' => 'Meningkat',
+            'menurun' => 'Menurun',
+            default => 'Stabil',
+        };
+
+        $message = "🏫 *{$schoolName}*\n";
+        $message .= "⚠️ *PERINGATAN KETERLAMBATAN*\n\n";
+        $message .= "Siswa: *{$student->nama}*\n";
+        $message .= "Kelas: {$student->kelas->nama_kelas}\n\n";
+        $message .= "📊 *Statistik Bulan Ini:*\n";
+        $message .= "• Total Terlambat: *{$lateCount}x*\n";
+        $message .= "• Akumulasi Waktu: *{$totalMinutes} menit*\n";
+        $message .= "• Trend: {$trendEmoji} *{$trendLabel}*\n\n";
+        $message .= "⚠️ Mohon perhatian lebih untuk kedisiplinan waktu.\n";
+        $message .= "Keterlambatan berulang dapat mempengaruhi prestasi belajar.\n\n";
+        $message .= "_Pesan otomatis dari sistem absensi_";
+
+        return $message;
     }
 
     /**
