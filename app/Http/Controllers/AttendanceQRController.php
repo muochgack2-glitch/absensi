@@ -6,6 +6,7 @@ use App\Models\AttendanceClass;
 use App\Models\AttendanceStudent;
 use App\Services\QRCardPdfService;
 use App\Services\QRCodeService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
