@@ -65,7 +65,7 @@
                     </a>
                 </div>
 
-                {{-- Baris 2: Generate QR Massal + Tambah Siswa --}}
+                {{-- Baris 2: Generate QR Massal + Cetak Kartu PDF + Tambah Siswa --}}
                 <div class="flex flex-wrap gap-2">
                     <button
                         type="button"
@@ -77,6 +77,18 @@
                     >
                         <i class="fas fa-qrcode mr-2"></i>
                         Generate QR Massal
+                    </button>
+
+                    <button
+                        type="button"
+                        onclick="document.getElementById('modalQRCardsPDF').classList.remove('hidden')"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 text-white"
+                        style="background: linear-gradient(to right, #dc2626, #991b1b);"
+                        onmouseover="this.style.background='linear-gradient(to right, #991b1b, #7c2d12)'"
+                        onmouseout="this.style.background='linear-gradient(to right, #dc2626, #991b1b)'"
+                    >
+                        <i class="fas fa-file-pdf mr-2"></i>
+                        Cetak Kartu QR (PDF)
                     </button>
 
                     <a
@@ -618,81 +630,136 @@
         </div>
     </div>
 
-    {{-- Modal Bulk Generate QR --}}
-    <div id="modalBulkQR" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+    {{-- Modal Generate QR Cards PDF --}}
+    <div id="modalQRCardsPDF" class="hidden fixed inset-0 z-50 flex items-center justify-center">
         {{-- Backdrop --}}
         <div
             class="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onclick="document.getElementById('modalBulkQR').classList.add('hidden')"
+            onclick="document.getElementById('modalQRCardsPDF').classList.add('hidden')"
         ></div>
 
         {{-- Modal Box --}}
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 z-10">
             {{-- Icon --}}
-            <div class="flex items-center justify-center w-14 h-14 rounded-full bg-green-100 dark:bg-green-900/40 mx-auto mb-4">
-                <i class="fas fa-qrcode text-2xl text-green-600 dark:text-green-400"></i>
+            <div class="flex items-center justify-center w-14 h-14 rounded-full bg-red-100 dark:bg-red-900/40 mx-auto mb-4">
+                <i class="fas fa-file-pdf text-2xl text-red-600 dark:text-red-400"></i>
             </div>
 
-            <h3 class="text-lg font-bold text-center text-gray-900 dark:text-white mb-1">Generate QR Code Massal</h3>
+            <h3 class="text-lg font-bold text-center text-gray-900 dark:text-white mb-1">Cetak Kartu QR (PDF)</h3>
             <p class="text-sm text-center text-gray-500 dark:text-gray-400 mb-6">
-                Pilih mode generate untuk semua siswa aktif.
+                Generate PDF dengan kartu QR untuk distribusi ke siswa.
             </p>
 
-            {{-- Statistik --}}
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <div class="text-center p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                    <div class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ \App\Models\AttendanceStudent::where('is_active', true)->count() }}
-                    </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Total Siswa Aktif</div>
-                </div>
-                <div class="text-center p-3 rounded-xl bg-yellow-50 dark:bg-yellow-900/20">
-                    <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-                        {{ \App\Models\AttendanceStudent::where('is_active', true)->whereNull('qr_code_path')->count() }}
-                    </div>
-                    <div class="text-xs text-yellow-600 dark:text-yellow-400 mt-0.5">Belum Ada QR</div>
-                </div>
-            </div>
-
-            {{-- Form: hanya yang belum ada --}}
-            <form method="POST" action="{{ route('attendance.qr.bulk-generate') }}" id="formBulkMissing">
+            {{-- Form --}}
+            <form id="formQRCardsPDF" method="POST" action="{{ route('attendance.qr.cards-pdf') }}">
                 @csrf
-                <input type="hidden" name="only_missing" value="1">
-            </form>
 
-            {{-- Form: generate ulang semua --}}
-            <form method="POST" action="{{ route('attendance.qr.bulk-generate') }}" id="formBulkAll">
-                @csrf
-                <input type="hidden" name="only_missing" value="0">
-            </form>
+                {{-- Select Class --}}
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Kelas
+                    </label>
+                    <select
+                        name="class_id"
+                        class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white text-sm transition-all"
+                    >
+                        <option value="">-- Semua Siswa Aktif --</option>
+                        @foreach(\App\Models\AttendanceClass::orderBy('nama_kelas')->get() as $kelas)
+                            <option value="{{ $kelas->id }}">
+                                {{ $kelas->nama_kelas }} ({{ $kelas->students()->where('is_active', true)->count() }} siswa)
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
-            {{-- Tombol Aksi --}}
-            <div class="space-y-2">
-                <button
-                    type="submit"
-                    form="formBulkMissing"
-                    class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all shadow-md"
-                >
-                    <i class="fas fa-plus-circle mr-2"></i>
-                    Generate Yang Belum Ada
-                </button>
-                <button
-                    type="submit"
-                    form="formBulkAll"
-                    onclick="return confirm('Generate ulang QR untuk SEMUA siswa aktif? File QR lama akan ditimpa.')"
-                    class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40 border border-green-200 dark:border-green-700 transition-all"
-                >
-                    <i class="fas fa-redo mr-2"></i>
-                    Generate Ulang Semua
-                </button>
-                <button
-                    type="button"
-                    onclick="document.getElementById('modalBulkQR').classList.add('hidden')"
-                    class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
-                >
-                    Batal
-                </button>
-            </div>
+                {{-- Select Layout --}}
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                        Layout Kartu per Halaman
+                    </label>
+                    <div class="space-y-2">
+                        <label class="flex items-center p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all">
+                            <input
+                                type="radio"
+                                name="layout"
+                                value="3x3"
+                                checked
+                                class="w-4 h-4 text-red-600 focus:ring-red-500"
+                            >
+                            <span class="ml-3 text-sm">
+                                <span class="font-medium text-gray-900 dark:text-white">3x3 Layout</span>
+                                <span class="text-gray-500 dark:text-gray-400 block text-xs mt-0.5">
+                                    9 kartu per halaman (5cm x 6cm) - Ukuran besar, lebih jelas
+                                </span>
+                            </span>
+                        </label>
+                        <label class="flex items-center p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all">
+                            <input
+                                type="radio"
+                                name="layout"
+                                value="4x4"
+                                class="w-4 h-4 text-red-600 focus:ring-red-500"
+                            >
+                            <span class="ml-3 text-sm">
+                                <span class="font-medium text-gray-900 dark:text-white">4x4 Layout</span>
+                                <span class="text-gray-500 dark:text-gray-400 block text-xs mt-0.5">
+                                    16 kartu per halaman - Lebih kompak
+                                </span>
+                            </span>
+                        </label>
+                        <label class="flex items-center p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all">
+                            <input
+                                type="radio"
+                                name="layout"
+                                value="6x6"
+                                class="w-4 h-4 text-red-600 focus:ring-red-500"
+                            >
+                            <span class="ml-3 text-sm">
+                                <span class="font-medium text-gray-900 dark:text-white">6x6 Layout</span>
+                                <span class="text-gray-500 dark:text-gray-400 block text-xs mt-0.5">
+                                    36 kartu per halaman - Paling kompak, hemat kertas
+                                </span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                {{-- Include Class Name --}}
+                <div class="mb-6">
+                    <label class="flex items-center p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all">
+                        <input
+                            type="checkbox"
+                            name="include_class"
+                            value="1"
+                            class="w-4 h-4 text-red-600 rounded focus:ring-red-500"
+                        >
+                        <span class="ml-3 text-sm">
+                            <span class="font-medium text-gray-900 dark:text-white">Tampilkan nama kelas di kartu</span>
+                            <span class="text-gray-500 dark:text-gray-400 block text-xs mt-0.5">
+                                Contoh: "Agus Setiawan / X-AKALBR"
+                            </span>
+                        </span>
+                    </label>
+                </div>
+
+                {{-- Action Buttons --}}
+                <div class="flex gap-2">
+                    <button
+                        type="submit"
+                        class="flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 transition-all shadow-md"
+                    >
+                        <i class="fas fa-download mr-2"></i>
+                        Download PDF
+                    </button>
+                    <button
+                        type="button"
+                        onclick="document.getElementById('modalQRCardsPDF').classList.add('hidden')"
+                        class="flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                    >
+                        Batal
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 

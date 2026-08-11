@@ -179,6 +179,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/attendance/qr/bulk-generate', [AttendanceQRController::class, 'bulkGenerate'])
         ->name('attendance.qr.bulk-generate');
 
+    Route::post('/attendance/qr/cards-pdf', [AttendanceQRController::class, 'generateCardsPDF'])
+        ->name('attendance.qr.cards-pdf');
+
     // Settings
     Route::get('/attendance/settings', [AttendanceSettingController::class, 'index'])
         ->name('attendance.settings.index');

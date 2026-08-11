@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocup Kartu QR 5x5cm</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f0f0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 24px;
+        }
+
+        .info {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        /* A4 Page Setup untuk Print */
+        .print-page {
+            width: 210mm;
+            height: 297mm;
+            background: white;
+            margin: 0 auto 20px;
+            padding: 10mm;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* Grid 3x3 (9 kartu per halaman) */
+        /* A4 - Margin 10mm semua sisi = 190mm x 277mm */
+        /* 3x3 layout: 3 kartu per baris x 3 baris */
+        /* Ukuran kartu: 5cm x 6cm = 50mm x 60mm */
+        /* Spacing antar kartu: ~4mm */
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 50mm);
+            grid-template-rows: repeat(3, 60mm);
+            gap: 4mm;
+            justify-content: center;
+        }
+
+        .card {
+            width: 50mm;
+            height: 60mm;
+            border: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            background: white;
+            padding: 1.5mm;
+            box-sizing: border-box;
+            page-break-inside: avoid;
+        }
+
+        .card-qr {
+            width: 47mm;
+            height: 47mm;
+            background: #f5f5f5;
+            border: 1px dashed #999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1mm;
+            margin-top: 0;
+            font-size: 10px;
+            color: #999;
+            flex-shrink: 0;
+        }
+
+        .card-qr svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .card-nis {
+            font-size: 10px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 0.5mm;
+            letter-spacing: 0.5px;
+        }
+
+        .card-nama {
+            font-size: 9px;
+            text-align: center;
+            line-height: 1;
+            max-width: 44mm;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            margin-bottom: 0.5mm;
+        }
+
+        .card-sekolah {
+            font-size: 9px;
+            color: #999;
+            text-align: center;
+            line-height: 1;
+            max-width: 44mm;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+        }
+
+        /* Demo QR Code Placeholder */
+        .demo-qr {
+            width: 26mm;
+            height: 26mm;
+            background: linear-gradient(135deg, #333 25%, transparent 25%, transparent 75%, #333 75%, #333),
+                        linear-gradient(135deg, #333 25%, transparent 25%, transparent 75%, #333 75%, #333);
+            background-size: 4mm 4mm;
+            background-position: 0 0, 2mm 2mm;
+            background-color: #fff;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                max-width: 100%;
+            }
+            h1, .info {
+                display: none;
+            }
+            .print-page {
+                margin: 0;
+                padding: 10mm;
+                box-shadow: none;
+                page-break-after: always;
+            }
+        }
+
+        /* Tombol Control */
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-print {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-print:hover {
+            background: #2563eb;
+        }
+
+        .btn-preview {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-preview:hover {
+            background: #059669;
+        }
+
+        .btn-download {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #d97706;
+        }
+
+        /* Legend */
+        .legend {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .legend h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .legend ul {
+            list-style: none;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .legend li {
+            margin: 5px 0;
+        }
+
+        .legend li strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Mocup Kartu QR Code 5cm x 6cm (Portrait)</h1>
+        <p class="info">Untuk Distribusi ke Siswa - Layout 3x3 (9 kartu per halaman A4)</p>
+
+        <div class="legend">
+            <h3>ℹ️ Spesifikasi Kartu:</h3>
+            <ul>
+                <li><strong>Ukuran Kartu:</strong> 5cm (lebar) x 6cm (tinggi) = 50mm x 60mm</li>
+                <li><strong>Layout:</strong> 3 kolom x 3 baris = 9 kartu per halaman A4</li>
+                <li><strong>QR Code:</strong> 47mm x 47mm (maksimal, rata ke atas)</li>
+                <li><strong>Konten Kartu:</strong></li>
+                <ul style="margin-left: 20px;">
+                    <li>NIS (10pt, monospace) - untuk identifikasi</li>
+                    <li>Nama / Kelas (9pt) - 1 baris (misal: Agus Setiawan / X-AKALBR)</li>
+                    <li>Sekolah (8pt) - nama sekolah</li>
+                </ul>
+                <li><strong>Background:</strong> Putih dengan border abu-abu</li>
+                <li><strong>Spacing:</strong> 4mm antar kartu (untuk potongan manual)</li>
+                <li><strong>Total Halaman:</strong> ~12 halaman untuk 100 siswa</li>
+            </ul>
+        </div>
+
+        <div class="controls">
+            <button class="btn-preview" onclick="previewMode()">👁️ Preview (Zoom 100%)</button>
+            <button class="btn-print" onclick="window.print()">🖨️ Print / Export PDF</button>
+            <button class="btn-download" onclick="downloadPDF()">⬇️ Download PDF</button>
+        </div>
+
+        <!-- HALAMAN 1 -->
+        <div class="print-page" id="page1">
+            <div class="cards-grid">
+                <!-- Kartu 1 -->
+                <div class="card">
+                    <div class="card-qr">
+                        <div class="demo-qr"></div>
+                    </div>
+                    <div class="card-nis">12001</div>
+                    <div class="card-nama">Agus Setiawan / X-AKALBR</div>
+                    <div class="card-sekolah">SMK SPMB</div>
+                </div>
+
+                <!-- Kartu 2 -->
+                <div class="card">
+                    <div class="card-qr">
+                        <div class="demo-qr"></div>
+                    </div>
+                    <div class="card-nis">12002</div>
+                    <div class="card-nama">Budi Santoso / X-AKALBR</div>
+                    <div class="card-sekolah">SMK SPMB</div>
+                </div>
+
+                <!-- Kartu 3 -->
+                <div class="card">
+                    <div class="card-qr">
+                        <div class="demo-qr"></div>
+                    </div>
+                    <div class="card-nis">12003</div>
+                    <div class="card-nama">Citra Dewi / X-AKALBR</div>
+                    <div class="card-sekolah">SMK SPMB</div>
+                </div>
+
+                <!-- Kartu 4 -->
+                <div class="card">
+                    <div class="card-qr">
+                        <div class="demo-qr"></div>
+                    </div>
+                    <div class="card-nis">12004</div>
+                    <div class="card-nama">Diana Kusuma / X-AKALBR</div>
+                    <div class="card-sekolah">SMK SPMB</div>
+                </div>
+
+                <!-- Kartu 5 -->
+                <div class="card">
+                    <div class="card-qr">
+                        <div class="demo-qr"></div>
+                    </div>
+                    <div class="card-nis">12005</div>
+                    <div class="card-nama">Eka Putri / X-AKALBR</div>
+                    <div class="card-sekolah">SMK SPMB</div>
+                </div>
+
+                <!-- Kartu 6 -->
+                <div class="card">
+                    <div class="card-qr">
+                        <div class="demo-qr"></div>
+                    </div>
+                    <div class="card-nis">12006</div>
+                    <div class="card-nama">Fajar Rahman / X-AKALBR</div>
+                    <div class="card-sekolah">SMK SPMB</div>
+                </div>
+
+                <!-- Kartu 7 -->
+                <div class="card">
+                    <div class="card-qr">
+                        <div class="demo-qr"></div>
+                    </div>
+                    <div class="card-nis">12007</div>
+                    <div class="card-nama">Galih Wijaya / X-AKALBR</div>
+                    <div class="card-sekolah">SMK SPMB</div>
+                </div>
+
+                <!-- Kartu 8 -->
+                <div class="card">
+                    <div class="card-qr">
+                        <div class="demo-qr"></div>
+                    </div>
+                    <div class="card-nis">12008</div>
+                    <div class="card-nama">Hendra Kusuma / X-AKALBR</div>
+                    <div class="card-sekolah">SMK SPMB</div>
+                </div>
+
+                <!-- Kartu 9 -->
+                <div class="card">
+                    <div class="card-qr">
+                        <div class="demo-qr"></div>
+                    </div>
+                    <div class="card-nis">12009</div>
+                    <div class="card-nama">Ika Lestari / X-AKALBR</div>
+                    <div class="card-sekolah">SMK SPMB</div>
+                </div>
+
+                <!-- Kartu 10 -->
+                <div class="card">
+                    <div class="card-qr">
+                        <div class="demo-qr"></div>
+                    </div>
+                    <div class="card-nis">12010</div>
+                    <div class="card-nama">Joko Susanto / X-AKALBR</div>
+                    <div class="card-sekolah">SMK SPMB</div>
+                </div>
+
+                <!-- Kartu 11 -->
+                <div class="card">
+                    <div class="card-qr">
+                        <div class="demo-qr"></div>
+                    </div>
+                    <div class="card-nis">12011</div>
+                    <div class="card-nama">Koko Hermawan / X-AKALBR</div>
+                    <div class="card-sekolah">SMK SPMB</div>
+                </div>
+
+                <!-- Kartu 12 -->
+                <div class="card">
+                    <div class="card-qr">
+                        <div class="demo-qr"></div>
+                    </div>
+                    <div class="card-nis">12012</div>
+                    <div class="card-nama">Lina Marlina / X-AKALBR</div>
+                    <div class="card-sekolah">SMK SPMB</div>
+                </div>
+
+                <!-- Kartu 13 -->
+                <div class="card">
+                    <div class="card-qr">
+                        <div class="demo-qr"></div>
+                    </div>
+                    <div class="card-nis">12013</div>
+                    <div class="card-nama">Mirna Sari / X-AKALBR</div>
+                    <div class="card-sekolah">SMK SPMB</div>
+                </div>
+
+                <!-- Kartu 14 -->
+                <div class="card">
+                    <div class="card-qr">
+                        <div class="demo-qr"></div>
+                    </div>
+                    <div class="card-nis">12014</div>
+                    <div class="card-nama">Nana Wijaya / X-AKALBR</div>
+                    <div class="card-sekolah">SMK SPMB</div>
+                </div>
+
+                <!-- Kartu 15 -->
+                <div class="card">
+                    <div class="card-qr">
+                        <div class="demo-qr"></div>
+                    </div>
+                    <div class="card-nis">12015</div>
+                    <div class="card-nama">Oki Pratama / X-AKALBR</div>
+                    <div class="card-sekolah">SMK SPMB</div>
+                </div>
+
+                <!-- Kartu 16 -->
+                <div class="card">
+                    <div class="card-qr">
+                        <div class="demo-qr"></div>
+                    </div>
+                    <div class="card-nis">12016</div>
+                    <div class="card-nama">Putri Handoko / X-AKALBR</div>
+                    <div class="card-sekolah">SMK SPMB</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function previewMode() {
+            // Set zoom to 100% untuk preview
+            document.body.style.zoom = '100%';
+            alert('Preview mode: Zoom 100%\nKlik "Print / Export PDF" untuk melihat hasil final.');
+        }
+
+        function downloadPDF() {
+            alert('Fitur download akan diimplementasikan di backend.\nGunakan "Print / Export PDF" kemudian save as PDF.');
+        }
+
+        // Print styling
+        window.addEventListener('beforeprint', function() {
+            console.log('Preparing to print...');
+        });
+    </script>
+</body>
+</html>

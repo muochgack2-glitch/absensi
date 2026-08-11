@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\AttendanceStudent;
 use App\Services\QRCodeService;
+use App\Services\QRCardPdfService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class AttendanceQRController extends Controller
 {
     public function __construct(
-        private QRCodeService $qrCodeService
+        private QRCodeService $qrCodeService,
+        private QRCardPdfService $qrCardPdfService
     ) {}
 
     /**
@@ -122,5 +124,70 @@ class AttendanceQRController extends Controller
         }
 
         return redirect()->back()->with('success', $message);
+    }
+
+    /**
+     * Generate PDF dengan kartu QR untuk distribusi ke siswa.
+     *
+     * POST /attendance/qr/cards-pdf
+     *
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function generateCardsPDF(Request $request)
+    {
+        ini_set('memory_limit', '256M');
+        ini_set('max_execution_time', '300');
+
+        // Validate input
+        $validated = $request->validate([
+            'class_id' => 'nullable|exists:attendance_classes,id',
+            'layout' => 'in:3x3,4x4,6x6',
+            'include_class' => 'boolean',
+        ]);
+
+        $classId = $validated['class_id'] ?? null;
+        $layout = $validated['layout'] ?? '3x3';
+        $includeClass = $validated['include_class'] ?? false;
+
+        // Get students
+        $query = AttendanceStudent::where('is_active', true);
+        
+        if ($classId) {
+            $query->where('class_id', $classId);
+            $kelas = \App\Models\AttendanceClass::find($classId);
+            $className = $kelas ? $kelas->nama_kelas : 'All';
+        } else {
+            $className = 'Semua';
+        }
+
+        $students = $query
+            ->with('kelas')
+            ->orderBy('class_id')
+            ->orderBy('nis')
+            ->get()
+            ->map(function ($student) {
+                return [
+                    'nis' => $student->nis,
+                    'nama' => $student->nama,
+                    'kelas' => $student->kelas,
+                ];
+            })
+            ->toArray();
+
+        if (empty($students)) {
+            return redirect()->back()->with('warning', 'Tidak ada siswa aktif untuk di-generate.');
+        }
+
+        // Generate PDF
+        try {
+            $pdf = $this->qrCardPdfService->generatePDF($students, $layout, $includeClass);
+            
+            $filename = "QR_Kartu_Siswa_{$className}_" . now()->format('Y-m-d') . '.pdf';
+            
+            return $pdf->download($filename);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal generate PDF: ' . $e->getMessage());
+        }
     }
 }
