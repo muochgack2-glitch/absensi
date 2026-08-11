@@ -71,6 +71,7 @@
             font-size: 10px;
             margin-bottom: 2mm;
             line-height: 1;
+            color: #000;
         }
 
         .nama {
@@ -79,11 +80,12 @@
             word-wrap: break-word;
             line-height: 1.2;
             min-height: 12px;
+            color: #000;
         }
 
         .sekolah {
             font-size: 9px;
-            color: #666;
+            color: #333;
             word-wrap: break-word;
             line-height: 1.2;
             min-height: 12px;
@@ -99,38 +101,36 @@
 @foreach($pages as $pageIndex => $cards)
     <div class="page">
         <table class="cards-table">
-            @php $cardIndex = 0; @endphp
-            @while($cardIndex < count($cards))
+            @for($i = 0; $i < count($cards); $i += 3)
             <tr>
-                @php $colsInRow = 0; @endphp
-                @while($colsInRow < 3 && $cardIndex < count($cards))
+                @for($j = 0; $j < 3; $j++)
+                    @php $idx = $i + $j; @endphp
                     <td class="card-cell">
-                        @php $student = $cards[$cardIndex]; @endphp
-                        @if($student)
+                        @if(isset($cards[$idx]) && $cards[$idx])
+                            @php $student = $cards[$idx]; @endphp
                             <div class="card-inner">
                                 <div class="qr-container">
                                     @if(!empty($student['qr_code_base64']))
-                                        <img src="data:image/png;base64,{{ $student['qr_code_base64'] }}" alt="QR Code" />
+                                        <img src="data:image/png;base64,{{ $student['qr_code_base64'] }}" alt="QR" />
                                     @else
-                                        <span style="color: #ccc; font-size: 10px;">No QR</span>
+                                        <span style="color: #999; font-size: 8px;">No QR</span>
                                     @endif
                                 </div>
-                                <div class="nis">{{ $student['nis'] ?? '-' }}</div>
+                                <div class="nis">{{ $student['nis'] ?? '' }}</div>
                                 <div class="nama">
                                     @if($includeClass && !empty($student['kelas']['nama_kelas']))
-                                        {{ $student['nama'] ?? '-' }} / {{ $student['kelas']['nama_kelas'] ?? '-' }}
+                                        {{ $student['nama'] ?? '' }} / {{ $student['kelas']['nama_kelas'] ?? '' }}
                                     @else
-                                        {{ $student['nama'] ?? '-' }}
+                                        {{ $student['nama'] ?? '' }}
                                     @endif
                                 </div>
                                 <div class="sekolah">{{ $schoolName }}</div>
                             </div>
                         @endif
                     </td>
-                    @php $cardIndex++; $colsInRow++; @endphp
-                @endwhile
+                @endfor
             </tr>
-            @endwhile
+            @endfor
         </table>
     </div>
 @endforeach
