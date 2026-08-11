@@ -930,6 +930,11 @@
                         <i class="fas fa-server"></i>
                         <span class="nav-text">Gateway</span>
                     </a>
+                    <a href="{{ route('whatsapp.settings') }}"
+                       class="sidebar-submenu-item {{ request()->routeIs('whatsapp.settings') ? 'active' : '' }}">
+                        <i class="fas fa-cog"></i>
+                        <span class="nav-text">Pengaturan WA</span>
+                    </a>
                 </div>
             </div>
 

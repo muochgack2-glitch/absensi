@@ -930,6 +930,11 @@
                         <i class="fas fa-server"></i>
                         <span class="nav-text">Gateway</span>
                     </a>
+                    <a href="<?php echo e(route('whatsapp.settings')); ?>"
+                       class="sidebar-submenu-item <?php echo e(request()->routeIs('whatsapp.settings') ? 'active' : ''); ?>">
+                        <i class="fas fa-cog"></i>
+                        <span class="nav-text">Pengaturan WA</span>
+                    </a>
                 </div>
             </div>
 
