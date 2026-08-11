@@ -226,12 +226,24 @@ class AttendanceQRController extends Controller
                 ];
             })->toArray();
 
-            $pdf = $this->qrCardPdfService->generatePDF(
-                $studentsArray,
-                $layout,
-                $includeClass,
-                config('app.school_name', 'SMK SPMB')
-            );
+            // Chunk students (9 per page for 3x3)
+            $pages = [];
+            $chunk = array_chunk($studentsArray, 9);
+            foreach ($chunk as $page) {
+                while (count($page) < 9) {
+                    $page[] = null;
+                }
+                $pages[] = $page;
+            }
+
+            $pdf = Pdf::loadView('pdfs.qr-cards-unified', [
+                'pages' => $pages,
+                'layout' => $layout,
+                'includeClass' => $includeClass,
+                'schoolName' => config('app.school_name', 'SMK SPMB'),
+            ]);
+
+            $pdf->setPaper('A4', 'portrait');
             
             $filename = "QR_Kartu_Siswa_{$className}_" . now()->format('Y-m-d') . '.pdf';
             
@@ -330,7 +342,7 @@ class AttendanceQRController extends Controller
             $pages[] = $page;
         }
 
-        return view('pdfs.qr-cards-preview', [
+        return view('pdfs.qr-cards-unified', [
             'pages' => $pages,
             'layout' => $layout,
             'includeClass' => $includeClass,

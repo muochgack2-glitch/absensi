@@ -10,10 +10,12 @@
             box-sizing: border-box;
         }
 
-        body {
+        html, body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            width: 100%;
+            height: 100%;
         }
 
         .page {
@@ -22,25 +24,31 @@
             padding: 5mm;
             page-break-after: always;
             margin: 0;
+            page-break-inside: avoid;
+            position: relative;
         }
 
+        /* DomPDF quirk: Use fixed dimensions for table */
         table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
         }
 
         tr {
             page-break-inside: avoid;
+            height: 60mm;
         }
 
         td {
             border: 1px solid #000;
-            width: 33.333%;
-            height: 72mm;
-            padding: 2mm;
+            width: 66.666mm;
+            height: 60mm;
+            padding: 1.5mm;
             text-align: center;
             vertical-align: top;
             page-break-inside: avoid;
+            background: #fff;
         }
 
         .card-container {
@@ -49,48 +57,65 @@
             align-items: center;
             justify-content: flex-start;
             height: 100%;
+            width: 100%;
         }
 
         .qr-img {
-            width: 50mm;
-            height: 50mm;
-            border: 1px dashed #666;
+            width: 47mm;
+            height: 47mm;
+            border: 1px dashed #999;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 1mm;
+            margin-bottom: 0.5mm;
             background: #fff;
+            flex-shrink: 0;
         }
 
         .qr-img img {
-            max-width: 100%;
-            max-height: 100%;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .text-nis {
             font-weight: bold;
             font-size: 10px;
-            font-family: monospace;
-            margin-bottom: 0.5mm;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 0.3mm;
             color: #000;
+            line-height: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 100%;
         }
 
         .text-nama {
             font-size: 9px;
-            margin-bottom: 0.5mm;
+            margin-bottom: 0.3mm;
             color: #000;
-            line-height: 1.2;
+            line-height: 1;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .text-sekolah {
-            font-size: 8px;
-            color: #333;
-            line-height: 1.2;
+        .text-kelas {
+            font-size: 9px;
+            color: #000;
+            line-height: 1;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         @page {
-            size: A4;
+            size: A4 portrait;
             margin: 0;
+            padding: 0;
         }
     </style>
 </head>
@@ -98,7 +123,7 @@
 
 @foreach($pages as $pageIdx => $cards)
 <div class="page">
-    <table>
+    <table cellpadding="0" cellspacing="0">
         @for($row = 0; $row < 3; $row++)
         <tr>
             @for($col = 0; $col < 3; $col++)
@@ -113,7 +138,7 @@
                             @if(!empty($student['qr_code_base64']))
                             <img src="data:image/png;base64,{{ $student['qr_code_base64'] }}" alt="QR" />
                             @else
-                            <span style="color: #ccc;">-</span>
+                            <span style="color: #ccc; font-size: 10px;">-</span>
                             @endif
                         </div>
                         <div class="text-nis">{{ $student['nis'] ?? '' }}</div>

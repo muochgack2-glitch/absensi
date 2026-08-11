@@ -47,7 +47,7 @@
         td {
             border: 2px solid #333;
             width: 33.333%;
-            height: 72mm;
+            height: 60mm;
             padding: 2mm;
             text-align: center;
             vertical-align: top;
