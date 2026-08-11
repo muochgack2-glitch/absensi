@@ -191,9 +191,9 @@ class AttendanceQRController extends Controller
                 if ($student->qr_code_path && file_exists(storage_path('app/public/' . $student->qr_code_path))) {
                     $qrPath = storage_path('app/public/' . $student->qr_code_path);
                     
-                    if (str_ends_with($qrPath, '.svg')) {
-                        // Convert SVG to PNG using imagick or gd
-                        try {
+                    try {
+                        if (str_ends_with($qrPath, '.svg')) {
+                            // Try to convert SVG to PNG
                             if (extension_loaded('imagick')) {
                                 $imagick = new \Imagick();
                                 $imagick->setBackgroundColor('white');
@@ -201,17 +201,17 @@ class AttendanceQRController extends Controller
                                 $imagick->setImageFormat('png');
                                 $qrBase64 = base64_encode($imagick->getImageBlob());
                             } else {
-                                // Fallback: read SVG as data URI
-                                $svg = file_get_contents($qrPath);
-                                $qrBase64 = base64_encode($svg);
+                                // Fallback: use file_get_contents for data URI
+                                $qrBase64 = base64_encode(file_get_contents($qrPath));
                             }
-                        } catch (\Exception $e) {
-                            // If conversion fails, leave it null
-                            $qrBase64 = null;
+                        } else if (file_exists($qrPath)) {
+                            // If already PNG or other format
+                            $qrBase64 = base64_encode(file_get_contents($qrPath));
                         }
-                    } else if (file_exists($qrPath)) {
-                        // If already PNG or other format
-                        $qrBase64 = base64_encode(file_get_contents($qrPath));
+                    } catch (\Exception $e) {
+                        // If conversion fails, leave it null
+                        \Log::warning('QR conversion failed for ' . $student->nis . ': ' . $e->getMessage());
+                        $qrBase64 = null;
                     }
                 }
                 
