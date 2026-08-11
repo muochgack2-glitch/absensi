@@ -20,7 +20,7 @@
         .page {
             width: 210mm;
             height: 297mm;
-            padding: 4mm;
+            padding: 3mm;
             page-break-after: always;
             margin: 0;
         }
@@ -32,9 +32,9 @@
 
         .card-cell {
             width: 33.333%;
-            height: 99mm;
+            height: 85mm;
             border: 1px solid #ccc;
-            padding: 2mm;
+            padding: 3mm;
             text-align: center;
             vertical-align: top;
             page-break-inside: avoid;
@@ -49,14 +49,14 @@
         }
 
         .qr-container {
-            width: 45mm;
-            height: 45mm;
+            width: 40mm;
+            height: 40mm;
             border: 1px dashed #999;
             background: #f9f9f9;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 2mm;
+            margin-bottom: 3mm;
             flex-shrink: 0;
         }
 
@@ -68,20 +68,25 @@
         .nis {
             font-weight: bold;
             font-family: 'Courier New', monospace;
-            font-size: 9px;
-            margin-bottom: 1mm;
+            font-size: 10px;
+            margin-bottom: 2mm;
+            line-height: 1;
         }
 
         .nama {
-            font-size: 8px;
-            margin-bottom: 1mm;
+            font-size: 9px;
+            margin-bottom: 2mm;
             word-wrap: break-word;
+            line-height: 1.2;
+            min-height: 12px;
         }
 
         .sekolah {
-            font-size: 8px;
+            font-size: 9px;
             color: #666;
             word-wrap: break-word;
+            line-height: 1.2;
+            min-height: 12px;
         }
 
         @page {
@@ -112,9 +117,10 @@
                                 </div>
                                 <div class="nis">{{ $student['nis'] ?? '-' }}</div>
                                 <div class="nama">
-                                    {{ $student['nama'] ?? '-' }}
                                     @if($includeClass && !empty($student['kelas']['nama_kelas']))
-                                        <br/>{{ $student['kelas']['nama_kelas'] ?? '-' }}
+                                        {{ $student['nama'] ?? '-' }} / {{ $student['kelas']['nama_kelas'] ?? '-' }}
+                                    @else
+                                        {{ $student['nama'] ?? '-' }}
                                     @endif
                                 </div>
                                 <div class="sekolah">{{ $schoolName }}</div>
