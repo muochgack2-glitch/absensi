@@ -91,7 +91,8 @@ Route::middleware(['auth'])->group(function () {
     // Students Management - Custom routes BEFORE resource (prevent {student} catching)
     Route::get('/attendance/students/card', function() {
         // Redirect old StudentCardController route to new QR system
-        return view('attendance.students.index');
+        $classes = \App\Models\AttendanceClass::where('is_active', true)->orderBy('tingkat', 'asc')->orderBy('nama_kelas', 'asc')->get();
+        return view('attendance.students.index', compact('classes'));
     })->name('attendance.students.card');
     
     Route::get('/attendance/students/import/form', [AttendanceStudentController::class, 'importForm'])
