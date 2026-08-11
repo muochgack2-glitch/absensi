@@ -11,8 +11,15 @@
             box-sizing: border-box;
         }
 
+        html, body {
+            width: 210mm;
+            height: 297mm;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: Arial, sans-serif;
             background: white;
             color: #000;
         }
@@ -22,25 +29,22 @@
             width: 210mm;
             height: 297mm;
             margin: 0;
-            padding: 5mm;
+            padding: 3mm;
             page-break-after: always;
-            position: relative;
         }
 
-        /* Grid 3x3 Layout */
+        /* Grid Container - 3 columns */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            grid-auto-rows: 60mm;
-            gap: 3mm;
+            grid-template-rows: repeat(3, auto);
+            gap: 2mm;
             width: 100%;
+            height: 100%;
         }
 
         /* Kartu Individual */
         .card {
-            width: 100%;
-            max-width: 50mm;
-            height: 60mm;
             border: 1px solid #ddd;
             display: flex;
             flex-direction: column;
@@ -48,27 +52,25 @@
             justify-content: flex-start;
             background: white;
             padding: 1mm;
-            box-sizing: border-box;
+            aspect-ratio: 50/60;
             page-break-inside: avoid;
         }
 
         /* QR Code Container */
         .card-qr {
-            width: 45mm;
-            height: 45mm;
+            width: 90%;
+            aspect-ratio: 1;
             background: #f5f5f5;
             border: 1px dashed #999;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 0.5mm;
-            margin-top: 0;
             flex-shrink: 0;
             overflow: hidden;
         }
 
-        .card-qr img,
-        .card-qr svg {
+        .card-qr img {
             width: 100%;
             height: 100%;
             object-fit: contain;
@@ -76,47 +78,41 @@
 
         /* NIS */
         .card-nis {
-            font-size: 9pt;
+            font-size: 8pt;
             font-weight: bold;
             font-family: 'Courier New', monospace;
-            margin-bottom: 0.3mm;
-            letter-spacing: 0.3px;
+            margin-bottom: 0.2mm;
             text-align: center;
             line-height: 1;
+            width: 100%;
         }
 
-        /* Nama / Kelas (1 baris) */
+        /* Nama / Kelas */
         .card-nama {
-            font-size: 8pt;
+            font-size: 7pt;
             text-align: center;
             line-height: 1;
-            max-width: 43mm;
+            width: 95%;
             overflow: hidden;
             text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 1;
-            -webkit-box-orient: vertical;
-            line-clamp: 1;
+            white-space: nowrap;
             margin-bottom: 0.2mm;
             font-weight: 500;
         }
 
         /* Sekolah */
         .card-sekolah {
-            font-size: 8pt;
+            font-size: 7pt;
             color: #666;
             text-align: center;
             line-height: 1;
-            max-width: 43mm;
+            width: 95%;
             overflow: hidden;
             text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 1;
-            -webkit-box-orient: vertical;
-            line-clamp: 1;
+            white-space: nowrap;
         }
 
-        /* Empty card (placeholder) */
+        /* Empty card */
         .card.empty {
             border: none;
             background: transparent;
@@ -129,22 +125,9 @@
             display: none;
         }
 
-        /* Print optimization */
         @page {
+            size: A4;
             margin: 0;
-            padding: 0;
-        }
-
-        @media print {
-            body {
-                margin: 0;
-                padding: 0;
-            }
-            .print-page {
-                margin: 0;
-                padding: 10mm;
-                box-shadow: none;
-            }
         }
     </style>
 </head>
@@ -157,22 +140,19 @@
                         <div class="card">
                             <div class="card-qr">
                                 @if(!empty($student['qr_code_base64']))
-                                    <img src="data:image/png;base64,{{ $student['qr_code_base64'] }}" alt="QR Code" style="width: 100%; height: 100%;">
+                                    <img src="data:image/png;base64,{{ $student['qr_code_base64'] }}" alt="QR">
                                 @else
-                                    {{-- Fallback: placeholder jika QR belum ada --}}
-                                    <div style="width: 100%; height: 100%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 8pt; color: #999;">
-                                        No QR
-                                    </div>
+                                    <div style="font-size: 6pt; color: #999;">No QR</div>
                                 @endif
                             </div>
-                            <div class="card-nis">{{ $student['nis'] ?? 'N/A' }}</div>
+                            <div class="card-nis">{{ substr($student['nis'] ?? '', 0, 8) }}</div>
                             <div class="card-nama">
-                                {{ $student['nama'] ?? 'N/A' }}
-                                @if($includeClass && !empty($student['kelas']))
-                                    / {{ $student['kelas']['nama_kelas'] ?? 'N/A' }}
+                                {{ substr($student['nama'] ?? '', 0, 20) }}
+                                @if($includeClass && !empty($student['kelas']['nama_kelas']))
+                                    / {{ substr($student['kelas']['nama_kelas'] ?? '', 0, 10) }}
                                 @endif
                             </div>
-                            <div class="card-sekolah">{{ $schoolName }}</div>
+                            <div class="card-sekolah">{{ substr($schoolName, 0, 15) }}</div>
                         </div>
                     @else
                         <div class="card empty"></div>
