@@ -149,7 +149,6 @@
                             @if($includeClass && !empty($student['kelas']['nama_kelas']))
                             <div class="text-kelas">{{ $student['kelas']['nama_kelas'] ?? '' }}</div>
                             @endif
-                            <div class="text-sekolah">{{ $schoolName }}</div>
                         </div>
                         @endif
                     </td>
