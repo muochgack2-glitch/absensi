@@ -117,13 +117,10 @@
                             @endif
                         </div>
                         <div class="text-nis">{{ $student['nis'] ?? '' }}</div>
-                        <div class="text-nama">
-                            @if($includeClass && !empty($student['kelas']['nama_kelas']))
-                            {{ $student['nama'] ?? '' }} / {{ $student['kelas']['nama_kelas'] ?? '' }}
-                            @else
-                            {{ $student['nama'] ?? '' }}
-                            @endif
-                        </div>
+                        <div class="text-nama">{{ $student['nama'] ?? '' }}</div>
+                        @if($includeClass && !empty($student['kelas']['nama_kelas']))
+                        <div class="text-kelas">{{ $student['kelas']['nama_kelas'] ?? '' }}</div>
+                        @endif
                         <div class="text-sekolah">{{ $schoolName }}</div>
                     </div>
                     @endif
