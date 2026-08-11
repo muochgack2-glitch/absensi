@@ -941,30 +941,17 @@
             <!-- Divider -->
             <div class="sidebar-divider"></div>
 
-            <!-- Settings Collapsible Menu -->
-            @php $settingsOpen = request()->routeIs('attendance.settings.*'); @endphp
-            <div class="sidebar-submenu-group" data-submenu="settings">
-                <button 
-                    type="button"
-                    class="sidebar-menu-item sidebar-submenu-toggle w-full {{ $settingsOpen ? 'submenu-active' : '' }}"
-                    onclick="toggleSubmenu('settings')"
-                    data-bs-toggle="tooltip" 
-                    data-bs-placement="right" 
-                    title="Settings"
-                >
-                    <i class="fas fa-cog text-lg"></i>
-                    <span class="nav-text font-medium flex-1 text-left">Settings</span>
-                    <i class="fas fa-chevron-down nav-text text-xs submenu-arrow transition-transform duration-200 {{ $settingsOpen ? 'rotate-180' : '' }}"></i>
-                </button>
-                
-                <div class="sidebar-submenu {{ $settingsOpen ? 'submenu-open' : '' }}" id="submenu-settings">
-                    <a href="{{ route('attendance.settings.index') }}"
-                       class="sidebar-submenu-item {{ request()->routeIs('attendance.settings.*') ? 'active' : '' }}">
-                        <i class="fas fa-sliders-h"></i>
-                        <span class="nav-text">Setting Sistem</span>
-                    </a>
-                </div>
-            </div>
+            <!-- Settings -->
+            <a 
+                href="{{ route('attendance.settings.index') }}"
+                class="sidebar-menu-item {{ request()->routeIs('attendance.settings.*') ? 'active' : '' }}"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="right" 
+                title="Settings"
+            >
+                <i class="fas fa-cog text-lg"></i>
+                <span class="nav-text font-medium">Settings</span>
+            </a>
 
         </nav>
 
