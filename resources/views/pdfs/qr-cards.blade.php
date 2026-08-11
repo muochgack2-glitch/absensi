@@ -52,8 +52,8 @@
         }
 
         .qr-img {
-            width: 35mm;
-            height: 35mm;
+            width: 45mm;
+            height: 45mm;
             border: 1px dashed #666;
             display: flex;
             align-items: center;
