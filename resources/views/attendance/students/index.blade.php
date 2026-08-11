@@ -631,7 +631,7 @@
     </div>
 
     {{-- Modal Generate QR Cards PDF --}}
-    <div id="modalQRCardsPDF" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+    <div id="modalQRCardsPDF" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
         {{-- Backdrop --}}
         <div
             class="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -639,7 +639,7 @@
         ></div>
 
         {{-- Modal Box --}}
-        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 z-10">
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-auto my-8 p-6 z-10 max-h-[90vh] overflow-y-auto">
             {{-- Icon --}}
             <div class="flex items-center justify-center w-14 h-14 rounded-full bg-red-100 dark:bg-red-900/40 mx-auto mb-4">
                 <i class="fas fa-file-pdf text-2xl text-red-600 dark:text-red-400"></i>
@@ -742,8 +742,8 @@
                     </label>
                 </div>
 
-                {{-- Action Buttons --}}
-                <div class="flex gap-2">
+            {{-- Action Buttons --}}
+                <div class="flex gap-2 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
                     <button
                         type="submit"
                         class="flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 transition-all shadow-md"
