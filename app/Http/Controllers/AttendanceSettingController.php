@@ -39,7 +39,7 @@ class AttendanceSettingController extends Controller
             'settings.absent_notify_time'            => 'nullable|date_format:H:i',
             'settings.absent_notify_days'            => 'nullable|string',
             'settings.late_notify_enabled'           => 'nullable|string|in:true,false',
-            'settings.late_warning_enabled'          => 'nullable|boolean',
+            'settings.late_warning_enabled'          => 'nullable|in:0,1',
             'settings.late_warning_threshold_minutes' => 'nullable|integer|min:1|max:120',
             'settings.late_warning_min_count'        => 'nullable|integer|min:1|max:20',
         ];
@@ -75,6 +75,11 @@ class AttendanceSettingController extends Controller
 
         foreach ($settingsData as $key => $value) {
             AttendanceSetting::set($key, $value);
+        }
+
+        // Handle late_warning_enabled checkbox (jika unchecked, tidak ada di request)
+        if (!isset($request->settings['late_warning_enabled'])) {
+            AttendanceSetting::set('late_warning_enabled', '0');
         }
 
         // Handle absent notify days (dari checkbox terpisah, sudah dikumpulkan JS)

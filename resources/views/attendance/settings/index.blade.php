@@ -378,7 +378,6 @@
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Kirim peringatan otomatis ke orang tua saat siswa sering terlambat</p>
                         </div>
                         <div>
-                            <input type="hidden" name="settings[late_warning_enabled]" value="0">
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox"
                                        name="settings[late_warning_enabled]"
