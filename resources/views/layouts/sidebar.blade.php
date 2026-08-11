@@ -930,6 +930,11 @@
                         <i class="fas fa-server"></i>
                         <span class="nav-text">Gateway</span>
                     </a>
+                    <a href="{{ route('whatsapp.settings') }}"
+                       class="sidebar-submenu-item {{ request()->routeIs('whatsapp.settings') ? 'active' : '' }}">
+                        <i class="fas fa-cog"></i>
+                        <span class="nav-text">Pengaturan WA</span>
+                    </a>
                 </div>
             </div>
 
@@ -937,7 +942,7 @@
             <div class="sidebar-divider"></div>
 
             <!-- Settings Collapsible Menu -->
-            @php $settingsOpen = request()->routeIs('attendance.settings.*') || request()->routeIs('whatsapp.settings'); @endphp
+            @php $settingsOpen = request()->routeIs('attendance.settings.*'); @endphp
             <div class="sidebar-submenu-group" data-submenu="settings">
                 <button 
                     type="button"
@@ -957,11 +962,6 @@
                        class="sidebar-submenu-item {{ request()->routeIs('attendance.settings.*') ? 'active' : '' }}">
                         <i class="fas fa-sliders-h"></i>
                         <span class="nav-text">Setting Sistem</span>
-                    </a>
-                    <a href="{{ route('whatsapp.settings') }}"
-                       class="sidebar-submenu-item {{ request()->routeIs('whatsapp.settings') ? 'active' : '' }}">
-                        <i class="fab fa-whatsapp"></i>
-                        <span class="nav-text">Setting WA</span>
                     </a>
                 </div>
             </div>
