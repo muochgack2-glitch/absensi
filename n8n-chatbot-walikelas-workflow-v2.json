@@ -134,19 +134,24 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { \"success\": true, \"message\": \"Reply sent\" } }}"
+        "responseBody": "={{ { \"success\": true, \"message\": \"Processing your request...\" } }}"
       },
       "id": "respond-webhook",
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1250, 300]
+      "position": [450, 450]
     }
   ],
   "connections": {
     "Webhook Trigger": {
       "main": [
         [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
           {
             "node": "IF Ringkasan",
             "type": "main",
@@ -254,17 +259,6 @@
         [
           {
             "node": "HTTP - Send Reply ke WA Gateway",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "HTTP - Send Reply ke WA Gateway": {
-      "main": [
-        [
-          {
-            "node": "Respond to Webhook",
             "type": "main",
             "index": 0
           }
