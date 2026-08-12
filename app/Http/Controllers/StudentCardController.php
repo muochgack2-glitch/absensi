@@ -128,7 +128,7 @@ class StudentCardController extends Controller
         $studentData = [];
         foreach ($students as $student) {
             // QR Code sebagai PNG via GD (tidak butuh Imagick)
-            $qrBase64 = $this->generateQrPng($student->nis, 300);
+            $qrBase64 = $this->generateQrPng($student->nis, 500);
 
             // Foto profil
             $fotoBase64 = null;
