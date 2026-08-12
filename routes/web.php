@@ -90,9 +90,12 @@ Route::middleware(['auth'])->group(function () {
 
     // Students Management - Custom routes BEFORE resource (prevent {student} catching)
     Route::get('/attendance/students/card', function() {
-        // Redirect old StudentCardController route to new QR system
-        $classes = \App\Models\AttendanceClass::where('is_active', true)->orderBy('tingkat', 'asc')->orderBy('nama_kelas', 'asc')->get();
-        return view('attendance.students.index', compact('classes'));
+        // Legacy route: old StudentCardController page has been replaced by
+        // the new QR system. This used to render 'attendance.students.index'
+        // directly but only passed $classes (unused by that view) and never
+        // built $students, causing "Undefined variable $students". Redirect
+        // to the real students index instead, which builds $students correctly.
+        return redirect()->route('attendance.students.index');
     })->name('attendance.students.card');
     
     Route::get('/attendance/students/import/form', [AttendanceStudentController::class, 'importForm'])
