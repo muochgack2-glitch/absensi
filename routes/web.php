@@ -16,6 +16,7 @@ use App\Http\Controllers\AttendancePortalController;
 use App\Http\Controllers\AttendanceIzinController;
 use App\Http\Controllers\WaliKelasController;
 use App\Http\Controllers\TahunAjaranController;
+use App\Http\Controllers\StudentCardController;
 use Illuminate\Support\Facades\Route;
 
 // Public Scanner Landing Page (no auth required)
@@ -89,14 +90,14 @@ Route::middleware(['auth'])->group(function () {
         ->name('attendance.manual.destroy');
 
     // Students Management - Custom routes BEFORE resource (prevent {student} catching)
-    Route::get('/attendance/students/card', function() {
-        // Legacy route: old StudentCardController page has been replaced by
-        // the new QR system. This used to render 'attendance.students.index'
-        // directly but only passed $classes (unused by that view) and never
-        // built $students, causing "Undefined variable $students". Redirect
-        // to the real students index instead, which builds $students correctly.
-        return redirect()->route('attendance.students.index');
-    })->name('attendance.students.card');
+    // Cetak Kartu Pelajar (StudentCardController) — halaman pilih kelas/siswa
+    // + layout, lalu generate PDF kartu QR (pakai GD, tidak butuh Imagick).
+    // Views (card-options, card-print, card-single) sudah ada tapi route-nya
+    // sebelumnya belum pernah didaftarkan.
+    Route::get('/attendance/students/card', [StudentCardController::class, 'index'])
+        ->name('attendance.students.card');
+    Route::post('/attendance/students/card/generate', [StudentCardController::class, 'generate'])
+        ->name('attendance.students.card.generate');
     
     Route::get('/attendance/students/import/form', [AttendanceStudentController::class, 'importForm'])
         ->name('attendance.students.import.form');
