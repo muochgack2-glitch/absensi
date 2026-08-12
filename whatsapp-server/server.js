@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
 const pino = require('pino');
 const QRCode = require('qrcode');
+const axios = require('axios');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -118,12 +119,33 @@ async function connectToWhatsApp() {
         // Credentials update handler
         sock.ev.on('creds.update', saveCreds);
 
-        // Messages handler (optional - for receiving messages)
+        // Messages handler - Forward to n8n chatbot
         sock.ev.on('messages.upsert', async ({ messages }) => {
             const msg = messages[0];
             if (!msg.key.fromMe && msg.message) {
-                logger.info('Received message:', msg.message);
-                // You can add auto-reply logic here if needed
+                const from = msg.key.remoteJid.replace('@s.whatsapp.net', '');
+                const text = msg.message.conversation || 
+                            msg.message.extendedTextMessage?.text || 
+                            '';
+                
+                logger.info(`📨 Received from ${from}: ${text}`);
+                
+                // Forward to n8n webhook
+                try {
+                    await axios.post('https://n8n.dmcenter.my.id/webhook/wa-chatbot', {
+                        body: {
+                            from: from,
+                            message: text
+                        },
+                        timestamp: new Date().toISOString()
+                    }, {
+                        headers: { 'Content-Type': 'application/json' },
+                        timeout: 10000
+                    });
+                    logger.info('✅ Message forwarded to n8n chatbot');
+                } catch (error) {
+                    logger.error('❌ Failed to forward to n8n:', error.message);
+                }
             }
         });
 
@@ -586,6 +608,48 @@ app.post('/logout', async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Failed to logout',
+            error: error.message
+        });
+    }
+});
+
+// Reply endpoint - Menerima response dari n8n untuk dikirim ke WA
+app.post('/reply', async (req, res) => {
+    try {
+        const { phone, message } = req.body;
+
+        if (!phone || !message) {
+            return res.status(400).json({
+                success: false,
+                message: 'Phone and message are required'
+            });
+        }
+
+        if (connectionState !== 'connected') {
+            return res.status(503).json({
+                success: false,
+                message: 'WhatsApp not connected',
+                status: connectionState
+            });
+        }
+
+        const formattedPhone = formatPhoneNumber(phone);
+        await sock.sendMessage(formattedPhone, { text: message });
+        
+        logger.info(`✅ Reply sent to ${phone} (from n8n chatbot)`);
+        
+        res.json({
+            success: true,
+            message: 'Reply sent successfully',
+            to: phone,
+            timestamp: new Date().toISOString()
+        });
+
+    } catch (error) {
+        logger.error('❌ Failed to send reply:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to send reply',
             error: error.message
         });
     }

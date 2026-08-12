@@ -5,6 +5,7 @@ use App\Http\Controllers\AttendanceScanController;
 use App\Http\Controllers\Api\AttendanceStatsController;
 use App\Http\Controllers\AttendanceSSEController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\ChatbotController;
 
 // AJAX Login API (dengan session middleware untuk auth)
 Route::middleware(['web'])->post('/auth/login', [AuthenticatedSessionController::class, 'store']);
@@ -26,3 +27,8 @@ Route::prefix('attendance')->group(function () {
 
 // Announcement API
 Route::get('/announcement/active', [AttendanceStatsController::class, 'activeAnnouncement']);
+
+// Chatbot API - for n8n WhatsApp chatbot integration
+Route::prefix('chatbot')->group(function () {
+    Route::get('/summary/{phone}', [ChatbotController::class, 'getSummary']);
+});
