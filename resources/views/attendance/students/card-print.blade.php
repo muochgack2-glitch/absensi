@@ -217,23 +217,23 @@
             border: 1px solid #ccc;
             border-radius: 2.5mm;
             background: #ffffff;
-            padding: 2mm;
+            padding: 1.5mm;
             text-align: center;
         }
 
         .card-mini-qr {
-            width: 44mm;
-            height: 44mm;
+            width: 46mm;
+            height: 46mm;
             border: 1px solid #e5e7eb;
             border-radius: 1.5mm;
-            padding: 0.5mm;
+            padding: 0.4mm;
             background: white;
             margin: 0 auto;
         }
 
         .card-mini-qr img {
-            width: 43mm;
-            height: 43mm;
+            width: 45.2mm;
+            height: 45.2mm;
             object-fit: contain;
         }
 
@@ -241,15 +241,15 @@
             font-size: 7.5pt;
             font-weight: 700;
             color: #111827;
-            margin-top: 1.2mm;
-            line-height: 1.1;
+            margin-top: 1mm;
+            line-height: 1.05;
         }
 
         .card-mini-detail {
             font-size: 6pt;
             color: #4b5563;
-            margin-top: 0.6mm;
-            line-height: 1.2;
+            margin-top: 0.5mm;
+            line-height: 1.15;
         }
 
         .card-empty-mini {
