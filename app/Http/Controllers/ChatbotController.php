@@ -50,7 +50,7 @@ class ChatbotController extends Controller
             $today = Carbon::today()->toDateString();
             
             // Get all students in this class
-            $students = AttendanceStudent::where('class_id', $kelas->id)->get();
+            $students = AttendanceStudent::where('kelas_id', $kelas->id)->get();
             $totalSiswa = $students->count();
             
             // Get attendance records for today
