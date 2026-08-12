@@ -38,7 +38,6 @@
         }
 
         .cards-grid td {
-            width: 50%;
             padding: 2mm;
             vertical-align: top;
         }
@@ -210,6 +209,56 @@
             height: 98mm;
         }
 
+        /* ============== KARTU MINI 5x6cm ============== */
+        /* Hanya berisi QR, Nama, NIS, Kelas - tanpa logo/foto/alamat */
+        .card-mini {
+            width: 50mm;
+            height: 60mm;
+            border: 1px solid #ccc;
+            border-radius: 2.5mm;
+            background: #ffffff;
+            padding: 3mm;
+            text-align: center;
+        }
+
+        .card-mini-qr {
+            width: 32mm;
+            height: 32mm;
+            border: 1px solid #e5e7eb;
+            border-radius: 2mm;
+            padding: 1mm;
+            background: white;
+            margin: 0 auto;
+        }
+
+        .card-mini-qr img {
+            width: 30mm;
+            height: 30mm;
+            object-fit: contain;
+        }
+
+        .card-mini-nama {
+            font-size: 8pt;
+            font-weight: 700;
+            color: #111827;
+            margin-top: 2mm;
+            line-height: 1.15;
+        }
+
+        .card-mini-detail {
+            font-size: 6.5pt;
+            color: #4b5563;
+            margin-top: 1mm;
+            line-height: 1.3;
+        }
+
+        .card-empty-mini {
+            width: 50mm;
+            height: 60mm;
+            border: 1px dashed #e5e7eb;
+            border-radius: 2.5mm;
+        }
+
         /* ============== TABLE LAYOUT ============== */
         .info-table {
             width: 100%;
@@ -260,9 +309,26 @@
                             $emptyClass .= ' card-empty-2x3';
                         }
                     @endphp
-                    <td>
+                    <td style="width: {{ number_format(100 / $config['cols'], 4) }}%;">
                         @if($item)
                             @php $s = $item['student']; @endphp
+                            @if($layout === 'mini')
+                                {{-- Kartu Mini 5x6cm: hanya QR, Nama, NIS, Kelas --}}
+                                <div class="card-mini">
+                                    <div class="card-mini-qr">
+                                        @if($item['qr_base64'])
+                                            <img src="{{ $item['qr_base64'] }}" alt="QR">
+                                        @else
+                                            <span style="font-size:5pt;color:#999;">No QR</span>
+                                        @endif
+                                    </div>
+                                    <div class="card-mini-nama">{{ $s->nama }}</div>
+                                    <div class="card-mini-detail">
+                                        NIS: {{ $s->nis }}<br>
+                                        Kelas: {{ $s->kelas->nama_kelas ?? '-' }}
+                                    </div>
+                                </div>
+                            @else
                             <div class="{{ $cardClass }}">
                                 {{-- Header --}}
                                 <div class="card-header">
@@ -340,8 +406,9 @@
                                 </div>
                                 @endif
                             </div>
+                            @endif
                         @else
-                            <div class="{{ $emptyClass }}"></div>
+                            <div class="{{ $layout === 'mini' ? 'card-empty-mini' : $emptyClass }}"></div>
                         @endif
                     </td>
                 @endfor

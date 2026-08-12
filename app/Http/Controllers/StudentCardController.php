@@ -91,7 +91,7 @@ class StudentCardController extends Controller
         $request->validate([
             'kelas_id'   => 'nullable|exists:attendance_classes,id',
             'student_ids'=> 'nullable|string',
-            'layout'     => 'required|in:2x5,2x4,2x3',
+            'layout'     => 'required|in:2x5,2x4,2x3,mini',
         ]);
 
         // Get students based on selection
@@ -128,7 +128,7 @@ class StudentCardController extends Controller
         $studentData = [];
         foreach ($students as $student) {
             // QR Code sebagai PNG via GD (tidak butuh Imagick)
-            $qrBase64 = $this->generateQrPng($student->nis, 200);
+            $qrBase64 = $this->generateQrPng($student->nis, 300);
 
             // Foto profil
             $fotoBase64 = null;
@@ -151,6 +151,8 @@ class StudentCardController extends Controller
             '2x5' => ['cols' => 2, 'rows' => 5, 'per_page' => 10],
             '2x4' => ['cols' => 2, 'rows' => 4, 'per_page' => 8],
             '2x3' => ['cols' => 2, 'rows' => 3, 'per_page' => 6],
+            // Kartu mini 5cm x 6cm: hanya QR, Nama, NIS, Kelas
+            'mini'=> ['cols' => 3, 'rows' => 5, 'per_page' => 15],
         ];
         $config = $layoutConfig[$layout];
 

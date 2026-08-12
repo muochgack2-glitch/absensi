@@ -107,7 +107,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div @click="layout = '2x5'" 
                          :class="layout === '2x5' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700'"
                          class="p-4 rounded-xl border-2 transition-all cursor-pointer text-center">
@@ -133,6 +133,15 @@
                         <p class="font-bold text-gray-900 dark:text-white">2 × 3</p>
                         <p class="text-xs text-gray-500 mt-1">6 kartu/halaman</p>
                         <p class="text-xs text-gray-500 mt-1">QR Paling Besar</p>
+                    </div>
+
+                    <div @click="layout = 'mini'" 
+                         :class="layout === 'mini' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700'"
+                         class="p-4 rounded-xl border-2 transition-all cursor-pointer text-center">
+                        <div class="text-3xl mb-2">🏷️</div>
+                        <p class="font-bold text-gray-900 dark:text-white">Mini 5×6cm</p>
+                        <p class="text-xs text-gray-500 mt-1">15 kartu/halaman</p>
+                        <p class="text-xs text-gray-500 mt-1">QR, Nama, NIS, Kelas saja</p>
                     </div>
                 </div>
             </x-card>
