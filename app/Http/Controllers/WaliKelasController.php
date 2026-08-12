@@ -29,18 +29,25 @@ class WaliKelasController extends Controller
         $request->validate([
             'name'     => 'required|string|max:100',
             'email'    => 'required|email|unique:users,email',
+            'phone'    => 'nullable|string|regex:/^[0-9]{9,13}$/|unique:users,phone',
             'password' => 'required|string|min:6',
             'role'     => 'required|in:admin,wali_kelas',
             'kelas_id' => 'nullable|exists:attendance_classes,id',
         ], [
             'email.unique'    => 'Email sudah digunakan.',
+            'phone.regex'     => 'Format nomor WhatsApp tidak valid (8xxxxxxxxx).',
+            'phone.unique'    => 'Nomor WhatsApp sudah terdaftar.',
             'password.min'    => 'Password minimal 6 karakter.',
             'kelas_id.exists' => 'Kelas tidak ditemukan.',
         ]);
 
+        // Normalize phone: add 62 prefix if provided
+        $phone = $request->phone ? '62' . $request->phone : null;
+
         User::create([
             'name'     => $request->name,
             'email'    => $request->email,
+            'phone'    => $phone,
             'password' => Hash::make($request->password),
             'role'     => $request->role,
             'kelas_id' => $request->role === 'wali_kelas' ? $request->kelas_id : null,
@@ -54,14 +61,22 @@ class WaliKelasController extends Controller
         $request->validate([
             'name'     => 'required|string|max:100',
             'email'    => 'required|email|unique:users,email,' . $user->id,
+            'phone'    => 'nullable|string|regex:/^[0-9]{9,13}$/|unique:users,phone,' . $user->id,
             'role'     => 'required|in:admin,wali_kelas',
             'kelas_id' => 'nullable|exists:attendance_classes,id',
             'password' => 'nullable|string|min:6',
+        ], [
+            'phone.regex'  => 'Format nomor WhatsApp tidak valid (8xxxxxxxxx).',
+            'phone.unique' => 'Nomor WhatsApp sudah terdaftar.',
         ]);
+
+        // Normalize phone: add 62 prefix if provided
+        $phone = $request->phone ? '62' . $request->phone : null;
 
         $data = [
             'name'     => $request->name,
             'email'    => $request->email,
+            'phone'    => $phone,
             'role'     => $request->role,
             'kelas_id' => $request->role === 'wali_kelas' ? $request->kelas_id : null,
         ];

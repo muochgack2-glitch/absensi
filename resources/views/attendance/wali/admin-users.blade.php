@@ -67,7 +67,7 @@
                                     </td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center gap-2">
-                                            <button onclick="openEditModal({{ $u->id }}, '{{ addslashes($u->name) }}', '{{ $u->email }}', '{{ $u->role }}', {{ $u->kelas_id ?? 'null' }})"
+                                            <button onclick="openEditModal({{ $u->id }}, '{{ addslashes($u->name) }}', '{{ $u->email }}', '{{ $u->role }}', {{ $u->kelas_id ?? 'null' }}, '{{ $u->phone ?? '' }}')"
                                                     class="text-indigo-500 hover:text-indigo-700 text-xs font-medium">
                                                 <i class="fas fa-edit"></i>
                                             </button>
@@ -111,6 +111,20 @@
                             <input type="email" name="email" required placeholder="email@sekolah.sch.id"
                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none">
                             @error('email')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                Nomor WhatsApp
+                                <span class="text-gray-400 font-normal">(Opsional)</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">+62</span>
+                                <input type="text" name="phone" placeholder="8123456789" pattern="[0-9]{9,13}"
+                                       class="w-full pl-12 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none">
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Format: 8xxxxxxxxx (tanpa 0 atau +62)</p>
+                            @error('phone')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                         </div>
 
                         <div>
@@ -172,6 +186,18 @@
                     <input type="email" name="email" id="editEmail" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-400">
                 </div>
                 <div>
+                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Nomor WhatsApp
+                        <span class="text-gray-400 font-normal">(Opsional)</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">+62</span>
+                        <input type="text" name="phone" id="editPhone" placeholder="8123456789" pattern="[0-9]{9,13}"
+                               class="w-full pl-12 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-400">
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Format: 8xxxxxxxxx (tanpa 0 atau +62)</p>
+                </div>
+                <div>
                     <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Password Baru (kosongkan jika tidak diubah)</label>
                     <input type="password" name="password" placeholder="Kosongkan jika tidak diubah" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-400">
                 </div>
@@ -206,10 +232,11 @@
             el?.classList.toggle('hidden', role !== 'wali_kelas');
         }
 
-        function openEditModal(id, name, email, role, kelasId) {
+        function openEditModal(id, name, email, role, kelasId, phone) {
             document.getElementById('editForm').action = '/attendance/users/' + id;
             document.getElementById('editName').value = name;
             document.getElementById('editEmail').value = email;
+            document.getElementById('editPhone').value = phone || '';
             document.getElementById('editRole').value = role;
             document.getElementById('editKelasId').value = kelasId || '';
             toggleKelas('editKelas', role);
