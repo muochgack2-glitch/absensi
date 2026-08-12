@@ -136,7 +136,7 @@
                     <div class="card-container">
                         <div class="qr-img">
                             @if(!empty($student['qr_code_base64']))
-                            <img src="data:image/png;base64,{{ $student['qr_code_base64'] }}" alt="QR" />
+                            <img src="data:{{ $student['qr_code_mime'] ?? 'image/png' }};base64,{{ $student['qr_code_base64'] }}" alt="QR" />
                             @else
                             <span style="color: #ccc; font-size: 10px;">-</span>
                             @endif

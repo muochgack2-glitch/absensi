@@ -94,7 +94,7 @@
 <div class="card">
     <div class="qr-container">
         @if(!empty($qr_code_base64))
-        <img src="data:image/png;base64,{{ $qr_code_base64 }}" alt="QR Code" />
+        <img src="data:{{ $qr_code_mime ?? 'image/png' }};base64,{{ $qr_code_base64 }}" alt="QR Code" />
         @else
         <span style="color: #ccc;">No QR</span>
         @endif

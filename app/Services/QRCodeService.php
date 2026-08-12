@@ -131,4 +131,77 @@ class QRCodeService
         $path = "qrcodes/{$nis}.svg";
         return Storage::disk('public')->exists($path);
     }
+
+    /**
+     * Convert a stored QR code file (path relative to storage/app/public)
+     * into a base64 string along with the CORRECT mime type, so it can be
+     * embedded directly in an <img src="data:{mime};base64,{data}"> tag.
+     *
+     * QR codes are always saved as SVG. If the Imagick PHP extension is
+     * available, we convert the SVG to PNG (better compatibility with some
+     * PDF renderers). If Imagick is NOT available, we fall back to using
+     * the raw SVG data — but critically, we report the mime type as
+     * "image/svg+xml" in that case, not "image/png". Previously this mime
+     * type was hardcoded to image/png everywhere the SVG was embedded,
+     * which produced a broken image whenever Imagick was missing (the
+     * browser/PDF renderer received SVG/XML data labeled as PNG and failed
+     * to decode it).
+     *
+     * @param string $relativePath Path relative to storage/app/public (e.g. "qrcodes/12345.svg")
+     * @return array{base64: ?string, mime: ?string} 'base64' and 'mime' are null if the file is missing/unreadable
+     */
+    public function getQRCodeAsBase64(string $relativePath): array
+    {
+        $fullPath = storage_path('app/public/' . $relativePath);
+
+        if (!$relativePath || !file_exists($fullPath)) {
+            return ['base64' => null, 'mime' => null];
+        }
+
+        $isSvg = str_ends_with(strtolower($fullPath), '.svg');
+
+        if ($isSvg) {
+            if (extension_loaded('imagick')) {
+                try {
+                    $imagick = new \Imagick();
+                    $imagick->setBackgroundColor(new \ImagickPixel('white'));
+                    $imagick->readImage($fullPath);
+                    $imagick->setImageFormat('png');
+                    return [
+                        'base64' => base64_encode($imagick->getImageBlob()),
+                        'mime' => 'image/png',
+                    ];
+                } catch (\Exception $e) {
+                    // Fall through to raw SVG fallback below.
+                }
+            }
+
+            // Imagick unavailable (or conversion failed): use raw SVG data,
+            // and report the mime type accurately as image/svg+xml.
+            $svg = file_get_contents($fullPath);
+            if ($svg === false) {
+                return ['base64' => null, 'mime' => null];
+            }
+
+            return [
+                'base64' => base64_encode($svg),
+                'mime' => 'image/svg+xml',
+            ];
+        }
+
+        // Non-SVG file (e.g. already PNG/JPEG) — detect mime from content.
+        $data = file_get_contents($fullPath);
+        if ($data === false) {
+            return ['base64' => null, 'mime' => null];
+        }
+
+        $mime = function_exists('mime_content_type')
+            ? (mime_content_type($fullPath) ?: 'image/png')
+            : 'image/png';
+
+        return [
+            'base64' => base64_encode($data),
+            'mime' => $mime,
+        ];
+    }
 }

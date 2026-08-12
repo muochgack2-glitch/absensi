@@ -76,34 +76,14 @@ class AttendanceQRController extends Controller
             $student->update(['qr_code_path' => $path]);
         }
 
-        // Convert QR to base64
-        $qrBase64 = null;
-        $qrPath = storage_path('app/public/' . $student->qr_code_path);
-        
-        if (file_exists($qrPath)) {
-            try {
-                if (str_ends_with($qrPath, '.svg')) {
-                    if (extension_loaded('imagick')) {
-                        $imagick = new \Imagick();
-                        $imagick->setBackgroundColor('white');
-                        $imagick->readImage($qrPath);
-                        $imagick->setImageFormat('png');
-                        $qrBase64 = base64_encode($imagick->getImageBlob());
-                    } else {
-                        $qrBase64 = base64_encode(file_get_contents($qrPath));
-                    }
-                } else {
-                    $qrBase64 = base64_encode(file_get_contents($qrPath));
-                }
-            } catch (\Exception $e) {
-                \Log::warning('QR conversion failed: ' . $e->getMessage());
-            }
-        }
+        // Convert QR to base64 (with correct mime type — see QRCodeService::getQRCodeAsBase64)
+        $qr = $this->qrCodeService->getQRCodeAsBase64($student->qr_code_path);
 
         // Generate PDF using Spatie with Browsershot
         $pdf = Pdf::view('pdfs.qr-card-single', [
             'student' => $student,
-            'qr_code_base64' => $qrBase64,
+            'qr_code_base64' => $qr['base64'],
+            'qr_code_mime' => $qr['mime'],
         ])
         ->paperSize('a4')
         ->margins(10, 10, 10, 10)
@@ -130,33 +110,13 @@ class AttendanceQRController extends Controller
             $student->update(['qr_code_path' => $path]);
         }
 
-        // Convert QR to base64
-        $qrBase64 = null;
-        $qrPath = storage_path('app/public/' . $student->qr_code_path);
-        
-        if (file_exists($qrPath)) {
-            try {
-                if (str_ends_with($qrPath, '.svg')) {
-                    if (extension_loaded('imagick')) {
-                        $imagick = new \Imagick();
-                        $imagick->setBackgroundColor('white');
-                        $imagick->readImage($qrPath);
-                        $imagick->setImageFormat('png');
-                        $qrBase64 = base64_encode($imagick->getImageBlob());
-                    } else {
-                        $qrBase64 = base64_encode(file_get_contents($qrPath));
-                    }
-                } else {
-                    $qrBase64 = base64_encode(file_get_contents($qrPath));
-                }
-            } catch (\Exception $e) {
-                \Log::warning('QR conversion failed: ' . $e->getMessage());
-            }
-        }
+        // Convert QR to base64 (with correct mime type — see QRCodeService::getQRCodeAsBase64)
+        $qr = $this->qrCodeService->getQRCodeAsBase64($student->qr_code_path);
 
         return view('pdfs.qr-card-single', [
             'student' => $student,
-            'qr_code_base64' => $qrBase64,
+            'qr_code_base64' => $qr['base64'],
+            'qr_code_mime' => $qr['mime'],
         ]);
     }
 
@@ -283,41 +243,17 @@ class AttendanceQRController extends Controller
         try {
             // Convert to array with proper structure
             $studentsArray = $students->map(function($student) {
-                $qrBase64 = null;
-                
-                // Convert SVG QR to PNG base64 for PDF compatibility
-                if ($student->qr_code_path && file_exists(storage_path('app/public/' . $student->qr_code_path))) {
-                    $qrPath = storage_path('app/public/' . $student->qr_code_path);
-                    
-                    try {
-                        if (str_ends_with($qrPath, '.svg')) {
-                            // Try to convert SVG to PNG
-                            if (extension_loaded('imagick')) {
-                                $imagick = new \Imagick();
-                                $imagick->setBackgroundColor('white');
-                                $imagick->readImage($qrPath);
-                                $imagick->setImageFormat('png');
-                                $qrBase64 = base64_encode($imagick->getImageBlob());
-                            } else {
-                                // Fallback: use file_get_contents for data URI
-                                $qrBase64 = base64_encode(file_get_contents($qrPath));
-                            }
-                        } else if (file_exists($qrPath)) {
-                            // If already PNG or other format
-                            $qrBase64 = base64_encode(file_get_contents($qrPath));
-                        }
-                    } catch (\Exception $e) {
-                        // If conversion fails, leave it null
-                        \Log::warning('QR conversion failed for ' . $student->nis . ': ' . $e->getMessage());
-                        $qrBase64 = null;
-                    }
-                }
-                
+                // Convert QR to base64 with correct mime type — see QRCodeService::getQRCodeAsBase64
+                $qr = $student->qr_code_path
+                    ? $this->qrCodeService->getQRCodeAsBase64($student->qr_code_path)
+                    : ['base64' => null, 'mime' => null];
+
                 return [
                     'nis' => $student->nis,
                     'nama' => $student->nama,
                     'qr_code_path' => $student->qr_code_path,
-                    'qr_code_base64' => $qrBase64,
+                    'qr_code_base64' => $qr['base64'],
+                    'qr_code_mime' => $qr['mime'],
                     'kelas' => $student->kelas ? [
                         'nama_kelas' => $student->kelas->nama_kelas
                     ] : null,
@@ -391,38 +327,18 @@ class AttendanceQRController extends Controller
             }
         }
 
-        // Convert to array with base64 QR
+        // Convert to array with base64 QR (with correct mime type — see QRCodeService::getQRCodeAsBase64)
         $studentsArray = $students->map(function($student) {
-            $qrBase64 = null;
-            
-            if ($student->qr_code_path && file_exists(storage_path('app/public/' . $student->qr_code_path))) {
-                $qrPath = storage_path('app/public/' . $student->qr_code_path);
-                
-                if (str_ends_with($qrPath, '.svg')) {
-                    try {
-                        if (extension_loaded('imagick')) {
-                            $imagick = new \Imagick();
-                            $imagick->setBackgroundColor('white');
-                            $imagick->readImage($qrPath);
-                            $imagick->setImageFormat('png');
-                            $qrBase64 = base64_encode($imagick->getImageBlob());
-                        } else {
-                            $svg = file_get_contents($qrPath);
-                            $qrBase64 = base64_encode($svg);
-                        }
-                    } catch (\Exception $e) {
-                        $qrBase64 = null;
-                    }
-                } else if (file_exists($qrPath)) {
-                    $qrBase64 = base64_encode(file_get_contents($qrPath));
-                }
-            }
-            
+            $qr = $student->qr_code_path
+                ? $this->qrCodeService->getQRCodeAsBase64($student->qr_code_path)
+                : ['base64' => null, 'mime' => null];
+
             return [
                 'nis' => $student->nis,
                 'nama' => $student->nama,
                 'qr_code_path' => $student->qr_code_path,
-                'qr_code_base64' => $qrBase64,
+                'qr_code_base64' => $qr['base64'],
+                'qr_code_mime' => $qr['mime'],
                 'kelas' => $student->kelas ? [
                     'nama_kelas' => $student->kelas->nama_kelas
                 ] : null,
