@@ -130,19 +130,38 @@ async function connectToWhatsApp() {
                 
                 logger.info(`📨 Received from ${from}: ${text}`);
                 
-                // Forward to n8n webhook
+                // Forward to n8n webhook (try internal port first, fallback to HTTPS)
                 try {
-                    await axios.post('https://n8n.dmcenter.my.id/webhook/wa-chatbot', {
-                        body: {
-                            from: from,
-                            message: text
-                        },
-                        timestamp: new Date().toISOString()
-                    }, {
-                        headers: { 'Content-Type': 'application/json' },
-                        timeout: 10000
-                    });
-                    logger.info('✅ Message forwarded to n8n chatbot');
+                    const n8nUrls = [
+                        'http://localhost:5678/webhook/wa-chatbot',
+                        'http://127.0.0.1:5678/webhook/wa-chatbot',
+                        'https://n8n.dmcenter.my.id/webhook/wa-chatbot'
+                    ];
+                    
+                    let forwarded = false;
+                    for (const url of n8nUrls) {
+                        try {
+                            await axios.post(url, {
+                                body: {
+                                    from: from,
+                                    message: text
+                                },
+                                timestamp: new Date().toISOString()
+                            }, {
+                                headers: { 'Content-Type': 'application/json' },
+                                timeout: 3000
+                            });
+                            logger.info(`✅ Message forwarded to n8n chatbot via ${url}`);
+                            forwarded = true;
+                            break;
+                        } catch (err) {
+                            logger.warn(`Failed to forward via ${url}: ${err.message}`);
+                        }
+                    }
+                    
+                    if (!forwarded) {
+                        throw new Error('All n8n URLs failed');
+                    }
                 } catch (error) {
                     logger.error('❌ Failed to forward to n8n:', error.message);
                 }
