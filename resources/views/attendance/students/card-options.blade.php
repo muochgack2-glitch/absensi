@@ -140,7 +140,7 @@
                          class="p-4 rounded-xl border-2 transition-all cursor-pointer text-center">
                         <div class="text-3xl mb-2">🏷️</div>
                         <p class="font-bold text-gray-900 dark:text-white">Mini 5×6cm</p>
-                        <p class="text-xs text-gray-500 mt-1">15 kartu/halaman</p>
+                        <p class="text-xs text-gray-500 mt-1">12 kartu/halaman</p>
                         <p class="text-xs text-gray-500 mt-1">QR, Nama, NIS, Kelas saja</p>
                     </div>
                 </div>
