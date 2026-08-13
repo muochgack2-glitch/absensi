@@ -169,19 +169,12 @@ Route::middleware(['auth'])->group(function () {
 
 
     // QR Code Display - Specific routes FIRST (before generic {student} route)
+    // Catatan: bulk-generate ini regenerate file SVG QR yang hilang di storage
+    // (bukan cetak PDF) - saat ini belum ada tombol UI yang memicunya.
     Route::post('/attendance/qr/bulk-generate', [AttendanceQRController::class, 'bulkGenerate'])
         ->name('attendance.qr.bulk-generate');
 
-    // PDF bulk generation routes - ENABLED
-    Route::post('/attendance/qr/cards-pdf', [AttendanceQRController::class, 'generateCardsPDF'])
-        ->name('attendance.qr.cards-pdf');
-    Route::get('/attendance/qr/cards-preview', [AttendanceQRController::class, 'previewCardsHTML'])
-        ->name('attendance.qr.cards-preview');
-
-    // Single student QR card preview & PDF download (BEFORE generic {student} route)
-    Route::get('/attendance/qr/{student}/preview-card', [AttendanceQRController::class, 'previewCardHTML'])
-        ->name('attendance.qr.preview-card');
-    
+    // Single student QR card PDF download (BEFORE generic {student} route)
     Route::get('/attendance/qr/{student}/download-card-pdf', [AttendanceQRController::class, 'downloadCardPDF'])
         ->name('attendance.qr.download-card-pdf');
 
@@ -192,9 +185,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/attendance/qr/{student}/download', [AttendanceQRController::class, 'download'])
         ->name('attendance.qr.download');
 
-    Route::get('/attendance/qr/{student}/download-card-pdf', [AttendanceQRController::class, 'downloadCardPDF'])
-        ->name('attendance.qr.download-card-pdf');
-    
     Route::post('/attendance/qr/{student}/regenerate', [AttendanceQRController::class, 'regenerate'])
         ->name('attendance.qr.regenerate');
 
