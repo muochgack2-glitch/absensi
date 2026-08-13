@@ -1,0 +1,126 @@
+========================================
+INSTRUKSI UPDATE N8N KE VERSI LATEST
+========================================
+
+TUJUAN:
+- Fix bug expressions di HTTP Request bodyParameters
+- Support dynamic phone numbers (tidak hardcode)
+- Workflow lebih flexible
+
+LANGKAH-LANGKAH:
+================
+
+1. BACKUP DATA N8N (PENTING!)
+   --------------------------
+   cd /www/wwwroot/n8n
+   tar -czf n8n_data_backup_$(date +%Y%m%d).tar.gz n8n_data/
+   
+   # Verify backup
+   ls -lh n8n_data_backup_*.tar.gz
+
+2. STOP N8N CONTAINER
+   -------------------
+   docker-compose down
+   
+   # Verify stopped
+   docker ps | grep n8n
+
+3. UPDATE DOCKER-COMPOSE.YML
+   --------------------------
+   # Edit file docker-compose.yml
+   # Ganti line:
+   #   image: n8nio/n8n:1.123.4
+   # Menjadi:
+   #   image: n8nio/n8n:latest
+   
+   # Atau copy file baru:
+   cp /www/wwwroot/absensi/docker-compose-n8n-latest.yml docker-compose.yml
+
+4. PULL IMAGE TERBARU
+   -------------------
+   docker-compose pull
+   
+   # Ini akan download n8n versi terbaru (1.70+)
+
+5. START N8N
+   ----------
+   docker-compose up -d
+   
+   # Wait 30 detik untuk startup
+   sleep 30
+
+6. CEK STATUS
+   -----------
+   docker-compose ps
+   docker logs n8n_app --tail 50
+   
+   # Cari line:
+   # "Version: X.XX.X"  <- harus 1.70+
+
+7. TEST AKSES WEB
+   ---------------
+   # Buka browser:
+   https://n8n.dmcenter.my.id
+   
+   # Login dan cek workflows masih ada
+
+8. IMPORT WORKFLOW BARU (DENGAN EXPRESSIONS)
+   -----------------------------------------
+   # Di n8n Web UI:
+   # 1. Buat workflow baru
+   # 2. Import file: n8n-chatbot-FINAL-WITH-SET.json
+   # 3. AKTIFKAN workflow (toggle Active)
+
+9. TEST WORKFLOW
+   --------------
+   # Test help
+   curl -X POST https://n8n.dmcenter.my.id/webhook/wa-chatbot \
+   -H "Content-Type: application/json" \
+   -d '{"body":{"from":"85216343400@lid","message":"help"}}'
+   
+   # Test ringkasan
+   curl -X POST https://n8n.dmcenter.my.id/webhook/wa-chatbot \
+   -H "Content-Type: application/json" \
+   -d '{"body":{"from":"85216343400@lid","message":"ringkasan"}}'
+
+10. VERIFIKASI
+    ----------
+    # Kirim WhatsApp "help" atau "ringkasan"
+    # Harus dapat reply dari bot
+
+JIKA ADA MASALAH:
+=================
+
+ROLLBACK KE VERSI LAMA:
+-----------------------
+cd /www/wwwroot/n8n
+docker-compose down
+
+# Edit docker-compose.yml, ganti ke:
+#   image: n8nio/n8n:1.123.4
+
+docker-compose up -d
+
+RESTORE DATA:
+-------------
+cd /www/wwwroot/n8n
+docker-compose down
+rm -rf n8n_data/
+tar -xzf n8n_data_backup_YYYYMMDD.tar.gz
+docker-compose up -d
+
+NOTES:
+======
+- Update tidak akan hapus workflows yang ada
+- Credentials tetap tersimpan
+- Workflow lama (hardcoded) masih bisa dipakai
+- Workflow baru (dynamic) bisa diimport setelah update
+
+EXPECTED RESULT:
+================
+Setelah update, workflow dengan expressions di bodyParameters
+akan bekerja dengan baik, tanpa perlu hardcode phone numbers.
+
+File workflow yang bisa dipakai:
+- n8n-chatbot-FINAL-WITH-SET.json (recommended)
+- n8n-chatbot-COPY-EXACT-WORKING.json (alternative)

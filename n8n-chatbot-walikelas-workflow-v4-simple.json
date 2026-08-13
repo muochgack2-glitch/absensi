@@ -1,0 +1,309 @@
+{
+  "name": "WhatsApp Chatbot - Wali Kelas (Simple)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wa-chatbot",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "wa-chatbot"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract and normalize data\nconst from = $json.body?.from || '';\nconst message = $json.body?.message || '';\n\n// Clean phone number (remove WhatsApp JID suffixes)\nlet phone = String(from);\nphone = phone.replace(/@s\\.whatsapp\\.net/g, '');\nphone = phone.replace(/@lid/g, '');\nphone = phone.replace(/@jid/g, '');\nphone = phone.replace(/@g\\.us/g, '');\n\n// Normalize message to lowercase for comparison\nconst msgLower = String(message).toLowerCase();\n\n// Determine command\nlet command = 'unknown';\nif (msgLower.includes('help')) {\n  command = 'help';\n} else if (msgLower.includes('ringkasan')) {\n  command = 'ringkasan';\n} else if (msgLower.includes('statistik')) {\n  command = 'statistik';\n}\n\nreturn [{ json: {\n  phone: phone,\n  message: message,\n  command: command\n}}];"
+      },
+      "id": "function-parse",
+      "name": "Parse Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.command }}",
+                    "value2": "help"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "help"
+            },
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.command }}",
+                    "value2": "ringkasan"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "ringkasan"
+            },
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.command }}",
+                    "value2": "statistik"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "statistik"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "switch-command",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const phone = $json.phone;\nconst replyMessage = `🤖 *MENU CHATBOT WALI KELAS*\\n\\nPerintah yang tersedia:\\n\\n1️⃣ *ringkasan kehadiran hari ini*\\n   → Lihat ringkasan absensi hari ini\\n\\n2️⃣ *statistik minggu ini*\\n   → Lihat statistik absensi minggu ini\\n   _(Coming soon)_\\n\\n3️⃣ *help*\\n   → Tampilkan menu ini\\n\\n---\\n_Sistem Absensi SMK PGRI Blora_\\n_Powered by n8n + Laravel_`;\n\nreturn [{ json: { phone: phone, message: replyMessage } }];"
+      },
+      "id": "function-help",
+      "name": "Help Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [840, 200]
+    },
+    {
+      "parameters": {
+        "url": "=https://absensi.smkpgriblora.sch.id/api/chatbot/summary/{{ $json.phone }}",
+        "authentication": "none",
+        "options": {}
+      },
+      "id": "http-laravel-api",
+      "name": "Get Summary from Laravel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [840, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const phone = items[0].json.phone;\nconst data = $json;\n\nif (!data.success) {\n  return [{ json: {\n    phone: phone,\n    message: data.message || 'Maaf, terjadi kesalahan. Pastikan nomor Anda terdaftar sebagai wali kelas.'\n  }}];\n}\n\nconst summary = data.data;\nlet tidakHadirList = '';\n\nif (summary.tidak_hadir && summary.tidak_hadir.length > 0) {\n  tidakHadirList = summary.tidak_hadir.map((siswa, index) => \n    `${index + 1}. ${siswa.nama} (${siswa.nis})`\n  ).join('\\n');\n} else {\n  tidakHadirList = '(Semua siswa hadir)';\n}\n\nconst message = `Selamat siang ${summary.wali_kelas_nama} 👋\\n\\n📊 *RINGKASAN ABSENSI HARI INI*\\nKelas: *${summary.kelas_nama}*\\nTanggal: ${summary.tanggal}\\n\\n📈 *Rekapitulasi:*\\n✅ Hadir: *${summary.hadir}* siswa\\n🤒 Sakit: *${summary.sakit}* siswa\\n📝 Izin: *${summary.izin}* siswa\\n❌ Alpha: *${summary.alpha}* siswa\\n\\n👥 Total siswa: *${summary.total_siswa}*\\n\\n${ summary.alpha > 0 ? `⚠️ *Siswa Tidak Hadir:*\\n${tidakHadirList}` : '✅ *Semua siswa hadir hari ini!*' }\\n\\n---\\n_Sistem Absensi SMK PGRI Blora_\\n_Ketik \"help\" untuk perintah lainnya_`;\n\nreturn [{ json: { phone: phone, message: message } }];"
+      },
+      "id": "function-format-ringkasan",
+      "name": "Format Ringkasan",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1040, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const phone = $json.phone;\nconst replyMessage = `📈 *FITUR STATISTIK*\\n\\nFitur ini sedang dalam pengembangan.\\n\\nSilakan gunakan perintah lain:\\n• *ringkasan kehadiran hari ini*\\n• *help*\\n\\n---\\n_Sistem Absensi SMK PGRI Blora_`;\n\nreturn [{ json: { phone: phone, message: replyMessage } }];"
+      },
+      "id": "function-statistik",
+      "name": "Statistik Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [840, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const phone = $json.phone;\nconst replyMessage = `❓ Maaf, saya tidak mengerti perintah Anda.\\n\\nKetik *help* untuk melihat daftar perintah yang tersedia.\\n\\n---\\n_Sistem Absensi SMK PGRI Blora_`;\n\nreturn [{ json: { phone: phone, message: replyMessage } }];"
+      },
+      "id": "function-unknown",
+      "name": "Unknown Command",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [840, 500]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://absensi.smkpgriblora.sch.id/wa-reply",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $json.phone }}"
+            },
+            {
+              "name": "message", 
+              "value": "={{ $json.message }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "http-send-wa",
+      "name": "Send to WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1240, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"message\": \"Processed\" } }}"
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1440, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Input": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Help Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Summary from Laravel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Statistik Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Unknown Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Help Message": {
+      "main": [
+        [
+          {
+            "node": "Send to WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Summary from Laravel": {
+      "main": [
+        [
+          {
+            "node": "Format Ringkasan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Ringkasan": {
+      "main": [
+        [
+          {
+            "node": "Send to WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Statistik Message": {
+      "main": [
+        [
+          {
+            "node": "Send to WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unknown Command": {
+      "main": [
+        [
+          {
+            "node": "Send to WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": []
+}

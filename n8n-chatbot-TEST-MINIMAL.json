@@ -1,0 +1,82 @@
+{
+  "name": "TEST MINIMAL - WhatsApp Reply",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wa-test",
+        "responseMode": "lastNode"
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "wa-test"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://absensi.smkpgriblora.sch.id/wa-reply",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "6285216343400"
+            },
+            {
+              "name": "message",
+              "value": "Test dari n8n - hardcoded"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-wa",
+      "name": "Send to WA (Hardcoded)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "respond",
+      "name": "Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [640, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Send to WA (Hardcoded)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to WA (Hardcoded)": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {},
+  "staticData": null,
+  "tags": []
+}

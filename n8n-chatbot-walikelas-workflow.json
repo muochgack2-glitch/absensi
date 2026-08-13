@@ -1,0 +1,289 @@
+{
+  "name": "WhatsApp Chatbot - Wali Kelas Absensi",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wa-chatbot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "wa-chatbot"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.body.message.toLowerCase() }}",
+                    "operation": "contains",
+                    "value2": "ringkasan"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "ringkasan"
+            },
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.body.message.toLowerCase() }}",
+                    "operation": "contains",
+                    "value2": "statistik"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "statistik"
+            },
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.body.message.toLowerCase() }}",
+                    "operation": "contains",
+                    "value2": "help"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "help"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "switch-keyword",
+      "name": "Switch - Parse Keyword",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://absensi.smkpgriblora.sch.id/api/chatbot/summary/{{ $json.body.from }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "http-get-summary",
+      "name": "HTTP - Get Summary dari Laravel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [650, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "Laravel API Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Format pesan ringkasan\nconst data = $input.item.json;\n\nif (!data.success) {\n  return {\n    phone: data.phone || $('Webhook Trigger').item.json.body.from,\n    message: data.message || 'Maaf, terjadi kesalahan. Pastikan nomor Anda terdaftar sebagai wali kelas.'\n  };\n}\n\nconst summary = data.data;\n\n// Build daftar siswa tidak hadir\nlet tidakHadirList = '';\nif (summary.tidak_hadir && summary.tidak_hadir.length > 0) {\n  tidakHadirList = summary.tidak_hadir.map((siswa, index) => \n    `${index + 1}. ${siswa.nama} (${siswa.nis})`\n  ).join('\\n');\n} else {\n  tidakHadirList = '(Semua siswa hadir)';\n}\n\nconst message = `Selamat siang ${summary.wali_kelas_nama} 👋\n\n📊 *RINGKASAN ABSENSI HARI INI*\nKelas: *${summary.kelas_nama}*\nTanggal: ${summary.tanggal}\n\n📈 *Rekapitulasi:*\n✅ Hadir: *${summary.hadir}* siswa\n🤒 Sakit: *${summary.sakit}* siswa\n📝 Izin: *${summary.izin}* siswa\n❌ Alpha: *${summary.alpha}* siswa\n\n👥 Total siswa: *${summary.total_siswa}*\n\n${ summary.alpha > 0 ? `⚠️ *Siswa Tidak Hadir:*\\n${tidakHadirList}` : '✅ *Semua siswa hadir hari ini!*' }\n\n---\n_Sistem Absensi SMK PGRI Blora_\n_Ketik \"help\" untuk perintah lainnya_`;\n\nreturn {\n  phone: summary.nomor_wa,\n  message: message\n};"
+      },
+      "id": "function-format-ringkasan",
+      "name": "Function - Format Pesan Ringkasan",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pesan help\nconst from = $('Webhook Trigger').item.json.body.from;\n\nconst helpMessage = `🤖 *MENU CHATBOT WALI KELAS*\n\nPerintah yang tersedia:\n\n1️⃣ *ringkasan kehadiran hari ini*\n   → Lihat ringkasan absensi hari ini\n\n2️⃣ *statistik minggu ini*\n   → Lihat statistik absensi minggu ini\n   _(Coming soon)_\n\n3️⃣ *help*\n   → Tampilkan menu ini\n\n---\n_Sistem Absensi SMK PGRI Blora_\n_Powered by n8n + Laravel_`;\n\nreturn {\n  phone: from,\n  message: helpMessage\n};"
+      },
+      "id": "function-help",
+      "name": "Function - Help Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pesan unknown command\nconst from = $('Webhook Trigger').item.json.body.from;\n\nconst unknownMessage = `❓ Maaf, saya tidak mengerti perintah Anda.\n\nKetik *help* untuk melihat daftar perintah yang tersedia.\n\n---\n_Sistem Absensi SMK PGRI Blora_`;\n\nreturn {\n  phone: from,\n  message: unknownMessage\n};"
+      },
+      "id": "function-unknown",
+      "name": "Function - Unknown Command",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Placeholder untuk statistik (future feature)\nconst from = $('Webhook Trigger').item.json.body.from;\n\nconst message = `📈 *FITUR STATISTIK*\n\nFitur ini sedang dalam pengembangan.\n\nSilakan gunakan perintah lain:\n• *ringkasan kehadiran hari ini*\n• *help*\n\n---\n_Sistem Absensi SMK PGRI Blora_`;\n\nreturn {\n  phone: from,\n  message: message\n};"
+      },
+      "id": "function-statistik",
+      "name": "Function - Statistik (Coming Soon)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 100]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/reply",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $json.phone }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.message }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-send-reply",
+      "name": "HTTP - Send Reply ke WA Gateway",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"message\": \"Reply sent\" } }}"
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch - Parse Keyword",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch - Parse Keyword": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Get Summary dari Laravel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Function - Statistik (Coming Soon)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Function - Help Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Function - Unknown Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - Get Summary dari Laravel": {
+      "main": [
+        [
+          {
+            "node": "Function - Format Pesan Ringkasan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function - Format Pesan Ringkasan": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Send Reply ke WA Gateway",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function - Help Message": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Send Reply ke WA Gateway",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function - Unknown Command": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Send Reply ke WA Gateway",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function - Statistik (Coming Soon)": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Send Reply ke WA Gateway",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - Send Reply ke WA Gateway": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-08-12T00:00:00.000Z",
+  "versionId": "1"
+}

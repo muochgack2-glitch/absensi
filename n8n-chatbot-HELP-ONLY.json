@@ -1,0 +1,103 @@
+{
+  "name": "TEST - Help Only",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wa-chatbot",
+        "responseMode": "lastNode"
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "wa-chatbot"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract phone from webhook body\nconst rawPhone = $json.body.from || '';\n\n// Clean phone number\nlet phone = String(rawPhone);\nphone = phone.replace('@s.whatsapp.net', '');\nphone = phone.replace('@lid', '');\nphone = phone.replace('@jid', '');\nphone = phone.replace('@g.us', '');\n\n// Hardcoded help message\nconst helpMsg = '🤖 *MENU CHATBOT WALI KELAS*\\n\\nPerintah:\\n1️⃣ *help* - Menu ini\\n2️⃣ *ringkasan* - Lihat absensi\\n\\n_SMK PGRI Blora_';\n\n// Return in correct format\nreturn [{\n  json: {\n    phone: phone,\n    message: helpMsg\n  }\n}];"
+      },
+      "id": "code",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://absensi.smkpgriblora.sch.id/wa-reply",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $json.phone }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.message }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "respond",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [840, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {},
+  "staticData": null,
+  "tags": []
+}

@@ -1,0 +1,204 @@
+{
+  "name": "WhatsApp Chatbot - Hardcoded Multi HTTP",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wa-chatbot",
+        "responseMode": "lastNode"
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "wa-chatbot"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.body.message.toLowerCase() }}",
+                    "operation": "contains",
+                    "value2": "help"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "help"
+            },
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.body.message.toLowerCase() }}",
+                    "operation": "contains",
+                    "value2": "ringkasan"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "ringkasan"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "switch",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://absensi.smkpgriblora.sch.id/wa-reply?phone=6285216343400&message=%F0%9F%A4%96%20*MENU%20CHATBOT%20WALI%20KELAS*%0A%0APerintah%3A%0A1%EF%B8%8F%E2%83%A3%20*ringkasan*%20-%20Lihat%20absensi%20hari%20ini%0A2%EF%B8%8F%E2%83%A3%20*help*%20-%20Menu%20ini%0A%0A---%0A_Sistem%20Absensi%20SMK%20PGRI%20Blora_",
+        "options": {}
+      },
+      "id": "http-help",
+      "name": "HTTP Help",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [640, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://absensi.smkpgriblora.sch.id/api/chatbot/summary/6285216343400",
+        "options": {}
+      },
+      "id": "http-api",
+      "name": "HTTP Get Summary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://absensi.smkpgriblora.sch.id/wa-reply?phone=6285216343400&message=Ringkasan%20akan%20dikirim%20(fitur%20dalam%20pengembangan)",
+        "options": {}
+      },
+      "id": "http-ringkasan",
+      "name": "HTTP Ringkasan",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [840, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://absensi.smkpgriblora.sch.id/wa-reply?phone=6285216343400&message=%E2%9D%93%20Perintah%20tidak%20dikenali.%20Ketik%20*help*%20untuk%20bantuan.",
+        "options": {}
+      },
+      "id": "http-unknown",
+      "name": "HTTP Unknown",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [640, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true } }}"
+      },
+      "id": "respond",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1040, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "HTTP Help",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Get Summary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Unknown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Help": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Get Summary": {
+      "main": [
+        [
+          {
+            "node": "HTTP Ringkasan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Ringkasan": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Unknown": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {},
+  "staticData": null,
+  "tags": []
+}
