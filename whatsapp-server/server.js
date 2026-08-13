@@ -635,7 +635,9 @@ app.post('/logout', async (req, res) => {
 // Reply endpoint - Menerima response dari n8n untuk dikirim ke WA
 app.post('/reply', async (req, res) => {
     try {
-        const { phone, message } = req.body;
+        // Support both body and query parameters
+        const phone = req.body.phone || req.query.phone;
+        const message = req.body.message || req.query.message;
 
         if (!phone || !message) {
             return res.status(400).json({
