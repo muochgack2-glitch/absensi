@@ -196,4 +196,4 @@
     <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
 </html>
-<?php /**PATH C:\Users\DMCenter\Music\SPMB2\SPMB\absensi\resources\views/layouts/app.blade.php ENDPATH**/ ?>
+<?php /**PATH /www/wwwroot/absensi/resources/views/layouts/app.blade.php ENDPATH**/ ?>

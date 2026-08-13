@@ -1005,4 +1005,4 @@
 
     </div>
 </aside>
-<?php /**PATH C:\Users\DMCenter\Music\SPMB2\SPMB\absensi\resources\views/layouts/sidebar.blade.php ENDPATH**/ ?>
+<?php /**PATH /www/wwwroot/absensi/resources/views/layouts/sidebar.blade.php ENDPATH**/ ?>

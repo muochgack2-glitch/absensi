@@ -123,13 +123,18 @@ async function connectToWhatsApp() {
         sock.ev.on('messages.upsert', async ({ messages }) => {
             const msg = messages[0];
             if (!msg.key.fromMe && msg.message) {
-                const from = msg.key.remoteJid.replace('@s.whatsapp.net', '').replace('@lid', '');
+                const remoteJid = msg.key.remoteJid;
+                const isLid = remoteJid.endsWith('@lid');
+                const from = remoteJid.replace('@s.whatsapp.net', '').replace('@lid', '');
                 const text = msg.message.conversation || 
                             msg.message.extendedTextMessage?.text || 
                             '';
                 
-                // Format phone with 62 prefix
-                const formattedPhone = '62' + from;
+                // PENTING: @lid adalah ID pengganti WhatsApp (bukan nomor telepon asli).
+                // Jangan tambahkan prefix 62 pada LID - itu akan menghasilkan JID yang
+                // tidak valid dan pesan balasan tidak akan pernah sampai.
+                // LID dikirim apa adanya (nanti ditandai ulang jadi @lid saat reply).
+                const formattedPhone = isLid ? from : '62' + from;
                 
                 logger.info(`📨 Received from ${from} (formatted: ${formattedPhone}): ${text}`);
                 
@@ -189,7 +194,15 @@ async function connectToWhatsApp() {
 function formatPhoneNumber(phone) {
     // Remove all non-numeric characters
     let cleaned = phone.replace(/\D/g, '');
-    
+
+    // LID (Linked ID) WhatsApp panjangnya 15-16 digit, jauh lebih panjang
+    // dari nomor telepon asli Indonesia (maks ~14 digit termasuk 62).
+    // LID bukan nomor telepon - jangan diberi prefix 62, dan JID-nya
+    // harus pakai suffix @lid, bukan @s.whatsapp.net.
+    if (cleaned.length >= 15) {
+        return cleaned + '@lid';
+    }
+
     // If starts with 0, replace with 62
     if (cleaned.startsWith('0')) {
         cleaned = '62' + cleaned.substring(1);

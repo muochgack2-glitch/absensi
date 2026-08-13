@@ -31,4 +31,5 @@ Route::get('/announcement/active', [AttendanceStatsController::class, 'activeAnn
 // Chatbot API - for n8n WhatsApp chatbot integration
 Route::prefix('chatbot')->group(function () {
     Route::get('/summary/{phone}', [ChatbotController::class, 'getSummary']);
+    Route::post('/verify', [ChatbotController::class, 'verify']);
 });

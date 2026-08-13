@@ -18,6 +18,7 @@
     },
     "dependencies": {
         "alpinejs": "^3.15.12",
-        "html5-qrcode": "^2.3.8"
+        "html5-qrcode": "^2.3.8",
+        "multer": "^2.2.0"
     }
 }

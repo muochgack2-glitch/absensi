@@ -44,13 +44,21 @@ class WaliKelasController extends Controller
         // Normalize phone: add 62 prefix if provided
         $phone = $request->phone ? '62' . $request->phone : null;
 
+        // Kalau nomor WA belum diisi manual & role wali_kelas, generate kode
+        // verifikasi 6 digit supaya wali kelas bisa daftar sendiri via chatbot
+        // WA (perlu buat kasus nomor terdeteksi sebagai LID, bukan nomor asli).
+        $verificationCode = (!$phone && $request->role === 'wali_kelas')
+            ? $this->generateVerificationCode()
+            : null;
+
         User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'phone'    => $phone,
-            'password' => Hash::make($request->password),
-            'role'     => $request->role,
-            'kelas_id' => $request->role === 'wali_kelas' ? $request->kelas_id : null,
+            'name'              => $request->name,
+            'email'             => $request->email,
+            'phone'             => $phone,
+            'verification_code' => $verificationCode,
+            'password'          => Hash::make($request->password),
+            'role'              => $request->role,
+            'kelas_id'          => $request->role === 'wali_kelas' ? $request->kelas_id : null,
         ]);
 
         return back()->with('success', "✅ Akun \"{$request->name}\" berhasil dibuat.");
@@ -97,6 +105,35 @@ class WaliKelasController extends Controller
         $name = $user->name;
         $user->delete();
         return back()->with('success', "Akun \"{$name}\" berhasil dihapus.");
+    }
+
+    /**
+     * Generate ulang kode verifikasi WA untuk wali kelas (misal karena nomor
+     * lama sudah tidak bisa dipakai, atau kode sebelumnya lupa/hilang).
+     * Ini mengosongkan phone yang sudah terdaftar (kalau ada) supaya wali
+     * kelas bisa daftar ulang dari nomor WA manapun pakai kode baru.
+     */
+    public function userRegenerateCode(User $user)
+    {
+        if ($user->role !== 'wali_kelas') {
+            return back()->with('error', 'Kode verifikasi hanya untuk akun wali kelas.');
+        }
+
+        $user->update([
+            'phone'             => null,
+            'verification_code' => $this->generateVerificationCode(),
+        ]);
+
+        return back()->with('success', "🔑 Kode verifikasi baru untuk \"{$user->name}\": {$user->verification_code}");
+    }
+
+    private function generateVerificationCode(): string
+    {
+        do {
+            $code = (string) random_int(100000, 999999);
+        } while (User::where('verification_code', $code)->exists());
+
+        return $code;
     }
 
     // ================================================================

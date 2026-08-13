@@ -144,6 +144,69 @@ class ChatbotController extends Controller
     }
     
     /**
+     * Verifikasi kode pendaftaran dari wali kelas & simpan nomor/LID pengirim
+     * sebagai phone user tersebut. Dipanggil dari n8n saat pesan masuk cocok
+     * pola kode 6 digit (dicek dulu oleh workflow n8n / whatsapp-server
+     * sebelum masuk ke sini).
+     *
+     * @param Request $request Body JSON: { "phone": "...", "code": "123456" }
+     */
+    public function verify(Request $request)
+    {
+        $expectedKey = config('services.chatbot.api_key');
+        if ($expectedKey && $request->header('X-API-Key') !== $expectedKey) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized',
+            ], 401);
+        }
+
+        $request->validate([
+            'phone' => 'required|string',
+            'code'  => 'required|string',
+        ]);
+
+        // Catatan: 'phone' di sini dikirim apa adanya dari whatsapp-server —
+        // bisa berupa nomor asli (62xxx) ATAU LID (angka panjang ≥15 digit).
+        // Sengaja TIDAK dipanggil normalizePhone() di sini, karena LID bukan
+        // nomor telepon dan normalisasi 62-prefix justru akan merusaknya.
+        $phone = preg_replace('/[^0-9]/', '', $request->phone);
+        $code  = preg_replace('/[^0-9]/', '', $request->code);
+
+        $user = User::where('verification_code', $code)
+                    ->where('role', 'wali_kelas')
+                    ->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode verifikasi tidak valid atau sudah tidak berlaku. Hubungi admin untuk kode baru.',
+            ], 404);
+        }
+
+        // Cegah 1 nomor/LID dipakai lebih dari 1 akun wali kelas
+        $konflik = User::where('phone', $phone)
+                        ->where('id', '!=', $user->id)
+                        ->exists();
+        if ($konflik) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nomor ini sudah terdaftar untuk wali kelas lain. Hubungi admin.',
+            ], 409);
+        }
+
+        $user->update([
+            'phone'             => $phone,
+            'verification_code' => null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "✅ Pendaftaran berhasil! Nomor Anda terhubung ke akun wali kelas {$user->name}. Ketik \"ringkasan\" untuk melihat data absensi.",
+        ]);
+    }
+
+    /**
      * Normalize phone number to consistent format (62xxx)
      * 
      * @param string $phone

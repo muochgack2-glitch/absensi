@@ -1,31 +1,49 @@
-<x-app-layout>
-    <x-slot name="title">Manajemen Pengguna</x-slot>
-    <x-slot name="pageTitle">Manajemen Pengguna & Wali Kelas</x-slot>
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+     <?php $__env->slot('title', null, []); ?> Manajemen Pengguna <?php $__env->endSlot(); ?>
+     <?php $__env->slot('pageTitle', null, []); ?> Manajemen Pengguna & Wali Kelas <?php $__env->endSlot(); ?>
 
     <div class="space-y-6">
 
-        @if(session('success'))
+        <?php if(session('success')): ?>
         <div class="flex items-center gap-3 px-4 py-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl text-sm text-green-700 dark:text-green-400">
-            <i class="fas fa-check-circle text-lg"></i><span>{{ session('success') }}</span>
+            <i class="fas fa-check-circle text-lg"></i><span><?php echo e(session('success')); ?></span>
         </div>
-        @endif
-        @if(session('error'))
+        <?php endif; ?>
+        <?php if(session('error')): ?>
         <div class="flex items-center gap-3 px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-700 dark:text-red-400">
-            <i class="fas fa-exclamation-circle text-lg"></i><span>{{ session('error') }}</span>
+            <i class="fas fa-exclamation-circle text-lg"></i><span><?php echo e(session('error')); ?></span>
         </div>
-        @endif
+        <?php endif; ?>
 
-        {{-- Grid: Tabel users (kiri) + Form tambah (kanan) --}}
+        
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            {{-- Daftar Users --}}
+            
             <div class="lg:col-span-2">
-                <x-card>
+                <?php if (isset($component)) { $__componentOriginal53747ceb358d30c0105769f8471417f6 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal53747ceb358d30c0105769f8471417f6 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.card','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('card'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
                     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                         <i class="fas fa-users text-indigo-500"></i> Daftar Pengguna
                     </h3>
 
-                    {{-- Search & Filter --}}
+                    
                     <div class="flex flex-col sm:flex-row gap-3 mb-4">
                         <div class="flex-1 relative">
                             <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
@@ -52,96 +70,129 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                                @foreach($users as $u)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 user-row" data-name="{{ strtolower($u->name) }}" data-email="{{ strtolower($u->email) }}" data-role="{{ $u->role }}">
-                                    <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ $u->name }}</td>
-                                    <td class="px-4 py-3 text-gray-600 dark:text-gray-400 text-xs hidden sm:table-cell">{{ $u->email }}</td>
+                                <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $u): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 user-row" data-name="<?php echo e(strtolower($u->name)); ?>" data-email="<?php echo e(strtolower($u->email)); ?>" data-role="<?php echo e($u->role); ?>">
+                                    <td class="px-4 py-3 font-medium text-gray-900 dark:text-white"><?php echo e($u->name); ?></td>
+                                    <td class="px-4 py-3 text-gray-600 dark:text-gray-400 text-xs hidden sm:table-cell"><?php echo e($u->email); ?></td>
                                     <td class="px-4 py-3">
-                                        @if($u->role === 'admin')
+                                        <?php if($u->role === 'admin'): ?>
                                             <span class="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-bold rounded-full">Admin</span>
-                                        @else
+                                        <?php else: ?>
                                             <span class="px-2 py-0.5 bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 text-xs font-bold rounded-full">Wali Kelas</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-400">
-                                        {{ $u->kelas?->nama_kelas ?? '—' }}
+                                        <?php echo e($u->kelas?->nama_kelas ?? '—'); ?>
+
                                     </td>
                                     <td class="px-4 py-3 text-xs">
-                                        @if($u->role === 'wali_kelas')
-                                            @if($u->phone)
-                                                <span class="text-gray-600 dark:text-gray-400">{{ $u->phone }}</span>
-                                                <form action="{{ route('attendance.users.regenerate-code', $u) }}" method="POST" class="inline" onsubmit="return confirm('Nomor WA {{ $u->name }} ({{ $u->phone }}) akan DIHAPUS dan diganti kode verifikasi baru. Wali kelas harus daftar ulang via chatbot. Lanjutkan?')">
-                                                    @csrf
+                                        <?php if($u->role === 'wali_kelas'): ?>
+                                            <?php if($u->phone): ?>
+                                                <span class="text-gray-600 dark:text-gray-400"><?php echo e($u->phone); ?></span>
+                                                <form action="<?php echo e(route('attendance.users.regenerate-code', $u)); ?>" method="POST" class="inline" onsubmit="return confirm('Nomor WA <?php echo e($u->name); ?> (<?php echo e($u->phone); ?>) akan DIHAPUS dan diganti kode verifikasi baru. Wali kelas harus daftar ulang via chatbot. Lanjutkan?')">
+                                                    <?php echo csrf_field(); ?>
                                                     <button type="submit" class="ml-1 text-gray-400 hover:text-red-500" title="Reset & buat kode baru">
                                                         <i class="fas fa-rotate"></i>
                                                     </button>
                                                 </form>
-                                            @elseif($u->verification_code)
-                                                <span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 font-mono font-bold rounded">{{ $u->verification_code }}</span>
-                                                <form action="{{ route('attendance.users.regenerate-code', $u) }}" method="POST" class="inline" onsubmit="return confirm('Buat kode baru untuk {{ $u->name }}?')">
-                                                    @csrf
+                                            <?php elseif($u->verification_code): ?>
+                                                <span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 font-mono font-bold rounded"><?php echo e($u->verification_code); ?></span>
+                                                <form action="<?php echo e(route('attendance.users.regenerate-code', $u)); ?>" method="POST" class="inline" onsubmit="return confirm('Buat kode baru untuk <?php echo e($u->name); ?>?')">
+                                                    <?php echo csrf_field(); ?>
                                                     <button type="submit" class="ml-1 text-indigo-400 hover:text-indigo-600" title="Buat kode baru">
                                                         <i class="fas fa-rotate"></i>
                                                     </button>
                                                 </form>
-                                            @else
-                                                <form action="{{ route('attendance.users.regenerate-code', $u) }}" method="POST" class="inline" onsubmit="return confirm('Buat kode verifikasi untuk {{ $u->name }}?')">
-                                                    @csrf
+                                            <?php else: ?>
+                                                <form action="<?php echo e(route('attendance.users.regenerate-code', $u)); ?>" method="POST" class="inline" onsubmit="return confirm('Buat kode verifikasi untuk <?php echo e($u->name); ?>?')">
+                                                    <?php echo csrf_field(); ?>
                                                     <button type="submit" class="text-indigo-500 hover:text-indigo-700 font-medium">
                                                         Buat kode
                                                     </button>
                                                 </form>
-                                            @endif
-                                        @else
+                                            <?php endif; ?>
+                                        <?php else: ?>
                                             —
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center gap-2">
-                                            <button onclick="openEditModal({{ $u->id }}, '{{ addslashes($u->name) }}', '{{ $u->email }}', '{{ $u->role }}', {{ $u->kelas_id ?? 'null' }}, '{{ $u->phone ?? '' }}')"
+                                            <button onclick="openEditModal(<?php echo e($u->id); ?>, '<?php echo e(addslashes($u->name)); ?>', '<?php echo e($u->email); ?>', '<?php echo e($u->role); ?>', <?php echo e($u->kelas_id ?? 'null'); ?>, '<?php echo e($u->phone ?? ''); ?>')"
                                                     class="text-indigo-500 hover:text-indigo-700 text-xs font-medium">
                                                 <i class="fas fa-edit"></i>
                                             </button>
-                                            @if($u->id !== auth()->id())
-                                            <form action="{{ route('attendance.users.destroy', $u) }}" method="POST"
-                                                  onsubmit="return confirm('Hapus akun {{ $u->name }}?')">
-                                                @csrf @method('DELETE')
+                                            <?php if($u->id !== auth()->id()): ?>
+                                            <form action="<?php echo e(route('attendance.users.destroy', $u)); ?>" method="POST"
+                                                  onsubmit="return confirm('Hapus akun <?php echo e($u->name); ?>?')">
+                                                <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                                                 <button type="submit" class="text-red-400 hover:text-red-600 text-xs">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tbody>
                         </table>
                     </div>
-                </x-card>
+                 <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal53747ceb358d30c0105769f8471417f6)): ?>
+<?php $attributes = $__attributesOriginal53747ceb358d30c0105769f8471417f6; ?>
+<?php unset($__attributesOriginal53747ceb358d30c0105769f8471417f6); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal53747ceb358d30c0105769f8471417f6)): ?>
+<?php $component = $__componentOriginal53747ceb358d30c0105769f8471417f6; ?>
+<?php unset($__componentOriginal53747ceb358d30c0105769f8471417f6); ?>
+<?php endif; ?>
             </div>
 
-            {{-- Form Tambah --}}
+            
             <div>
-                <x-card>
+                <?php if (isset($component)) { $__componentOriginal53747ceb358d30c0105769f8471417f6 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal53747ceb358d30c0105769f8471417f6 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.card','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('card'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
                     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                         <i class="fas fa-user-plus text-teal-500"></i> Tambah Pengguna
                     </h3>
-                    <form action="{{ route('attendance.users.store') }}" method="POST" class="space-y-4">
-                        @csrf
+                    <form action="<?php echo e(route('attendance.users.store')); ?>" method="POST" class="space-y-4">
+                        <?php echo csrf_field(); ?>
 
                         <div>
                             <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Nama Lengkap</label>
                             <input type="text" name="name" required placeholder="Nama pengguna"
                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none">
-                            @error('name')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                            <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Email</label>
                             <input type="email" name="email" required placeholder="email@sekolah.sch.id"
                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none">
-                            @error('email')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                            <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
 
                         <div>
@@ -155,14 +206,28 @@
                                        class="w-full pl-12 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none">
                             </div>
                             <p class="text-xs text-gray-500 mt-1">Format: 8xxxxxxxxx (tanpa 0 atau +62)</p>
-                            @error('phone')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                            <?php $__errorArgs = ['phone'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Password</label>
                             <input type="password" name="password" required placeholder="Min 6 karakter"
                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none">
-                            @error('password')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                            <?php $__errorArgs = ['password'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
 
                         <div>
@@ -179,9 +244,9 @@
                             <select name="kelas_id"
                                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none">
                                 <option value="">Pilih Kelas</option>
-                                @foreach($classes as $cls)
-                                    <option value="{{ $cls->id }}">{{ $cls->nama_kelas }}</option>
-                                @endforeach
+                                <?php $__currentLoopData = $classes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cls): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($cls->id); ?>"><?php echo e($cls->nama_kelas); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
 
@@ -190,9 +255,18 @@
                             <i class="fas fa-plus mr-2"></i>Tambah Pengguna
                         </button>
                     </form>
-                </x-card>
+                 <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal53747ceb358d30c0105769f8471417f6)): ?>
+<?php $attributes = $__attributesOriginal53747ceb358d30c0105769f8471417f6; ?>
+<?php unset($__attributesOriginal53747ceb358d30c0105769f8471417f6); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal53747ceb358d30c0105769f8471417f6)): ?>
+<?php $component = $__componentOriginal53747ceb358d30c0105769f8471417f6; ?>
+<?php unset($__componentOriginal53747ceb358d30c0105769f8471417f6); ?>
+<?php endif; ?>
 
-                {{-- Info box --}}
+                
                 <div class="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 text-xs text-blue-700 dark:text-blue-300">
                     <p class="font-semibold mb-1"><i class="fas fa-info-circle mr-1"></i>Info Role:</p>
                     <p class="mb-1"><strong>Admin:</strong> Akses penuh ke semua fitur</p>
@@ -202,12 +276,12 @@
         </div>
     </div>
 
-    {{-- Modal Edit --}}
+    
     <div id="editModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
             <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Edit Pengguna</h3>
             <form id="editForm" method="POST" class="space-y-4">
-                @csrf @method('PUT')
+                <?php echo csrf_field(); ?> <?php echo method_field('PUT'); ?>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Nama</label>
                     <input type="text" name="name" id="editName" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-400">
@@ -243,9 +317,9 @@
                     <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Kelas</label>
                     <select name="kelas_id" id="editKelasId" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-400">
                         <option value="">— Pilih Kelas —</option>
-                        @foreach($classes as $cls)
-                            <option value="{{ $cls->id }}">{{ $cls->nama_kelas }}</option>
-                        @endforeach
+                        <?php $__currentLoopData = $classes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cls): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($cls->id); ?>"><?php echo e($cls->nama_kelas); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
                 </div>
                 <div class="flex gap-3 pt-2">
@@ -256,7 +330,7 @@
         </div>
     </div>
 
-    @push('scripts')
+    <?php $__env->startPush('scripts'); ?>
     <script>
         function toggleKelas(elId, role) {
             const el = document.getElementById(elId);
@@ -295,5 +369,15 @@
         document.getElementById('userSearch').addEventListener('input', filterUsers);
         document.getElementById('roleFilter').addEventListener('change', filterUsers);
     </script>
-    @endpush
-</x-app-layout>
+    <?php $__env->stopPush(); ?>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php /**PATH /www/wwwroot/absensi/resources/views/attendance/wali/admin-users.blade.php ENDPATH**/ ?>

@@ -25,4 +25,4 @@
         </div>
     </div>
 </footer>
-<?php /**PATH C:\Users\DMCenter\Music\SPMB2\SPMB\absensi\resources\views/layouts/footer.blade.php ENDPATH**/ ?>
+<?php /**PATH /www/wwwroot/absensi/resources/views/layouts/footer.blade.php ENDPATH**/ ?>

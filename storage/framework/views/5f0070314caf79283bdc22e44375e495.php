@@ -78,4 +78,4 @@ unset($__defined_vars, $__key, $__value); ?>
         </div>
     </div>
 </div>
-<?php /**PATH C:\Users\DMCenter\Music\SPMB2\SPMB\absensi\resources\views/components/stat-card.blade.php ENDPATH**/ ?>
+<?php /**PATH /www/wwwroot/absensi/resources/views/components/stat-card.blade.php ENDPATH**/ ?>

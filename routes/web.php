@@ -277,6 +277,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/attendance/users', [WaliKelasController::class, 'userStore'])->name('attendance.users.store');
         Route::put('/attendance/users/{user}', [WaliKelasController::class, 'userUpdate'])->name('attendance.users.update');
         Route::delete('/attendance/users/{user}', [WaliKelasController::class, 'userDestroy'])->name('attendance.users.destroy');
+        Route::post('/attendance/users/{user}/regenerate-code', [WaliKelasController::class, 'userRegenerateCode'])->name('attendance.users.regenerate-code');
 
         // Tahun Ajaran Management
         Route::get('/attendance/tahun-ajaran', [TahunAjaranController::class, 'index'])->name('attendance.tahun-ajaran.index');

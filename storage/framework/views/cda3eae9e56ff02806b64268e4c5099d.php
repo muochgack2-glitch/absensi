@@ -48,4 +48,4 @@ unset($__defined_vars, $__key, $__value); ?>
     <?php echo e($slot); ?>
 
 </div>
-<?php /**PATH C:\Users\DMCenter\Music\SPMB2\SPMB\absensi\resources\views/components/card.blade.php ENDPATH**/ ?>
+<?php /**PATH /www/wwwroot/absensi/resources/views/components/card.blade.php ENDPATH**/ ?>
