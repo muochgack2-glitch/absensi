@@ -1,0 +1,134 @@
+================================================================================
+IMPORT N8N WORKFLOW - QUERY PARAMS (FINAL SOLUTION)
+================================================================================
+
+FILE: n8n-chatbot-QUERY-PARAMS.json
+PATH: /www/wwwroot/absensi/n8n-chatbot-QUERY-PARAMS.json
+
+================================================================================
+LANGKAH IMPORT:
+================================================================================
+
+1. BUKA N8N DASHBOARD
+   https://n8n.dmcenter.my.id
+
+2. IMPORT WORKFLOW
+   - Klik "Workflows" (sidebar kiri)
+   - Klik "+ Add Workflow" atau tombol Import
+   - Select "Import from File"
+   - Browse: /www/wwwroot/absensi/n8n-chatbot-QUERY-PARAMS.json
+   - Klik "Import"
+
+3. AKTIVKAN WORKFLOW
+   - Pastikan workflow terbuka di editor
+   - Klik toggle di kanan atas: "Test" → "Production" (WAJIB!)
+   - Toggle "Active" ON (warna hijau)
+   - Webhook akan aktif di: /webhook/wa-chatbot-query
+
+4. VERIFIKASI SETTINGS
+   Node "Send to WhatsApp" harus menggunakan URL dengan query params:
+   https://absensi.smkpgriblora.sch.id/wa-reply?phone={{ $json.phone }}&message={{ encodeURIComponent($json.message) }}
+   
+   (URL harus dimulai dengan "=" untuk enable expressions)
+
+================================================================================
+TEST SETELAH IMPORT:
+================================================================================
+
+bash test-wa-chatbot-query.sh
+
+ATAU manual:
+
+curl -X POST https://n8n.dmcenter.my.id/webhook/wa-chatbot-query \
+-H "Content-Type: application/json" \
+-d '{"body":{"from":"85216343400@lid","message":"help"}}'
+
+EXPECTED OUTPUT:
+{"success":true}
+
+DAN WhatsApp 6285216343400 akan menerima pesan help menu!
+
+================================================================================
+KENAPA INI HARUS BERHASIL:
+================================================================================
+
+1. Query parameters approach SUDAH TESTED dan WORKING:
+   ✅ curl -X POST "https://absensi.smkpgriblora.sch.id/wa-reply?phone=6285216343400&message=Test"
+   
+2. Server.js SUPPORT query parameters:
+   ✅ const phone = req.body.phone || req.query.phone;
+   
+3. URL expressions di n8n LEBIH RELIABLE daripada bodyParameters expressions
+
+4. Workflow structure EXACT SAMA dengan yang working, hanya Send to WhatsApp
+   node yang ubah dari bodyParameters ke query parameters
+
+================================================================================
+JIKA MASIH ERROR SETELAH IMPORT:
+================================================================================
+
+1. CEK WORKFLOW MODE:
+   - HARUS "Production" mode (bukan Test)
+   - Toggle Active HARUS ON (hijau)
+
+2. CEK N8N EXECUTION LOGS:
+   - Buka "Executions" di sidebar
+   - Cari execution untuk workflow ini
+   - Klik untuk lihat detail
+   - Cek node mana yang error
+
+3. CEK NODE "SEND TO WHATSAPP":
+   - Klik node di editor
+   - Tab "Parameters"
+   - Pastikan URL field ada tanda "=" di awal
+   - Pastikan URL mengandung query params: ?phone={{ $json.phone }}&message=...
+
+4. TEST MANUAL DI N8N EDITOR:
+   - Buka workflow di editor
+   - Klik node "Webhook"
+   - Klik "Listen for Test Event"
+   - Jalankan curl command
+   - Lihat data flow dari node ke node
+
+================================================================================
+TROUBLESHOOTING COMMON ISSUES:
+================================================================================
+
+ISSUE: Webhook 404 not found
+SOLUTION: Workflow belum di mode Production atau belum Active
+
+ISSUE: Error in workflow
+SOLUTION: Cek execution logs untuk detail error
+
+ISSUE: Phone or message null
+SOLUTION: Cek data flow di execution logs - pastikan Parse Input output benar
+
+ISSUE: WhatsApp tidak terkirim tapi n8n success
+SOLUTION: 
+- Cek WhatsApp Gateway status: curl http://localhost:3001/status
+- Cek WhatsApp Gateway logs: pm2 logs whatsapp-absensi
+- Pastikan WA Gateway connected
+
+================================================================================
+SETELAH BERHASIL:
+================================================================================
+
+1. Update whatsapp-server/server.js:
+   Ubah n8n webhook URL dari:
+   'http://localhost:5678/webhook/wa-chatbot-v2'
+   
+   Menjadi:
+   'http://localhost:5678/webhook/wa-chatbot-query'
+
+2. Restart WhatsApp Gateway:
+   pm2 restart whatsapp-absensi
+
+3. Test end-to-end dari WhatsApp:
+   Kirim pesan "help" dari HP
+   Kirim pesan "ringkasan"
+
+4. Deactivate workflow lama (optional):
+   - "WhatsApp Chatbot - Hardcoded Multi HTTP"
+   - Toggle Active OFF
+
+================================================================================
