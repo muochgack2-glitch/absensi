@@ -133,9 +133,9 @@ async function connectToWhatsApp() {
                 // Forward to n8n webhook (try internal port first, fallback to HTTPS)
                 try {
                     const n8nUrls = [
-                        'http://localhost:5678/webhook/wa-chatbot',
-                        'http://127.0.0.1:5678/webhook/wa-chatbot',
-                        'https://n8n.dmcenter.my.id/webhook/wa-chatbot'
+                        'http://localhost:5678/webhook/wa-chatbot-v2',
+                        'http://127.0.0.1:5678/webhook/wa-chatbot-v2',
+                        'https://n8n.dmcenter.my.id/webhook/wa-chatbot-v2'
                     ];
                     
                     let forwarded = false;
