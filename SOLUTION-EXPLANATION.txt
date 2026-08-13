@@ -1,0 +1,105 @@
+================================================================================
+N8N CHATBOT - SOLUTION
+================================================================================
+
+FILE: n8n-chatbot-SOLUTION.json
+WEBHOOK: /webhook/wa-chatbot-solution
+
+================================================================================
+KEY CHANGES FROM WORKING VERSION:
+================================================================================
+
+1. PARSE INPUT - Add "62" prefix:
+   "value": "={{ '62' + $json.body.from.split('@')[0] }}"
+   
+   Input:  "85216343400@lid"
+   Output: "6285216343400"
+
+2. ALL SET NODES (Set Help, Set Ringkasan, Set Unknown):
+   Phone ALWAYS reference Parse Input node:
+   "value": "={{ $('Parse Input').item.json.phone }}"
+   
+   This ensures phone value is consistently available from the SAME source.
+
+3. SEND TO WHATSAPP NODE:
+   Use simple $json reference (data from previous Set node):
+   {
+     "name": "phone",
+     "value": "={{ $json.phone }}"
+   },
+   {
+     "name": "message",
+     "value": "={{ $json.message }}"
+   }
+
+================================================================================
+WHY THIS SHOULD WORK:
+================================================================================
+
+DATA FLOW:
+
+1. Webhook → Parse Input
+   Output: { phone: "6285216343400", command: "help" }
+
+2. Parse Input → Switch → Set Help
+   Set Help creates NEW data:
+   {
+     phone: "6285216343400",  ← From $('Parse Input').item.json.phone
+     message: "🤖 MENU..."
+   }
+
+3. Set Help → Send to WhatsApp
+   HTTP Request uses $json (current data from Set Help):
+   {
+     phone: "6285216343400",  ← From $json.phone
+     message: "🤖 MENU..."     ← From $json.message
+   }
+
+The key is: EVERY Set node re-creates the phone field from Parse Input,
+so it's ALWAYS available in $json for the next node.
+
+================================================================================
+COMPARISON WITH WORKING VERSION:
+================================================================================
+
+WORKING (wa-chatbot-v2):
+- Parse Input: phone = "85216343400" (no prefix)
+- Set Help: phone = $('Parse Input').item.json.phone
+- Send to WhatsApp: phone = "6285216343400" (HARDCODED)
+
+SOLUTION (wa-chatbot-solution):
+- Parse Input: phone = "6285216343400" (WITH prefix)
+- Set Help: phone = $('Parse Input').item.json.phone
+- Send to WhatsApp: phone = $json.phone (DYNAMIC)
+
+================================================================================
+TESTING:
+================================================================================
+
+curl -X POST https://n8n.dmcenter.my.id/webhook/wa-chatbot-solution \
+-H "Content-Type: application/json" \
+-d '{"body":{"from":"85216343400@lid","message":"help"}}'
+
+EXPECTED:
+{"success":true}
+
+WhatsApp 6285216343400 receives message.
+
+================================================================================
+IF STILL FAILS:
+================================================================================
+
+Check n8n execution logs:
+1. Click the failed execution
+2. Check "Set Help" node output - does it have phone field?
+3. Check "Send to WhatsApp" node INPUT tab - does it show phone and message?
+4. Check "Send to WhatsApp" node Parameters tab - are bodyParameters resolved?
+
+If bodyParameters still show null despite INPUT having correct data,
+then n8n v2.34.5 has a bug with expression evaluation in bodyParameters.
+
+ALTERNATIVE SOLUTION: Use query parameters instead of body:
+- Change Send to WhatsApp URL to use query params
+- Server.js already supports this: ?phone=xxx&message=yyy
+
+================================================================================

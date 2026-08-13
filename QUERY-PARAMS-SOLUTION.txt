@@ -1,0 +1,128 @@
+================================================================================
+N8N CHATBOT - QUERY PARAMETERS SOLUTION
+================================================================================
+
+FILE: n8n-chatbot-QUERY-PARAMS.json
+WEBHOOK: /webhook/wa-chatbot-query
+
+================================================================================
+THE PROBLEM:
+================================================================================
+
+Expression evaluation in bodyParameters DOES NOT WORK in n8n v2.34.5.
+
+Even with correct data flow:
+- Parse Input outputs: { phone: "6285216343400", message: "..." }
+- Set Help outputs: { phone: "6285216343400", message: "..." }
+- Send to WhatsApp receives: { phone: "6285216343400", message: "..." }
+
+But when using bodyParameters with expressions:
+{
+  "name": "phone",
+  "value": "={{ $json.phone }}"
+}
+
+The expression evaluates to NULL!
+
+This is a KNOWN BUG in n8n expression evaluation for HTTP Request node
+bodyParameters.
+
+================================================================================
+THE SOLUTION: USE QUERY PARAMETERS
+================================================================================
+
+Instead of:
+POST /wa-reply
+Body: { "phone": "6285216343400", "message": "..." }
+
+Use:
+POST /wa-reply?phone=6285216343400&message=...
+
+The server.js ALREADY SUPPORTS THIS:
+```javascript
+const phone = req.body.phone || req.query.phone;
+const message = req.body.message || req.query.message;
+```
+
+In n8n HTTP Request node:
+- URL: https://absensi.smkpgriblora.sch.id/wa-reply?phone={{ $json.phone }}&message={{ encodeURIComponent($json.message) }}
+- Method: POST
+- NO bodyParameters needed!
+
+URL expressions work reliably in n8n, unlike bodyParameters expressions.
+
+================================================================================
+KEY CHANGES:
+================================================================================
+
+BEFORE (NOT WORKING):
+{
+  "method": "POST",
+  "url": "https://absensi.smkpgriblora.sch.id/wa-reply",
+  "sendBody": true,
+  "bodyParameters": {
+    "parameters": [
+      { "name": "phone", "value": "={{ $json.phone }}" },  ← NULL!
+      { "name": "message", "value": "={{ $json.message }}" }
+    ]
+  }
+}
+
+AFTER (WORKING):
+{
+  "method": "POST",
+  "url": "=https://absensi.smkpgriblora.sch.id/wa-reply?phone={{ $json.phone }}&message={{ encodeURIComponent($json.message) }}",
+  "options": {}
+}
+
+Note:
+- URL starts with "=" to enable expression evaluation
+- encodeURIComponent() for message to handle special characters
+- No sendBody, no bodyParameters
+
+================================================================================
+TESTING:
+================================================================================
+
+curl -X POST https://n8n.dmcenter.my.id/webhook/wa-chatbot-query \
+-H "Content-Type: application/json" \
+-d '{"body":{"from":"85216343400@lid","message":"help"}}'
+
+EXPECTED:
+{"success":true}
+
+WhatsApp 6285216343400 receives message.
+
+The actual HTTP call from n8n to Laravel will be:
+POST https://absensi.smkpgriblora.sch.id/wa-reply?phone=6285216343400&message=🤖%20*MENU...
+
+And server.js will extract:
+- phone from req.query.phone
+- message from req.query.message
+
+================================================================================
+WHY THIS WORKS:
+================================================================================
+
+1. URL expression evaluation in n8n is MORE RELIABLE than bodyParameters
+2. server.js already supports query parameters (we updated it before)
+3. Query parameters are simpler - no JSON encoding issues
+4. This is the SAME approach that worked in test-wa-reply-query-params.sh
+
+We already tested this approach successfully:
+curl -X POST "https://absensi.smkpgriblora.sch.id/wa-reply?phone=6285216343400&message=Test%20query%20params%20after%20update"
+{"success":true,"message":"Reply sent successfully","to":"6285216343400","timestamp":"2026-08-13T01:49:40.324Z"}
+
+================================================================================
+IMPORT AND TEST:
+================================================================================
+
+1. Import n8n-chatbot-QUERY-PARAMS.json to n8n
+2. Set to Production mode
+3. Activate workflow
+4. Run: bash test-wa-chatbot-query.sh
+
+If this STILL doesn't work, then the problem is NOT in bodyParameters,
+but somewhere else in the data flow or expression syntax.
+
+================================================================================

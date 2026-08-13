@@ -1,0 +1,140 @@
+================================================================================
+N8N CHATBOT - FIXED PHONE VERSION
+================================================================================
+
+FILE: n8n-chatbot-FIXED-PHONE.json
+WEBHOOK PATH: /webhook/wa-chatbot-fixed
+
+================================================================================
+PROBLEM YANG DITEMUKAN:
+================================================================================
+
+Dari n8n execution logs screenshot, terlihat error di node "Send to WhatsApp":
+
+OUTPUT ERROR:
+"Bad request - please check your parameters"
+"Phone and message are required"
+
+INPUT DATA YANG DITERIMA:
+{
+  "phone": null,  ← PHONE ADALAH NULL!
+  "message": "🤖 *MENU CHATBOT WALI KELAS*..."
+}
+
+ROOT CAUSE:
+Expression {{ $json.phone }} tidak bisa mengakses data dari node sebelumnya
+karena context $json sudah berubah di node "Send to WhatsApp".
+
+================================================================================
+PERUBAHAN YANG DILAKUKAN:
+================================================================================
+
+1. PARSE INPUT NODE - Prefix phone dengan "62":
+   BEFORE: "={{ $json.body.from.split('@')[0] }}"
+   AFTER:  "={{ '62' + $json.body.from.split('@')[0] }}"
+   
+   Contoh:
+   Input: "85216343400@lid"
+   Output: "6285216343400"  ← Langsung dengan prefix 62
+
+2. SEND TO WHATSAPP NODE - Gunakan $input.item.json:
+   BEFORE (SALAH):
+   {
+     "name": "phone",
+     "value": "={{ $json.phone }}"  ← NULL karena $json context berubah
+   }
+   
+   AFTER (BENAR):
+   {
+     "name": "phone",
+     "value": "={{ $input.item.json.phone }}"  ← Ambil dari input node
+   }
+   
+   Dan untuk message:
+   {
+     "name": "message",
+     "value": "={{ $input.item.json.message }}"  ← Ambil dari input node
+   }
+
+================================================================================
+KENAPA $input.item.json BUKAN $json?
+================================================================================
+
+Dalam n8n, setiap node punya context data:
+
+- $json = Data output dari node SAAT INI (current node)
+- $input = Data yang MASUK ke node ini dari node sebelumnya
+- $input.item.json = Data item yang diterima dari node sebelumnya
+
+Node "Send to WhatsApp" adalah HTTP Request node yang:
+1. Menerima data dari "Set Help/Ringkasan/Unknown" (input)
+2. Membuat HTTP request (processing)
+3. Menghasilkan response dari server (output/$json)
+
+Jadi saat kita define bodyParameters, kita sedang BUILD request.
+Pada saat itu, $json belum ada (karena request belum dijalankan).
+Kita harus ambil data dari $input (data yang masuk ke node ini).
+
+================================================================================
+TESTING:
+================================================================================
+
+bash test-wa-chatbot-fixed.sh
+
+ATAU manual:
+
+curl -X POST https://n8n.dmcenter.my.id/webhook/wa-chatbot-fixed \
+-H "Content-Type: application/json" \
+-d '{"body":{"from":"85216343400@lid","message":"help"}}'
+
+EXPECTED OUTPUT:
+{"success":true}
+
+DAN WhatsApp akan menerima pesan ke nomor: 6285216343400
+
+================================================================================
+EXPECTED FLOW:
+================================================================================
+
+1. Webhook receives: {"body":{"from":"85216343400@lid","message":"help"}}
+
+2. Parse Input outputs: 
+   {
+     "phone": "6285216343400",  ← Dengan prefix 62
+     "command": "help"
+   }
+
+3. Switch routes to "Set Help"
+
+4. Set Help outputs:
+   {
+     "phone": "6285216343400",
+     "message": "🤖 *MENU CHATBOT WALI KELAS*..."
+   }
+
+5. Send to WhatsApp sends POST to /wa-reply:
+   {
+     "phone": "6285216343400",  ← Dari $input.item.json.phone
+     "message": "🤖 *MENU CHATBOT WALI KELAS*..."  ← Dari $input.item.json.message
+   }
+
+6. WhatsApp Gateway sends message to 6285216343400
+
+7. Respond returns: {"success":true}
+
+================================================================================
+JIKA MASIH ERROR:
+================================================================================
+
+Cek n8n execution logs detail:
+1. Klik execution yang error
+2. Klik node "Send to WhatsApp"
+3. Tab "INPUT" - Cek apakah phone dan message ada dan benar
+4. Tab "Parameters" - Cek apakah bodyParameters ter-resolve dengan benar
+5. Tab "OUTPUT" - Cek response dari /wa-reply endpoint
+
+Jika INPUT sudah benar tapi bodyParameters masih null, berarti:
+- Expression syntax tidak supported di n8n version ini
+- Perlu gunakan Code node untuk build request body
+
+================================================================================
