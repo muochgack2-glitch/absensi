@@ -215,12 +215,12 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { \"success\": true, \"phone\": $('Parse Input').item.json.phone } }}"
+        "responseBody": "={{ { \"success\": true } }}"
       },
       "id": "respond",
       "name": "Respond",
       "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.1,
+      "typeVersion": 1,
       "position": [1440, 300]
     }
   ],
