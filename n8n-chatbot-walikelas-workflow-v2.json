@@ -89,7 +89,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const from = $json.body.from;\n\nconst helpMessage = `🤖 *MENU CHATBOT WALI KELAS*\\n\\nPerintah yang tersedia:\\n\\n1️⃣ *ringkasan kehadiran hari ini*\\n   → Lihat ringkasan absensi hari ini\\n\\n2️⃣ *statistik minggu ini*\\n   → Lihat statistik absensi minggu ini\\n   _(Coming soon)_\\n\\n3️⃣ *help*\\n   → Tampilkan menu ini\\n\\n---\\n_Sistem Absensi SMK PGRI Blora_\\n_Powered by n8n + Laravel_`;\n\nreturn {\n  phone: from,\n  message: helpMessage\n};"
+        "jsCode": "// Extract phone number from WhatsApp JID format\nconst rawFrom = $json.body.from;\nconst phone = rawFrom.replace('@s.whatsapp.net', '').replace('@lid', '').replace('@jid', '').replace('@g.us', '');\n\nconst helpMessage = `🤖 *MENU CHATBOT WALI KELAS*\\n\\nPerintah yang tersedia:\\n\\n1️⃣ *ringkasan kehadiran hari ini*\\n   → Lihat ringkasan absensi hari ini\\n\\n2️⃣ *statistik minggu ini*\\n   → Lihat statistik absensi minggu ini\\n   _(Coming soon)_\\n\\n3️⃣ *help*\\n   → Tampilkan menu ini\\n\\n---\\n_Sistem Absensi SMK PGRI Blora_\\n_Powered by n8n + Laravel_`;\n\nreturn {\n  phone: phone,\n  message: helpMessage\n};"
       },
       "id": "function-help",
       "name": "Function - Help Message",
@@ -99,7 +99,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const from = $json.body.from;\n\nconst unknownMessage = `❓ Maaf, saya tidak mengerti perintah Anda.\\n\\nKetik *help* untuk melihat daftar perintah yang tersedia.\\n\\n---\\n_Sistem Absensi SMK PGRI Blora_`;\n\nreturn {\n  phone: from,\n  message: unknownMessage\n};"
+        "jsCode": "// Extract phone number from WhatsApp JID format\nconst rawFrom = $json.body.from;\nconst phone = rawFrom.replace('@s.whatsapp.net', '').replace('@lid', '').replace('@jid', '').replace('@g.us', '');\n\nconst unknownMessage = `❓ Maaf, saya tidak mengerti perintah Anda.\\n\\nKetik *help* untuk melihat daftar perintah yang tersedia.\\n\\n---\\n_Sistem Absensi SMK PGRI Blora_`;\n\nreturn {\n  phone: phone,\n  message: unknownMessage\n};"
       },
       "id": "function-unknown",
       "name": "Function - Unknown Command",
@@ -109,7 +109,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const from = $json.body.from;\n\nconst message = `📈 *FITUR STATISTIK*\\n\\nFitur ini sedang dalam pengembangan.\\n\\nSilakan gunakan perintah lain:\\n• *ringkasan kehadiran hari ini*\\n• *help*\\n\\n---\\n_Sistem Absensi SMK PGRI Blora_`;\n\nreturn {\n  phone: from,\n  message: message\n};"
+        "jsCode": "// Extract phone number from WhatsApp JID format\nconst rawFrom = $json.body.from;\nconst phone = rawFrom.replace('@s.whatsapp.net', '').replace('@lid', '').replace('@jid', '').replace('@g.us', '');\n\nconst message = `📈 *FITUR STATISTIK*\\n\\nFitur ini sedang dalam pengembangan.\\n\\nSilakan gunakan perintah lain:\\n• *ringkasan kehadiran hari ini*\\n• *help*\\n\\n---\\n_Sistem Absensi SMK PGRI Blora_`;\n\nreturn {\n  phone: phone,\n  message: message\n};"
       },
       "id": "function-statistik",
       "name": "Function - Statistik (Coming Soon)",
