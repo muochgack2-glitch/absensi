@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'chatbot' => [
+        // API key untuk endpoint GET /api/chatbot/summary/{phone} (dipanggil
+        // n8n). Kalau kosong/tidak di-set, endpoint tetap terbuka tanpa auth -
+        // isi CHATBOT_API_KEY di .env & kirim via header X-API-Key dari n8n.
+        'api_key' => env('CHATBOT_API_KEY'),
+    ],
+
 ];

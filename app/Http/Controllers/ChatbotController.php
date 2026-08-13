@@ -14,11 +14,24 @@ class ChatbotController extends Controller
     /**
      * Get daily attendance summary for wali kelas by phone number
      * 
+     * @param Request $request
      * @param string $phone Phone number in format 628xxx or 08xxx
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getSummary($phone)
+    public function getSummary(Request $request, $phone)
     {
+        // Guard sederhana: endpoint ini tidak butuh login (dipanggil dari n8n),
+        // tapi tetap butuh API key supaya tidak bisa diakses publik begitu saja
+        // (mengembalikan nama & data absensi siswa berdasarkan nomor HP wali
+        // kelas). Set CHATBOT_API_KEY di .env, kirim via header X-API-Key.
+        $expectedKey = config('services.chatbot.api_key');
+        if ($expectedKey && $request->header('X-API-Key') !== $expectedKey) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized',
+            ], 401);
+        }
+
         try {
             // Normalize phone number (handle both 62xxx and 08xxx format)
             $normalizedPhone = $this->normalizePhone($phone);
@@ -53,24 +66,48 @@ class ChatbotController extends Controller
             $students = AttendanceStudent::where('kelas_id', $kelas->id)->get();
             $totalSiswa = $students->count();
             
-            // Get attendance records for today
-            $attendanceToday = AttendanceRecord::whereDate('created_at', $today)
+            // Get attendance records for today.
+            // Catatan: pakai kolom 'date' (tanggal absensi), BUKAN 'created_at'
+            // (kapan record dibuat) - keduanya bisa beda untuk input manual
+            // yang di-backfill ke tanggal lampau.
+            $attendanceToday = AttendanceRecord::where('date', $today)
                 ->whereIn('student_id', $students->pluck('id'))
                 ->get();
             
-            // Count by status
-            $hadir = $attendanceToday->where('status', 'hadir')->count();
-            $sakit = $attendanceToday->where('status', 'sakit')->count();
-            $izin = $attendanceToday->where('status', 'izin')->count();
-            $alpha = $totalSiswa - $attendanceToday->count();
+            // Count by status. Enum status di DB: hadir, terlambat, alpha, izin, sakit.
+            // Masing-masing dihitung terpisah (bukan digabung) supaya
+            // hadir + terlambat + sakit + izin + alpha = total_siswa persis.
+            $hadir      = $attendanceToday->where('status', 'hadir')->count();
+            $terlambat  = $attendanceToday->where('status', 'terlambat')->count();
+            $sakit      = $attendanceToday->where('status', 'sakit')->count();
+            $izin       = $attendanceToday->where('status', 'izin')->count();
+
+            // Alpha = siswa dengan status eksplisit 'alpha' (biasanya di-set oleh
+            // scheduled job attendance:mark-absent) DITAMBAH siswa yang sama sekali
+            // belum punya record hari ini (misal job belum jalan). Sebelumnya kode
+            // ini cuma menghitung "tidak ada record sama sekali", jadi begitu job
+            // mark-absent jalan (buat record status=alpha), siswa itu malah hilang
+            // dari hitungan alpha karena sudah "punya record".
+            $alphaEksplisit   = $attendanceToday->where('status', 'alpha')->count();
+            $studentIdsAdaRecord = $attendanceToday->pluck('student_id');
+            $tanpaRecordSamaSekali = $totalSiswa - $studentIdsAdaRecord->count();
+            $alpha = $alphaEksplisit + $tanpaRecordSamaSekali;
             
-            // Get students who haven't attended
-            $studentIdsPresent = $attendanceToday->pluck('student_id');
-            $tidakHadir = $students->whereNotIn('id', $studentIdsPresent)
+            // Daftar siswa yang tidak hadir = tanpa record sama sekali ATAU
+            // record eksplisit berstatus alpha.
+            $studentIdsAlphaEksplisit = $attendanceToday
+                ->where('status', 'alpha')
+                ->pluck('student_id');
+            $idsTidakHadir = $students->pluck('id')
+                ->diff($studentIdsAdaRecord)
+                ->merge($studentIdsAlphaEksplisit)
+                ->unique();
+
+            $tidakHadir = $students->whereIn('id', $idsTidakHadir)
                 ->map(function($student) {
                     return [
-                        'nis' => $student->nis,
-                        'nama' => $student->name
+                        'nis'  => $student->nis,
+                        'nama' => $student->nama,
                     ];
                 })
                 ->values();
@@ -79,10 +116,11 @@ class ChatbotController extends Controller
                 'success' => true,
                 'data' => [
                     'wali_kelas_nama' => $waliKelas->name,
-                    'kelas_nama' => $kelas->name,
+                    'kelas_nama' => $kelas->nama_kelas,
                     'tanggal' => Carbon::parse($today)->locale('id')->isoFormat('DD MMMM YYYY'),
                     'total_siswa' => $totalSiswa,
                     'hadir' => $hadir,
+                    'terlambat' => $terlambat,
                     'sakit' => $sakit,
                     'izin' => $izin,
                     'alpha' => $alpha,
