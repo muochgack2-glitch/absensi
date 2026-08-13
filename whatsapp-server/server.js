@@ -119,16 +119,19 @@ async function connectToWhatsApp() {
         // Credentials update handler
         sock.ev.on('creds.update', saveCreds);
 
-        // Messages handler - Forward to n8n chatbot
+        // Messages handler - Forward to n8n chatbot WITH phone mapping
         sock.ev.on('messages.upsert', async ({ messages }) => {
             const msg = messages[0];
             if (!msg.key.fromMe && msg.message) {
-                const from = msg.key.remoteJid.replace('@s.whatsapp.net', '');
+                const from = msg.key.remoteJid.replace('@s.whatsapp.net', '').replace('@lid', '');
                 const text = msg.message.conversation || 
                             msg.message.extendedTextMessage?.text || 
                             '';
                 
-                logger.info(`📨 Received from ${from}: ${text}`);
+                // Format phone with 62 prefix
+                const formattedPhone = '62' + from;
+                
+                logger.info(`📨 Received from ${from} (formatted: ${formattedPhone}): ${text}`);
                 
                 // Forward to n8n webhook (try internal port first, fallback to HTTPS)
                 try {
@@ -141,11 +144,13 @@ async function connectToWhatsApp() {
                     let forwarded = false;
                     for (const url of n8nUrls) {
                         try {
-                            await axios.post(url, {
+                            // Send to n8n - n8n will call back /wa-reply with response
+                            const response = await axios.post(url, {
                                 body: {
-                                    from: from,
+                                    from: from + '@lid',  // Keep original format for n8n
                                     message: text
                                 },
+                                phone: formattedPhone,  // Add formatted phone for reply
                                 timestamp: new Date().toISOString()
                             }, {
                                 headers: { 'Content-Type': 'application/json' },
