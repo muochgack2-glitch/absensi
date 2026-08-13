@@ -1,0 +1,121 @@
+================================================================================
+FIX N8N EXPRESSIONS - URL MUST START WITH "="
+================================================================================
+
+PROBLEM FOUND IN SCREENSHOT:
+- URL field shows: https://absensi.smkpgriblora.sch.id/wa-reply?phone={{ $json.phone }}&message=...
+- Expression NOT EVALUATED (still shows {{ }})
+- Result: phone is null
+
+ROOT CAUSE:
+In n8n HTTP Request node, expressions in URL are ONLY evaluated if the URL field
+starts with "=" character.
+
+WITHOUT "=":
+URL: https://absensi.smkpgriblora.sch.id/wa-reply?phone={{ $json.phone }}
+Result: Literal string, NOT evaluated → phone=null
+
+WITH "=":
+URL: =https://absensi.smkpgriblora.sch.id/wa-reply?phone={{ $json.phone }}
+Result: Expression evaluated → phone=6285216343400
+
+================================================================================
+HOW TO FIX IN N8N UI:
+================================================================================
+
+1. Open workflow in n8n editor
+2. Click node "Send to WhatsApp"
+3. In URL field, ADD "=" at the beginning:
+
+BEFORE (WRONG):
+https://absensi.smkpgriblora.sch.id/wa-reply?phone={{ $json.phone }}&message={{ encodeURIComponent($json.message) }}
+
+AFTER (CORRECT):
+=https://absensi.smkpgriblora.sch.id/wa-reply?phone={{ $json.phone }}&message={{ encodeURIComponent($json.message) }}
+
+4. Save workflow
+5. Test again
+
+================================================================================
+JSON WORKFLOWS ALREADY HAVE "=" PREFIX
+================================================================================
+
+All workflow JSON files I created already have this:
+
+"url": "=https://absensi.smkpgriblora.sch.id/wa-reply?phone={{ $json.phone }}&message={{ encodeURIComponent($json.message) }}"
+
+Notice the "=" before https.
+
+If you imported the workflow and the "=" is missing, it means:
+1. You manually edited the URL field and removed the "=", OR
+2. You're using an old workflow that doesn't have "="
+
+================================================================================
+WHICH WORKFLOWS HAVE CORRECT URL WITH "="?
+================================================================================
+
+✅ n8n-chatbot-QUERY-PARAMS.json - Has "=" prefix
+✅ n8n-chatbot-USE-ROOT-PHONE.json - Has "=" prefix
+✅ n8n-chatbot-SOLUTION.json - Has "=" prefix
+✅ n8n-chatbot-FIXED-PHONE.json - Has "=" prefix
+
+❌ n8n-chatbot-FINAL-DYNAMIC.json - Uses bodyParameters (different approach)
+❌ n8n-chatbot-FULLY-DYNAMIC-v2.json - Uses bodyParameters (different approach)
+
+================================================================================
+RECOMMENDED ACTION:
+================================================================================
+
+OPTION A: Edit existing workflow in n8n
+1. Open the workflow
+2. Click "Send to WhatsApp" node
+3. Click in URL field
+4. Add "=" at the very beginning
+5. Save
+
+OPTION B: Import fresh workflow
+1. Delete current workflow
+2. Import n8n-chatbot-USE-ROOT-PHONE.json (RECOMMENDED)
+3. Activate workflow
+
+OPTION C: Import n8n-chatbot-QUERY-PARAMS.json
+1. This uses query params approach
+2. Should work with proper "=" prefix
+
+================================================================================
+TEST AFTER FIX:
+================================================================================
+
+curl -X POST https://n8n.dmcenter.my.id/webhook/wa-chatbot-v2 \
+-H "Content-Type: application/json" \
+-d '{"body":{"from":"85216343400@lid","message":"help"},"phone":"6285216343400"}'
+
+OR (for query params workflow):
+
+curl -X POST https://n8n.dmcenter.my.id/webhook/wa-chatbot-query \
+-H "Content-Type: application/json" \
+-d '{"body":{"from":"85216343400@lid","message":"help"}}'
+
+EXPECTED:
+{"success":true}
+WhatsApp receives message!
+
+================================================================================
+WHY THIS HAPPENS:
+================================================================================
+
+n8n has TWO modes for text fields:
+
+1. STATIC MODE (default):
+   - Text is used literally
+   - {{ }} is treated as literal text
+   - No expression evaluation
+
+2. EXPRESSION MODE (enabled by "=" prefix):
+   - Text is evaluated as expression
+   - {{ }} expressions are resolved
+   - Dynamic values work
+
+The "=" at the start tells n8n: "This field contains expressions, evaluate them!"
+
+================================================================================
