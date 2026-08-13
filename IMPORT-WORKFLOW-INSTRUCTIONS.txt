@@ -1,0 +1,123 @@
+================================================================================
+INSTRUKSI IMPORT WORKFLOW N8N - FULLY DYNAMIC CHATBOT
+================================================================================
+
+WORKFLOW SUDAH DI-PULL KE SERVER TAPI BELUM DIIMPORT KE N8N!
+
+Test script tidak mengembalikan response karena workflow belum ada di n8n.
+Anda perlu IMPORT MANUAL melalui UI n8n.
+
+================================================================================
+LANGKAH-LANGKAH IMPORT:
+================================================================================
+
+1. BUKA N8N DASHBOARD
+   URL: https://n8n.dmcenter.my.id
+   Login dengan kredensial n8n Anda
+
+2. IMPORT WORKFLOW BARU
+   - Klik "Workflows" di sidebar kiri
+   - Klik tombol "+ Add Workflow" atau "Import from File"
+   - Browse ke file: /www/wwwroot/absensi/n8n-chatbot-FULLY-DYNAMIC-v2.json
+   - Klik "Import"
+
+3. SETTING WORKFLOW
+   a. Pastikan workflow name: "WhatsApp Chatbot - Fully Dynamic v2"
+   
+   b. CEK WEBHOOK NODE (node pertama):
+      - Klik node "Webhook"
+      - Pastikan settings:
+        * HTTP Method: POST
+        * Path: wa-chatbot-dynamic
+        * Response Mode: Response Node (PENTING!)
+      
+   c. SWITCH KE PRODUCTION MODE:
+      - Di kanan atas editor, ada toggle "Test" / "Production"
+      - KLIK "Production" (WAJIB!)
+      - Jika mode "Test", webhook tidak akan bisa diakses dari luar
+   
+   d. AKTIFKAN WORKFLOW:
+      - Toggle switch "Active" di kanan atas
+      - Pastikan menjadi hijau (ON)
+      - Status harus "Active in Production"
+
+4. VERIFIKASI WEBHOOK PATH
+   Setelah aktif, webhook seharusnya tersedia di:
+   https://n8n.dmcenter.my.id/webhook/wa-chatbot-dynamic
+
+================================================================================
+TEST SETELAH IMPORT:
+================================================================================
+
+Di server, jalankan test ini:
+
+# Test 1: Simple test
+curl -X POST https://n8n.dmcenter.my.id/webhook/wa-chatbot-dynamic \
+-H "Content-Type: application/json" \
+-d '{"body":{"from":"85216343400@lid","message":"help"}}'
+
+EXPECTED OUTPUT:
+{"success":true,"phone":"85216343400"}
+
+DAN WhatsApp harus menerima pesan help menu!
+
+
+# Test 2: Full test suite
+cd /www/wwwroot/absensi
+bash test-wa-chatbot-dynamic.sh
+
+
+# Test 3: Cek execution logs di n8n
+- Buka n8n dashboard
+- Klik "Executions" di sidebar
+- Lihat execution terakhir untuk workflow ini
+- Status harus "Success" (hijau)
+- Klik untuk lihat detail setiap node
+
+================================================================================
+TROUBLESHOOTING:
+================================================================================
+
+PROBLEM: curl tidak return apa-apa
+SOLUTION: Workflow belum diimport atau belum aktif → Import dulu!
+
+PROBLEM: Error "Workflow not found" atau 404
+SOLUTION: 
+- Pastikan workflow sudah di mode "Production" (bukan Test)
+- Pastikan toggle "Active" sudah ON (hijau)
+- Pastikan path webhook: wa-chatbot-dynamic (tanpa leading /)
+
+PROBLEM: Error "Unused Respond to Webhook node"
+SOLUTION: Workflow sudah diperbaiki, pastikan import file terbaru
+
+PROBLEM: Error "Error in workflow"
+SOLUTION: 
+- Buka Executions di n8n untuk lihat detail error
+- Cek node mana yang error (biasanya merah)
+- Pastikan semua expressions syntax benar
+
+PROBLEM: WhatsApp Gateway tidak kirim pesan
+SOLUTION:
+- Cek WA Gateway status: curl http://localhost:3001/status
+- Pastikan status: "connected"
+- Cek logs: pm2 logs whatsapp-absensi
+
+================================================================================
+SETELAH TEST SUKSES:
+================================================================================
+
+1. Update whatsapp-server/server.js untuk gunakan webhook path baru
+2. Restart WhatsApp Gateway: pm2 restart whatsapp-absensi
+3. Test end-to-end dengan kirim WA dari HP
+4. Nonaktifkan workflow lama (hardcoded version) kalau tidak perlu
+
+================================================================================
+CATATAN PENTING:
+================================================================================
+
+- Webhook n8n HANYA BISA DIAKSES jika workflow dalam mode "Production" dan "Active"
+- Mode "Test" hanya untuk testing di editor n8n, tidak expose webhook ke public
+- Jika lupa switch ke Production, webhook akan return 404
+- Setiap kali edit workflow, pastikan tetap di mode Production dan Active ON
+
+================================================================================
