@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Role-based access middleware
         $middleware->alias([
             'role' => \App\Http\Middleware\WaliKelasMiddleware::class,
+            'ekaldik.api' => \App\Http\Middleware\ValidateEkaldikApiKey::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

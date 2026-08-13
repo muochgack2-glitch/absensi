@@ -42,4 +42,11 @@ return [
         'api_key' => env('CHATBOT_API_KEY'),
     ],
 
+    'ekaldik' => [
+        // API key untuk endpoint /api/ekaldik/* (dipanggil E-Kaldik/SIM Kurikulum).
+        // Kalau kosong/tidak di-set, endpoint tetap terbuka tanpa auth.
+        // Isi EKALDIK_API_KEY di .env & set key yang sama di E-Kaldik.
+        'api_key' => env('EKALDIK_API_KEY'),
+    ],
+
 ];

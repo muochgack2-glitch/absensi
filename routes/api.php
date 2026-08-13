@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AttendanceStatsController;
 use App\Http\Controllers\AttendanceSSEController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\Api\EkaldikController;
 
 // AJAX Login API (dengan session middleware untuk auth)
 Route::middleware(['web'])->post('/auth/login', [AuthenticatedSessionController::class, 'store']);
@@ -32,4 +33,9 @@ Route::get('/announcement/active', [AttendanceStatsController::class, 'activeAnn
 Route::prefix('chatbot')->group(function () {
     Route::get('/summary/{phone}', [ChatbotController::class, 'getSummary']);
     Route::post('/verify', [ChatbotController::class, 'verify']);
+});
+
+// E-Kaldik Integration API - untuk auto-fill absensi di jurnal mengajar
+Route::middleware(['ekaldik.api'])->prefix('ekaldik')->group(function () {
+    Route::get('/attendance', [EkaldikController::class, 'getAttendance']);
 });
