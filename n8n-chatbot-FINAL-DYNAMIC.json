@@ -1,0 +1,329 @@
+{
+  "name": "WhatsApp Chatbot - Final Dynamic",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wa-chatbot-final",
+        "responseMode": "lastNode"
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "wa-chatbot-final"
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "phone",
+              "name": "phone",
+              "value": "={{ $json.body.from.split('@')[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "command",
+              "name": "command",
+              "value": "={{ $json.body.message.toLowerCase() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "parse",
+      "name": "Parse Input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.command }}",
+                    "operation": "contains",
+                    "value2": "help"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "help"
+            },
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.command }}",
+                    "operation": "contains",
+                    "value2": "ringkasan"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "ringkasan"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "switch",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "phone-field",
+              "name": "phone",
+              "value": "={{ $json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "message-field",
+              "name": "message",
+              "value": "🤖 *MENU CHATBOT WALI KELAS*\n\nPerintah yang tersedia:\n\n1️⃣ *ringkasan* - Lihat absensi hari ini\n2️⃣ *help* - Tampilkan menu ini\n\n---\n_Sistem Absensi SMK PGRI Blora_",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-help",
+      "name": "Set Help",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [840, 200]
+    },
+    {
+      "parameters": {
+        "url": "=https://absensi.smkpgriblora.sch.id/api/chatbot/summary/{{ $json.phone }}",
+        "options": {}
+      },
+      "id": "laravel-api",
+      "name": "Get Summary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [840, 300]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "phone-field",
+              "name": "phone",
+              "value": "={{ $('Parse Input').item.json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "message-field",
+              "name": "message",
+              "value": "=Ringkasan Absensi\nKelas: {{ $json.data.kelas_nama }}\n✅ Hadir: {{ $json.data.hadir }}\n❌ Alpha: {{ $json.data.alpha }}\n\n_SMK PGRI Blora_",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-ringkasan",
+      "name": "Set Ringkasan",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [1040, 300]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "phone-field",
+              "name": "phone",
+              "value": "={{ $json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "message-field",
+              "name": "message",
+              "value": "❓ Perintah tidak dikenali. Ketik *help* untuk bantuan.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-unknown",
+      "name": "Set Unknown",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [840, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://absensi.smkpgriblora.sch.id/wa-reply",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "keypair",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $json.phone }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.message }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-wa",
+      "name": "Send to WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1240, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true } }}"
+      },
+      "id": "respond",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1440, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Input": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Set Help",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Summary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Unknown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Help": {
+      "main": [
+        [
+          {
+            "node": "Send to WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Summary": {
+      "main": [
+        [
+          {
+            "node": "Set Ringkasan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Ringkasan": {
+      "main": [
+        [
+          {
+            "node": "Send to WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Unknown": {
+      "main": [
+        [
+          {
+            "node": "Send to WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {},
+  "staticData": null,
+  "tags": []
+}
