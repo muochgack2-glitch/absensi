@@ -286,6 +286,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/attendance/tahun-ajaran/preview', [TahunAjaranController::class, 'previewNaikKelas'])->name('attendance.tahun-ajaran.preview');
         Route::post('/attendance/tahun-ajaran/naik-kelas', [TahunAjaranController::class, 'naikKelas'])->name('attendance.tahun-ajaran.naik-kelas');
         Route::post('/attendance/tahun-ajaran/rollback', [TahunAjaranController::class, 'rollback'])->name('attendance.tahun-ajaran.rollback');
+
+        // Hari Libur Management (synced from E-Kaldik)
+        Route::get('/holidays', [\App\Http\Controllers\HolidayController::class, 'index'])->name('holidays.index');
+        Route::post('/holidays', [\App\Http\Controllers\HolidayController::class, 'store'])->name('holidays.store');
+        Route::delete('/holidays/{holiday}', [\App\Http\Controllers\HolidayController::class, 'destroy'])->name('holidays.destroy');
+        Route::post('/holidays/sync', [\App\Http\Controllers\HolidayController::class, 'sync'])->name('holidays.sync');
     });
 
     // ==========================================

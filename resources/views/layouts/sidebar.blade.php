@@ -881,6 +881,22 @@
                 <i class="fas fa-calendar-alt text-lg"></i>
                 <span class="nav-text font-medium">Tahun Pelajaran</span>
             </a>
+
+            <!-- Hari Libur -->
+            <a 
+                href="{{ route('holidays.index') }}"
+                class="sidebar-menu-item {{ request()->routeIs('holidays*') ? 'active' : '' }}"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="right" 
+                title="Hari Libur"
+            >
+                <i class="fas fa-calendar-times text-lg"></i>
+                <span class="nav-text font-medium">Hari Libur</span>
+                @php $isHolidayToday = \App\Models\Holiday::isHoliday(); @endphp
+                @if($isHolidayToday)
+                    <span class="sidebar-badge" style="display:flex; background: linear-gradient(135deg, #f59e0b, #d97706);">!</span>
+                @endif
+            </a>
             @endif
 
             <!-- WhatsApp Collapsible Menu -->

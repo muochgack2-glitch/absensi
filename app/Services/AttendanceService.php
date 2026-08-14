@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\AttendanceStudent;
 use App\Models\AttendanceRecord;
+use App\Models\Holiday;
 use App\Models\AttendanceLog;
 use App\Models\AttendanceSetting;
 use Carbon\Carbon;
@@ -29,6 +30,18 @@ class AttendanceService
     public function processScan(string $nis, ?string $photoBase64, string $action): array
     {
         $startTime = microtime(true);
+
+        // Check if today is a holiday — block scan
+        $todayHoliday = Holiday::getForDate(Carbon::today()->toDateString());
+        if ($todayHoliday) {
+            return [
+                'success' => false,
+                'message' => "Hari ini libur: {$todayHoliday->name}",
+                'is_holiday' => true,
+                'data' => null,
+            ];
+        }
+
         DB::beginTransaction();
         
         try {
@@ -325,6 +338,20 @@ class AttendanceService
     public function markAbsentStudents(): array
     {
         $today = Carbon::today();
+
+        // Skip auto-alpha on holidays
+        if (Holiday::isHoliday($today->toDateString())) {
+            return [
+                'success' => true,
+                'total_students' => 0,
+                'marked_absent' => 0,
+                'already_recorded' => 0,
+                'inactive_skipped' => 0,
+                'marked_students' => [],
+                'skipped_reason' => 'Hari libur',
+            ];
+        }
+
         $cutoffTime = AttendanceSetting::get('cutoff_time', '09:00');
         
         // Get all active students

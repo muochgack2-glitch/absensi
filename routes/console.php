@@ -51,3 +51,19 @@ Schedule::call(function () {
   ->timezone('Asia/Jakarta')
   ->withoutOverlapping()
   ->appendOutputTo(storage_path('logs/absent-notification.log'));
+
+/*
+|--------------------------------------------------------------------------
+| Auto-Sync Hari Libur dari E-Kaldik
+|--------------------------------------------------------------------------
+|
+| Sync otomatis setiap hari jam 06:00 WIB.
+| Bisa juga dijalankan manual: php artisan holidays:sync
+|
+*/
+Schedule::command('holidays:sync')
+  ->dailyAt('06:00')
+  ->timezone('Asia/Jakarta')
+  ->withoutOverlapping()
+  ->appendOutputTo(storage_path('logs/holiday-sync.log'));
+

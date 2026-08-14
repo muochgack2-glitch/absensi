@@ -47,6 +47,8 @@ return [
         // Kalau kosong/tidak di-set, endpoint tetap terbuka tanpa auth.
         // Isi EKALDIK_API_KEY di .env & set key yang sama di E-Kaldik.
         'api_key' => env('EKALDIK_API_KEY'),
+        // Base URL E-Kaldik untuk sync hari libur
+        'base_url' => env('EKALDIK_BASE_URL', ''),
     ],
 
 ];

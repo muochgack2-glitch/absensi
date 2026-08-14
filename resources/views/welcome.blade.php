@@ -1,4 +1,18 @@
 <x-public-layout>
+    {{-- Holiday Banner --}}
+    @php $publicHoliday = \App\Models\Holiday::getForDate(); @endphp
+    @if($publicHoliday)
+    <div class="mb-4 flex items-center gap-3 px-5 py-4 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl text-white shadow-lg">
+        <div class="w-12 h-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center text-2xl flex-shrink-0">
+            🏖️
+        </div>
+        <div>
+            <p class="font-bold text-base">Hari Ini Libur!</p>
+            <p class="text-sm mt-0.5 text-amber-100">{{ $publicHoliday->name }} — Scan absensi tidak aktif hari ini</p>
+        </div>
+    </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-4" id="scanner-container">
         
         {{-- LEFT SIDEBAR: Stats Cards --}}

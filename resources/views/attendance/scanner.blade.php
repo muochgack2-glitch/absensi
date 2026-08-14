@@ -2,6 +2,21 @@
     <x-slot name="title">QR Scanner</x-slot>
     <x-slot name="pageTitle">QR Scanner</x-slot>
     
+    
+    {{-- Holiday Banner --}}
+    @php $scannerHoliday = \App\Models\Holiday::getForDate(); @endphp
+    @if($scannerHoliday)
+    <div class="mb-4 flex items-center gap-3 px-5 py-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-300 dark:border-amber-700 rounded-xl text-amber-800 dark:text-amber-300 shadow-lg">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white text-xl flex-shrink-0">
+            <i class="fas fa-umbrella-beach"></i>
+        </div>
+        <div>
+            <p class="font-bold text-base">🏖️ Hari Ini Libur!</p>
+            <p class="text-sm mt-0.5">{{ $scannerHoliday->name }} — Scan absensi dinonaktifkan otomatis</p>
+        </div>
+    </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-4" id="scanner-container">
         
         {{-- LEFT SIDEBAR: Logo + Stats Cards --}}
