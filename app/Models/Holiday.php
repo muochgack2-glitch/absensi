@@ -70,6 +70,13 @@ class Holiday extends Model
     public static function isHoliday(?string $date = null): bool
     {
         $date = $date ?? Carbon::today()->toDateString();
+        
+        // Sabtu (6) dan Minggu (0) otomatis libur
+        $dayOfWeek = Carbon::parse($date)->dayOfWeek;
+        if ($dayOfWeek === Carbon::SATURDAY || $dayOfWeek === Carbon::SUNDAY) {
+            return true;
+        }
+        
         return static::forDate($date)->exists();
     }
 
@@ -79,6 +86,20 @@ class Holiday extends Model
     public static function getForDate(?string $date = null): ?self
     {
         $date = $date ?? Carbon::today()->toDateString();
+        
+        // Check weekend first
+        $dayOfWeek = Carbon::parse($date)->dayOfWeek;
+        if ($dayOfWeek === Carbon::SATURDAY || $dayOfWeek === Carbon::SUNDAY) {
+            $weekendHoliday = new static();
+            $weekendHoliday->name = $dayOfWeek === Carbon::SATURDAY ? 'Hari Sabtu' : 'Hari Minggu';
+            $weekendHoliday->start_date = $date;
+            $weekendHoliday->end_date = $date;
+            $weekendHoliday->type = 'weekend';
+            $weekendHoliday->source = 'system';
+            $weekendHoliday->is_active = true;
+            return $weekendHoliday;
+        }
+        
         return static::forDate($date)->first();
     }
 
@@ -110,10 +131,26 @@ class Holiday extends Model
         $start = Carbon::parse($startDate);
         $end = Carbon::parse($endDate);
 
+        // Count DB holidays
         foreach ($holidays as $holiday) {
             $hStart = $holiday->start_date->max($start);
             $hEnd = $holiday->end_date->min($end);
             $count += $hStart->diffInDays($hEnd) + 1;
+        }
+
+        // Count weekends not already covered by DB holidays
+        $current = $start->copy();
+        while ($current->lte($end)) {
+            if ($current->isWeekend()) {
+                // Check if this weekend day is NOT already counted as a DB holiday
+                $isDbHoliday = $holidays->contains(function ($h) use ($current) {
+                    return $current->between($h->start_date, $h->end_date);
+                });
+                if (!$isDbHoliday) {
+                    $count++;
+                }
+            }
+            $current->addDay();
         }
 
         return $count;
