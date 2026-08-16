@@ -292,6 +292,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/holidays', [\App\Http\Controllers\HolidayController::class, 'store'])->name('holidays.store');
         Route::delete('/holidays/{holiday}', [\App\Http\Controllers\HolidayController::class, 'destroy'])->name('holidays.destroy');
         Route::post('/holidays/sync', [\App\Http\Controllers\HolidayController::class, 'sync'])->name('holidays.sync');
+    Route::post('/holidays/toggle-weekend', [\App\Http\Controllers\HolidayController::class, 'toggleWeekend'])->name('holidays.toggle-weekend');
     });
 
     // ==========================================
