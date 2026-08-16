@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use App\Models\AttendanceSetting;
 
 class Holiday extends Model
 {
@@ -71,9 +72,12 @@ class Holiday extends Model
     {
         $date = $date ?? Carbon::today()->toDateString();
         
-        // Sabtu (6) dan Minggu (0) otomatis libur
+        // Cek libur weekend dari setting
         $dayOfWeek = Carbon::parse($date)->dayOfWeek;
-        if ($dayOfWeek === Carbon::SATURDAY || $dayOfWeek === Carbon::SUNDAY) {
+        if ($dayOfWeek === Carbon::SATURDAY && AttendanceSetting::get('saturday_off', '1') === '1') {
+            return true;
+        }
+        if ($dayOfWeek === Carbon::SUNDAY && AttendanceSetting::get('sunday_off', '1') === '1') {
             return true;
         }
         
@@ -87,9 +91,11 @@ class Holiday extends Model
     {
         $date = $date ?? Carbon::today()->toDateString();
         
-        // Check weekend first
+        // Check weekend from settings
         $dayOfWeek = Carbon::parse($date)->dayOfWeek;
-        if ($dayOfWeek === Carbon::SATURDAY || $dayOfWeek === Carbon::SUNDAY) {
+        $isSaturdayOff = ($dayOfWeek === Carbon::SATURDAY && AttendanceSetting::get('saturday_off', '1') === '1');
+        $isSundayOff = ($dayOfWeek === Carbon::SUNDAY && AttendanceSetting::get('sunday_off', '1') === '1');
+        if ($isSaturdayOff || $isSundayOff) {
             $weekendHoliday = new static();
             $weekendHoliday->name = $dayOfWeek === Carbon::SATURDAY ? 'Hari Sabtu' : 'Hari Minggu';
             $weekendHoliday->start_date = $date;

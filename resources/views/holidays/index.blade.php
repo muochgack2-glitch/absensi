@@ -63,6 +63,40 @@
             </div>
         </x-card>
 
+        {{-- Weekend Holiday Settings --}}
+        <x-card>
+            <form action="{{ route('holidays.toggle-weekend') }}" method="POST">
+                @csrf
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-2xl shadow-lg">
+                            <i class="fas fa-calendar-week"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-gray-900 dark:text-white">Hari Libur Mingguan</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Tandai hari yang tidak ada kegiatan scan absensi</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-6">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" name="saturday_off" value="1" {{ $saturdayOff == '1' ? 'checked' : '' }}
+                                   class="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500 transition">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Sabtu</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" name="sunday_off" value="1" {{ $sundayOff == '1' ? 'checked' : '' }}
+                                   class="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500 transition">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Minggu</span>
+                        </label>
+                        <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold text-sm transition-all shadow">
+                            <i class="fas fa-save"></i>
+                            Simpan
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </x-card>
+
         {{-- Holiday Today Banner --}}
         @php $todayHoliday = $holidays->first(fn($h) => $h->is_active && $h->start_date <= now() && $h->end_date >= now()); @endphp
         @if($todayHoliday)
