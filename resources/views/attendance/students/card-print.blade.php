@@ -368,7 +368,7 @@
 <body>
     @foreach($pages as $pageIndex => $page)
     <div class="page">
-        <table class="cards-grid" @if($layout === 'mini-55') style="width: 183mm; margin: 9mm auto; border-collapse: collapse;" @endif>
+        <table class="cards-grid" @if($layout === 'mini-55') style="width: 183mm; margin-top: 9mm; margin-left: 6mm; border-collapse: collapse;" @endif>
             @for($row = 0; $row < $config['rows']; $row++)
             <tr>
                 @for($col = 0; $col < $config['cols']; $col++)
