@@ -95,7 +95,7 @@ class StudentCardController extends Controller
         $request->validate([
             'kelas_id'   => 'nullable|exists:attendance_classes,id',
             'student_ids'=> 'nullable|string',
-            'layout'     => 'required|in:2x5,2x4,2x3,mini',
+            'layout'     => 'required|in:2x5,mini',
         ]);
 
         // Get students based on selection
@@ -152,13 +152,11 @@ class StudentCardController extends Controller
         // Layout config
         $layout       = $request->layout;
         $layoutConfig = [
-            '2x5' => ['cols' => 2, 'rows' => 5, 'per_page' => 10],
-            '2x4' => ['cols' => 2, 'rows' => 4, 'per_page' => 8],
-            '2x3' => ['cols' => 2, 'rows' => 3, 'per_page' => 6],
+            '2x5'  => ['cols' => 2, 'rows' => 5, 'per_page' => 10],
             // Kartu mini 3x4: hanya QR, Nama, NIS, Kelas.
             // 3 kolom x 4 baris = 12 kartu/halaman pada kertas F4.
             // Per kartu: ~61mm lebar x 74mm tinggi, QR 57mm x 57mm (dimaksimalkan).
-            'mini'=> ['cols' => 3, 'rows' => 4, 'per_page' => 12],
+            'mini' => ['cols' => 3, 'rows' => 4, 'per_page' => 12],
         ];
         $config = $layoutConfig[$layout];
 

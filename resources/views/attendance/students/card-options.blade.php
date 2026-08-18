@@ -107,7 +107,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div @click="layout = '2x5'" 
                          :class="layout === '2x5' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700'"
                          class="p-4 rounded-xl border-2 transition-all cursor-pointer text-center">
@@ -115,24 +115,6 @@
                         <p class="font-bold text-gray-900 dark:text-white">2 × 5</p>
                         <p class="text-xs text-gray-500 mt-1">10 kartu/halaman</p>
                         <p class="text-xs text-green-600 font-semibold mt-1">✨ Direkomendasikan</p>
-                    </div>
-
-                    <div @click="layout = '2x4'" 
-                         :class="layout === '2x4' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700'"
-                         class="p-4 rounded-xl border-2 transition-all cursor-pointer text-center">
-                        <div class="text-3xl mb-2">📄</div>
-                        <p class="font-bold text-gray-900 dark:text-white">2 × 4</p>
-                        <p class="text-xs text-gray-500 mt-1">8 kartu/halaman</p>
-                        <p class="text-xs text-gray-500 mt-1">QR besar • 61×74mm</p>
-                    </div>
-
-                    <div @click="layout = '2x3'" 
-                         :class="layout === '2x3' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700'"
-                         class="p-4 rounded-xl border-2 transition-all cursor-pointer text-center">
-                        <div class="text-3xl mb-2">📄</div>
-                        <p class="font-bold text-gray-900 dark:text-white">2 × 3</p>
-                        <p class="text-xs text-gray-500 mt-1">6 kartu/halaman</p>
-                        <p class="text-xs text-gray-500 mt-1">QR besar • 61×74mm</p>
                     </div>
 
                     <div @click="layout = 'mini'" 
