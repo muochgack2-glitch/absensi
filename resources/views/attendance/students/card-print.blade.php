@@ -303,7 +303,18 @@
             object-fit: contain;
             display: block;
         }
-        /* Teks mini-55: lebar 50mm lurus dengan kanan-kiri QR */
+        /* Wrapper: centering vertikal & horizontal konten mini-55 */
+        .card-mini-55-inner {
+            display: table;
+            width: 100%;
+            height: 74mm;
+        }
+        .card-mini-55-cell {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+        }
+
         .card-mini-55-nama {
             width: 50mm;
             margin: 1.5mm auto 0;
@@ -370,6 +381,9 @@
                             @if($layout !== '2x5')
                                 {{-- Mini / mini-55: QR + divider + Nama + NIS|Kelas --}}
                                 <div class="card-mini">
+                                    @if($layout === 'mini-55')
+                                    <div class="card-mini-55-inner"><div class="card-mini-55-cell">
+                                    @endif
                                     <div class="{{ $layout === 'mini-55' ? 'card-mini-55-qr' : 'card-mini-qr' }}">
                                         @if($item['qr_base64'])
                                             <img src="{{ $item['qr_base64'] }}" alt="QR">
@@ -388,6 +402,7 @@
                                             NIS: {{ $s->nis }} &nbsp;|&nbsp; {{ $s->kelas->nama_kelas ?? '-' }}
                                         </div>
                                     @endif
+                                    @if($layout === 'mini-55')</div></div>@endif
                                 </div>
                             @else
                             {{-- 2x5: Full card dengan logo, foto, info table, QR --}}
