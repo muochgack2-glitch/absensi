@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AttendanceStudent;
 use App\Models\AttendanceClass;
 use App\Models\AttendanceSetting;
+use App\Services\QRCodeService;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
@@ -13,6 +14,9 @@ use BaconQrCode\Common\ErrorCorrectionLevel;
 
 class StudentCardController extends Controller
 {
+    public function __construct(
+        private QRCodeService $qrCodeService
+    ) {}
     /**
      * Generate QR Code PNG menggunakan BaconQrCode matrix + PHP GD
      * (Tidak butuh Imagick, hanya GD)
@@ -127,8 +131,8 @@ class StudentCardController extends Controller
         // Generate data per siswa
         $studentData = [];
         foreach ($students as $student) {
-            // QR Code sebagai PNG via GD (tidak butuh Imagick)
-            $qrBase64 = $this->generateQrPng($student->nis, 500);
+            // QR Code sebagai PNG via GD — konten = signed HMAC token (bukan NIS polos)
+            $qrBase64 = $this->generateQrPng($this->qrCodeService->buildQRToken($student->nis), 500);
 
             // Foto profil
             $fotoBase64 = null;
@@ -199,8 +203,8 @@ class StudentCardController extends Controller
             $logoBase64  = 'data:' . $logoMime . ';base64,' . base64_encode($logoContent);
         }
 
-        // QR Code sebagai PNG via GD
-        $qrBase64 = $this->generateQrPng($student->nis, 250);
+        // QR Code sebagai PNG via GD — konten = signed HMAC token (bukan NIS polos)
+        $qrBase64 = $this->generateQrPng($this->qrCodeService->buildQRToken($student->nis), 250);
 
         // Foto
         $fotoBase64 = null;
