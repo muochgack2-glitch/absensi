@@ -376,7 +376,7 @@
                         $idx = ($row * $config['cols']) + $col;
                         $item = $page[$idx] ?? null;
                     @endphp
-                    <td style="width: {{ $layout === 'mini-55' ? '61mm' : number_format(100 / $config['cols'], 4).'%' }};">
+                    <td style="width: {{ $layout === 'mini-55' ? '61mm' : number_format(100 / $config['cols'], 4).'%' }}; {{ $layout === 'mini-55' ? 'padding: 0;' : '' }}">
                         @if($item)
                             @php $s = $item['student']; @endphp
                             @if($layout !== '2x5')
