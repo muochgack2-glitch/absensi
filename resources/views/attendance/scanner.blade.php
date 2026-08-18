@@ -592,7 +592,7 @@
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        nis: nis,
+                        qr_token: nis,   // raw QR content (NIS:HMAC) — backend verifies signature
                         action: currentAction,
                         photo_base64: photoBase64
                     })

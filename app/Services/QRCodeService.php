@@ -13,10 +13,54 @@ class QRCodeService
      * @param string $nis Student NIS (Nomor Induk Siswa)
      * @return string Path to saved QR code file
      */
+    /**
+     * Build a signed QR token for the given NIS.
+     *
+     * Format: "<NIS>:<HMAC-SHA256(NIS, APP_KEY)>"
+     * The HMAC prevents forging a valid token without knowing APP_KEY.
+     *
+     * @param string $nis
+     * @return string signed token
+     */
+    public function buildQRToken(string $nis): string
+    {
+        $secret = config('app.key');
+        $sig    = hash_hmac('sha256', $nis, $secret);
+        return $nis . ':' . $sig;
+    }
+
+    /**
+     * Verify a QR token and return the NIS if valid.
+     *
+     * Returns null if the token is malformed or the signature does not match.
+     *
+     * @param string $token  raw string scanned from QR
+     * @return string|null   NIS on success, null on failure
+     */
+    public function verifyQRToken(string $token): ?string
+    {
+        $parts = explode(':', $token, 2);
+        if (count($parts) !== 2) {
+            return null; // malformed
+        }
+
+        [$nis, $receivedSig] = $parts;
+
+        $secret      = config('app.key');
+        $expectedSig = hash_hmac('sha256', $nis, $secret);
+
+        // Use hash_equals to prevent timing attacks
+        if (!hash_equals($expectedSig, $receivedSig)) {
+            return null; // invalid signature
+        }
+
+        return $nis;
+    }
+
     public function generateQRCode(string $nis): string
     {
-        // Generate QR Code content (just the NIS)
-        $qrContent = $nis;
+        // Generate signed QR token — NOT plain NIS
+        $qrContent = $this->buildQRToken($nis);
         
         // Generate QR Code image (SVG format, 300x300, high error correction)
         $qrImage = QrCode::format('svg')
