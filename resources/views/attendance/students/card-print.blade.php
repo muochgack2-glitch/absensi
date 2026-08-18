@@ -318,20 +318,20 @@
 
         .card-mini-55-nama {
             width: 50mm;
-            margin: 1.5mm auto 0;
-            font-size: 10pt;
+            margin: 1mm auto 0;
+            font-size: 8pt;
             font-weight: 700;
             color: #111827;
-            line-height: 1.15;
+            line-height: 1.1;
             text-align: center;
         }
         .card-mini-55-detail {
             width: 50mm;
-            margin: 0.8mm auto 0;
-            font-size: 9pt;
+            margin: 0.5mm auto 0;
+            font-size: 7.5pt;
             font-weight: 600;
             color: #374151;
-            line-height: 1.2;
+            line-height: 1.15;
             text-align: center;
         }
 
