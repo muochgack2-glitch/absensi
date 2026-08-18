@@ -155,10 +155,10 @@ class StudentCardController extends Controller
             '2x5' => ['cols' => 2, 'rows' => 5, 'per_page' => 10],
             '2x4' => ['cols' => 2, 'rows' => 4, 'per_page' => 8],
             '2x3' => ['cols' => 2, 'rows' => 3, 'per_page' => 6],
-            // Kartu mini 6x6: hanya QR, Nama, NIS, Kelas.
-            // 6 kolom x 6 baris = 36 kartu/halaman pada kertas F4.
-            // Per kartu: ~28mm lebar x 48mm tinggi.
-            'mini'=> ['cols' => 6, 'rows' => 6, 'per_page' => 36],
+            // Kartu mini 3x4: hanya QR, Nama, NIS, Kelas.
+            // 3 kolom x 4 baris = 12 kartu/halaman pada kertas F4.
+            // Per kartu: ~61mm lebar x 74mm tinggi, QR 57mm x 57mm (dimaksimalkan).
+            'mini'=> ['cols' => 3, 'rows' => 4, 'per_page' => 12],
         ];
         $config = $layoutConfig[$layout];
 

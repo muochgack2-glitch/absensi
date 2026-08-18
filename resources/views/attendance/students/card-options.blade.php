@@ -139,9 +139,9 @@
                          :class="layout === 'mini' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700'"
                          class="p-4 rounded-xl border-2 transition-all cursor-pointer text-center">
                         <div class="text-3xl mb-2">🏷️</div>
-                        <p class="font-bold text-gray-900 dark:text-white">Mini 5×6cm</p>
+                        <p class="font-bold text-gray-900 dark:text-white">Mini 3×4</p>
                         <p class="text-xs text-gray-500 mt-1">12 kartu/halaman</p>
-                        <p class="text-xs text-gray-500 mt-1">QR, Nama, NIS, Kelas saja</p>
+                        <p class="text-xs text-gray-500 mt-1">QR besar • 61×74mm</p>
                     </div>
                 </div>
             </x-card>

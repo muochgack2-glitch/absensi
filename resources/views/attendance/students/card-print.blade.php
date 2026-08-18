@@ -209,54 +209,66 @@
             height: 98mm;
         }
 
-        /* ============== KARTU MINI 6x6 (~28mm x 48mm per kartu) ============== */
-        /* Hanya berisi QR, Nama, NIS, Kelas - tanpa logo/foto/alamat */
+        /* ============================================================ */
+        /* KARTU MINI 3x4 — 61mm × 74mm per kartu, QR dimaksimalkan   */
+        /* QR 57mm × 57mm mepet ke tepi atas & samping                 */
+        /* ============================================================ */
         .card-mini {
-            width: 28mm;
-            height: 48mm;
-            border: 1px solid #ccc;
-            border-radius: 1.5mm;
+            width: 61mm;
+            height: 74mm;
+            border: 1px solid #bbb;
+            border-radius: 2mm;
             background: #ffffff;
-            padding: 1mm;
+            padding: 0;
+            overflow: hidden;
             text-align: center;
         }
 
+        /* QR wrapper: mepet atas, kiri, kanan — hanya 1mm padding tiap sisi */
         .card-mini-qr {
-            width: 24mm;
-            height: 24mm;
-            border: 1px solid #e5e7eb;
-            border-radius: 1mm;
-            padding: 0.3mm;
+            width: 59mm;
+            height: 59mm;
+            padding: 1mm;
             background: white;
             margin: 0 auto;
         }
 
         .card-mini-qr img {
-            width: 23.4mm;
-            height: 23.4mm;
+            width: 57mm;
+            height: 57mm;
             object-fit: contain;
+            display: block;
+        }
+
+        /* Garis pemisah tipis antara QR dan teks */
+        .card-mini-divider {
+            height: 0.3mm;
+            background: #e5e7eb;
+            margin: 0 2mm;
         }
 
         .card-mini-nama {
-            font-size: 5.5pt;
+            font-size: 7.5pt;
             font-weight: 700;
             color: #111827;
-            margin-top: 0.8mm;
+            margin-top: 1.5mm;
             line-height: 1.1;
+            padding: 0 2mm;
         }
 
         .card-mini-detail {
-            font-size: 4.5pt;
+            font-size: 5.5pt;
             color: #4b5563;
-            margin-top: 0.4mm;
+            margin-top: 0.8mm;
             line-height: 1.2;
+            padding: 0 2mm;
         }
 
         .card-empty-mini {
-            width: 28mm;
-            height: 48mm;
+            width: 61mm;
+            height: 74mm;
             border: 1px dashed #e5e7eb;
-            border-radius: 1.5mm;
+            border-radius: 2mm;
         }
 
         /* ============== TABLE LAYOUT ============== */
@@ -313,19 +325,19 @@
                         @if($item)
                             @php $s = $item['student']; @endphp
                             @if($layout === 'mini')
-                                {{-- Kartu Mini 5x6cm: hanya QR, Nama, NIS, Kelas --}}
+                                {{-- Kartu Mini 3x4: QR dimaksimalkan, Nama, NIS, Kelas --}}
                                 <div class="card-mini">
                                     <div class="card-mini-qr">
                                         @if($item['qr_base64'])
                                             <img src="{{ $item['qr_base64'] }}" alt="QR">
                                         @else
-                                            <span style="font-size:5pt;color:#999;">No QR</span>
+                                            <span style="font-size:6pt;color:#999;line-height:59mm;display:block;">No QR</span>
                                         @endif
                                     </div>
+                                    <div class="card-mini-divider"></div>
                                     <div class="card-mini-nama">{{ $s->nama }}</div>
                                     <div class="card-mini-detail">
-                                        NIS: {{ $s->nis }}<br>
-                                        Kelas: {{ $s->kelas->nama_kelas ?? '-' }}
+                                        NIS: {{ $s->nis }} &nbsp;|&nbsp; {{ $s->kelas->nama_kelas ?? '-' }}
                                     </div>
                                 </div>
                             @else
