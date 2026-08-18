@@ -43,7 +43,7 @@ class AttendanceNotificationService
         $message = $this->formatCheckInMessage($student, $record, $schoolName);
 
         // Check if photo should be included
-        $includePhoto = AttendanceSetting::get('include_photo_in_notification', 'false');
+        $includePhoto = AttendanceSetting::get('include_photo_in_notification', 'true');
         $shouldIncludePhoto = in_array($includePhoto, ['true', '1', 1, true], true);
         $photoPath = $shouldIncludePhoto ? $record->check_in_photo : null;
 
@@ -279,7 +279,7 @@ class AttendanceNotificationService
         $message = $this->formatCheckOutMessage($student, $record, $schoolName);
 
         // Check if photo should be included
-        $includePhoto = AttendanceSetting::get('include_photo_in_notification', 'false');
+        $includePhoto = AttendanceSetting::get('include_photo_in_notification', 'true');
         $shouldIncludePhoto = in_array($includePhoto, ['true', '1', 1, true], true);
         $photoPath = $shouldIncludePhoto ? $record->check_out_photo : null;
 

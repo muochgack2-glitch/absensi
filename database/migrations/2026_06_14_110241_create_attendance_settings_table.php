@@ -68,7 +68,7 @@ return new class extends Migration
             ],
             [
                 'key' => 'include_photo_in_notification',
-                'value' => 'false',
+                'value' => 'true',
                 'group_name' => 'notification',
                 'description' => 'Sertakan foto dalam notifikasi WA',
                 'created_at' => now(),

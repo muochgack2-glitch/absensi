@@ -65,7 +65,7 @@ class AttendanceSettingsSeeder extends Seeder
             ],
             [
                 'key' => 'include_photo_in_notification',
-                'value' => 'false',
+                'value' => 'true',
                 'group_name' => 'notification',
                 'description' => 'Include captured photo in WhatsApp notifications to parents',
                 'created_at' => now(),

@@ -131,7 +131,7 @@ class AttendanceSettingController extends Controller
             'tolerance_minutes'              => '15',
             'cutoff_time'                    => '09:00',
             'enable_parent_notification'     => '1',
-            'include_photo_in_notification'  => '0',
+            'include_photo_in_notification'  => '1',
             'school_name'                    => 'SMK Negeri 1',
             'auto_absent_notify'             => '0',
             'absent_notify_time'             => '09:00',
