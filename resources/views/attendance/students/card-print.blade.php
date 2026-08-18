@@ -209,54 +209,54 @@
             height: 98mm;
         }
 
-        /* ============== KARTU MINI 5x6cm ============== */
+        /* ============== KARTU MINI 6x6 (~28mm x 48mm per kartu) ============== */
         /* Hanya berisi QR, Nama, NIS, Kelas - tanpa logo/foto/alamat */
         .card-mini {
-            width: 50mm;
-            height: 60mm;
+            width: 28mm;
+            height: 48mm;
             border: 1px solid #ccc;
-            border-radius: 2.5mm;
+            border-radius: 1.5mm;
             background: #ffffff;
-            padding: 1.5mm;
+            padding: 1mm;
             text-align: center;
         }
 
         .card-mini-qr {
-            width: 46mm;
-            height: 46mm;
+            width: 24mm;
+            height: 24mm;
             border: 1px solid #e5e7eb;
-            border-radius: 1.5mm;
-            padding: 0.4mm;
+            border-radius: 1mm;
+            padding: 0.3mm;
             background: white;
             margin: 0 auto;
         }
 
         .card-mini-qr img {
-            width: 45.2mm;
-            height: 45.2mm;
+            width: 23.4mm;
+            height: 23.4mm;
             object-fit: contain;
         }
 
         .card-mini-nama {
-            font-size: 7.5pt;
+            font-size: 5.5pt;
             font-weight: 700;
             color: #111827;
-            margin-top: 1mm;
-            line-height: 1.05;
+            margin-top: 0.8mm;
+            line-height: 1.1;
         }
 
         .card-mini-detail {
-            font-size: 6pt;
+            font-size: 4.5pt;
             color: #4b5563;
-            margin-top: 0.5mm;
-            line-height: 1.15;
+            margin-top: 0.4mm;
+            line-height: 1.2;
         }
 
         .card-empty-mini {
-            width: 50mm;
-            height: 60mm;
+            width: 28mm;
+            height: 48mm;
             border: 1px dashed #e5e7eb;
-            border-radius: 2.5mm;
+            border-radius: 1.5mm;
         }
 
         /* ============== TABLE LAYOUT ============== */
