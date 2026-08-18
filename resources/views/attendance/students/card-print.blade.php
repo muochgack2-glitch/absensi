@@ -361,7 +361,12 @@
                                     <div class="card-mini-divider"></div>
                                     <div class="card-mini-nama">{{ $s->nama }}</div>
                                     <div class="card-mini-detail">
-                                        NIS: {{ $s->nis }} &nbsp;|&nbsp; {{ $s->kelas->nama_kelas ?? '-' }}
+                                        @if($layout === 'mini-55')
+                                            NIS: {{ $s->nis }}<br>
+                                            Kelas: {{ $s->kelas->nama_kelas ?? '-' }}
+                                        @else
+                                            NIS: {{ $s->nis }} &nbsp;|&nbsp; {{ $s->kelas->nama_kelas ?? '-' }}
+                                        @endif
                                     </div>
                                 </div>
                             @else
