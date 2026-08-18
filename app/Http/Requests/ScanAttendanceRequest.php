@@ -31,6 +31,8 @@ class ScanAttendanceRequest extends FormRequest
             'qr_token'     => 'required|string|max:150',
             'photo_base64' => 'nullable|string',
             'action'       => 'required|in:check_in,check_out',
+            // nis di-inject oleh prepareForValidation() setelah verifikasi HMAC
+            'nis'          => 'nullable|string',
         ];
     }
 
