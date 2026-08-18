@@ -328,23 +328,14 @@
                     @php
                         $idx = ($row * $config['cols']) + $col;
                         $item = $page[$idx] ?? null;
-                        $cardClass = 'card';
-                        $emptyClass = 'card-empty';
-                        if ($layout === '2x4') {
-                            $cardClass .= ' card-2x4';
-                            $emptyClass .= ' card-empty-2x4';
-                        } elseif ($layout === '2x3') {
-                            $cardClass .= ' card-2x3';
-                            $emptyClass .= ' card-empty-2x3';
-                        }
                     @endphp
                     <td style="width: {{ number_format(100 / $config['cols'], 4) }}%;">
                         @if($item)
                             @php $s = $item['student']; @endphp
-                            @if($layout === 'mini' || $layout === '2x3')
-                                {{-- Kartu Mini / 2x3: QR besar, Nama, NIS, Kelas saja --}}
+                            @if($layout !== '2x5')
+                                {{-- Semua layout kecuali 2x5: mini template (QR + Nama + NIS|Kelas) --}}
                                 <div class="card-mini">
-                                    <div class="{{ $layout === '2x3' ? 'card-2x3-qr' : 'card-mini-qr' }}">
+                                    <div class="card-mini-qr">
                                         @if($item['qr_base64'])
                                             <img src="{{ $item['qr_base64'] }}" alt="QR">
                                         @else
@@ -358,7 +349,8 @@
                                     </div>
                                 </div>
                             @else
-                            <div class="{{ $cardClass }}">
+                            {{-- 2x5: Full card dengan logo, foto, info table, QR --}}
+                            <div class="card">
                                 {{-- Header --}}
                                 <div class="card-header">
                                     <div class="card-header-logo">
@@ -372,7 +364,7 @@
                                     </div>
                                 </div>
 
-                                {{-- Body menggunakan HTML table (DomPDF tidak support flexbox) --}}
+                                {{-- Body --}}
                                 <div class="card-body">
                                     <table class="card-body-table">
                                         <tr>
@@ -437,7 +429,7 @@
                             </div>
                             @endif
                         @else
-                            <div class="{{ $layout === 'mini' ? 'card-empty-mini' : $emptyClass }}"></div>
+                            <div class="{{ $layout !== '2x5' ? 'card-empty-mini' : 'card-empty' }}"></div>
                         @endif
                     </td>
                 @endfor
