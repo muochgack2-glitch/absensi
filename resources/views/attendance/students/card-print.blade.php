@@ -303,6 +303,25 @@
             object-fit: contain;
             display: block;
         }
+        /* Teks mini-55: lebar 50mm lurus dengan kanan-kiri QR */
+        .card-mini-55-nama {
+            width: 50mm;
+            margin: 1.5mm auto 0;
+            font-size: 10pt;
+            font-weight: 700;
+            color: #111827;
+            line-height: 1.15;
+            text-align: center;
+        }
+        .card-mini-55-detail {
+            width: 50mm;
+            margin: 0.8mm auto 0;
+            font-size: 9pt;
+            font-weight: 600;
+            color: #374151;
+            line-height: 1.2;
+            text-align: center;
+        }
 
 
         .info-table {
@@ -359,15 +378,16 @@
                                         @endif
                                     </div>
                                     <div class="card-mini-divider"></div>
-                                    <div class="card-mini-nama">{{ $s->nama }}</div>
-                                    <div class="card-mini-detail">
-                                        @if($layout === 'mini-55')
-                                            NIS: {{ $s->nis }}<br>
-                                            Kelas: {{ $s->kelas->nama_kelas ?? '-' }}
-                                        @else
+                                    @if($layout === 'mini-55')
+                                        <div class="card-mini-55-nama">{{ $s->nama }}</div>
+                                        <div class="card-mini-55-detail">NIS: {{ $s->nis }}</div>
+                                        <div class="card-mini-55-detail">Kelas: {{ $s->kelas->nama_kelas ?? '-' }}</div>
+                                    @else
+                                        <div class="card-mini-nama">{{ $s->nama }}</div>
+                                        <div class="card-mini-detail">
                                             NIS: {{ $s->nis }} &nbsp;|&nbsp; {{ $s->kelas->nama_kelas ?? '-' }}
-                                        @endif
-                                    </div>
+                                        </div>
+                                    @endif
                                 </div>
                             @else
                             {{-- 2x5: Full card dengan logo, foto, info table, QR --}}
