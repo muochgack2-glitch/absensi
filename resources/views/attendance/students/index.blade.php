@@ -629,6 +629,107 @@
         </div>
     </div>
 
+    {{-- ============================================================ --}}
+    {{-- Modal: Generate QR Massal --}}
+    {{-- Dipanggil oleh tombol "Generate QR Massal" di header halaman --}}
+    {{-- ============================================================ --}}
+    <div id="modalBulkQR" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+             onclick="document.getElementById('modalBulkQR').classList.add('hidden')"></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6 z-10">
+            {{-- Header --}}
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center">
+                        <i class="fas fa-qrcode text-teal-600 dark:text-teal-400"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-900 dark:text-white">Generate QR Massal</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Generate QR Code untuk semua siswa aktif</p>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('modalBulkQR').classList.add('hidden')"
+                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+
+            {{-- Form --}}
+            <form action="{{ route('attendance.qr.bulk-generate') }}" method="POST">
+                @csrf
+                <div class="space-y-4">
+                    {{-- Opsi generate --}}
+                    <div class="space-y-2">
+                        <label class="flex items-center p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all">
+                            <input type="radio" name="only_missing" value="1" checked
+                                   class="w-4 h-4 text-teal-600 focus:ring-teal-500">
+                            <span class="ml-3 text-sm">
+                                <span class="font-medium text-gray-900 dark:text-white">Hanya yang belum punya QR</span>
+                                <span class="text-gray-500 dark:text-gray-400 block text-xs mt-0.5">Lebih cepat — skip siswa yang sudah ada QR-nya</span>
+                            </span>
+                        </label>
+                        <label class="flex items-center p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all">
+                            <input type="radio" name="only_missing" value="0"
+                                   class="w-4 h-4 text-teal-600 focus:ring-teal-500">
+                            <span class="ml-3 text-sm">
+                                <span class="font-medium text-gray-900 dark:text-white">Generate ulang semua</span>
+                                <span class="text-gray-500 dark:text-gray-400 block text-xs mt-0.5">Regenerate QR seluruh siswa aktif (lebih lama)</span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                        <p class="text-xs text-amber-700 dark:text-amber-400">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Proses ini mungkin memerlukan beberapa detik tergantung jumlah siswa.
+                        </p>
+                    </div>
+                </div>
+
+                {{-- Action Buttons --}}
+                <div class="flex gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button type="submit"
+                            class="flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 transition-all shadow-md">
+                        <i class="fas fa-qrcode mr-2"></i>Generate QR
+                    </button>
+                    <button type="button"
+                            onclick="document.getElementById('modalBulkQR').classList.add('hidden')"
+                            class="flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- ============================================================ --}}
+    {{-- Modal: Cetak Kartu QR PDF --}}
+    {{-- Konten ini sebelumnya tercecer tanpa wrapper modal --}}
+    {{-- ============================================================ --}}
+    <div id="modalQRCardsPDF" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+             onclick="document.getElementById('modalQRCardsPDF').classList.add('hidden')"></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6 z-10">
+            {{-- Header --}}
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                        <i class="fas fa-id-card text-red-600 dark:text-red-400"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-900 dark:text-white">Cetak Kartu QR</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Download PDF kartu QR per kelas</p>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('modalQRCardsPDF').classList.add('hidden')"
+                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+
+            <form action="{{ route('attendance.students.card.generate') }}" method="POST">
+                @csrf
+                {{-- Select Kelas --}}
                 <div class="mb-5">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Kelas
@@ -716,7 +817,7 @@
                     </label>
                 </div>
 
-            {{-- Action Buttons --}}
+                {{-- Action Buttons --}}
                 <div class="flex gap-2 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
                     <button
                         type="submit"
@@ -733,5 +834,9 @@
                         Batal
                     </button>
                 </div>
+            </form>
+        </div>
+    </div>
 
 </x-app-layout>
+
