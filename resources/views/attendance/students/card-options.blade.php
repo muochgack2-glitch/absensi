@@ -132,7 +132,7 @@
                         <div class="text-3xl mb-2">📄</div>
                         <p class="font-bold text-gray-900 dark:text-white">2 × 3</p>
                         <p class="text-xs text-gray-500 mt-1">6 kartu/halaman</p>
-                        <p class="text-xs text-gray-500 mt-1">QR Paling Besar</p>
+                        <p class="text-xs text-gray-500 mt-1">Mini 3×4, QR 5.6cm</p>
                     </div>
 
                     <div @click="layout = 'mini'" 

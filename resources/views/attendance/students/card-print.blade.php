@@ -271,14 +271,21 @@
             border-radius: 2mm;
         }
 
-        /* Override QR size untuk layout 2x3 (56mm vs 57mm pada mini) */
-        .card-qr-sm {
-            width: 58mm !important;
-            height: 58mm !important;
+        /* ============================================================ */
+        /* KARTU 2x3 — sama persis dengan mini, QR 56mm (lebih kecil) */
+        /* ============================================================ */
+        .card-2x3-qr {
+            width: 58mm;
+            height: 58mm;
+            padding: 1mm;
+            background: white;
+            margin: 0 auto;
         }
-        .card-qr-sm img {
-            width: 56mm !important;
-            height: 56mm !important;
+        .card-2x3-qr img {
+            width: 56mm;
+            height: 56mm;
+            object-fit: contain;
+            display: block;
         }
 
         /* ============== TABLE LAYOUT ============== */
@@ -337,7 +344,7 @@
                             @if($layout === 'mini' || $layout === '2x3')
                                 {{-- Kartu Mini / 2x3: QR besar, Nama, NIS, Kelas saja --}}
                                 <div class="card-mini">
-                                    <div class="card-mini-qr {{ $layout === '2x3' ? 'card-qr-sm' : '' }}">
+                                    <div class="{{ $layout === '2x3' ? 'card-2x3-qr' : 'card-mini-qr' }}">
                                         @if($item['qr_base64'])
                                             <img src="{{ $item['qr_base64'] }}" alt="QR">
                                         @else
