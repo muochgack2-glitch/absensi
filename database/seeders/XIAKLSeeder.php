@@ -62,8 +62,7 @@ class XIAKLSeeder extends Seeder
             ['nis' => '2006', 'nama' => 'NAZWA PERMATA OKTAVIA'],
             ['nis' => '2007', 'nama' => 'RIZKIYA NURUL SABRINA'],
         ];
-
-        $nomorHP = '085216343400'; // Nomor HP sama untuk semua siswa
+        $nomorHP = '0882006582245'; // No HP Ortu XI AKL
 
         foreach ($students as $index => $studentData) {
             $student = AttendanceStudent::withoutGlobalScope('tahun_ajaran')->firstOrCreate(
@@ -102,7 +101,7 @@ class XIAKLSeeder extends Seeder
         $this->command->info('   - Password: password123');
         $this->command->info('   - Kelas: ' . $kelas->nama_kelas);
         $this->command->info('   - Total Siswa: ' . count($students));
-        $this->command->info('   - Nomor HP Ortu: ' . $nomorHP);
+        $this->command->info('   - Nomor HP Ortu: ' . '08[NIS]');
         $this->command->info('   - Tahun Ajaran: ' . $activeTahunAjaran);
     }
 

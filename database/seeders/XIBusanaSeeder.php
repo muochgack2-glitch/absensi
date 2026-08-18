@@ -73,7 +73,7 @@ class XIBusanaSeeder extends Seeder
             ['nis' => '2001', 'nama' => 'VERI NOFIANA'],
         ];
 
-        $nomorHP = '085216343400'; // Nomor HP sama untuk semua siswa
+        $nomorHP = '085876141411'; // No HP Ortu XI Busana
 
         foreach ($students as $index => $studentData) {
             $student = AttendanceStudent::withoutGlobalScope('tahun_ajaran')->firstOrCreate(
@@ -112,7 +112,7 @@ class XIBusanaSeeder extends Seeder
         $this->command->info('   - Password: password123');
         $this->command->info('   - Kelas: ' . $kelas->nama_kelas);
         $this->command->info('   - Total Siswa: ' . count($students));
-        $this->command->info('   - Nomor HP Ortu: ' . $nomorHP);
+        $this->command->info('   - Nomor HP Ortu: ' . '08[NIS]');
         $this->command->info('   - Tahun Ajaran: ' . $activeTahunAjaran);
     }
 

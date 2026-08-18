@@ -86,8 +86,7 @@ class XMPLBSeeder extends Seeder
             ['nis' => '2063', 'nama' => 'WIDIYA'],
             ['nis' => '2064', 'nama' => 'YOSEFA AVELINA PUTRI SETIAWATI'],
         ];
-
-        $nomorHP = '085216343400'; // Nomor HP sama untuk semua siswa
+        $nomorHP = '081228745812'; // No HP Ortu X MPLB
 
         foreach ($students as $index => $studentData) {
             $student = AttendanceStudent::withoutGlobalScope('tahun_ajaran')->firstOrCreate(
@@ -126,7 +125,7 @@ class XMPLBSeeder extends Seeder
         $this->command->info('   - Password: password123');
         $this->command->info('   - Kelas: ' . $kelas->nama_kelas);
         $this->command->info('   - Total Siswa: ' . count($students));
-        $this->command->info('   - Nomor HP Ortu: ' . $nomorHP);
+        $this->command->info('   - Nomor HP Ortu: ' . '08[NIS]');
         $this->command->info('   - Tahun Ajaran: ' . $activeTahunAjaran);
     }
 
