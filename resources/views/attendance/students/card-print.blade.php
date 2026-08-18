@@ -287,8 +287,24 @@
             object-fit: contain;
             display: block;
         }
+        /* ============================================================ */
+        /* KARTU MINI-55: identik mini, QR 55mm (lebih kecil)          */
+        /* ============================================================ */
+        .card-mini-55-qr {
+            width: 57mm;
+            height: 57mm;
+            padding: 1mm;
+            background: white;
+            margin: 0 auto;
+        }
+        .card-mini-55-qr img {
+            width: 55mm;
+            height: 55mm;
+            object-fit: contain;
+            display: block;
+        }
 
-        /* ============== TABLE LAYOUT ============== */
+
         .info-table {
             width: 100%;
             border-collapse: collapse;
@@ -333,9 +349,9 @@
                         @if($item)
                             @php $s = $item['student']; @endphp
                             @if($layout !== '2x5')
-                                {{-- Semua layout kecuali 2x5: mini template (QR + Nama + NIS|Kelas) --}}
+                                {{-- Mini / mini-55: QR + divider + Nama + NIS|Kelas --}}
                                 <div class="card-mini">
-                                    <div class="card-mini-qr">
+                                    <div class="{{ $layout === 'mini-55' ? 'card-mini-55-qr' : 'card-mini-qr' }}">
                                         @if($item['qr_base64'])
                                             <img src="{{ $item['qr_base64'] }}" alt="QR">
                                         @else

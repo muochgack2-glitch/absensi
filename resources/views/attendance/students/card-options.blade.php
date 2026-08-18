@@ -107,7 +107,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div @click="layout = '2x5'" 
                          :class="layout === '2x5' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700'"
                          class="p-4 rounded-xl border-2 transition-all cursor-pointer text-center">
@@ -123,7 +123,16 @@
                         <div class="text-3xl mb-2">🏷️</div>
                         <p class="font-bold text-gray-900 dark:text-white">Mini 3×4</p>
                         <p class="text-xs text-gray-500 mt-1">12 kartu/halaman</p>
-                        <p class="text-xs text-gray-500 mt-1">QR besar • 61×74mm</p>
+                        <p class="text-xs text-gray-500 mt-1">QR 57mm • 61×74mm</p>
+                    </div>
+
+                    <div @click="layout = 'mini-55'" 
+                         :class="layout === 'mini-55' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700'"
+                         class="p-4 rounded-xl border-2 transition-all cursor-pointer text-center">
+                        <div class="text-3xl mb-2">🏷️</div>
+                        <p class="font-bold text-gray-900 dark:text-white">Mini 3×4</p>
+                        <p class="text-xs text-gray-500 mt-1">12 kartu/halaman</p>
+                        <p class="text-xs text-gray-500 mt-1">QR 55mm • 61×74mm</p>
                     </div>
                 </div>
             </x-card>
