@@ -311,27 +311,26 @@
         }
         .card-mini-55-cell {
             display: table-cell;
-            vertical-align: top;
-            padding-top: 4mm;
+            vertical-align: middle;
             text-align: center;
         }
 
         .card-mini-55-nama {
             width: 50mm;
-            margin: 1mm auto 0;
-            font-size: 8pt;
+            margin: 1.5mm auto 0;
+            font-size: 10pt;
             font-weight: 700;
             color: #111827;
-            line-height: 1.1;
+            line-height: 1.15;
             text-align: center;
         }
         .card-mini-55-detail {
             width: 50mm;
-            margin: 0.5mm auto 0;
-            font-size: 7.5pt;
+            margin: 0.8mm auto 0;
+            font-size: 9pt;
             font-weight: 600;
             color: #374151;
-            line-height: 1.15;
+            line-height: 1.2;
             text-align: center;
         }
 
@@ -368,7 +367,7 @@
 <body>
     @foreach($pages as $pageIndex => $page)
     <div class="page">
-        <table class="cards-grid" @if($layout === 'mini-55') style="width: 187.5mm; margin-top: 6mm; margin-left: 3.75mm; border-collapse: collapse;" @endif>
+        <table class="cards-grid">
             @for($row = 0; $row < $config['rows']; $row++)
             <tr>
                 @for($col = 0; $col < $config['cols']; $col++)
@@ -376,15 +375,14 @@
                         $idx = ($row * $config['cols']) + $col;
                         $item = $page[$idx] ?? null;
                     @endphp
-                    <td style="width: {{ $layout === 'mini-55' ? '62.5mm' : number_format(100 / $config['cols'], 4).'%' }}; {{ $layout === 'mini-55' ? 'padding: 0 1.5mm 1.5mm 0;' : '' }}">
+                    <td style="width: {{ number_format(100 / $config['cols'], 4) }}%;">
                         @if($item)
                             @php $s = $item['student']; @endphp
                             @if($layout !== '2x5')
                                 {{-- Mini / mini-55: QR + divider + Nama + NIS|Kelas --}}
                                 <div class="card-mini">
-                                    @if($layout === 'mini-55')
-                                    <div class="card-mini-55-inner"><div class="card-mini-55-cell">
-                                    @endif
+                                    <div class="card-mini-55-inner">
+                                    <div class="card-mini-55-cell">
                                     <div class="{{ $layout === 'mini-55' ? 'card-mini-55-qr' : 'card-mini-qr' }}">
                                         @if($item['qr_base64'])
                                             <img src="{{ $item['qr_base64'] }}" alt="QR">
@@ -403,7 +401,7 @@
                                             NIS: {{ $s->nis }} &nbsp;|&nbsp; {{ $s->kelas->nama_kelas ?? '-' }}
                                         </div>
                                     @endif
-                                    @if($layout === 'mini-55')</div></div>@endif
+                                    </div></div>{{-- /card-mini-55-cell /card-mini-55-inner --}}
                                 </div>
                             @else
                             {{-- 2x5: Full card dengan logo, foto, info table, QR --}}
