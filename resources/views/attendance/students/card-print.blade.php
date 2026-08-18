@@ -271,6 +271,16 @@
             border-radius: 2mm;
         }
 
+        /* Override QR size untuk layout 2x3 (56mm vs 57mm pada mini) */
+        .card-qr-sm {
+            width: 58mm !important;
+            height: 58mm !important;
+        }
+        .card-qr-sm img {
+            width: 56mm !important;
+            height: 56mm !important;
+        }
+
         /* ============== TABLE LAYOUT ============== */
         .info-table {
             width: 100%;
@@ -324,10 +334,10 @@
                     <td style="width: {{ number_format(100 / $config['cols'], 4) }}%;">
                         @if($item)
                             @php $s = $item['student']; @endphp
-                            @if($layout === 'mini')
-                                {{-- Kartu Mini 3x4: QR dimaksimalkan, Nama, NIS, Kelas --}}
+                            @if($layout === 'mini' || $layout === '2x3')
+                                {{-- Kartu Mini / 2x3: QR besar, Nama, NIS, Kelas saja --}}
                                 <div class="card-mini">
-                                    <div class="card-mini-qr">
+                                    <div class="card-mini-qr {{ $layout === '2x3' ? 'card-qr-sm' : '' }}">
                                         @if($item['qr_base64'])
                                             <img src="{{ $item['qr_base64'] }}" alt="QR">
                                         @else
