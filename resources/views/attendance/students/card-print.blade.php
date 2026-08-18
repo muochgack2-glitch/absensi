@@ -291,15 +291,15 @@
         /* KARTU MINI-55: identik mini, QR 55mm (lebih kecil)          */
         /* ============================================================ */
         .card-mini-55-qr {
-            width: 57mm;
-            height: 57mm;
+            width: 52mm;
+            height: 52mm;
             padding: 1mm;
             background: white;
             margin: 0 auto;
         }
         .card-mini-55-qr img {
-            width: 55mm;
-            height: 55mm;
+            width: 50mm;
+            height: 50mm;
             object-fit: contain;
             display: block;
         }
