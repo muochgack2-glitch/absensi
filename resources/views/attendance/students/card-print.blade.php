@@ -311,7 +311,8 @@
         }
         .card-mini-55-cell {
             display: table-cell;
-            vertical-align: middle;
+            vertical-align: top;
+            padding-top: 4mm;
             text-align: center;
         }
 
