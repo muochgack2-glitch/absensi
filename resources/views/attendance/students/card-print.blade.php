@@ -368,7 +368,7 @@
 <body>
     @foreach($pages as $pageIndex => $page)
     <div class="page">
-        <table class="cards-grid">
+        <table class="cards-grid" @if($layout === 'mini-55') style="width: 183mm; margin: 9mm auto; border-collapse: collapse;" @endif>
             @for($row = 0; $row < $config['rows']; $row++)
             <tr>
                 @for($col = 0; $col < $config['cols']; $col++)
@@ -376,7 +376,7 @@
                         $idx = ($row * $config['cols']) + $col;
                         $item = $page[$idx] ?? null;
                     @endphp
-                    <td style="width: {{ number_format(100 / $config['cols'], 4) }}%;">
+                    <td style="width: {{ $layout === 'mini-55' ? '61mm' : number_format(100 / $config['cols'], 4).'%' }};">
                         @if($item)
                             @php $s = $item['student']; @endphp
                             @if($layout !== '2x5')
