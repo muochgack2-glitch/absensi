@@ -528,14 +528,16 @@
             
             const config = {
                 fps: 30,                    // 30fps lebih stabil di semua browser
-                qrbox: { width: 280, height: 280 },  // Lebih besar = lebih toleran jarak & gerakan
+                qrbox: { width: 280, height: 280 },  // Toleran jarak & gerakan
                 aspectRatio: 1.0,
                 disableFlip: false,         // Enable flip untuk toleransi angle
                 rememberLastUsedCamera: true,
                 videoConstraints: {
                     facingMode: "environment",
-                    width: { ideal: 1280 },  // HD untuk deteksi jelas
-                    height: { ideal: 720 }
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                    focusMode: "continuous", // Fokus terus-menerus, tidak hunting saat kartu muncul
+                    advanced: [{ focusMode: "continuous" }]
                 }
             };
 
