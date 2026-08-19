@@ -25,8 +25,9 @@ class QRCodeService
     public function buildQRToken(string $nis): string
     {
         $secret = config('app.key');
-        $sig    = hash_hmac('sha256', $nis, $secret);
-        return $nis . ':' . $sig;
+        // 8-char uppercase HMAC → QR Version 1 Alfanumerik → scan SUPER CEPAT
+        $sig = strtoupper(substr(hash_hmac('sha256', $nis, $secret), 0, 8));
+        return strtoupper($nis) . ':' . $sig;
     }
 
     /**
@@ -45,16 +46,18 @@ class QRCodeService
         }
 
         [$nis, $receivedSig] = $parts;
+        $nis = strtoupper($nis);
 
         $secret      = config('app.key');
-        $expectedSig = hash_hmac('sha256', $nis, $secret);
+        // Hitung 8-char uppercase HMAC sesuai format baru
+        $expectedSig = strtoupper(substr(hash_hmac('sha256', strtolower($nis), $secret), 0, 8));
 
         // Use hash_equals to prevent timing attacks
-        if (!hash_equals($expectedSig, $receivedSig)) {
+        if (!hash_equals($expectedSig, strtoupper($receivedSig))) {
             return null; // invalid signature
         }
 
-        return $nis;
+        return strtolower($nis); // kembalikan NIS dalam lowercase
     }
 
     public function generateQRCode(string $nis): string
@@ -62,10 +65,11 @@ class QRCodeService
         // Generate signed QR token — NOT plain NIS
         $qrContent = $this->buildQRToken($nis);
         
-        // Generate QR Code image (SVG format, 300x300, high error correction)
+        // Generate QR Code image (SVG format, 300x300)
+        // Error correction M (tidak perlu H) → QR lebih simpel → scan lebih cepat
         $qrImage = QrCode::format('svg')
             ->size(300)
-            ->errorCorrection('H')
+            ->errorCorrection('M')
             ->generate($qrContent);
         
         // Define storage path (relative to storage/app/public)
