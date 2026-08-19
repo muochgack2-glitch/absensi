@@ -527,15 +527,15 @@
             html5QrCode = new Html5Qrcode("reader");
             
             const config = {
-                fps: 30,                    // Aggressive 30 FPS for instant detection
-                qrbox: { width: 300, height: 300 },  // Square scan area with equal dimensions
+                fps: 60,                    // 60 FPS maksimal untuk deteksi instan
+                qrbox: { width: 220, height: 220 },  // Area lebih kecil = decode lebih cepat
                 aspectRatio: 1.0,
-                disableFlip: false,         // Allow flipped QR codes
-                rememberLastUsedCamera: true, // Remember camera selection
+                disableFlip: true,          // Disable flip (QR Version 1 tidak perlu)
+                rememberLastUsedCamera: true,
                 videoConstraints: {
                     facingMode: "environment",
-                    width: { ideal: 1280, max: 1920 },   // Higher resolution for better detection
-                    height: { ideal: 720, max: 1080 }
+                    width: { ideal: 640, max: 1280 },   // 640px cukup untuk QR Version 1
+                    height: { ideal: 480, max: 720 }
                 }
             };
 
