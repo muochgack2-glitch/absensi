@@ -729,7 +729,8 @@
                         const fallbackCam = cameras[0] || null;
                         if (fallbackCam) {
                             console.log('📷 Fallback → pakai kamera:', fallbackCam.label);
-                            doStart(fallbackCam.id, configDefault);
+                            // Pakai configDual (tanpa videoConstraints) agar tidak konflik dengan deviceId
+                            doStart(fallbackCam.id, configDual);
                         } else {
                             console.log('📷 Tidak ada kamera → facingMode:environment');
                             doStart({ facingMode: 'environment' }, configDefault);
