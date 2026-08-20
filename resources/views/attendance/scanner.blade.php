@@ -579,6 +579,44 @@
             // Silently ignore scan failures (expected during scanning)
         }
 
+        // =============================================
+        // HID BARCODE SCANNER (EP5000G / EP5000D)
+        // Bekerja BERSAMA webcam scanner — tidak konflik
+        // Scanner USB ketik data seperti keyboard + Enter
+        // =============================================
+        let hidBuffer = '';
+        let hidTimer  = null;
+
+        document.addEventListener('keydown', function(e) {
+            // Abaikan jika user sedang ketik di input/textarea
+            const tag = document.activeElement.tagName;
+            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return;
+
+            if (e.key === 'Enter') {
+                const scanned = hidBuffer.trim();
+                hidBuffer = '';
+                clearTimeout(hidTimer);
+
+                if (scanned.length > 3) {
+                    console.log('📟 HID Scanner input:', scanned);
+                    // Proses sama seperti scan dari kamera
+                    onScanSuccess(scanned, null);
+                }
+                return;
+            }
+
+            // Kumpulkan karakter dari HID scanner
+            if (e.key.length === 1) {
+                hidBuffer += e.key;
+            }
+
+            // Reset buffer jika 300ms tidak ada input baru
+            clearTimeout(hidTimer);
+            hidTimer = setTimeout(() => {
+                hidBuffer = '';
+            }, 300);
+        });
+
         async function processScan(nis) {
             try {
                 // Capture photo from video (optional, bisa pakai dummy)

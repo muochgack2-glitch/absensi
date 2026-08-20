@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Picqer\Barcode\BarcodeGeneratorPNG;
 use Illuminate\Support\Facades\Storage;
 
 class QRCodeService
@@ -62,23 +63,21 @@ class QRCodeService
 
     public function generateQRCode(string $nis): string
     {
-        // Generate signed QR token — NOT plain NIS
+        // Generate signed token — sama seperti sebelumnya
         $qrContent = $this->buildQRToken($nis);
         
-        // PNG format lebih tajam dari SVG untuk hardware scanner
-        // Margin 10 = quiet zone cukup besar (wajib untuk hardware scanner)
-        // Size 500 = lebih besar untuk print jelas
-        $qrImage = QrCode::format('png')
-            ->size(500)
-            ->margin(10)
-            ->errorCorrection('M')
-            ->generate($qrContent);
+        // Generate Code128 Barcode (1D) — mudah dibaca printer biasa & EP5000G
+        $generator = new BarcodeGeneratorPNG();
+        $barcodeImage = $generator->getBarcode(
+            $qrContent,
+            $generator::TYPE_CODE_128,
+            3,    // lebar setiap bar (px)
+            100   // tinggi barcode (px)
+        );
         
         // Simpan sebagai PNG
         $path = "qrcodes/{$nis}.png";
-        
-        // Save to public storage disk so it's web-accessible
-        Storage::disk('public')->put($path, $qrImage);
+        Storage::disk('public')->put($path, $barcodeImage);
         
         return $path;
     }
