@@ -66,11 +66,11 @@ class QRCodeService
         $qrContent = $this->buildQRToken($nis);
         
         // PNG format lebih tajam dari SVG untuk hardware scanner
-        // Margin 2 = quiet zone (wajib untuk hardware scanner bisa baca)
-        // Size 400 = lebih besar, lebih mudah dibaca dari jarak normal
+        // Margin 10 = quiet zone cukup besar (wajib untuk hardware scanner)
+        // Size 500 = lebih besar untuk print jelas
         $qrImage = QrCode::format('png')
-            ->size(400)
-            ->margin(2)
+            ->size(500)
+            ->margin(10)
             ->errorCorrection('M')
             ->generate($qrContent);
         
