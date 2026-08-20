@@ -144,10 +144,6 @@
                         <div class="absolute -inset-3 bg-gradient-to-r from-primary-500 via-purple-500 to-pink-500 rounded-2xl opacity-30 blur-lg animate-pulse"></div>
                         <div class="relative bg-gray-900 rounded-xl p-3 shadow-xl">
                             <div id="reader" class="mx-auto rounded-lg overflow-hidden" style="width: 100%; max-width: 400px; min-height: 300px;"></div>
-                            {{-- Hidden input untuk capture HID scanner EP5000G --}}
-                            <input id="hid-capture" type="text" autocomplete="off"
-                                style="position:absolute;opacity:0;width:1px;height:1px;left:-9999px;top:0;"
-                                tabindex="1">
                             
                             {{-- Scanning Animation Overlay --}}
                             <div id="scanOverlay" class="absolute inset-3 pointer-events-none rounded-lg overflow-hidden">
@@ -178,27 +174,6 @@
                             </div>
                             <p class="font-semibold text-gray-900 dark:text-white text-xs">Auto Scan</p>
                         </div>
-                    </div>
-
-                    {{-- Input Scanner Manual / EP5000G Test --}}
-                    <div class="mt-3 max-w-lg mx-auto">
-                        <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-700/50 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 focus-within:border-primary-400 transition-colors">
-                            <i class="fas fa-barcode text-gray-400 text-lg flex-shrink-0"></i>
-                            <input
-                                id="scanner-manual-input"
-                                type="text"
-                                placeholder="Klik di sini lalu scan barcode / ketik token..."
-                                autocomplete="off"
-                                class="flex-1 bg-transparent text-sm text-gray-700 dark:text-gray-200 outline-none placeholder-gray-400"
-                                style="min-width:0;"
-                            >
-                            <button onclick="submitManualScan()" class="flex-shrink-0 px-3 py-1 bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold rounded-lg transition-colors">
-                                <i class="fas fa-paper-plane mr-1"></i>Scan
-                            </button>
-                        </div>
-                        <p class="text-xs text-gray-400 text-center mt-1">
-                            Gunakan untuk EP5000G atau input manual token
-                        </p>
                     </div>
                 </div>
             </x-card>
@@ -673,130 +648,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Scanner page loaded, checking Html5Qrcode availability...');
             waitForHtml5Qrcode();
-            initHIDScanner(); // EP5000G hardware scanner listener
-            initManualScanInput(); // Input kotak visible untuk test
         });
-
-        /** Input kotak visible — klik lalu scan dengan EP5000G atau ketik manual */
-        function initManualScanInput() {
-            var inp = document.getElementById('scanner-manual-input');
-            if (!inp) return;
-
-            inp.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    submitManualScan();
-                    return;
-                }
-            });
-
-            // Auto-submit saat 13 digit angka terisi cepat (scanner mode)
-            inp.addEventListener('input', function() {
-                var val = inp.value.replace(/\D/g, ''); // ambil digit saja
-                if (val.length >= 13) {
-                    inp.value = '';
-                    processScan(val.substring(0, 13));
-                }
-            });
-        }
-
-        function submitManualScan() {
-            var inp = document.getElementById('scanner-manual-input');
-            if (!inp) return;
-            var val = inp.value.trim().replace(/\D/g, '');
-            if (!val) { inp.focus(); return; }
-            inp.value = '';
-            processScan(val);
-        }
-
-        /**
-         * HID Scanner Listener — EP5000G (EAN-13).
-         * Dual listener: hidden input (primary) + document (fallback).
-         * Auto-refocus setiap 1 detik agar input selalu siap.
-         */
-        function initHIDScanner() {
-            var input = document.getElementById('hid-capture');
-            var hid = { buf: '', lastTime: 0, timer: null, LEN: 13, processing: false };
-
-            // ---- REFOCUS ----
-            function refocus() {
-                if (!document.hidden) {
-                    var active = (document.activeElement || {}).tagName || '';
-                    if (active !== 'INPUT' && active !== 'TEXTAREA' && active !== 'SELECT' && active !== 'BUTTON') {
-                        if (input) input.focus({ preventScroll: true });
-                    }
-                }
-            }
-            setTimeout(refocus, 600);
-            setInterval(refocus, 1000); // jaga fokus setiap detik
-
-            document.addEventListener('click', function(e) {
-                var tag = (e.target || {}).tagName || '';
-                if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT' && tag !== 'BUTTON' && tag !== 'A') {
-                    setTimeout(refocus, 100);
-                }
-            });
-
-            // ---- HANDLER ----
-            function onKey(e) {
-                var now = Date.now();
-
-                if (e.key === 'Enter' || e.key === 'Return') {
-                    e.preventDefault();
-                    if (hid.buf.length >= 12 && /^\d+$/.test(hid.buf) && !hid.processing) {
-                        hid.processing = true;
-                        console.log('🔫 HID scan (Enter):', hid.buf);
-                        var tok = hid.buf;
-                        hid.buf = ''; if (input) input.value = '';
-                        clearTimeout(hid.timer);
-                        processScan(tok).finally(function() { hid.processing = false; });
-                    } else {
-                        hid.buf = ''; if (input) input.value = '';
-                    }
-                    return;
-                }
-
-                if (!e.key || e.key.length !== 1) return;
-                if (hid.lastTime && (now - hid.lastTime) > 120) { hid.buf = ''; if (input) input.value = ''; }
-                hid.lastTime = now;
-
-                if (/\d/.test(e.key)) {
-                    hid.buf += e.key;
-                } else {
-                    hid.buf = ''; if (input) input.value = ''; return;
-                }
-
-                if (hid.buf.length === hid.LEN && !hid.processing) {
-                    hid.processing = true;
-                    console.log('🔫 HID scan (auto-13):', hid.buf);
-                    var token = hid.buf;
-                    hid.buf = ''; if (input) input.value = '';
-                    clearTimeout(hid.timer);
-                    processScan(token).finally(function() { hid.processing = false; });
-                    return;
-                }
-
-                if (hid.buf.length > hid.LEN) { hid.buf = ''; if (input) input.value = ''; }
-                clearTimeout(hid.timer);
-                hid.timer = setTimeout(function() { hid.buf = ''; if (input) input.value = ''; }, 250);
-            }
-
-            // Primary: hidden input
-            if (input) input.addEventListener('keydown', onKey);
-
-            // Fallback: document (cover kasus focus di video/canvas webcam)
-            document.addEventListener('keydown', function(e) {
-                var active = (document.activeElement || {});
-                // Jangan proses dua kali (kalau input sudah handle)
-                if (active === input) return;
-                // Abaikan jika focus di form element lain
-                var tag = active.tagName || '';
-                if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-                onKey(e);
-            });
-
-            console.log('✅ HID scanner listener aktif (dual-mode, EP5000G)');
-        }
 
         function initScanner() {
             const Html5Qrcode = window.Html5Qrcode;
@@ -851,9 +703,6 @@
 
         async function processScan(nis) {
             try {
-                // DEBUG: log exact token
-                console.log('📤 Token dikirim ke server:', JSON.stringify(nis), '| panjang:', nis ? nis.length : 0);
-
                 // Capture photo from video (optional, bisa pakai dummy)
                 const photoBase64 = await capturePhoto();
 

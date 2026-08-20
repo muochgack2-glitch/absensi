@@ -98,8 +98,6 @@ Route::middleware(['auth'])->group(function () {
         ->name('attendance.students.card');
     Route::post('/attendance/students/card/generate', [StudentCardController::class, 'generate'])
         ->name('attendance.students.card.generate');
-    Route::get('/attendance/students/card/download-barcodes', [StudentCardController::class, 'downloadBarcodes'])
-        ->name('attendance.students.card.download-barcodes');
     
     Route::get('/attendance/students/import/form', [AttendanceStudentController::class, 'importForm'])
         ->name('attendance.students.import.form');

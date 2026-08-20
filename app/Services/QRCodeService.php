@@ -14,198 +14,71 @@ class QRCodeService
      * @return string Path to saved QR code file
      */
     /**
-     * Build token untuk barcode EAN-13 (format angka murni).
-     * Kompatibel dengan scanner EP5000G yang hanya bisa baca EAN.
+     * Build a signed QR token for the given NIS.
      *
-     * Format: NIS (6 digit, zero-padded) + hash HMAC 6 digit numerik = 12 digit
-     * Picqer akan tambah check digit → 13 digit EAN-13
+     * Format: "<NIS>:<HMAC-SHA256(NIS, APP_KEY)>"
+     * The HMAC prevents forging a valid token without knowing APP_KEY.
      *
      * @param string $nis
-     * @return string 12-digit numeric token
+     * @return string signed token
      */
     public function buildQRToken(string $nis): string
     {
-        $secret  = config('app.key');
-        $nisOnly = preg_replace('/[^0-9]/', '', $nis); // angka saja
-
-        // 6-digit HMAC numerik dari SHA256
-        $hmac    = hash_hmac('sha256', $nisOnly, $secret);
-        $numHash = sprintf('%06d', hexdec(substr($hmac, 0, 6)) % 1000000);
-
-        // NIS 6 digit (zero-padded) + hash 6 digit = 12 digit → EAN-13
-        return str_pad($nisOnly, 6, '0', STR_PAD_LEFT) . $numHash;
+        $secret = config('app.key');
+        // 8-char uppercase HMAC → QR Version 1 Alfanumerik → scan SUPER CEPAT
+        $sig = strtoupper(substr(hash_hmac('sha256', $nis, $secret), 0, 8));
+        return strtoupper($nis) . ':' . $sig;
     }
 
     /**
-     * Verifikasi token EAN-13 dan kembalikan NIS jika valid.
+     * Verify a QR token and return the NIS if valid.
      *
-     * EP5000G output 13 digit (termasuk check digit EAN-13).
-     * Webcam/scanner lain mungkin output 12 digit (tanpa check digit).
+     * Returns null if the token is malformed or the signature does not match.
      *
-     * @param string $token  angka dari scanner (12 atau 13 digit)
+     * @param string $token  raw string scanned from QR
      * @return string|null   NIS on success, null on failure
      */
     public function verifyQRToken(string $token): ?string
     {
-        // Strip karakter non-angka (spasi, newline dari HID scanner)
-        $token = preg_replace('/[^0-9]/', '', $token);
-
-        // EP5000G output 13 digit (include EAN check digit) → strip terakhir
-        if (strlen($token) === 13) {
-            $token = substr($token, 0, 12);
+        $parts = explode(':', $token, 2);
+        if (count($parts) !== 2) {
+            return null; // malformed
         }
 
-        // Harus 12 digit angka murni
-        if (strlen($token) !== 12) {
-            return null;
+        [$nis, $receivedSig] = $parts;
+        $nis = strtoupper($nis);
+
+        $secret      = config('app.key');
+        // Hitung 8-char uppercase HMAC sesuai format baru
+        $expectedSig = strtoupper(substr(hash_hmac('sha256', strtolower($nis), $secret), 0, 8));
+
+        // Use hash_equals to prevent timing attacks
+        if (!hash_equals($expectedSig, strtoupper($receivedSig))) {
+            return null; // invalid signature
         }
 
-        $nisNum  = substr($token, 0, 6); // 6 digit NIS
-        $hashRec = substr($token, 6, 6); // 6 digit hash
-
-        // Hapus leading zeros untuk dapat NIS asli
-        $nis = ltrim($nisNum, '0') ?: '0';
-
-        // Hitung ulang hash
-        $secret  = config('app.key');
-        $hmac    = hash_hmac('sha256', $nis, $secret);
-        $hashExp = sprintf('%06d', hexdec(substr($hmac, 0, 6)) % 1000000);
-
-        if (!hash_equals($hashExp, $hashRec)) {
-            return null; // token tidak valid
-        }
-
-        return $nis; // kembalikan NIS
+        return strtolower($nis); // kembalikan NIS dalam lowercase
     }
 
     public function generateQRCode(string $nis): string
     {
-        // 12-digit numeric token untuk EAN-13
+        // Generate signed QR token — NOT plain NIS
         $qrContent = $this->buildQRToken($nis);
-
-        // Generate EAN-13 barcode — kompatibel dengan EP5000G
-        if (class_exists('Picqer\Barcode\BarcodeGeneratorPNG')) {
-            $generator  = new \Picqer\Barcode\BarcodeGeneratorPNG();
-            $barcodeRaw = $generator->getBarcode(
-                $qrContent,
-                $generator::TYPE_EAN_13,
-                5,   // bar width 5px
-                120  // height 120px
-            );
-
-            // Picqer v3 pakai transparent background → fix dengan white background
-            // Tanpa ini barcode tampak terbalik (putih di hitam) → tidak bisa discan
-            $src   = imagecreatefromstring($barcodeRaw);
-            $w     = imagesx($src);
-            $h     = imagesy($src);
-            $dst   = imagecreatetruecolor($w, $h);
-            $white = imagecolorallocate($dst, 255, 255, 255);
-            imagefill($dst, 0, 0, $white);
-            imagecopy($dst, $src, 0, 0, 0, 0, $w, $h);
-            ob_start();
-            imagepng($dst);
-            $barcodeImage = ob_get_clean();
-            imagedestroy($src);
-            imagedestroy($dst);
-        } else {
-            // Fallback GD jika picqer tidak ada
-            $barcodeImage = $this->generateCode128GD($qrContent);
-        }
-
-        $path = "qrcodes/{$nis}.png";
-        Storage::disk('public')->put($path, $barcodeImage);
-
+        
+        // Error correction L = QR paling simpel → scan paling cepat
+        // (kartu laminating tidak butuh EC tinggi)
+        $qrImage = QrCode::format('svg')
+            ->size(300)
+            ->errorCorrection('L')
+            ->generate($qrContent);
+        
+        // Define storage path (relative to storage/app/public)
+        $path = "qrcodes/{$nis}.svg";
+        
+        // Save to public storage disk so it's web-accessible
+        Storage::disk('public')->put($path, $qrImage);
+        
         return $path;
-    }
-
-    /**
-     * Generate Code128B barcode PNG menggunakan GD (tanpa library eksternal).
-     * Tabel patterns lengkap 103 entri sesuai standar Code128.
-     */
-    private function generateCode128GD(string $text): string
-    {
-        // Code128B value table: ASCII 32-127 → Code128 value 0-95
-        $code128B = [];
-        for ($i = 32; $i <= 127; $i++) {
-            $code128B[chr($i)] = $i - 32;
-        }
-
-        // Complete Code128 patterns — 103 data symbols (0-102) + start/stop
-        $patterns = [
-            '11011001100', '11001101100', '11001100110', '10010011000',
-            '10010001100', '10001001100', '10011001000', '10011000100',
-            '10001100100', '11001001000', '11001000100', '11000100100',
-            '10110011100', '10011011100', '10011001110', '10111001100',
-            '10011101100', '10011100110', '11001110010', '11001011100',
-            '11001001110', '11011100100', '11001110100', '11101101110',
-            '11101001100', '11100101100', '11100100110', '11101100100',
-            '11100110100', '11100110010', '11011011000', '11011000110',
-            '11000110110', '10100011000', '10001011000', '10001000110',
-            '10110001000', '10001101000', '10001100010', '11010001000',
-            '11000101000', '11000100010', '10110111000', '10110001110',
-            '10001101110', '10111011000', '10111000110', '10001110110',
-            '11101110110', '11010001110', '11000101110', '11011101000',
-            '11011100010', '11011101110', '11101011000', '11101000110',
-            '11100010110', '11101101000', '11101100010', '11100011010',
-            '11101111010', '11001000010', '11110001010', '10100110000',
-            '10100001100', '10010110000', '10010000110', '10000101100',
-            '10000100110', '10110010000', '10110000100', '10011010000',
-            '10011000010', '10000110100', '10000110010', '11000010010',
-            '11001010000', '11110111010', '11000010100', '10001111010',
-            '10100111100', '10010111100', '10010011110', '10111100100',
-            '10011110100', '10011110010', '11110100100', '11110010100',
-            '11110010010', '11011011110', '11011110110', '11110110110',
-            '10101111000', '10100011110', '10001011110', '10111101000',
-            '10111100010', '11110101000', '11110100010', '10111011110',
-            '10111101110', '11101011110', '11110101110', '11010000100',
-            '11010010000', // 104 = Start B (index 104 - tapi dipakai terpisah)
-        ];
-
-        // Build data values
-        $checksum   = 104; // Start Code B
-        $codeValues = [];
-        foreach (str_split($text) as $char) {
-            $val          = $code128B[$char] ?? 0;
-            $codeValues[] = $val;
-            $checksum    += $val * count($codeValues);
-        }
-        $checksum %= 103;
-
-        // Build bit stream: StartB + data + checksum + stop
-        $startB   = '11010010000';
-        $stopPat  = '1100011101011';
-        $bits     = $startB;
-        foreach ($codeValues as $val) {
-            $bits .= $patterns[$val] ?? $patterns[0];
-        }
-        $bits .= $patterns[$checksum] ?? $patterns[0];
-        $bits .= $stopPat;
-
-        // Render PNG dengan GD
-        $barWidth = 3;
-        $height   = 100;
-        $quiet    = 20;
-        $width    = strlen($bits) * $barWidth + $quiet * 2;
-
-        $img   = imagecreatetruecolor($width, $height + 30);
-        $white = imagecolorallocate($img, 255, 255, 255);
-        $black = imagecolorallocate($img, 0,   0,   0);
-        imagefill($img, 0, 0, $white);
-
-        $x = $quiet;
-        foreach (str_split($bits) as $bit) {
-            if ($bit === '1') {
-                imagefilledrectangle($img, $x, 10, $x + $barWidth - 1, $height + 10, $black);
-            }
-            $x += $barWidth;
-        }
-
-        ob_start();
-        imagepng($img);
-        $png = ob_get_clean();
-        imagedestroy($img);
-
-        return $png;
     }
 
     /**
@@ -216,12 +89,10 @@ class QRCodeService
      */
     public function regenerateQRCode(string $nis): string
     {
-        // Hapus file lama (SVG dan PNG)
-        foreach (['svg', 'png'] as $ext) {
-            $oldPath = "qrcodes/{$nis}.{$ext}";
-            if (Storage::disk('public')->exists($oldPath)) {
-                Storage::disk('public')->delete($oldPath);
-            }
+        // Delete old QR Code if exists
+        $oldPath = "qrcodes/{$nis}.svg";
+        if (Storage::disk('public')->exists($oldPath)) {
+            Storage::disk('public')->delete($oldPath);
         }
         
         // Generate new QR Code
@@ -236,14 +107,13 @@ class QRCodeService
      */
     public function getQRCodeUrl(string $nis): ?string
     {
-        // Cek PNG dulu, fallback ke SVG
-        foreach (['png', 'svg'] as $ext) {
-            $path = "qrcodes/{$nis}.{$ext}";
-            if (Storage::disk('public')->exists($path)) {
-                return Storage::disk('public')->url($path);
-            }
+        $path = "qrcodes/{$nis}.svg";
+        
+        if (!Storage::disk('public')->exists($path)) {
+            return null;
         }
-        return null;
+        
+        return Storage::disk('public')->url($path);
     }
 
     /**
@@ -306,12 +176,8 @@ class QRCodeService
      */
     public function qrCodeExists(string $nis): bool
     {
-        foreach (['png', 'svg'] as $ext) {
-            if (Storage::disk('public')->exists("qrcodes/{$nis}.{$ext}")) {
-                return true;
-            }
-        }
-        return false;
+        $path = "qrcodes/{$nis}.svg";
+        return Storage::disk('public')->exists($path);
     }
 
     /**

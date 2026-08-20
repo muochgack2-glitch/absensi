@@ -106,7 +106,7 @@
 
         /* Card Body - menggunakan table layout karena DomPDF tidak support flexbox */
         .card-body {
-            padding: 1.5mm 2.5mm;
+            padding: 2mm 3mm;
             width: 100%;
         }
 
@@ -122,8 +122,8 @@
 
         /* Photo Area */
         .card-photo {
-            width: 16mm;
-            height: 20mm;
+            width: 18mm;
+            height: 24mm;
             border: 1px solid #ddd;
             border-radius: 2mm;
             overflow: hidden;
@@ -132,16 +132,16 @@
         }
 
         .card-photo img {
-            width: 16mm;
-            height: 20mm;
+            width: 18mm;
+            height: 24mm;
             object-fit: cover;
         }
 
         .card-photo .initials {
-            font-size: 12pt;
+            font-size: 14pt;
             font-weight: bold;
             color: #6b7280;
-            line-height: 20mm;
+            line-height: 24mm;
             display: block;
         }
 
@@ -151,33 +151,33 @@
             padding-right: 1mm;
         }
 
-        /* QR/Barcode Area - full width di bawah kartu untuk barcode EAN-13 */
+        /* QR Code Area */
         .card-qr-wrap {
-            width: 100%;
+            width: 24mm;
             text-align: center;
-            padding-top: 1mm;
         }
 
-        .card-barcode {
-            width: 100%;
-            height: 10mm;
-            border: 0.5px solid #e5e7eb;
-            border-radius: 1mm;
-            padding: 0.5mm 2mm;
+        .card-qr {
+            width: 22mm;
+            height: 22mm;
+            border: 1px solid #e5e7eb;
+            border-radius: 2mm;
+            padding: 1mm;
             background: white;
+            margin: 0 auto;
         }
 
-        .card-barcode img {
-            width: 100%;
-            height: 9mm;
-            object-fit: fill;
+        .card-qr img {
+            width: 20mm;
+            height: 20mm;
+            object-fit: contain;
         }
 
         .card-qr-label {
             text-align: center;
             font-size: 5pt;
             color: #9ca3af;
-            margin-top: 0.3mm;
+            margin-top: 0.5mm;
         }
 
         /* Footer */
@@ -404,7 +404,7 @@
                                     </div></div>{{-- /card-mini-55-cell /card-mini-55-inner --}}
                                 </div>
                             @else
-                            {{-- 2x5: Full card dengan logo, foto, info table, Barcode bawah --}}
+                            {{-- 2x5: Full card dengan logo, foto, info table, QR --}}
                             <div class="card">
                                 {{-- Header --}}
                                 <div class="card-header">
@@ -419,12 +419,12 @@
                                     </div>
                                 </div>
 
-                                {{-- Body: Foto + Info (baris atas) --}}
+                                {{-- Body --}}
                                 <div class="card-body">
                                     <table class="card-body-table">
                                         <tr>
                                             {{-- Kolom Foto --}}
-                                            <td style="width:16mm;">
+                                            <td style="width:18mm;">
                                                 <div class="card-photo">
                                                     @if($item['foto_base64'])
                                                         <img src="{{ $item['foto_base64'] }}" alt="Foto">
@@ -434,7 +434,7 @@
                                                 </div>
                                             </td>
 
-                                            {{-- Kolom Info (melebar karena QR dipindah ke bawah) --}}
+                                            {{-- Kolom Info --}}
                                             <td class="card-info">
                                                 <table class="info-table">
                                                     <tr>
@@ -459,20 +459,20 @@
                                                     </tr>
                                                 </table>
                                             </td>
+
+                                            {{-- Kolom QR Code --}}
+                                            <td class="card-qr-wrap" style="width:24mm;">
+                                                <div class="card-qr">
+                                                    @if($item['qr_base64'])
+                                                        <img src="{{ $item['qr_base64'] }}" alt="QR">
+                                                    @else
+                                                        <span style="font-size:5pt;color:#999;">No QR</span>
+                                                    @endif
+                                                </div>
+                                                <div class="card-qr-label">Scan Absensi</div>
+                                            </td>
                                         </tr>
                                     </table>
-
-                                    {{-- Baris Barcode: full width di bawah foto+info --}}
-                                    <div class="card-qr-wrap">
-                                        <div class="card-barcode">
-                                            @if($item['qr_base64'])
-                                                <img src="{{ $item['qr_base64'] }}" alt="Barcode Absensi">
-                                            @else
-                                                <span style="font-size:5pt;color:#999;">No Barcode</span>
-                                            @endif
-                                        </div>
-                                        <div class="card-qr-label">Scan Absensi</div>
-                                    </div>
                                 </div>
 
                                 {{-- Footer --}}
