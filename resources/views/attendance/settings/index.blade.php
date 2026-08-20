@@ -600,77 +600,74 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                         </label>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                <i class="fas fa-qrcode mr-1 text-indigo-500"></i> Kamera QR Scanner (index)
+                    {{-- Dropdown + Preview per kamera --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                        {{-- QR Camera --}}
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                <i class="fas fa-qrcode mr-1 text-indigo-500"></i> Kamera QR Scanner
                             </label>
-                            <input
-                                type="number"
-                                name="settings[qr_camera_index]"
-                                value="{{ old('settings.qr_camera_index', $settings['camera']['qr_camera_index'] ?? '0') }}"
-                                min="0" max="9"
-                                class="w-full text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500"
-                            >
+                            <select id="qr_camera_select" onchange="onCameraSelect('qr')"
+                                class="w-full text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
+                                <option value="">— Mendeteksi kamera... —</option>
+                            </select>
+                            <input type="hidden" name="settings[qr_camera_index]"
+                                   id="qr_camera_index_val"
+                                   value="{{ old('settings.qr_camera_index', $settings['camera']['qr_camera_index'] ?? '0') }}">
+
+                            {{-- Preview QR Cam --}}
+                            <div id="qr-preview-wrap" class="hidden">
+                                <div class="relative bg-black rounded-lg overflow-hidden">
+                                    <video id="qr-preview-video" autoplay muted playsinline
+                                           class="w-full rounded-lg" style="object-fit:contain; max-height:180px;"></video>
+                                    <button type="button" onclick="stopCamPreview('qr')"
+                                        class="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs flex items-center justify-center">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-indigo-600 dark:text-indigo-400 mt-1 text-center">
+                                    <i class="fas fa-microchip mr-1"></i>
+                                    <span id="qr-preview-specs">mendeteksi...</span>
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                <i class="fas fa-portrait mr-1 text-indigo-500"></i> Kamera Foto Wajah (index)
+
+                        {{-- Foto Wajah Camera --}}
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                <i class="fas fa-portrait mr-1 text-indigo-500"></i> Kamera Foto Wajah
                             </label>
-                            <input
-                                type="number"
-                                name="settings[photo_camera_index]"
-                                value="{{ old('settings.photo_camera_index', $settings['camera']['photo_camera_index'] ?? '1') }}"
-                                min="0" max="9"
-                                class="w-full text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500"
-                            >
+                            <select id="photo_camera_select" onchange="onCameraSelect('photo')"
+                                class="w-full text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
+                                <option value="">— Mendeteksi kamera... —</option>
+                            </select>
+                            <input type="hidden" name="settings[photo_camera_index]"
+                                   id="photo_camera_index_val"
+                                   value="{{ old('settings.photo_camera_index', $settings['camera']['photo_camera_index'] ?? '1') }}">
+
+                            {{-- Preview Foto Cam --}}
+                            <div id="photo-preview-wrap" class="hidden">
+                                <div class="relative bg-black rounded-lg overflow-hidden">
+                                    <video id="photo-preview-video" autoplay muted playsinline
+                                           class="w-full rounded-lg" style="object-fit:contain; max-height:180px;"></video>
+                                    <button type="button" onclick="stopCamPreview('photo')"
+                                        class="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs flex items-center justify-center">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-indigo-600 dark:text-indigo-400 mt-1 text-center">
+                                    <i class="fas fa-microchip mr-1"></i>
+                                    <span id="photo-preview-specs">mendeteksi...</span>
+                                </p>
+                            </div>
                         </div>
                     </div>
+
                     <p class="text-xs text-gray-500 dark:text-gray-400">
                         <i class="fas fa-info-circle mr-1"></i>
-                        Index 0 = kamera pertama yang terdeteksi, 1 = kedua, dst.
-                        Cabut-pasang USB webcam bisa mengubah urutan index.
+                        Daftar kamera otomatis terisi saat halaman dibuka. Pilih kamera → preview langsung muncul.
                     </p>
-
-                    {{-- Deteksi & Preview Kamera --}}
-                    <div class="border border-indigo-200 dark:border-indigo-800 rounded-xl p-4 bg-indigo-50 dark:bg-indigo-900/20">
-                        <div class="flex items-center justify-between mb-3">
-                            <p class="text-sm font-semibold text-indigo-800 dark:text-indigo-300">
-                                <i class="fas fa-search mr-1"></i> Deteksi Kamera Tersedia
-                            </p>
-                            <button type="button" onclick="detectCameras()"
-                                class="px-3 py-1 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
-                                <i class="fas fa-sync mr-1"></i> Deteksi
-                            </button>
-                        </div>
-
-                        {{-- Daftar kamera --}}
-                        <div id="camera-list" class="space-y-2 mb-3">
-                            <p class="text-xs text-indigo-600 dark:text-indigo-400 italic">
-                                Klik "Deteksi" untuk melihat daftar kamera yang terhubung.
-                            </p>
-                        </div>
-
-                        {{-- Preview video --}}
-                        <div id="camera-preview-wrap" class="hidden">
-                            <p class="text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-1">
-                                <i class="fas fa-video mr-1"></i> Preview:
-                                <span id="camera-preview-label" class="font-normal"></span>
-                            </p>
-                            <div class="relative bg-black rounded-lg overflow-hidden">
-                                <video id="camera-preview-video" autoplay muted playsinline
-                                       class="w-full rounded-lg" style="object-fit:contain; max-height:280px;"></video>
-                                <button type="button" onclick="stopPreview()"
-                                    class="absolute top-2 right-2 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs flex items-center justify-center">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                            <p class="text-xs text-indigo-600 dark:text-indigo-400 mt-1 text-center">
-                                <i class="fas fa-microchip mr-1"></i>
-                                Resolusi: <span id="camera-preview-specs" class="font-semibold">mendeteksi...</span>
-                            </p>
-                        </div>
-                    </div>
                 </div>
             </x-card>
 
@@ -940,90 +937,105 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
             );
         }
 
-        // ===== Kamera: Deteksi & Preview =====
-        let previewStream = null;
+        // ===== Kamera: Dropdown + Auto Preview =====
+        const camStreams = { qr: null, photo: null };
+        let allCameras  = []; // cache hasil enumerate
 
-        async function detectCameras() {
-            const listEl = document.getElementById('camera-list');
-            listEl.innerHTML = '<p class="text-xs text-indigo-500 italic"><i class="fas fa-spinner fa-spin mr-1"></i> Mendeteksi kamera...</p>';
-
+        async function initCameraDropdowns() {
             try {
-                // Minta izin dulu agar label terisi
-                await navigator.mediaDevices.getUserMedia({ video: true }).then(s => s.getTracks().forEach(t => t.stop()));
+                // Minta izin kamera sekali agar label nama terisi
+                const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                tempStream.getTracks().forEach(t => t.stop());
 
                 const devices = await navigator.mediaDevices.enumerateDevices();
-                const cameras = devices.filter(d => d.kind === 'videoinput');
+                allCameras = devices.filter(d => d.kind === 'videoinput');
 
-                if (cameras.length === 0) {
-                    listEl.innerHTML = '<p class="text-xs text-red-500"><i class="fas fa-times-circle mr-1"></i> Tidak ada kamera terdeteksi.</p>';
-                    return;
-                }
+                const savedQr    = parseInt(document.getElementById('qr_camera_index_val').value)    || 0;
+                const savedPhoto = parseInt(document.getElementById('photo_camera_index_val').value)  || 1;
 
-                listEl.innerHTML = '';
-                cameras.forEach((cam, idx) => {
-                    const label = cam.label || 'Kamera ' + idx;
-                    const div = document.createElement('div');
-                    div.className = 'flex items-center justify-between bg-white dark:bg-gray-700 border border-indigo-200 dark:border-indigo-700 rounded-lg px-3 py-2';
-                    div.innerHTML = `
-                        <div>
-                            <span class="inline-block w-6 h-6 bg-indigo-500 text-white text-xs font-bold rounded text-center leading-6 mr-2">${idx}</span>
-                            <span class="text-sm text-gray-700 dark:text-gray-200">${label}</span>
-                        </div>
-                        <button type="button" onclick="previewCamera('${cam.deviceId}', '${label.replace(/'/g, '')} (index ${idx})')"
-                            class="px-2 py-1 text-xs bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-800 dark:hover:bg-indigo-700 text-indigo-700 dark:text-indigo-200 rounded font-medium transition-colors">
-                            <i class="fas fa-play mr-1"></i> Preview
-                        </button>`;
-                    listEl.appendChild(div);
+                ['qr_camera_select', 'photo_camera_select'].forEach((selectId, si) => {
+                    const sel = document.getElementById(selectId);
+                    sel.innerHTML = '';
+                    const savedIdx = si === 0 ? savedQr : savedPhoto;
+
+                    allCameras.forEach((cam, idx) => {
+                        const lbl = cam.label || ('Kamera ' + idx);
+                        const opt = document.createElement('option');
+                        opt.value = idx;
+                        opt.textContent = `[${idx}] ${lbl}`;
+                        if (idx === savedIdx) opt.selected = true;
+                        sel.appendChild(opt);
+                    });
+
+                    if (allCameras.length === 0) {
+                        const opt = document.createElement('option');
+                        opt.textContent = '— Tidak ada kamera terdeteksi —';
+                        sel.appendChild(opt);
+                    }
                 });
 
+                // Auto-preview kamera yang sudah tersimpan
+                if (allCameras[savedQr])    openCamPreview('qr',    allCameras[savedQr].deviceId);
+                if (allCameras[savedPhoto]) openCamPreview('photo', allCameras[savedPhoto].deviceId);
+
             } catch (err) {
-                listEl.innerHTML = `<p class="text-xs text-red-500"><i class="fas fa-exclamation-triangle mr-1"></i> Gagal: ${err.message}</p>`;
+                console.warn('Gagal deteksi kamera:', err.message);
             }
         }
 
-        async function previewCamera(deviceId, label) {
-            stopPreview();
+        function onCameraSelect(role) {
+            const sel   = document.getElementById(role + '_camera_select');
+            const idx   = parseInt(sel.value);
+            const cam   = allCameras[idx];
+            const hidden = document.getElementById(role + '_camera_index_val');
+            if (hidden) hidden.value = idx;
+
+            stopCamPreview(role);
+            if (cam) openCamPreview(role, cam.deviceId);
+        }
+
+        async function openCamPreview(role, deviceId) {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { deviceId: { exact: deviceId } } // tanpa paksa resolusi — pakai native
+                    video: { deviceId: { exact: deviceId } } // native resolution
                 });
-                previewStream = stream;
-                const video = document.getElementById('camera-preview-video');
-                video.srcObject = stream;
-                document.getElementById('camera-preview-label').textContent = label;
-                document.getElementById('camera-preview-wrap').classList.remove('hidden');
+                camStreams[role] = stream;
 
-                // Tampilkan spesifikasi resolusi setelah video siap
+                const video = document.getElementById(role + '-preview-video');
+                video.srcObject = stream;
+                document.getElementById(role + '-preview-wrap').classList.remove('hidden');
+
                 video.onloadedmetadata = () => {
-                    const track = stream.getVideoTracks()[0];
+                    const track    = stream.getVideoTracks()[0];
                     const settings = track.getSettings();
-                    const specsEl = document.getElementById('camera-preview-specs');
-                    if (specsEl) {
-                        specsEl.textContent = `${settings.width || video.videoWidth} × ${settings.height || video.videoHeight} px @ ${(settings.frameRate || 0).toFixed(0)} fps`;
+                    const specs    = document.getElementById(role + '-preview-specs');
+                    if (specs) {
+                        const w   = settings.width  || video.videoWidth;
+                        const h   = settings.height || video.videoHeight;
+                        const fps = (settings.frameRate || 0).toFixed(0);
+                        specs.textContent = `${w} × ${h} px @ ${fps} fps`;
                     }
                 };
             } catch (err) {
-                alert('Gagal membuka kamera: ' + err.message);
+                console.error('Gagal preview kamera', role, ':', err.message);
             }
         }
 
-        function stopPreview() {
-            if (previewStream) {
-                previewStream.getTracks().forEach(t => t.stop());
-                previewStream = null;
+        function stopCamPreview(role) {
+            if (camStreams[role]) {
+                camStreams[role].getTracks().forEach(t => t.stop());
+                camStreams[role] = null;
             }
-            document.getElementById('camera-preview-wrap').classList.add('hidden');
-            const video = document.getElementById('camera-preview-video');
+            document.getElementById(role + '-preview-wrap').classList.add('hidden');
+            const video = document.getElementById(role + '-preview-video');
             if (video) video.srcObject = null;
         }
 
         // ===== Initialize toggle states on page load =====
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize auto absent notify toggle
             toggleAbsentNotifyFields();
-            
-            // Initialize late warning toggle
             toggleLateWarningFields();
+            initCameraDropdowns(); // auto-load kamera saat halaman buka
         });
     </script>
     @endpush
