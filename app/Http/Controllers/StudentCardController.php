@@ -131,8 +131,14 @@ class StudentCardController extends Controller
         // Generate data per siswa
         $studentData = [];
         foreach ($students as $student) {
-            // QR Code sebagai PNG via GD — konten = signed HMAC token (bukan NIS polos)
-            $qrBase64 = $this->generateQrPng($this->qrCodeService->buildQRToken($student->nis), 500);
+            // Load barcode EAN-13 dari storage (digenerate oleh QRCodeService)
+            $qrPath = 'qrcodes/' . $student->nis . '.png';
+            if (!Storage::disk('public')->exists($qrPath)) {
+                // Regenerate jika file belum ada
+                $this->qrCodeService->generateQRCode($student->nis);
+            }
+            $barcodeContent = Storage::disk('public')->get($qrPath);
+            $qrBase64 = 'data:image/png;base64,' . base64_encode($barcodeContent);
 
             // Foto profil
             $fotoBase64 = null;
@@ -201,8 +207,13 @@ class StudentCardController extends Controller
             $logoBase64  = 'data:' . $logoMime . ';base64,' . base64_encode($logoContent);
         }
 
-        // QR Code sebagai PNG via GD — konten = signed HMAC token (bukan NIS polos)
-        $qrBase64 = $this->generateQrPng($this->qrCodeService->buildQRToken($student->nis), 250);
+        // Load barcode EAN-13 dari storage
+        $qrPath = 'qrcodes/' . $student->nis . '.png';
+        if (!Storage::disk('public')->exists($qrPath)) {
+            $this->qrCodeService->generateQRCode($student->nis);
+        }
+        $barcodeContent = Storage::disk('public')->get($qrPath);
+        $qrBase64 = 'data:image/png;base64,' . base64_encode($barcodeContent);
 
         // Foto
         $fotoBase64 = null;
