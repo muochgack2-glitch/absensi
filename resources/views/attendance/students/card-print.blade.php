@@ -151,26 +151,26 @@
             padding-right: 1mm;
         }
 
-        /* QR Code Area */
+        /* QR/Barcode Area - full width di bawah kartu untuk barcode EAN-13 */
         .card-qr-wrap {
-            width: 24mm;
+            width: 100%;
             text-align: center;
+            padding-top: 1.5mm;
         }
 
-        .card-qr {
-            width: 22mm;
-            height: 22mm;
-            border: 1px solid #e5e7eb;
-            border-radius: 2mm;
-            padding: 1mm;
+        .card-barcode {
+            width: 100%;
+            height: 13mm;
+            border: 0.5px solid #e5e7eb;
+            border-radius: 1.5mm;
+            padding: 1mm 2mm;
             background: white;
-            margin: 0 auto;
         }
 
-        .card-qr img {
-            width: 20mm;
-            height: 20mm;
-            object-fit: contain;
+        .card-barcode img {
+            width: 100%;
+            height: 11mm;
+            object-fit: fill; /* fill = barcode tidak di-crop, rasio bebas */
         }
 
         .card-qr-label {
@@ -404,7 +404,7 @@
                                     </div></div>{{-- /card-mini-55-cell /card-mini-55-inner --}}
                                 </div>
                             @else
-                            {{-- 2x5: Full card dengan logo, foto, info table, QR --}}
+                            {{-- 2x5: Full card dengan logo, foto, info table, Barcode bawah --}}
                             <div class="card">
                                 {{-- Header --}}
                                 <div class="card-header">
@@ -419,7 +419,7 @@
                                     </div>
                                 </div>
 
-                                {{-- Body --}}
+                                {{-- Body: Foto + Info (baris atas) --}}
                                 <div class="card-body">
                                     <table class="card-body-table">
                                         <tr>
@@ -434,7 +434,7 @@
                                                 </div>
                                             </td>
 
-                                            {{-- Kolom Info --}}
+                                            {{-- Kolom Info (melebar karena QR dipindah ke bawah) --}}
                                             <td class="card-info">
                                                 <table class="info-table">
                                                     <tr>
@@ -459,20 +459,20 @@
                                                     </tr>
                                                 </table>
                                             </td>
-
-                                            {{-- Kolom QR Code --}}
-                                            <td class="card-qr-wrap" style="width:24mm;">
-                                                <div class="card-qr">
-                                                    @if($item['qr_base64'])
-                                                        <img src="{{ $item['qr_base64'] }}" alt="QR">
-                                                    @else
-                                                        <span style="font-size:5pt;color:#999;">No QR</span>
-                                                    @endif
-                                                </div>
-                                                <div class="card-qr-label">Scan Absensi</div>
-                                            </td>
                                         </tr>
                                     </table>
+
+                                    {{-- Baris Barcode: full width di bawah foto+info --}}
+                                    <div class="card-qr-wrap">
+                                        <div class="card-barcode">
+                                            @if($item['qr_base64'])
+                                                <img src="{{ $item['qr_base64'] }}" alt="Barcode Absensi">
+                                            @else
+                                                <span style="font-size:5pt;color:#999;">No Barcode</span>
+                                            @endif
+                                        </div>
+                                        <div class="card-qr-label">Scan Absensi</div>
+                                    </div>
                                 </div>
 
                                 {{-- Footer --}}
