@@ -648,7 +648,65 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Scanner page loaded, checking Html5Qrcode availability...');
             waitForHtml5Qrcode();
+            initHIDScanner(); // EP5000G hardware scanner listener
         });
+
+        /**
+         * HID Scanner Listener — untuk EP5000G dan barcode scanner USB sejenis.
+         * Scanner HID mengirim digit sangat cepat (< 50ms per karakter) diakhiri Enter.
+         * Manusia mengetik lebih lambat (> 100ms per karakter).
+         * Bedakan keduanya dari kecepatan input.
+         */
+        function initHIDScanner() {
+            let hidBuffer   = '';
+            let lastKeyTime = 0;
+            let hidTimer    = null;
+            const MAX_INTERVAL_MS = 80;  // Scanner kirim setiap < 80ms, manusia > 100ms
+            const MIN_LENGTH      = 12;  // EAN-13 = 13 digit, min 12 (tanpa check digit)
+
+            document.addEventListener('keydown', function(e) {
+                // Abaikan jika focus di input/textarea/select
+                const tag = document.activeElement ? document.activeElement.tagName : '';
+                if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return;
+
+                const now = Date.now();
+
+                // Enter = akhir scan (submit buffer)
+                if (e.key === 'Enter') {
+                    if (hidBuffer.length >= MIN_LENGTH && /^\d+$/.test(hidBuffer)) {
+                        console.log('🔫 EP5000G scan detected:', hidBuffer);
+                        e.preventDefault();
+                        const token = hidBuffer;
+                        hidBuffer   = '';
+                        clearTimeout(hidTimer);
+                        processScan(token);
+                    } else {
+                        hidBuffer = '';
+                    }
+                    return;
+                }
+
+                // Hanya karakter tunggal yang valid
+                if (e.key.length !== 1) return;
+
+                // Jika terlalu lama sejak keystroke terakhir → reset (bukan scanner)
+                if (lastKeyTime && (now - lastKeyTime) > MAX_INTERVAL_MS) {
+                    hidBuffer = '';
+                }
+                lastKeyTime = now;
+
+                hidBuffer += e.key;
+
+                // Auto-reset jika buffer terlalu panjang (bukan EAN-13)
+                if (hidBuffer.length > 20) hidBuffer = '';
+
+                // Timeout: jika 150ms tidak ada keystroke lagi → reset buffer
+                clearTimeout(hidTimer);
+                hidTimer = setTimeout(() => { hidBuffer = ''; }, 150);
+            });
+
+            console.log('✅ HID scanner listener aktif (EP5000G mode)');
+        }
 
         function initScanner() {
             const Html5Qrcode = window.Html5Qrcode;
