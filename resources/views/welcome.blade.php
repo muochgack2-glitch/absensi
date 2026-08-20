@@ -699,6 +699,15 @@
                     onScanSuccess,
                     onScanFailure
                 ).then(() => {
+                    // Debug: cek kamera yang BENAR-BENAR streaming sekarang
+                    setTimeout(() => {
+                        const video = document.querySelector('#reader video');
+                        if (video && video.srcObject) {
+                            const track = video.srcObject.getVideoTracks()[0];
+                            console.log('🔍 ACTUAL streaming camera:', track.label);
+                            console.log('🔍 Camera settings:', JSON.stringify(track.getSettings()));
+                        }
+                    }, 1000);
                     initDualCamera();
                 }).catch(err => {
                     console.error('Failed to start scanner:', err);
