@@ -153,8 +153,10 @@
                     </div>
 
                     {{-- Dual Camera: Face Webcam (HIDDEN — capture background saat QR scan) --}}
+                    {{-- PENTING: JANGAN display:none — browser stop render frames, canvas jadi hitam --}}
+                    {{-- Pakai position:fixed offscreen + opacity:0 agar frame tetap di-render --}}
                     <video id="face-camera" autoplay muted playsinline
-                           style="display:none; width:1px; height:1px; position:absolute; opacity:0;"
+                           style="position:fixed; top:-9999px; left:-9999px; width:1px; height:1px; opacity:0; pointer-events:none; z-index:-1;"
                            aria-hidden="true"></video>
 
 
