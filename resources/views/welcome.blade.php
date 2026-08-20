@@ -575,6 +575,7 @@
         const QR_CAM_IDX  = {{ (int)($qrCameraIndex ?? 0) }};
         const PHO_CAM_IDX = {{ (int)($photoCameraIndex ?? 1) }};
         let fotoStream    = null; // MediaStream kamera wajah
+        let faceReadyAt  = null; // Timestamp saat face camera mulai streaming frame
 
         // Real-time clock
         function updateClock() {
@@ -738,11 +739,16 @@
                 const fotoDevice = cameras[PHO_CAM_IDX] || cameras[cameras.length - 1];
                 console.log('📷 Face camera pakai:', fotoDevice.label, 'idx:', PHO_CAM_IDX);
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { deviceId: { exact: fotoDevice.id } } // .id bukan .deviceId
+                    video: { deviceId: { exact: fotoDevice.id } }
                 });
-                document.getElementById('face-camera').srcObject = stream;
+                const faceVideo = document.getElementById('face-camera');
+                faceVideo.srcObject = stream;
                 fotoStream = stream;
-                console.log('✅ Face camera aktif di background!');
+                // Catat waktu saat video mulai play frame sungguhan
+                faceVideo.onplaying = () => {
+                    faceReadyAt = Date.now();
+                    console.log('✅ Face camera streaming aktif!');
+                };
             } catch (err) {
                 console.error('❌ Gagal init face camera:', err.message);
             }
@@ -828,8 +834,25 @@
         async function capturePhoto() {
             try {
                 let videoElement;
-                // Dual mode: gunakan face camera jika tersedia
+                // Dual mode: gunakan face camera jika tersedia dan sudah warm
                 if (DUAL_CAMERA && fotoStream) {
+                    // Tunggu sampai face camera benar-benar streaming (onplaying fired)
+                    if (!faceReadyAt) {
+                        // Kamera belum play sama sekali, tunggu max 3 detik
+                        await new Promise(resolve => {
+                            const fv = document.getElementById('face-camera');
+                            const onPlay = () => { faceReadyAt = Date.now(); resolve(); };
+                            fv.addEventListener('playing', onPlay, { once: true });
+                            setTimeout(resolve, 3000); // max wait 3s
+                        });
+                    }
+                    // Pastikan minimal 1.5 detik sejak kamera aktif (warm-up)
+                    if (faceReadyAt) {
+                        const elapsed = Date.now() - faceReadyAt;
+                        if (elapsed < 1500) {
+                            await new Promise(r => setTimeout(r, 1500 - elapsed));
+                        }
+                    }
                     videoElement = document.getElementById('face-camera');
                 } else {
                     videoElement = document.querySelector('#reader video');
@@ -855,6 +878,7 @@
                 return null;
             }
         }
+
 
         function showSuccess(result) {
             // Determine action type
