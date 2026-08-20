@@ -271,10 +271,9 @@ class StudentCardController extends Controller
         foreach ($students as $student) {
             $barcodePath = 'qrcodes/' . $student->nis . '.png';
 
-            // Generate barcode jika belum ada di storage
-            if (!Storage::disk('public')->exists($barcodePath)) {
-                $this->qrCodeService->generateQRCode($student->nis);
-            }
+            // SELALU generate ulang — jangan pakai cache lama
+            // Ini memastikan token selalu sinkron dengan APP_KEY saat ini
+            $this->qrCodeService->generateQRCode($student->nis);
 
             if (Storage::disk('public')->exists($barcodePath)) {
                 // Bersihkan nama siswa dari karakter tidak valid untuk nama file
