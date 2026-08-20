@@ -234,4 +234,72 @@ class StudentCardController extends Controller
 
         return $pdf->stream('kartu-' . $student->nis . '.pdf');
     }
+
+    /**
+     * Download semua barcode sebagai ZIP — nama file = nama siswa
+     *
+     * GET /attendance/students/card/download-barcodes?kelas_id=1
+     */
+    public function downloadBarcodes(Request $request)
+    {
+        // Filter berdasarkan kelas jika ada
+        $query = AttendanceStudent::with('kelas')->where('is_active', true);
+        if ($request->filled('kelas_id')) {
+            $query->where('kelas_id', $request->kelas_id);
+        }
+        $students = $query->orderBy('nama', 'asc')->get();
+
+        if ($students->isEmpty()) {
+            return back()->with('error', 'Tidak ada siswa yang ditemukan.');
+        }
+
+        // Buat folder temp jika belum ada
+        $tempDir = storage_path('app/temp');
+        if (!file_exists($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+
+        $zipFileName = 'barcode-siswa-' . date('Ymd-His') . '.zip';
+        $zipPath     = $tempDir . '/' . $zipFileName;
+
+        $zip = new \ZipArchive();
+        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            return back()->with('error', 'Gagal membuat file ZIP.');
+        }
+
+        $added = 0;
+        foreach ($students as $student) {
+            $barcodePath = 'qrcodes/' . $student->nis . '.png';
+
+            // Generate barcode jika belum ada di storage
+            if (!Storage::disk('public')->exists($barcodePath)) {
+                $this->qrCodeService->generateQRCode($student->nis);
+            }
+
+            if (Storage::disk('public')->exists($barcodePath)) {
+                // Bersihkan nama siswa dari karakter tidak valid untuk nama file
+                $safeName  = preg_replace('/[^A-Za-z0-9 \-_\.]/', '', $student->nama);
+                $safeName  = trim(preg_replace('/\s+/', ' ', $safeName));
+                $kelasName = $student->kelas->nama_kelas ?? 'NoKelas';
+
+                // Format nama file: "NAMA SISWA - NIS - KELAS.png"
+                $fileName = $safeName . ' - ' . $student->nis . ' - ' . $kelasName . '.png';
+
+                $zip->addFromString($fileName, Storage::disk('public')->get($barcodePath));
+                $added++;
+            }
+        }
+
+        $zip->close();
+
+        if ($added === 0) {
+            @unlink($zipPath);
+            return back()->with('error', 'Tidak ada barcode. Regenerate dulu via: php artisan attendance:generate-qr --regenerate');
+        }
+
+        // Download ZIP, hapus file temp setelah dikirim
+        return response()->download($zipPath, $zipFileName, [
+            'Content-Type' => 'application/zip',
+        ])->deleteFileAfterSend(true);
+    }
 }

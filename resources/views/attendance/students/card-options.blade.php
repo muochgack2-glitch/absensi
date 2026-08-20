@@ -159,5 +159,65 @@
                 </ul>
             </div>
         </x-card>
+
+        {{-- Download Barcode ZIP --}}
+        <x-card>
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center text-white text-2xl mr-4">
+                    <i class="fas fa-download"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Download Barcode PNG</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Download semua barcode sebagai file ZIP — nama file = nama siswa</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {{-- Download Semua --}}
+                <a href="{{ route('attendance.students.card.download-barcodes') }}"
+                   class="flex items-center gap-3 p-4 rounded-xl border-2 border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20 hover:border-green-500 hover:shadow-md transition-all group">
+                    <i class="fas fa-file-archive text-3xl text-green-500 group-hover:scale-110 transition-transform"></i>
+                    <div>
+                        <p class="font-semibold text-gray-900 dark:text-white">Semua Siswa</p>
+                        <p class="text-xs text-gray-500">{{ \App\Models\AttendanceStudent::where('is_active', true)->count() }} siswa → ZIP PNG</p>
+                    </div>
+                </a>
+
+                {{-- Download per Kelas --}}
+                <div class="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700">
+                    <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-filter mr-1"></i> Download per Kelas
+                    </p>
+                    <div class="flex gap-2">
+                        <select id="kelas-download" class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm px-3 py-2 text-gray-700 dark:text-gray-200">
+                            <option value="">-- Pilih Kelas --</option>
+                            @foreach($classes as $kelas)
+                                <option value="{{ $kelas->id }}">{{ $kelas->nama_kelas }}</option>
+                            @endforeach
+                        </select>
+                        <button onclick="downloadByKelas()" 
+                                class="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white text-sm font-medium rounded-lg transition-colors">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-3">
+                <i class="fas fa-info-circle mr-1"></i>
+                Format nama file: <code>NAMA SISWA - NIS - KELAS.png</code>
+            </p>
+        </x-card>
     </div>
+
+    <script>
+    function downloadByKelas() {
+        const kelasId = document.getElementById('kelas-download').value;
+        if (!kelasId) {
+            alert('Pilih kelas terlebih dahulu!');
+            return;
+        }
+        window.location.href = '{{ route('attendance.students.card.download-barcodes') }}?kelas_id=' + kelasId;
+    }
+    </script>
 </x-app-layout>
