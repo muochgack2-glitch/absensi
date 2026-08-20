@@ -98,11 +98,11 @@ class AttendanceSettingController extends Controller
         // Handle use_dual_camera checkbox
         // Pakai nilai langsung (bukan isset) karena ada hidden input yg selalu terkirim
         $dualCam = $request->input('settings.use_dual_camera', '0');
-        AttendanceSetting::set('use_dual_camera', $dualCam === '1' ? '1' : '0');
+        AttendanceSetting::set('use_dual_camera', $dualCam === '1' ? '1' : '0', 'camera');
 
         // Simpan index kamera dari hidden input yang di-update JS
-        AttendanceSetting::set('qr_camera_index',    $request->input('settings.qr_camera_index',    '0'));
-        AttendanceSetting::set('photo_camera_index', $request->input('settings.photo_camera_index', '1'));
+        AttendanceSetting::set('qr_camera_index',    $request->input('settings.qr_camera_index',    '0'), 'camera');
+        AttendanceSetting::set('photo_camera_index', $request->input('settings.photo_camera_index', '1'), 'camera');
 
 
         // Handle absent notify days (dari checkbox terpisah, sudah dikumpulkan JS)
