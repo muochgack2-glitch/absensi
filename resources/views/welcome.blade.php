@@ -711,7 +711,10 @@
                 });
             };
 
-            if (DUAL_CAMERA) {
+            const isMobileDevice = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
+
+            if (DUAL_CAMERA && !isMobileDevice) {
+                // PC/Desktop: pakai dual camera dengan deviceId matching
                 Html5Qrcode.getCameras().then(cameras => {
                     camerasCache = cameras;
                     console.log('📷 Kamera tersedia:', cameras.map((c,i) => `[${i}] ${c.label}`));
@@ -725,13 +728,15 @@
                     } else {
                         doStart({ facingMode: 'environment' }, configDefault);
                     }
-                    // Init face camera via setTimeout — JANGAN pakai .then() dari start()
-                    // karena html5QrCode.start() tidak selalu resolve promise-nya
+                    // Init face camera via setTimeout
                     setTimeout(() => initDualCamera(), 800);
                 }).catch(() => doStart({ facingMode: 'environment' }, configDefault));
             } else {
+                // HP/Mobile atau DUAL_CAMERA=false: pakai kamera belakang saja
+                if (isMobileDevice) console.log('📱 Mobile device — single camera mode (facingMode: environment)');
                 doStart({ facingMode: 'environment' }, configDefault);
             }
+
 
         }
 
