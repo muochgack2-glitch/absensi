@@ -653,16 +653,15 @@
 
         /**
          * HID Scanner Listener — untuk EP5000G dan barcode scanner USB sejenis.
-         * Scanner HID mengirim digit sangat cepat (< 50ms per karakter) diakhiri Enter.
-         * Manusia mengetik lebih lambat (> 100ms per karakter).
-         * Bedakan keduanya dari kecepatan input.
+         * EAN-13 = selalu 13 digit. Auto-process saat 13 digit terkumpul cepat.
+         * Juga support Enter sebagai terminator.
          */
         function initHIDScanner() {
             let hidBuffer   = '';
             let lastKeyTime = 0;
             let hidTimer    = null;
-            const MAX_INTERVAL_MS = 80;  // Scanner kirim setiap < 80ms, manusia > 100ms
-            const MIN_LENGTH      = 12;  // EAN-13 = 13 digit, min 12 (tanpa check digit)
+            const MAX_INTERVAL_MS = 100; // Lebih toleran: scanner < 100ms, manusia > 150ms
+            const EAN13_LENGTH    = 13;  // EAN-13 selalu 13 digit
 
             document.addEventListener('keydown', function(e) {
                 // Abaikan jika focus di input/textarea/select
@@ -671,10 +670,10 @@
 
                 const now = Date.now();
 
-                // Enter = akhir scan (submit buffer)
-                if (e.key === 'Enter') {
-                    if (hidBuffer.length >= MIN_LENGTH && /^\d+$/.test(hidBuffer)) {
-                        console.log('🔫 EP5000G scan detected:', hidBuffer);
+                // Enter/CR = akhir scan (fallback, beberapa scanner pakai Enter)
+                if (e.key === 'Enter' || e.key === 'Return') {
+                    if (hidBuffer.length >= 12 && /^\d+$/.test(hidBuffer)) {
+                        console.log('🔫 HID scan (Enter):', hidBuffer);
                         e.preventDefault();
                         const token = hidBuffer;
                         hidBuffer   = '';
@@ -686,26 +685,44 @@
                     return;
                 }
 
-                // Hanya karakter tunggal yang valid
+                // Abaikan key non-karakter (Shift, Ctrl, Alt, F1, dll)
                 if (e.key.length !== 1) return;
 
-                // Jika terlalu lama sejak keystroke terakhir → reset (bukan scanner)
+                // Jika jeda terlalu lama → bukan scanner, reset buffer
                 if (lastKeyTime && (now - lastKeyTime) > MAX_INTERVAL_MS) {
                     hidBuffer = '';
                 }
                 lastKeyTime = now;
 
-                hidBuffer += e.key;
+                // EAN-13 hanya digit — karakter lain berarti bukan barcode kita
+                if (/\d/.test(e.key)) {
+                    hidBuffer += e.key;
+                } else {
+                    hidBuffer = '';
+                    return;
+                }
 
-                // Auto-reset jika buffer terlalu panjang (bukan EAN-13)
-                if (hidBuffer.length > 20) hidBuffer = '';
+                // Auto-process saat tepat 13 digit (EAN-13) — tidak perlu tunggu Enter
+                if (hidBuffer.length === EAN13_LENGTH) {
+                    console.log('🔫 HID scan (13-digit auto):', hidBuffer);
+                    const token = hidBuffer;
+                    hidBuffer   = '';
+                    clearTimeout(hidTimer);
+                    processScan(token);
+                    return;
+                }
 
-                // Timeout: jika 150ms tidak ada keystroke lagi → reset buffer
+                // Buffer terlalu panjang → bukan EAN-13, reset
+                if (hidBuffer.length > EAN13_LENGTH) {
+                    hidBuffer = '';
+                }
+
+                // Timeout: jika 200ms tidak ada keystroke → reset
                 clearTimeout(hidTimer);
-                hidTimer = setTimeout(() => { hidBuffer = ''; }, 150);
+                hidTimer = setTimeout(() => { hidBuffer = ''; }, 200);
             });
 
-            console.log('✅ HID scanner listener aktif (EP5000G mode)');
+            console.log('✅ HID scanner listener aktif (EP5000G / EAN-13 mode)');
         }
 
         function initScanner() {
