@@ -25,8 +25,8 @@ class QRCodeService
     public function buildQRToken(string $nis): string
     {
         $secret = config('app.key');
-        // 8-char uppercase HMAC → QR Version 1 Alfanumerik → scan SUPER CEPAT
-        $sig = strtoupper(substr(hash_hmac('sha256', $nis, $secret), 0, 8));
+        // 4-char uppercase HMAC → QR lebih kecil, scan lebih cepat
+        $sig = strtoupper(substr(hash_hmac('sha256', $nis, $secret), 0, 4));
         return strtoupper($nis) . ':' . $sig;
     }
 
@@ -49,11 +49,12 @@ class QRCodeService
         $nis = strtoupper($nis);
 
         $secret      = config('app.key');
-        // Hitung 8-char uppercase HMAC sesuai format baru
-        $expectedSig = strtoupper(substr(hash_hmac('sha256', strtolower($nis), $secret), 0, 8));
+        // 4-char uppercase HMAC
+        $expectedSig = strtoupper(substr(hash_hmac('sha256', strtolower($nis), $secret), 0, 4));
 
-        // Use hash_equals to prevent timing attacks
-        if (!hash_equals($expectedSig, strtoupper($receivedSig))) {
+        // Toleransi: accept 4 atau 8 char (backward compat kartu lama)
+        $receivedShort = strtoupper(substr($receivedSig, 0, 4));
+        if (!hash_equals($expectedSig, $receivedShort)) {
             return null; // invalid signature
         }
 
