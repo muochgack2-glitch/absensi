@@ -14,68 +14,86 @@ class QRCodeService
      * @return string Path to saved QR code file
      */
     /**
-     * Build a signed QR token for the given NIS.
+     * Build token untuk barcode EAN-13 (format angka murni).
+     * Kompatibel dengan scanner EP5000G yang hanya bisa baca EAN.
      *
-     * Format: "<NIS>:<HMAC-SHA256(NIS, APP_KEY)>"
-     * The HMAC prevents forging a valid token without knowing APP_KEY.
+     * Format: NIS (6 digit, zero-padded) + hash HMAC 6 digit numerik = 12 digit
+     * Picqer akan tambah check digit → 13 digit EAN-13
      *
      * @param string $nis
-     * @return string signed token
+     * @return string 12-digit numeric token
      */
     public function buildQRToken(string $nis): string
     {
-        $secret = config('app.key');
-        // 8-char uppercase HMAC → QR Version 1 Alfanumerik → scan SUPER CEPAT
-        $sig = strtoupper(substr(hash_hmac('sha256', $nis, $secret), 0, 8));
-        return strtoupper($nis) . ':' . $sig;
+        $secret  = config('app.key');
+        $nisOnly = preg_replace('/[^0-9]/', '', $nis); // angka saja
+
+        // 6-digit HMAC numerik dari SHA256
+        $hmac    = hash_hmac('sha256', $nisOnly, $secret);
+        $numHash = sprintf('%06d', hexdec(substr($hmac, 0, 6)) % 1000000);
+
+        // NIS 6 digit (zero-padded) + hash 6 digit = 12 digit → EAN-13
+        return str_pad($nisOnly, 6, '0', STR_PAD_LEFT) . $numHash;
     }
 
     /**
-     * Verify a QR token and return the NIS if valid.
+     * Verifikasi token EAN-13 dan kembalikan NIS jika valid.
      *
-     * Returns null if the token is malformed or the signature does not match.
+     * EP5000G output 13 digit (termasuk check digit EAN-13).
+     * Webcam/scanner lain mungkin output 12 digit (tanpa check digit).
      *
-     * @param string $token  raw string scanned from QR
+     * @param string $token  angka dari scanner (12 atau 13 digit)
      * @return string|null   NIS on success, null on failure
      */
     public function verifyQRToken(string $token): ?string
     {
-        $parts = explode(':', $token, 2);
-        if (count($parts) !== 2) {
-            return null; // malformed
+        // Strip karakter non-angka (spasi, newline dari HID scanner)
+        $token = preg_replace('/[^0-9]/', '', $token);
+
+        // EP5000G output 13 digit (include EAN check digit) → strip terakhir
+        if (strlen($token) === 13) {
+            $token = substr($token, 0, 12);
         }
 
-        [$nis, $receivedSig] = $parts;
-        $nis = strtoupper($nis);
-
-        $secret      = config('app.key');
-        // Hitung 8-char uppercase HMAC sesuai format baru
-        $expectedSig = strtoupper(substr(hash_hmac('sha256', strtolower($nis), $secret), 0, 8));
-
-        // Use hash_equals to prevent timing attacks
-        if (!hash_equals($expectedSig, strtoupper($receivedSig))) {
-            return null; // invalid signature
+        // Harus 12 digit angka murni
+        if (strlen($token) !== 12) {
+            return null;
         }
 
-        return strtolower($nis); // kembalikan NIS dalam lowercase
+        $nisNum  = substr($token, 0, 6); // 6 digit NIS
+        $hashRec = substr($token, 6, 6); // 6 digit hash
+
+        // Hapus leading zeros untuk dapat NIS asli
+        $nis = ltrim($nisNum, '0') ?: '0';
+
+        // Hitung ulang hash
+        $secret  = config('app.key');
+        $hmac    = hash_hmac('sha256', $nis, $secret);
+        $hashExp = sprintf('%06d', hexdec(substr($hmac, 0, 6)) % 1000000);
+
+        if (!hash_equals($hashExp, $hashRec)) {
+            return null; // token tidak valid
+        }
+
+        return $nis; // kembalikan NIS
     }
 
     public function generateQRCode(string $nis): string
     {
-        // Generate signed token
+        // 12-digit numeric token untuk EAN-13
         $qrContent = $this->buildQRToken($nis);
 
-        // Coba pakai picqer jika tersedia, fallback ke GD built-in
+        // Generate EAN-13 barcode — kompatibel dengan EP5000G
         if (class_exists('Picqer\Barcode\BarcodeGeneratorPNG')) {
             $generator    = new \Picqer\Barcode\BarcodeGeneratorPNG();
             $barcodeImage = $generator->getBarcode(
                 $qrContent,
-                $generator::TYPE_CODE_128,
-                5,   // bar width 5px — cukup tebal untuk printer biasa
-                120  // height 120px
+                $generator::TYPE_EAN_13, // EAN-13 = format barcode produk
+                5,                       // bar width 5px
+                120                      // height 120px
             );
         } else {
-            // Fallback: generate barcode menggunakan GD (built-in PHP)
+            // Fallback GD jika picqer tidak ada
             $barcodeImage = $this->generateCode128GD($qrContent);
         }
 
