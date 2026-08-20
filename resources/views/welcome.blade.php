@@ -147,7 +147,7 @@
                             {{-- Hidden input untuk capture HID scanner EP5000G --}}
                             <input id="hid-capture" type="text" autocomplete="off"
                                 style="position:absolute;opacity:0;width:1px;height:1px;left:-9999px;top:0;"
-                                tabindex="0" aria-hidden="true">
+                                tabindex="1">
                             
                             {{-- Scanning Animation Overlay --}}
                             <div id="scanOverlay" class="absolute inset-3 pointer-events-none rounded-lg overflow-hidden">
