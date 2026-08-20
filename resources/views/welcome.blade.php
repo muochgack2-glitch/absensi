@@ -781,10 +781,20 @@
                 const faceVideo = document.getElementById('face-camera');
                 faceVideo.srcObject = stream;
                 fotoStream = stream;
-                faceVideo.onplaying = () => {
-                    faceReadyAt = Date.now();
-                    console.log('✅ Face camera streaming aktif! Label:', fotoDevice.label);
+
+                // Set faceReadyAt saat video mulai render frame
+                const markReady = () => {
+                    if (!faceReadyAt) {
+                        faceReadyAt = Date.now();
+                        console.log('✅ Face camera aktif! Label:', fotoDevice.label);
+                    }
                 };
+                faceVideo.onplaying  = markReady;
+                faceVideo.onloadeddata = markReady;
+
+                // Paksa play — autoplay tidak selalu jalan untuk elemen offscreen
+                faceVideo.play().catch(e => console.warn('face play():', e.message));
+
             } catch (err) {
                 console.error('❌ Gagal init face camera:', err.name, err.message);
             }
