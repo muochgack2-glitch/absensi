@@ -152,7 +152,12 @@
                         </div>
                     </div>
 
-                    {{-- Modern Instructions --}}
+                    {{-- Dual Camera: Face Webcam (HIDDEN — capture background saat QR scan) --}}
+                    <video id="face-camera" autoplay muted playsinline
+                           style="display:none; width:1px; height:1px; position:absolute; opacity:0;"
+                           aria-hidden="true"></video>
+
+
                     <div class="grid grid-cols-3 gap-3 max-w-2xl mx-auto">
                         <div class="flex flex-col items-center gap-2 p-2 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
                             <div class="w-8 h-8 bg-primary-500 text-white rounded-lg flex items-center justify-center">
@@ -565,6 +570,12 @@
         let recentScans = [];
         let autoCloseTimer = null; // Timer untuk auto-close modal
 
+        // --- Dual Camera Config (dari server setting) ---
+        const DUAL_CAMERA = {{ ($useDualCamera ?? '0') === '1' ? 'true' : 'false' }};
+        const QR_CAM_IDX  = {{ (int)($qrCameraIndex ?? 0) }};
+        const PHO_CAM_IDX = {{ (int)($photoCameraIndex ?? 1) }};
+        let fotoStream    = null; // MediaStream kamera wajah
+
         // Real-time clock
         function updateClock() {
             const now = new Date();
@@ -653,29 +664,73 @@
         function initScanner() {
             const Html5Qrcode = window.Html5Qrcode;
             html5QrCode = new Html5Qrcode("reader");
-            
+
             const config = {
-                fps: 30,                    // Aggressive 30 FPS for instant detection
-                qrbox: 300,                 // Large scan area for easy detection
+                fps: 30,
+                qrbox: 300,
                 aspectRatio: 1.0,
-                disableFlip: false,         // Allow flipped QR codes
-                rememberLastUsedCamera: true, // Remember camera selection
+                disableFlip: false,
+                rememberLastUsedCamera: true,
                 videoConstraints: {
                     facingMode: "environment",
-                    width: { ideal: 1280, max: 1920 },   // Higher resolution for better detection
+                    width: { ideal: 1280, max: 1920 },
                     height: { ideal: 720, max: 1080 }
                 }
             };
 
-            html5QrCode.start(
-                { facingMode: "environment" },
-                config,
-                onScanSuccess,
-                onScanFailure
-            ).catch(err => {
-                console.error('Failed to start scanner:', err);
-                showError('Gagal membuka kamera. Pastikan browser memiliki akses ke kamera.');
-            });
+            const doStart = (constraint) => {
+                html5QrCode.start(
+                    constraint,
+                    config,
+                    onScanSuccess,
+                    onScanFailure
+                ).then(() => {
+                    initDualCamera(); // Init face camera setelah QR scanner jalan
+                }).catch(err => {
+                    console.error('Failed to start scanner:', err);
+                    showError('Gagal membuka kamera. Pastikan browser memiliki akses ke kamera.');
+                });
+            };
+
+            if (DUAL_CAMERA) {
+                navigator.mediaDevices.enumerateDevices().then(devices => {
+                    const cameras = devices.filter(d => d.kind === 'videoinput');
+                    if (cameras.length >= 1 && cameras[QR_CAM_IDX]) {
+                        doStart({ deviceId: { exact: cameras[QR_CAM_IDX].deviceId } });
+                    } else {
+                        doStart({ facingMode: 'environment' });
+                    }
+                }).catch(() => doStart({ facingMode: 'environment' }));
+            } else {
+                doStart({ facingMode: 'environment' });
+            }
+        }
+
+        /**
+         * Inisialisasi kamera wajah di background (Dual Camera Mode)
+         */
+        async function initDualCamera() {
+            if (!DUAL_CAMERA) return;
+            const isMobile = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
+            if (isMobile) return;
+
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const cameras = devices.filter(d => d.kind === 'videoinput');
+                if (cameras.length < 2) {
+                    console.warn('⚠️ Dual camera: hanya', cameras.length, 'kamera tersedia');
+                    return;
+                }
+                const fotoDevice = cameras[PHO_CAM_IDX] || cameras[cameras.length - 1];
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { deviceId: { exact: fotoDevice.deviceId } }
+                });
+                document.getElementById('face-camera').srcObject = stream;
+                fotoStream = stream;
+                console.log('📷 Face camera aktif di background! idx:', PHO_CAM_IDX);
+            } catch (err) {
+                console.error('❌ Gagal init face camera:', err.message);
+            }
         }
 
         function onScanSuccess(decodedText, decodedResult) {
@@ -757,33 +812,31 @@
 
         async function capturePhoto() {
             try {
-                // Get video element from QR scanner
-                const videoElement = document.querySelector('#reader video');
-                
-                if (!videoElement) {
-                    console.warn('Video element not found, skipping photo capture');
+                let videoElement;
+                // Dual mode: gunakan face camera jika tersedia
+                if (DUAL_CAMERA && fotoStream) {
+                    videoElement = document.getElementById('face-camera');
+                } else {
+                    videoElement = document.querySelector('#reader video');
+                }
+
+                if (!videoElement || !videoElement.videoWidth) {
+                    console.warn('Video element not ready, skipping photo capture');
                     return null;
                 }
-                
-                // Create canvas to capture frame
+
                 const canvas = document.createElement('canvas');
-                canvas.width = videoElement.videoWidth || 640;
+                canvas.width  = videoElement.videoWidth  || 640;
                 canvas.height = videoElement.videoHeight || 480;
-                
                 const ctx = canvas.getContext('2d');
-                
-                // Draw current video frame to canvas
                 ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                
-                // Convert to base64 (JPEG with 80% quality for smaller size)
+
                 const photoBase64 = canvas.toDataURL('image/jpeg', 0.8);
-                
-                console.log('📸 Photo captured successfully:', photoBase64.substring(0, 50) + '...');
-                
+                const src = (DUAL_CAMERA && fotoStream) ? 'face camera 📷' : 'QR camera 🎥';
+                console.log('📸 Photo from', src);
                 return photoBase64;
             } catch (error) {
                 console.error('Failed to capture photo:', error);
-                // Return null if photo capture fails - backend will handle it
                 return null;
             }
         }
