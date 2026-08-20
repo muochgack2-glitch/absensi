@@ -703,9 +703,7 @@
                     cfg || configDefault,
                     onScanSuccess,
                     onScanFailure
-                ).then(() => {
-                    initDualCamera();
-                }).catch(err => {
+                ).catch(err => {
                     console.error('Failed to start scanner:', err);
                     showError('Gagal membuka kamera. Pastikan browser memiliki akses ke kamera.');
                 });
