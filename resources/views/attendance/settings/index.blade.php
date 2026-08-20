@@ -949,8 +949,12 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                 const devices = await navigator.mediaDevices.enumerateDevices();
                 allCameras = devices.filter(d => d.kind === 'videoinput');
 
-                const savedQr    = parseInt(document.getElementById('qr_camera_index_val').value)    || 0;
-                const savedPhoto = parseInt(document.getElementById('photo_camera_index_val').value)  || 1;
+                const _qrRaw    = document.getElementById('qr_camera_index_val').value;
+                const _photoRaw = document.getElementById('photo_camera_index_val').value;
+                // Gunakan Number() lalu fallback hanya jika NaN (bukan 0!)
+                const savedQr    = isNaN(parseInt(_qrRaw))    ? 0 : parseInt(_qrRaw);
+                const savedPhoto = isNaN(parseInt(_photoRaw)) ? 1 : parseInt(_photoRaw);
+
 
                 ['qr_camera_select', 'photo_camera_select'].forEach((selectId, si) => {
                     const sel = document.getElementById(selectId);
