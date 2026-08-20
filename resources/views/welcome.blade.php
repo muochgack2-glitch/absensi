@@ -665,7 +665,8 @@
             const Html5Qrcode = window.Html5Qrcode;
             html5QrCode = new Html5Qrcode("reader");
 
-            const config = {
+            // Config default (single camera / facingMode)
+            const configDefault = {
                 fps: 30,
                 qrbox: 300,
                 aspectRatio: 1.0,
@@ -678,14 +679,27 @@
                 }
             };
 
-            const doStart = (constraint) => {
+            // Config dual camera: TANPA facingMode agar deviceId dipatuhi
+            const configDual = {
+                fps: 30,
+                qrbox: 300,
+                aspectRatio: 1.0,
+                disableFlip: false,
+                rememberLastUsedCamera: false, // jangan ingat kamera lama
+                videoConstraints: {
+                    width: { ideal: 1280, max: 1920 },
+                    height: { ideal: 720, max: 1080 }
+                }
+            };
+
+            const doStart = (constraint, cfg) => {
                 html5QrCode.start(
                     constraint,
-                    config,
+                    cfg || configDefault,
                     onScanSuccess,
                     onScanFailure
                 ).then(() => {
-                    initDualCamera(); // Init face camera setelah QR scanner jalan
+                    initDualCamera();
                 }).catch(err => {
                     console.error('Failed to start scanner:', err);
                     showError('Gagal membuka kamera. Pastikan browser memiliki akses ke kamera.');
@@ -693,7 +707,6 @@
             };
 
             if (DUAL_CAMERA) {
-                // Minta izin kamera dulu agar urutan device konsisten dengan settings page
                 navigator.mediaDevices.getUserMedia({ video: true })
                     .then(tempStream => {
                         tempStream.getTracks().forEach(t => t.stop());
@@ -701,18 +714,20 @@
                     })
                     .then(devices => {
                         const cameras = devices.filter(d => d.kind === 'videoinput');
+                        console.log('📷 Kamera tersedia:', cameras.map((c,i) => `[${i}] ${c.label}`));
                         if (cameras.length >= 1 && cameras[QR_CAM_IDX]) {
-                            // Html5Qrcode.start() butuh deviceId STRING, bukan object
-                            doStart(cameras[QR_CAM_IDX].deviceId);
+                            console.log('🎥 QR scanner pakai:', cameras[QR_CAM_IDX].label);
+                            doStart(cameras[QR_CAM_IDX].deviceId, configDual);
                         } else {
-                            doStart({ facingMode: 'environment' });
+                            doStart({ facingMode: 'environment' }, configDefault);
                         }
                     })
-                    .catch(() => doStart({ facingMode: 'environment' }));
+                    .catch(() => doStart({ facingMode: 'environment' }, configDefault));
             } else {
-                doStart({ facingMode: 'environment' });
+                doStart({ facingMode: 'environment' }, configDefault);
             }
         }
+
 
         /**
          * Inisialisasi kamera wajah di background (Dual Camera Mode)
