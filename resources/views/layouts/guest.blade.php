@@ -211,7 +211,7 @@
 
             {{ $slot }}
 
-            <a href="{{ route('scanner') ?? '/' }}" class="back-link">
+            <a href="{{ url('/') }}" class="back-link">
                 <i class="fas fa-arrow-left"></i> Kembali ke Scanner
             </a>
         </div>
