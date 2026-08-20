@@ -693,14 +693,21 @@
             };
 
             if (DUAL_CAMERA) {
-                navigator.mediaDevices.enumerateDevices().then(devices => {
-                    const cameras = devices.filter(d => d.kind === 'videoinput');
-                    if (cameras.length >= 1 && cameras[QR_CAM_IDX]) {
-                        doStart({ deviceId: { exact: cameras[QR_CAM_IDX].deviceId } });
-                    } else {
-                        doStart({ facingMode: 'environment' });
-                    }
-                }).catch(() => doStart({ facingMode: 'environment' }));
+                // Minta izin kamera dulu agar urutan device konsisten dengan settings page
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(tempStream => {
+                        tempStream.getTracks().forEach(t => t.stop()); // tutup stream sementara
+                        return navigator.mediaDevices.enumerateDevices();
+                    })
+                    .then(devices => {
+                        const cameras = devices.filter(d => d.kind === 'videoinput');
+                        if (cameras.length >= 1 && cameras[QR_CAM_IDX]) {
+                            doStart({ deviceId: { exact: cameras[QR_CAM_IDX].deviceId } });
+                        } else {
+                            doStart({ facingMode: 'environment' });
+                        }
+                    })
+                    .catch(() => doStart({ facingMode: 'environment' }));
             } else {
                 doStart({ facingMode: 'environment' });
             }
