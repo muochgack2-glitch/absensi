@@ -106,7 +106,7 @@
 
         /* Card Body - menggunakan table layout karena DomPDF tidak support flexbox */
         .card-body {
-            padding: 2mm 3mm;
+            padding: 1.5mm 2.5mm;
             width: 100%;
         }
 
@@ -122,8 +122,8 @@
 
         /* Photo Area */
         .card-photo {
-            width: 18mm;
-            height: 24mm;
+            width: 16mm;
+            height: 20mm;
             border: 1px solid #ddd;
             border-radius: 2mm;
             overflow: hidden;
@@ -132,16 +132,16 @@
         }
 
         .card-photo img {
-            width: 18mm;
-            height: 24mm;
+            width: 16mm;
+            height: 20mm;
             object-fit: cover;
         }
 
         .card-photo .initials {
-            font-size: 14pt;
+            font-size: 12pt;
             font-weight: bold;
             color: #6b7280;
-            line-height: 24mm;
+            line-height: 20mm;
             display: block;
         }
 
@@ -155,29 +155,29 @@
         .card-qr-wrap {
             width: 100%;
             text-align: center;
-            padding-top: 1.5mm;
+            padding-top: 1mm;
         }
 
         .card-barcode {
             width: 100%;
-            height: 13mm;
+            height: 10mm;
             border: 0.5px solid #e5e7eb;
-            border-radius: 1.5mm;
-            padding: 1mm 2mm;
+            border-radius: 1mm;
+            padding: 0.5mm 2mm;
             background: white;
         }
 
         .card-barcode img {
             width: 100%;
-            height: 11mm;
-            object-fit: fill; /* fill = barcode tidak di-crop, rasio bebas */
+            height: 9mm;
+            object-fit: fill;
         }
 
         .card-qr-label {
             text-align: center;
             font-size: 5pt;
             color: #9ca3af;
-            margin-top: 0.5mm;
+            margin-top: 0.3mm;
         }
 
         /* Footer */
@@ -424,7 +424,7 @@
                                     <table class="card-body-table">
                                         <tr>
                                             {{-- Kolom Foto --}}
-                                            <td style="width:18mm;">
+                                            <td style="width:16mm;">
                                                 <div class="card-photo">
                                                     @if($item['foto_base64'])
                                                         <img src="{{ $item['foto_base64'] }}" alt="Foto">
