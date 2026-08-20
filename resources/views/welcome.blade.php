@@ -664,6 +664,7 @@
             const EAN13_LENGTH    = 13;  // EAN-13 selalu 13 digit
 
             document.addEventListener('keydown', function(e) {
+                try {
                 // Abaikan jika focus di input/textarea/select
                 const tag = document.activeElement ? document.activeElement.tagName : '';
                 if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return;
@@ -720,6 +721,7 @@
                 // Timeout: jika 200ms tidak ada keystroke → reset
                 clearTimeout(hidTimer);
                 hidTimer = setTimeout(() => { hidBuffer = ''; }, 200);
+                } catch(err) { console.warn('HID listener error:', err); }
             });
 
             console.log('✅ HID scanner listener aktif (EP5000G / EAN-13 mode)');
