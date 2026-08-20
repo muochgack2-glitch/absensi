@@ -144,6 +144,10 @@
                         <div class="absolute -inset-3 bg-gradient-to-r from-primary-500 via-purple-500 to-pink-500 rounded-2xl opacity-30 blur-lg animate-pulse"></div>
                         <div class="relative bg-gray-900 rounded-xl p-3 shadow-xl">
                             <div id="reader" class="mx-auto rounded-lg overflow-hidden" style="width: 100%; max-width: 400px; min-height: 300px;"></div>
+                            {{-- Hidden input untuk capture HID scanner EP5000G --}}
+                            <input id="hid-capture" type="text" autocomplete="off"
+                                style="position:absolute;opacity:0;width:1px;height:1px;left:-9999px;top:0;"
+                                tabindex="0" aria-hidden="true">
                             
                             {{-- Scanning Animation Overlay --}}
                             <div id="scanOverlay" class="absolute inset-3 pointer-events-none rounded-lg overflow-hidden">
@@ -653,71 +657,82 @@
 
         /**
          * HID Scanner Listener — EP5000G dan barcode scanner USB.
+         * Menggunakan hidden input agar focus terjaga meski webcam aktif.
          * EAN-13 = 13 digit. Auto-process saat 13 digit terkumpul.
          */
         function initHIDScanner() {
-            // State disimpan dalam object (bukan closure var) agar tidak bisa undefined
+            var input = document.getElementById('hid-capture');
+            if (!input) { console.warn('hid-capture input not found'); return; }
+
             var hid = { buf: '', lastTime: 0, timer: null, LEN: 13 };
 
-            document.addEventListener('keydown', function(e) {
-                // Guard: pastikan state valid
-                if (!hid || typeof hid.buf !== 'string') hid = { buf: '', lastTime: 0, timer: null, LEN: 13 };
+            // Fokus ke input tersembunyi saat halaman dimuat
+            function refocus() {
+                // Jangan rebut focus dari modal/login/form
+                var active = (document.activeElement || {}).tagName || '';
+                if (active !== 'INPUT' && active !== 'TEXTAREA' && active !== 'SELECT' && active !== 'BUTTON') {
+                    input.focus();
+                }
+            }
+            setTimeout(refocus, 500);
 
-                // Abaikan jika focus di input/textarea/select
-                var tag = (document.activeElement || {}).tagName || '';
-                if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+            // Re-focus setiap kali user klik di area page (bukan form)
+            document.addEventListener('click', function(e) {
+                var tag = (e.target || {}).tagName || '';
+                if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT' && tag !== 'BUTTON' && tag !== 'A') {
+                    setTimeout(refocus, 100);
+                }
+            });
 
+            // Listen pada hidden input (bukan document)
+            input.addEventListener('keydown', function(e) {
                 var now = Date.now();
 
                 // Enter/CR = fallback terminator
                 if (e.key === 'Enter' || e.key === 'Return') {
+                    e.preventDefault();
                     if (hid.buf.length >= 12 && /^\d+$/.test(hid.buf)) {
                         console.log('🔫 HID scan (Enter):', hid.buf);
-                        e.preventDefault();
                         var tok = hid.buf;
-                        hid.buf = '';
+                        hid.buf = ''; input.value = '';
                         clearTimeout(hid.timer);
                         processScan(tok);
                     } else {
-                        hid.buf = '';
+                        hid.buf = ''; input.value = '';
                     }
                     return;
                 }
 
-                // Abaikan key multi-karakter (Shift, Ctrl, ArrowUp, dll)
                 if (!e.key || e.key.length !== 1) return;
 
-                // Jika jeda terlalu lama → reset (bukan scanner)
-                if (hid.lastTime && (now - hid.lastTime) > 100) hid.buf = '';
+                // Reset jika jeda terlalu lama
+                if (hid.lastTime && (now - hid.lastTime) > 100) { hid.buf = ''; input.value = ''; }
                 hid.lastTime = now;
 
-                // Hanya digit untuk EAN-13
+                // Hanya digit
                 if (/\d/.test(e.key)) {
                     hid.buf += e.key;
                 } else {
-                    hid.buf = '';
-                    return;
+                    hid.buf = ''; input.value = ''; return;
                 }
 
-                // Auto-process saat 13 digit terkumpul
+                // Auto-process 13 digit
                 if (hid.buf.length === hid.LEN) {
                     console.log('🔫 HID scan (auto-13):', hid.buf);
                     var token = hid.buf;
-                    hid.buf = '';
+                    hid.buf = ''; input.value = '';
                     clearTimeout(hid.timer);
                     processScan(token);
                     return;
                 }
 
-                // Terlalu panjang → reset
-                if (hid.buf.length > hid.LEN) hid.buf = '';
+                if (hid.buf.length > hid.LEN) { hid.buf = ''; input.value = ''; }
 
-                // Idle timeout
                 clearTimeout(hid.timer);
-                hid.timer = setTimeout(function() { hid.buf = ''; }, 250);
+                hid.timer = setTimeout(function() { hid.buf = ''; input.value = ''; }, 250);
             });
 
-            console.log('✅ HID scanner listener aktif (EP5000G / EAN-13 mode)');
+            console.log('✅ HID scanner listener aktif (hidden-input mode, EP5000G)');
         }
 
         function initScanner() {
