@@ -570,6 +570,70 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                 </div>
             </x-card>
 
+            {{-- Card: Pengaturan Kamera Scanner --}}
+            <x-card>
+                <div class="space-y-4">
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <span class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center text-white text-sm">
+                            <i class="fas fa-camera"></i>
+                        </span>
+                        Pengaturan Kamera Scanner
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        Dual camera: Webcam 1 scan QR kartu, Webcam 2 foto wajah siswa.
+                        Hanya aktif di PC dengan 2 USB webcam terhubung.
+                    </p>
+
+                    {{-- Toggle Dual Camera --}}
+                    <div class="flex items-center gap-3">
+                        <input type="hidden" name="settings[use_dual_camera]" value="0">
+                        <input
+                            type="checkbox"
+                            id="use_dual_camera"
+                            name="settings[use_dual_camera]"
+                            value="1"
+                            {{ ($settings['camera']['use_dual_camera'] ?? '0') == '1' ? 'checked' : '' }}
+                            class="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                        >
+                        <label for="use_dual_camera" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Aktifkan Dual Camera (QR + Foto Wajah)
+                        </label>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                <i class="fas fa-qrcode mr-1 text-indigo-500"></i> Kamera QR Scanner (index)
+                            </label>
+                            <input
+                                type="number"
+                                name="settings[qr_camera_index]"
+                                value="{{ old('settings.qr_camera_index', $settings['camera']['qr_camera_index'] ?? '0') }}"
+                                min="0" max="9"
+                                class="w-full text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                <i class="fas fa-portrait mr-1 text-indigo-500"></i> Kamera Foto Wajah (index)
+                            </label>
+                            <input
+                                type="number"
+                                name="settings[photo_camera_index]"
+                                value="{{ old('settings.photo_camera_index', $settings['camera']['photo_camera_index'] ?? '1') }}"
+                                min="0" max="9"
+                                class="w-full text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500"
+                            >
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Index 0 = kamera pertama yang terdeteksi, 1 = kedua, dst.
+                        Cabut-pasang USB webcam bisa mengubah urutan index.
+                    </p>
+                </div>
+            </x-card>
+
             {{-- Action Buttons --}}
             <div class="flex justify-end gap-3">
                 <a

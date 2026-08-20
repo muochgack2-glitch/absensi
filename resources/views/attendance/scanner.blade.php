@@ -131,13 +131,26 @@
                         <div class="absolute -inset-3 bg-gradient-to-r from-primary-500 via-purple-500 to-pink-500 rounded-2xl opacity-30 blur-lg animate-pulse"></div>
                         <div class="relative bg-gray-900 rounded-xl p-3 shadow-xl">
                             <div id="reader" class="mx-auto rounded-lg overflow-hidden" style="width: 100%; max-width: 400px; min-height: 300px;"></div>
-                            
+
                             {{-- Scanning Animation Overlay --}}
                             <div id="scanOverlay" class="absolute inset-3 pointer-events-none rounded-lg overflow-hidden">
                                 <div class="scan-line"></div>
                             </div>
                         </div>
                     </div>
+
+                    {{-- Dual Camera: Face Webcam (hidden by default, shown if setting aktif & 2 kamera tersedia) --}}
+                    <div id="face-camera-container" class="hidden mt-3 max-w-lg mx-auto">
+                        <div class="bg-gray-900 rounded-xl p-3 shadow-xl">
+                            <div class="flex items-center gap-2 mb-2">
+                                <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                <p class="text-white text-xs font-semibold">📷 Kamera Wajah (Dual Mode Aktif)</p>
+                            </div>
+                            <video id="face-camera" class="w-full rounded-lg bg-black" autoplay muted playsinline
+                                   style="max-height:240px; object-fit:cover;"></video>
+                        </div>
+                    </div>
+
 
                     {{-- Modern Instructions --}}
                     <div class="grid grid-cols-3 gap-3 max-w-2xl mx-auto">
@@ -438,6 +451,12 @@
         let lastScannedNis = null;
         let recentScans = [];
 
+        // --- Dual Camera Config (dari server setting) ---
+        const DUAL_CAMERA = {{ ($useDualCamera ?? '0') === '1' ? 'true' : 'false' }};
+        const QR_CAM_IDX  = {{ (int)($qrCameraIndex ?? 0) }};
+        const PHO_CAM_IDX = {{ (int)($photoCameraIndex ?? 1) }};
+        let fotoStream    = null; // MediaStream kamera wajah
+
         // Real-time clock
         function updateClock() {
             const now = new Date();
@@ -525,31 +544,95 @@
         function initScanner() {
             const Html5Qrcode = window.Html5Qrcode;
             html5QrCode = new Html5Qrcode("reader");
-            
+
             const config = {
-                fps: 30,                    // 30fps lebih stabil di semua browser
-                qrbox: { width: 280, height: 280 },  // Toleran jarak & gerakan
+                fps: 30,
+                qrbox: { width: 280, height: 280 },
                 aspectRatio: 1.0,
-                disableFlip: false,         // Enable flip untuk toleransi angle
+                disableFlip: false,
                 rememberLastUsedCamera: true,
                 videoConstraints: {
                     facingMode: "environment",
                     width: { ideal: 1280 },
                     height: { ideal: 720 },
-                    focusMode: "continuous", // Fokus terus-menerus, tidak hunting saat kartu muncul
+                    focusMode: "continuous",
                     advanced: [{ focusMode: "continuous" }]
                 }
             };
 
-            html5QrCode.start(
-                { facingMode: "environment" },
-                config,
-                onScanSuccess,
-                onScanFailure
-            ).catch(err => {
-                console.error('Failed to start scanner:', err);
-                showError('Gagal membuka kamera. Pastikan browser memiliki akses ke kamera.');
-            });
+            // Pilih kamera QR berdasarkan index jika dual mode aktif
+            const startConstraint = DUAL_CAMERA
+                ? { deviceId: undefined } // akan di-resolve setelah enumerate
+                : { facingMode: "environment" };
+
+            const doStart = (constraint) => {
+                html5QrCode.start(
+                    constraint,
+                    config,
+                    onScanSuccess,
+                    onScanFailure
+                ).then(() => {
+                    // Setelah QR kamera jalan, init kamera wajah
+                    initDualCamera();
+                }).catch(err => {
+                    console.error('Failed to start scanner:', err);
+                    showError('Gagal membuka kamera. Pastikan browser memiliki akses ke kamera.');
+                });
+            };
+
+            if (DUAL_CAMERA) {
+                // Enumerate dulu untuk dapat deviceId kamera QR
+                navigator.mediaDevices.enumerateDevices().then(devices => {
+                    const cameras = devices.filter(d => d.kind === 'videoinput');
+                    if (cameras.length >= 1 && cameras[QR_CAM_IDX]) {
+                        doStart({ deviceId: { exact: cameras[QR_CAM_IDX].deviceId } });
+                    } else {
+                        doStart({ facingMode: 'environment' });
+                    }
+                }).catch(() => doStart({ facingMode: 'environment' }));
+            } else {
+                doStart({ facingMode: 'environment' });
+            }
+        }
+
+        /**
+         * Inisialisasi kamera wajah (Dual Camera Mode)
+         * Dipanggil setelah QR scanner berhasil start.
+         */
+        async function initDualCamera() {
+            if (!DUAL_CAMERA) return;
+
+            const isMobile = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
+            if (isMobile) {
+                console.warn('⚠️ Dual camera: mobile device, fallback ke single camera');
+                return;
+            }
+
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const cameras = devices.filter(d => d.kind === 'videoinput');
+
+                if (cameras.length < 2) {
+                    console.warn('⚠️ Dual camera: hanya', cameras.length, 'kamera tersedia, butuh minimal 2');
+                    return;
+                }
+
+                const fotoDevice = cameras[PHO_CAM_IDX] || cameras[cameras.length - 1];
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { deviceId: { exact: fotoDevice.deviceId }, width: { ideal: 640 }, height: { ideal: 480 } }
+                });
+
+                const faceVideo = document.getElementById('face-camera');
+                faceVideo.srcObject = stream;
+                fotoStream = stream;
+
+                document.getElementById('face-camera-container').classList.remove('hidden');
+                console.log('📷 Dual camera aktif! QR idx:', QR_CAM_IDX, '| Foto idx:', PHO_CAM_IDX);
+
+            } catch (err) {
+                console.error('❌ Gagal init kamera wajah:', err.message);
+                // Tidak fatal — sistem tetap jalan dengan single camera
+            }
         }
 
         function onScanSuccess(decodedText, decodedResult) {
@@ -681,33 +764,34 @@
 
         async function capturePhoto() {
             try {
-                // Get video element from QR scanner
-                const videoElement = document.querySelector('#reader video');
-                
-                if (!videoElement) {
-                    console.warn('Video element not found, skipping photo capture');
+                let videoElement;
+
+                // Dual mode: gunakan kamera wajah jika tersedia
+                if (DUAL_CAMERA && fotoStream) {
+                    videoElement = document.getElementById('face-camera');
+                } else {
+                    videoElement = document.querySelector('#reader video');
+                }
+
+                if (!videoElement || !videoElement.videoWidth) {
+                    console.warn('Video element not ready, skipping photo capture');
                     return null;
                 }
-                
-                // Create canvas to capture frame
+
                 const canvas = document.createElement('canvas');
-                canvas.width = videoElement.videoWidth || 640;
+                canvas.width  = videoElement.videoWidth  || 640;
                 canvas.height = videoElement.videoHeight || 480;
-                
+
                 const ctx = canvas.getContext('2d');
-                
-                // Draw current video frame to canvas
                 ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                
-                // Convert to base64 (JPEG with 80% quality for smaller size)
+
                 const photoBase64 = canvas.toDataURL('image/jpeg', 0.8);
-                
-                console.log('📸 Photo captured successfully:', photoBase64.substring(0, 50) + '...');
-                
+                const source = (DUAL_CAMERA && fotoStream) ? 'kamera wajah 📷' : 'kamera QR 🎥';
+                console.log('📸 Photo captured from', source);
+
                 return photoBase64;
             } catch (error) {
                 console.error('Failed to capture photo:', error);
-                // Return null if photo capture fails - backend will handle it
                 return null;
             }
         }

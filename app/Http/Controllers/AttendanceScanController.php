@@ -84,6 +84,10 @@ class AttendanceScanController extends Controller
      */
     public function showScanner()
     {
-        return view('attendance.scanner');
+        $useDualCamera    = \App\Models\AttendanceSetting::get('use_dual_camera', '0');
+        $qrCameraIndex    = \App\Models\AttendanceSetting::get('qr_camera_index', '0');
+        $photoCameraIndex = \App\Models\AttendanceSetting::get('photo_camera_index', '1');
+
+        return view('attendance.scanner', compact('useDualCamera', 'qrCameraIndex', 'photoCameraIndex'));
     }
 }

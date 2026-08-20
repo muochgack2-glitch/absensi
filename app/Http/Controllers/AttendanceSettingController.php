@@ -42,6 +42,9 @@ class AttendanceSettingController extends Controller
             'settings.late_warning_enabled'          => 'nullable|in:0,1',
             'settings.late_warning_threshold_minutes' => 'nullable|integer|min:1|max:120',
             'settings.late_warning_min_count'        => 'nullable|integer|min:1|max:20',
+            'settings.use_dual_camera'               => 'nullable|in:0,1',
+            'settings.qr_camera_index'               => 'nullable|integer|min:0|max:9',
+            'settings.photo_camera_index'            => 'nullable|integer|min:0|max:9',
         ];
 
         $messages = [
@@ -87,9 +90,17 @@ class AttendanceSettingController extends Controller
             AttendanceSetting::set('late_notify_enabled', 'false');
         }
 
-        // Handle auto_absent_notify checkbox (jika unchecked, tidak ada di request)
+        // Handle auto_absent_notify checkbox
         if (!isset($request->settings['auto_absent_notify'])) {
             AttendanceSetting::set('auto_absent_notify', '0');
+        }
+
+        // Handle use_dual_camera checkbox
+        AttendanceSetting::set('use_dual_camera', isset($request->settings['use_dual_camera']) ? '1' : '0');
+        // Simpan index kamera (langsung dari input number)
+        if ($request->has('settings')) {
+            AttendanceSetting::set('qr_camera_index',    $request->input('settings.qr_camera_index',    '0'));
+            AttendanceSetting::set('photo_camera_index', $request->input('settings.photo_camera_index', '1'));
         }
 
         // Handle absent notify days (dari checkbox terpisah, sudah dikumpulkan JS)
