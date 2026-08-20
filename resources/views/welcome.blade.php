@@ -578,6 +578,7 @@
         const PHO_CAM_IDX = {{ (int)($photoCameraIndex ?? 1) }};
         let fotoStream    = null; // MediaStream kamera wajah
         let faceReadyAt  = null; // Timestamp saat face camera mulai streaming frame
+        let camerasCache = null; // Cache cameras list agar tidak double-call getCameras()
 
         // Real-time clock
         function updateClock() {
@@ -707,12 +708,12 @@
             };
 
             if (DUAL_CAMERA) {
-                // Pakai API resmi Html5Qrcode untuk list kamera — handle permission & urutan sendiri
                 Html5Qrcode.getCameras().then(cameras => {
+                    camerasCache = cameras; // simpan untuk initDualCamera
                     console.log('📷 Kamera tersedia:', cameras.map((c,i) => `[${i}] ${c.label}`));
                     if (cameras.length >= 1 && cameras[QR_CAM_IDX]) {
                         console.log('🎥 QR scanner pakai:', cameras[QR_CAM_IDX].label);
-                        doStart(cameras[QR_CAM_IDX].id, configDual); // .id bukan .deviceId
+                        doStart(cameras[QR_CAM_IDX].id, configDual);
                     } else {
                         doStart({ facingMode: 'environment' }, configDefault);
                     }
@@ -732,10 +733,11 @@
             if (isMobile) return;
 
             try {
-                // Pakai getCameras() — urutan konsisten dengan QR scanner di atas
-                const cameras = await Html5Qrcode.getCameras();
-                if (cameras.length < 2) {
-                    console.warn('⚠️ Dual camera: hanya', cameras.length, 'kamera tersedia');
+                // Pakai cache dari initScanner — JANGAN panggil getCameras() lagi
+                // karena QR camera sudah aktif dan bisa conflict
+                const cameras = camerasCache;
+                if (!cameras || cameras.length < 2) {
+                    console.warn('⚠️ Dual camera: kamera tidak cukup atau cache kosong');
                     return;
                 }
                 const fotoDevice = cameras[PHO_CAM_IDX] || cameras[cameras.length - 1];
@@ -746,13 +748,12 @@
                 const faceVideo = document.getElementById('face-camera');
                 faceVideo.srcObject = stream;
                 fotoStream = stream;
-                // Catat waktu saat video mulai play frame sungguhan
                 faceVideo.onplaying = () => {
                     faceReadyAt = Date.now();
                     console.log('✅ Face camera streaming aktif!');
                 };
             } catch (err) {
-                console.error('❌ Gagal init face camera:', err.message);
+                console.error('❌ Gagal init face camera:', err.name, err.message);
             }
         }
 
