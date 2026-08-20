@@ -580,7 +580,8 @@
         const PHO_CAM_DEVICEID = "{{ $photoCameraDeviceId ?? '' }}";
         let fotoStream    = null;
         let faceReadyAt  = null;
-        let camerasCache = null;
+        let camerasCache  = null;
+        let qrCameraId    = null; // deviceId kamera QR yang aktif
 
         // Real-time clock
         function updateClock() {
@@ -717,6 +718,7 @@
                     const qrCamera = (QR_CAM_DEVICEID && cameras.find(c => c.id === QR_CAM_DEVICEID))
                                      || cameras[QR_CAM_IDX];
                     if (qrCamera) {
+                        qrCameraId = qrCamera.id; // simpan untuk initDualCamera
                         console.log('🎥 QR scanner pakai:', qrCamera.label);
                         doStart(qrCamera.id, configDual);
                     } else {
@@ -745,11 +747,17 @@
                     console.warn('⚠️ Dual camera: kamera tidak cukup atau cache kosong');
                     return;
                 }
-                // Cari kamera wajah by deviceId dulu, fallback ke index
+                // Cari kamera wajah by deviceId dulu, fallback ke:
+                // 1. index tersimpan, 2. kamera apapun yang BUKAN kamera QR
                 const fotoDevice = (PHO_CAM_DEVICEID && cameras.find(c => c.id === PHO_CAM_DEVICEID))
                                    || cameras[PHO_CAM_IDX]
+                                   || cameras.find(c => c.id !== qrCameraId)
                                    || cameras[cameras.length - 1];
-                console.log('📷 Face camera pakai:', fotoDevice.label, '| id:', fotoDevice.id.substring(0, 20) + '...');
+                if (!fotoDevice || fotoDevice.id === qrCameraId) {
+                    console.warn('⚠️ Tidak ada kamera wajah selain kamera QR');
+                    return;
+                }
+                console.log('📷 Face camera pakai:', fotoDevice.label);
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: { deviceId: { exact: fotoDevice.id } }
                 });
