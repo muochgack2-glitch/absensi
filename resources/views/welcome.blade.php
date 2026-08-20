@@ -626,9 +626,8 @@
             const currentMinute = now.getMinutes();
             const currentTime = currentHour * 60 + currentMinute; // Convert to minutes
             
-            // Check-out start time (default: 15:00 = 900 minutes)
-            // You can adjust this threshold based on school schedule
-            const checkOutStartTime = 15 * 60; // 15:00 in minutes
+            // Check-out start time: 12:00 siang = 720 minutes
+            const checkOutStartTime = 12 * 60; // 12:00 in minutes
             
             // Determine initial action based on time
             const initialAction = currentTime >= checkOutStartTime ? 'check_out' : 'check_in';
