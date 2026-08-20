@@ -740,23 +740,36 @@
             if (isMobile) return;
 
             try {
-                // Pakai cache dari initScanner — JANGAN panggil getCameras() lagi
-                // karena QR camera sudah aktif dan bisa conflict
                 const cameras = camerasCache;
                 if (!cameras || cameras.length < 2) {
-                    console.warn('⚠️ Dual camera: kamera tidak cukup atau cache kosong');
+                    console.warn('⚠️ Dual camera: kamera tidak cukup');
                     return;
                 }
-                // Cari kamera wajah by deviceId dulu, fallback ke:
-                // 1. index tersimpan, 2. kamera apapun yang BUKAN kamera QR
-                const fotoDevice = (PHO_CAM_DEVICEID && cameras.find(c => c.id === PHO_CAM_DEVICEID))
-                                   || cameras[PHO_CAM_IDX]
-                                   || cameras.find(c => c.id !== qrCameraId)
-                                   || cameras[cameras.length - 1];
-                if (!fotoDevice || fotoDevice.id === qrCameraId) {
-                    console.warn('⚠️ Tidak ada kamera wajah selain kamera QR');
+
+                // Pilih kamera wajah step-by-step:
+                let fotoDevice = null;
+
+                // Step 1: match by deviceId tersimpan (paling akurat)
+                if (PHO_CAM_DEVICEID) {
+                    fotoDevice = cameras.find(c => c.id === PHO_CAM_DEVICEID) || null;
+                }
+
+                // Step 2: index tersimpan — tapi HANYA jika bukan kamera QR
+                if (!fotoDevice) {
+                    const byIdx = cameras[PHO_CAM_IDX];
+                    if (byIdx && byIdx.id !== qrCameraId) fotoDevice = byIdx;
+                }
+
+                // Step 3: kamera pertama yang BUKAN kamera QR
+                if (!fotoDevice) {
+                    fotoDevice = cameras.find(c => c.id !== qrCameraId) || null;
+                }
+
+                if (!fotoDevice) {
+                    console.warn('⚠️ Tidak ada kamera wajah yang tersedia selain kamera QR');
                     return;
                 }
+
                 console.log('📷 Face camera pakai:', fotoDevice.label);
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: { deviceId: { exact: fotoDevice.id } }
@@ -766,7 +779,7 @@
                 fotoStream = stream;
                 faceVideo.onplaying = () => {
                     faceReadyAt = Date.now();
-                    console.log('✅ Face camera streaming aktif!');
+                    console.log('✅ Face camera streaming aktif! Label:', fotoDevice.label);
                 };
             } catch (err) {
                 console.error('❌ Gagal init face camera:', err.name, err.message);
