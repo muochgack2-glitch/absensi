@@ -714,20 +714,24 @@
                 Html5Qrcode.getCameras().then(cameras => {
                     camerasCache = cameras;
                     console.log('📷 Kamera tersedia:', cameras.map((c,i) => `[${i}] ${c.label}`));
-                    // Cari kamera by deviceId dulu (lebih reliable), fallback ke index
+                    // Cari kamera QR by deviceId dulu, fallback ke index
                     const qrCamera = (QR_CAM_DEVICEID && cameras.find(c => c.id === QR_CAM_DEVICEID))
                                      || cameras[QR_CAM_IDX];
                     if (qrCamera) {
-                        qrCameraId = qrCamera.id; // simpan untuk initDualCamera
+                        qrCameraId = qrCamera.id;
                         console.log('🎥 QR scanner pakai:', qrCamera.label);
                         doStart(qrCamera.id, configDual);
                     } else {
                         doStart({ facingMode: 'environment' }, configDefault);
                     }
+                    // Init face camera via setTimeout — JANGAN pakai .then() dari start()
+                    // karena html5QrCode.start() tidak selalu resolve promise-nya
+                    setTimeout(() => initDualCamera(), 800);
                 }).catch(() => doStart({ facingMode: 'environment' }, configDefault));
             } else {
                 doStart({ facingMode: 'environment' }, configDefault);
             }
+
         }
 
 
