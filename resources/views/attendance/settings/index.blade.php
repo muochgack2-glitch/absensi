@@ -657,14 +657,18 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                                 <i class="fas fa-video mr-1"></i> Preview:
                                 <span id="camera-preview-label" class="font-normal"></span>
                             </p>
-                            <div class="relative bg-black rounded-lg overflow-hidden" style="max-height:200px;">
+                            <div class="relative bg-black rounded-lg overflow-hidden">
                                 <video id="camera-preview-video" autoplay muted playsinline
-                                       class="w-full rounded-lg" style="max-height:200px; object-fit:cover;"></video>
+                                       class="w-full rounded-lg" style="object-fit:contain; max-height:280px;"></video>
                                 <button type="button" onclick="stopPreview()"
                                     class="absolute top-2 right-2 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs flex items-center justify-center">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
+                            <p class="text-xs text-indigo-600 dark:text-indigo-400 mt-1 text-center">
+                                <i class="fas fa-microchip mr-1"></i>
+                                Resolusi: <span id="camera-preview-specs" class="font-semibold">mendeteksi...</span>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -981,13 +985,23 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
             stopPreview();
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { deviceId: { exact: deviceId }, width: { ideal: 640 }, height: { ideal: 360 } }
+                    video: { deviceId: { exact: deviceId } } // tanpa paksa resolusi — pakai native
                 });
                 previewStream = stream;
                 const video = document.getElementById('camera-preview-video');
                 video.srcObject = stream;
                 document.getElementById('camera-preview-label').textContent = label;
                 document.getElementById('camera-preview-wrap').classList.remove('hidden');
+
+                // Tampilkan spesifikasi resolusi setelah video siap
+                video.onloadedmetadata = () => {
+                    const track = stream.getVideoTracks()[0];
+                    const settings = track.getSettings();
+                    const specsEl = document.getElementById('camera-preview-specs');
+                    if (specsEl) {
+                        specsEl.textContent = `${settings.width || video.videoWidth} × ${settings.height || video.videoHeight} px @ ${(settings.frameRate || 0).toFixed(0)} fps`;
+                    }
+                };
             } catch (err) {
                 alert('Gagal membuka kamera: ' + err.message);
             }
