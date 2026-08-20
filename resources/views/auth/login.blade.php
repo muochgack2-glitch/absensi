@@ -1,60 +1,92 @@
 <x-guest-layout>
-    {{-- School Branding --}}
-    <div class="text-center mb-6">
-        @if(isset($appLogoUrl) && $appLogoUrl)
-            <img src="{{ $appLogoUrl }}" alt="Logo" class="w-16 h-16 mx-auto rounded-xl object-contain mb-3">
-        @else
-            <div class="w-16 h-16 mx-auto bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mb-3">
-                <i class="fas fa-qrcode text-white text-2xl"></i>
-            </div>
-        @endif
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ $appSchoolName ?? 'Absensi QR' }}</h2>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Sistem Absensi Digital</p>
-    </div>
 
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    {{-- Session Status --}}
+    @if (session('status'))
+        <div class="alert-status">
+            <i class="fas fa-circle-check"></i>
+            {{ session('status') }}
+        </div>
+    @endif
 
-    <form method="POST" action="{{ route('login') }}">
+    <form method="POST" action="{{ route('login') }}" id="loginForm">
         @csrf
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        {{-- Email --}}
+        <div class="form-group">
+            <label for="email" class="form-label">Alamat Email</label>
+            <div class="input-wrap">
+                <i class="fas fa-envelope input-icon"></i>
+                <input id="email" type="email" name="email"
+                       class="form-input"
+                       value="{{ old('email') }}"
+                       placeholder="admin@sekolah.sch.id"
+                       required autofocus autocomplete="username">
+            </div>
+            @error('email')
+                <p class="error-msg"><i class="fas fa-circle-exclamation"></i> {{ $message }}</p>
+            @enderror
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        {{-- Password --}}
+        <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <div class="input-wrap">
+                <i class="fas fa-lock input-icon"></i>
+                <input id="password" type="password" name="password"
+                       class="form-input"
+                       placeholder="••••••••"
+                       required autocomplete="current-password">
+                <span class="toggle-pw" onclick="togglePassword()" id="toggleIcon">
+                    <i class="fas fa-eye" id="eyeIcon"></i>
+                </span>
+            </div>
+            @error('password')
+                <p class="error-msg"><i class="fas fa-circle-exclamation"></i> {{ $message }}</p>
+            @enderror
         </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
-                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
+        {{-- Remember + Forgot --}}
+        <div class="row-options">
+            <label class="remember-label">
+                <input id="remember_me" type="checkbox" class="remember-check" name="remember">
+                Ingat saya
             </label>
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
             @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
+                <a href="{{ route('password.request') }}" class="forgot-link">Lupa password?</a>
             @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
         </div>
+
+        {{-- Submit --}}
+        <button type="submit" class="btn-login" id="btnLogin">
+            <span class="btn-text">
+                <i class="fas fa-right-to-bracket" id="btnIcon"></i>
+                <span id="btnLabel">Masuk ke Dashboard</span>
+            </span>
+        </button>
     </form>
+
+    <script>
+        function togglePassword() {
+            const input = document.getElementById('password');
+            const icon  = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', function() {
+            const btn   = document.getElementById('btnLogin');
+            const icon  = document.getElementById('btnIcon');
+            const label = document.getElementById('btnLabel');
+            btn.disabled = true;
+            btn.style.opacity = '.8';
+            icon.className  = 'fas fa-circle-notch fa-spin';
+            label.textContent = 'Memproses...';
+        });
+    </script>
+
 </x-guest-layout>
