@@ -96,13 +96,8 @@ class AttendanceSettingController extends Controller
         }
 
         // Handle use_dual_camera checkbox
-        // Pakai nilai langsung (bukan isset) karena ada hidden input yg selalu terkirim
+        // Pakai nilai langsung (bukan isset) karena tanpa hidden, '0' jika unchecked
         $dualCam = $request->input('settings.use_dual_camera', '0');
-        \Illuminate\Support\Facades\Log::info('[CameraSettings] Received', [
-            'use_dual_camera'    => $dualCam,
-            'qr_camera_index'    => $request->input('settings.qr_camera_index', 'NOT_SENT'),
-            'photo_camera_index' => $request->input('settings.photo_camera_index', 'NOT_SENT'),
-        ]);
         AttendanceSetting::set('use_dual_camera', $dualCam === '1' ? '1' : '0', 'camera');
 
         // Simpan index kamera dari hidden input yang di-update JS
@@ -124,10 +119,10 @@ class AttendanceSettingController extends Controller
             AttendanceSetting::set('school_logo', $logoPath);
         }
 
-        // Handle school address
-        if ($request->has('school_address')) {
-            AttendanceSetting::set('school_address', $request->input('school_address', ''));
-        }
+        // Handle school address — default '' agar tidak NULL di DB
+        $schoolAddress = $request->input('school_address', '');
+        AttendanceSetting::set('school_address', $schoolAddress ?? '');
+
 
         // Clear settings cache
         AttendanceSetting::clearCache();
