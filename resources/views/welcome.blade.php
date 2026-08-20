@@ -724,17 +724,26 @@
                         doStart(qrCamera.id, configDual);
                         setTimeout(() => initDualCamera(), 800);
                     } else {
-                        // HP/PC baru/belum setting: single camera aman
-                        console.log('📷 DeviceId tidak match → facingMode:environment');
-                        doStart({ facingMode: 'environment' }, configDefault);
+                        // HP/PC baru: pakai camera ID langsung (lebih aman dari facingMode)
+                        // Android: cameras biasanya [back, front] → pakai cameras[0] = belakang
+                        const fallbackCam = cameras[0] || null;
+                        if (fallbackCam) {
+                            console.log('📷 Fallback → pakai kamera:', fallbackCam.label);
+                            doStart(fallbackCam.id, configDefault);
+                        } else {
+                            console.log('📷 Tidak ada kamera → facingMode:environment');
+                            doStart({ facingMode: 'environment' }, configDefault);
+                        }
                     }
                 }).catch(() => {
+                    // getCameras gagal (permission denied?) → coba facingMode langsung
                     console.log('📷 getCameras gagal → facingMode:environment');
                     doStart({ facingMode: 'environment' }, configDefault);
                 });
             } else {
                 doStart({ facingMode: 'environment' }, configDefault);
             }
+
 
 
         }
