@@ -65,11 +65,10 @@ class QRCodeService
         // Generate signed QR token — NOT plain NIS
         $qrContent = $this->buildQRToken($nis);
         
-        // Error correction L = QR paling simpel → scan paling cepat
-        // (kartu laminating tidak butuh EC tinggi)
+        // Error correction M = balance antara kecepatan & kompatibilitas hardware scanner
         $qrImage = QrCode::format('svg')
             ->size(300)
-            ->errorCorrection('L')
+            ->errorCorrection('M')
             ->generate($qrContent);
         
         // Define storage path (relative to storage/app/public)
