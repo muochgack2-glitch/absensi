@@ -65,14 +65,17 @@ class QRCodeService
         // Generate signed QR token — NOT plain NIS
         $qrContent = $this->buildQRToken($nis);
         
-        // Error correction M = balance antara kecepatan & kompatibilitas hardware scanner
-        $qrImage = QrCode::format('svg')
-            ->size(300)
+        // PNG format lebih tajam dari SVG untuk hardware scanner
+        // Margin 2 = quiet zone (wajib untuk hardware scanner bisa baca)
+        // Size 400 = lebih besar, lebih mudah dibaca dari jarak normal
+        $qrImage = QrCode::format('png')
+            ->size(400)
+            ->margin(2)
             ->errorCorrection('M')
             ->generate($qrContent);
         
-        // Define storage path (relative to storage/app/public)
-        $path = "qrcodes/{$nis}.svg";
+        // Simpan sebagai PNG
+        $path = "qrcodes/{$nis}.png";
         
         // Save to public storage disk so it's web-accessible
         Storage::disk('public')->put($path, $qrImage);
@@ -88,10 +91,12 @@ class QRCodeService
      */
     public function regenerateQRCode(string $nis): string
     {
-        // Delete old QR Code if exists
-        $oldPath = "qrcodes/{$nis}.svg";
-        if (Storage::disk('public')->exists($oldPath)) {
-            Storage::disk('public')->delete($oldPath);
+        // Hapus file lama (SVG dan PNG)
+        foreach (['svg', 'png'] as $ext) {
+            $oldPath = "qrcodes/{$nis}.{$ext}";
+            if (Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
+            }
         }
         
         // Generate new QR Code
@@ -106,13 +111,14 @@ class QRCodeService
      */
     public function getQRCodeUrl(string $nis): ?string
     {
-        $path = "qrcodes/{$nis}.svg";
-        
-        if (!Storage::disk('public')->exists($path)) {
-            return null;
+        // Cek PNG dulu, fallback ke SVG
+        foreach (['png', 'svg'] as $ext) {
+            $path = "qrcodes/{$nis}.{$ext}";
+            if (Storage::disk('public')->exists($path)) {
+                return Storage::disk('public')->url($path);
+            }
         }
-        
-        return Storage::disk('public')->url($path);
+        return null;
     }
 
     /**
@@ -175,8 +181,12 @@ class QRCodeService
      */
     public function qrCodeExists(string $nis): bool
     {
-        $path = "qrcodes/{$nis}.svg";
-        return Storage::disk('public')->exists($path);
+        foreach (['png', 'svg'] as $ext) {
+            if (Storage::disk('public')->exists("qrcodes/{$nis}.{$ext}")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
