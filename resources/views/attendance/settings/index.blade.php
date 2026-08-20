@@ -586,7 +586,6 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
 
                     {{-- Toggle Dual Camera --}}
                     <div class="flex items-center gap-3">
-                        <input type="hidden" name="settings[use_dual_camera]" value="0">
                         <input
                             type="checkbox"
                             id="use_dual_camera"
