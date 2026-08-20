@@ -153,10 +153,10 @@
                     </div>
 
                     {{-- Dual Camera: Face Webcam (HIDDEN — capture background saat QR scan) --}}
-                    {{-- PENTING: JANGAN display:none — browser stop render frames, canvas jadi hitam --}}
-                    {{-- Pakai position:fixed offscreen + opacity:0 agar frame tetap di-render --}}
+                    {{-- JANGAN display:none — browser stop render frames. Pakai offscreen agar frame tetap aktif --}}
+                    {{-- Ukuran 320x240 agar browser tidak throttle render pada elemen terlalu kecil --}}
                     <video id="face-camera" autoplay muted playsinline
-                           style="position:fixed; top:-9999px; left:-9999px; width:1px; height:1px; opacity:0; pointer-events:none; z-index:-1;"
+                           style="position:fixed; top:-9999px; left:-9999px; width:320px; height:240px; opacity:0; pointer-events:none; z-index:-1;"
                            aria-hidden="true"></video>
 
 
@@ -836,19 +836,15 @@
         async function capturePhoto() {
             try {
                 let videoElement;
-                // Dual mode: gunakan face camera jika tersedia dan sudah warm
                 if (DUAL_CAMERA && fotoStream) {
-                    // Tunggu sampai face camera benar-benar streaming (onplaying fired)
                     if (!faceReadyAt) {
-                        // Kamera belum play sama sekali, tunggu max 3 detik
                         await new Promise(resolve => {
                             const fv = document.getElementById('face-camera');
                             const onPlay = () => { faceReadyAt = Date.now(); resolve(); };
                             fv.addEventListener('playing', onPlay, { once: true });
-                            setTimeout(resolve, 3000); // max wait 3s
+                            setTimeout(resolve, 3000);
                         });
                     }
-                    // Pastikan minimal 1.5 detik sejak kamera aktif (warm-up)
                     if (faceReadyAt) {
                         const elapsed = Date.now() - faceReadyAt;
                         if (elapsed < 1500) {
@@ -860,8 +856,20 @@
                     videoElement = document.querySelector('#reader video');
                 }
 
+                // Debug info
+                console.log('📸 capturePhoto debug:', {
+                    dual: DUAL_CAMERA,
+                    hasStream: !!fotoStream,
+                    faceReadyAt,
+                    elem: videoElement?.id,
+                    vw: videoElement?.videoWidth,
+                    vh: videoElement?.videoHeight,
+                    readyState: videoElement?.readyState,
+                    paused: videoElement?.paused
+                });
+
                 if (!videoElement || !videoElement.videoWidth) {
-                    console.warn('Video element not ready, skipping photo capture');
+                    console.warn('Video element not ready');
                     return null;
                 }
 
@@ -871,16 +879,18 @@
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
+                // Cek apakah frame hitam
+                const imgData = ctx.getImageData(0, 0, Math.min(10, canvas.width), Math.min(10, canvas.height));
+                const isBlack = Array.from(imgData.data).every((v, i) => i % 4 === 3 || v < 10);
+                console.log('📸 Frame hitam?', isBlack);
+
                 const photoBase64 = canvas.toDataURL('image/jpeg', 0.8);
-                const src = (DUAL_CAMERA && fotoStream) ? 'face camera 📷' : 'QR camera 🎥';
-                console.log('📸 Photo from', src);
                 return photoBase64;
             } catch (error) {
-                console.error('Failed to capture photo:', error);
+                console.error('capturePhoto error:', error);
                 return null;
             }
         }
-
 
         function showSuccess(result) {
             // Determine action type
