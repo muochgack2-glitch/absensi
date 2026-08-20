@@ -707,22 +707,16 @@
             };
 
             if (DUAL_CAMERA) {
-                navigator.mediaDevices.getUserMedia({ video: true })
-                    .then(tempStream => {
-                        tempStream.getTracks().forEach(t => t.stop());
-                        return navigator.mediaDevices.enumerateDevices();
-                    })
-                    .then(devices => {
-                        const cameras = devices.filter(d => d.kind === 'videoinput');
-                        console.log('📷 Kamera tersedia:', cameras.map((c,i) => `[${i}] ${c.label}`));
-                        if (cameras.length >= 1 && cameras[QR_CAM_IDX]) {
-                            console.log('🎥 QR scanner pakai:', cameras[QR_CAM_IDX].label);
-                            doStart(cameras[QR_CAM_IDX].deviceId, configDual);
-                        } else {
-                            doStart({ facingMode: 'environment' }, configDefault);
-                        }
-                    })
-                    .catch(() => doStart({ facingMode: 'environment' }, configDefault));
+                // Pakai API resmi Html5Qrcode untuk list kamera — handle permission & urutan sendiri
+                Html5Qrcode.getCameras().then(cameras => {
+                    console.log('📷 Kamera tersedia:', cameras.map((c,i) => `[${i}] ${c.label}`));
+                    if (cameras.length >= 1 && cameras[QR_CAM_IDX]) {
+                        console.log('🎥 QR scanner pakai:', cameras[QR_CAM_IDX].label);
+                        doStart(cameras[QR_CAM_IDX].id, configDual); // .id bukan .deviceId
+                    } else {
+                        doStart({ facingMode: 'environment' }, configDefault);
+                    }
+                }).catch(() => doStart({ facingMode: 'environment' }, configDefault));
             } else {
                 doStart({ facingMode: 'environment' }, configDefault);
             }
@@ -738,19 +732,20 @@
             if (isMobile) return;
 
             try {
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const cameras = devices.filter(d => d.kind === 'videoinput');
+                // Pakai getCameras() — urutan konsisten dengan QR scanner di atas
+                const cameras = await Html5Qrcode.getCameras();
                 if (cameras.length < 2) {
                     console.warn('⚠️ Dual camera: hanya', cameras.length, 'kamera tersedia');
                     return;
                 }
                 const fotoDevice = cameras[PHO_CAM_IDX] || cameras[cameras.length - 1];
+                console.log('📷 Face camera pakai:', fotoDevice.label, 'idx:', PHO_CAM_IDX);
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { deviceId: { exact: fotoDevice.deviceId } }
+                    video: { deviceId: { exact: fotoDevice.id } } // .id bukan .deviceId
                 });
                 document.getElementById('face-camera').srcObject = stream;
                 fotoStream = stream;
-                console.log('📷 Face camera aktif di background! idx:', PHO_CAM_IDX);
+                console.log('✅ Face camera aktif di background!');
             } catch (err) {
                 console.error('❌ Gagal init face camera:', err.message);
             }
