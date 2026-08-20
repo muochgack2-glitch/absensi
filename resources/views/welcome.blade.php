@@ -656,27 +656,26 @@
         });
 
         /**
-         * HID Scanner Listener — EP5000G dan barcode scanner USB.
-         * Menggunakan hidden input agar focus terjaga meski webcam aktif.
-         * EAN-13 = 13 digit. Auto-process saat 13 digit terkumpul.
+         * HID Scanner Listener — EP5000G (EAN-13).
+         * Dual listener: hidden input (primary) + document (fallback).
+         * Auto-refocus setiap 1 detik agar input selalu siap.
          */
         function initHIDScanner() {
             var input = document.getElementById('hid-capture');
-            if (!input) { console.warn('hid-capture input not found'); return; }
+            var hid = { buf: '', lastTime: 0, timer: null, LEN: 13, processing: false };
 
-            var hid = { buf: '', lastTime: 0, timer: null, LEN: 13 };
-
-            // Fokus ke input tersembunyi saat halaman dimuat
+            // ---- REFOCUS ----
             function refocus() {
-                // Jangan rebut focus dari modal/login/form
-                var active = (document.activeElement || {}).tagName || '';
-                if (active !== 'INPUT' && active !== 'TEXTAREA' && active !== 'SELECT' && active !== 'BUTTON') {
-                    input.focus();
+                if (!document.hidden) {
+                    var active = (document.activeElement || {}).tagName || '';
+                    if (active !== 'INPUT' && active !== 'TEXTAREA' && active !== 'SELECT' && active !== 'BUTTON') {
+                        if (input) input.focus({ preventScroll: true });
+                    }
                 }
             }
-            setTimeout(refocus, 500);
+            setTimeout(refocus, 600);
+            setInterval(refocus, 1000); // jaga fokus setiap detik
 
-            // Re-focus setiap kali user klik di area page (bukan form)
             document.addEventListener('click', function(e) {
                 var tag = (e.target || {}).tagName || '';
                 if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT' && tag !== 'BUTTON' && tag !== 'A') {
@@ -684,55 +683,65 @@
                 }
             });
 
-            // Listen pada hidden input (bukan document)
-            input.addEventListener('keydown', function(e) {
+            // ---- HANDLER ----
+            function onKey(e) {
                 var now = Date.now();
 
-                // Enter/CR = fallback terminator
                 if (e.key === 'Enter' || e.key === 'Return') {
                     e.preventDefault();
-                    if (hid.buf.length >= 12 && /^\d+$/.test(hid.buf)) {
+                    if (hid.buf.length >= 12 && /^\d+$/.test(hid.buf) && !hid.processing) {
+                        hid.processing = true;
                         console.log('🔫 HID scan (Enter):', hid.buf);
                         var tok = hid.buf;
-                        hid.buf = ''; input.value = '';
+                        hid.buf = ''; if (input) input.value = '';
                         clearTimeout(hid.timer);
-                        processScan(tok);
+                        processScan(tok).finally(function() { hid.processing = false; });
                     } else {
-                        hid.buf = ''; input.value = '';
+                        hid.buf = ''; if (input) input.value = '';
                     }
                     return;
                 }
 
                 if (!e.key || e.key.length !== 1) return;
-
-                // Reset jika jeda terlalu lama
-                if (hid.lastTime && (now - hid.lastTime) > 100) { hid.buf = ''; input.value = ''; }
+                if (hid.lastTime && (now - hid.lastTime) > 120) { hid.buf = ''; if (input) input.value = ''; }
                 hid.lastTime = now;
 
-                // Hanya digit
                 if (/\d/.test(e.key)) {
                     hid.buf += e.key;
                 } else {
-                    hid.buf = ''; input.value = ''; return;
+                    hid.buf = ''; if (input) input.value = ''; return;
                 }
 
-                // Auto-process 13 digit
-                if (hid.buf.length === hid.LEN) {
+                if (hid.buf.length === hid.LEN && !hid.processing) {
+                    hid.processing = true;
                     console.log('🔫 HID scan (auto-13):', hid.buf);
                     var token = hid.buf;
-                    hid.buf = ''; input.value = '';
+                    hid.buf = ''; if (input) input.value = '';
                     clearTimeout(hid.timer);
-                    processScan(token);
+                    processScan(token).finally(function() { hid.processing = false; });
                     return;
                 }
 
-                if (hid.buf.length > hid.LEN) { hid.buf = ''; input.value = ''; }
-
+                if (hid.buf.length > hid.LEN) { hid.buf = ''; if (input) input.value = ''; }
                 clearTimeout(hid.timer);
-                hid.timer = setTimeout(function() { hid.buf = ''; input.value = ''; }, 250);
+                hid.timer = setTimeout(function() { hid.buf = ''; if (input) input.value = ''; }, 250);
+            }
+
+            // Primary: hidden input
+            if (input) input.addEventListener('keydown', onKey);
+
+            // Fallback: document (cover kasus focus di video/canvas webcam)
+            document.addEventListener('keydown', function(e) {
+                var active = (document.activeElement || {});
+                // Jangan proses dua kali (kalau input sudah handle)
+                if (active === input) return;
+                // Abaikan jika focus di form element lain
+                var tag = active.tagName || '';
+                if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+                onKey(e);
             });
 
-            console.log('✅ HID scanner listener aktif (hidden-input mode, EP5000G)');
+            console.log('✅ HID scanner listener aktif (dual-mode, EP5000G)');
         }
 
         function initScanner() {
