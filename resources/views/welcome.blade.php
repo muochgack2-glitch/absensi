@@ -735,9 +735,10 @@
          * Inisialisasi kamera wajah di background (Dual Camera Mode)
          */
         async function initDualCamera() {
-            if (!DUAL_CAMERA) return;
+            console.log('🔧 initDualCamera called | DUAL_CAMERA:', DUAL_CAMERA, '| cacheLen:', camerasCache?.length, '| qrCameraId:', qrCameraId?.substring(0,12));
+            if (!DUAL_CAMERA) { console.log('🔧 skip: DUAL_CAMERA=false'); return; }
             const isMobile = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
-            if (isMobile) return;
+            if (isMobile) { console.log('🔧 skip: is mobile'); return; }
 
             try {
                 const cameras = camerasCache;
