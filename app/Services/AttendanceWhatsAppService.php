@@ -240,10 +240,18 @@ class AttendanceWhatsAppService
                 'server_url' => $serverUrl,
             ]);
 
-            $response = Http::timeout($this->timeout)
-                ->retry($this->retryAttempts, 1000)
-                ->post("{$serverUrl}/send", [
-                    'phone' => $phone,
+            // Siapkan HTTP client dengan API key jika ada
+            $apiKey = WhatsAppSetting::get('wa_api_key', '');
+            $http = Http::timeout($this->timeout)->retry($this->retryAttempts, 1000);
+            if ($apiKey) {
+                $http = $http->withHeaders([
+                    'Authorization' => 'Bearer ' . $apiKey,
+                    'X-API-Key'     => $apiKey,
+                ]);
+            }
+
+            $response = $http->post("{$serverUrl}/send", [
+                    'phone'   => $phone,
                     'message' => $message,
                 ]);
 
@@ -378,12 +386,20 @@ class AttendanceWhatsAppService
                 'server_url' => $serverUrl,
             ]);
 
+            // Siapkan HTTP client dengan API key jika ada
+            $apiKey = WhatsAppSetting::get('wa_api_key', '');
+            $http = Http::timeout($this->timeout * 2)->retry($this->retryAttempts, 1000);
+            if ($apiKey) {
+                $http = $http->withHeaders([
+                    'Authorization' => 'Bearer ' . $apiKey,
+                    'X-API-Key'     => $apiKey,
+                ]);
+            }
+
             // Send with multipart/form-data
-            $response = Http::timeout($this->timeout * 2) // Double timeout for media upload
-                ->retry($this->retryAttempts, 1000)
-                ->attach('media', file_get_contents($fullPath), basename($fullPath))
+            $response = $http->attach('media', file_get_contents($fullPath), basename($fullPath))
                 ->post("{$serverUrl}/send-media", [
-                    'phone' => $phone,
+                    'phone'   => $phone,
                     'caption' => $caption,
                 ]);
 
