@@ -711,29 +711,34 @@
                 });
             };
 
-            const isMobileDevice = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
-
-            if (DUAL_CAMERA && !isMobileDevice) {
-                // PC/Desktop: pakai dual camera dengan deviceId matching
+            if (DUAL_CAMERA) {
                 Html5Qrcode.getCameras().then(cameras => {
                     camerasCache = cameras;
                     console.log('📷 Kamera tersedia:', cameras.map((c,i) => `[${i}] ${c.label}`));
+
                     // Cari kamera QR by deviceId dulu, fallback ke index
                     const qrCamera = (QR_CAM_DEVICEID && cameras.find(c => c.id === QR_CAM_DEVICEID))
                                      || cameras[QR_CAM_IDX];
-                    if (qrCamera) {
+
+                    // Jika deviceId tidak match sama sekali (HP/PC baru) → single camera mode
+                    const deviceIdMatched = QR_CAM_DEVICEID && cameras.find(c => c.id === QR_CAM_DEVICEID);
+
+                    if (qrCamera && (deviceIdMatched || cameras.length >= 2)) {
                         qrCameraId = qrCamera.id;
                         console.log('🎥 QR scanner pakai:', qrCamera.label);
                         doStart(qrCamera.id, configDual);
+                        // Init face camera hanya kalau ada kamera lain
+                        if (cameras.length >= 2) setTimeout(() => initDualCamera(), 800);
                     } else {
+                        // Fallback: facingMode:environment (aman di semua device)
+                        console.log('📷 Single camera mode (facingMode: environment)');
                         doStart({ facingMode: 'environment' }, configDefault);
                     }
-                    // Init face camera via setTimeout
-                    setTimeout(() => initDualCamera(), 800);
-                }).catch(() => doStart({ facingMode: 'environment' }, configDefault));
+                }).catch(() => {
+                    console.log('📷 getCameras gagal, fallback facingMode:environment');
+                    doStart({ facingMode: 'environment' }, configDefault);
+                });
             } else {
-                // HP/Mobile atau DUAL_CAMERA=false: pakai kamera belakang saja
-                if (isMobileDevice) console.log('📱 Mobile device — single camera mode (facingMode: environment)');
                 doStart({ facingMode: 'environment' }, configDefault);
             }
 
