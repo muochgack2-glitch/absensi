@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use Picqer\Barcode\BarcodeGeneratorPNG;
 use Illuminate\Support\Facades\Storage;
 
 class QRCodeService
@@ -63,23 +62,110 @@ class QRCodeService
 
     public function generateQRCode(string $nis): string
     {
-        // Generate signed token — sama seperti sebelumnya
+        // Generate signed token
         $qrContent = $this->buildQRToken($nis);
-        
-        // Generate Code128 Barcode (1D) — mudah dibaca printer biasa & EP5000G
-        $generator = new BarcodeGeneratorPNG();
-        $barcodeImage = $generator->getBarcode(
-            $qrContent,
-            $generator::TYPE_CODE_128,
-            3,    // lebar setiap bar (px)
-            100   // tinggi barcode (px)
-        );
-        
-        // Simpan sebagai PNG
+
+        // Coba pakai picqer jika tersedia, fallback ke GD built-in
+        if (class_exists('Picqer\Barcode\BarcodeGeneratorPNG')) {
+            $generator    = new \Picqer\Barcode\BarcodeGeneratorPNG();
+            $barcodeImage = $generator->getBarcode(
+                $qrContent,
+                $generator::TYPE_CODE_128,
+                3,   // bar width
+                100  // height
+            );
+        } else {
+            // Fallback: generate barcode menggunakan GD (built-in PHP)
+            $barcodeImage = $this->generateCode128GD($qrContent);
+        }
+
         $path = "qrcodes/{$nis}.png";
         Storage::disk('public')->put($path, $barcodeImage);
-        
+
         return $path;
+    }
+
+    /**
+     * Generate Code128 barcode PNG menggunakan GD (tanpa library eksternal).
+     */
+    private function generateCode128GD(string $text): string
+    {
+        // Code128 B encoding table
+        $code128B = [
+            ' '=>0,  '!'=>1,  '"'=>2,  '#'=>3,  '$'=>4,  '%'=>5,  '&'=>6,  "'".'=>7,
+            '('=>8,  ')'=>9,  '*'=>10, '+'=>11, ','=>12, '-'=>13, '.'=>14, '/'=>15,
+            '0'=>16, '1'=>17, '2'=>18, '3'=>19, '4'=>20, '5'=>21, '6'=>22, '7'=>23,
+            '8'=>24, '9'=>25, ':'=>26, ';'=>27, '<'=>28, '='=>29, '>'=>30, '?'=>31,
+            '@'=>32, 'A'=>33, 'B'=>34, 'C'=>35, 'D'=>36, 'E'=>37, 'F'=>38, 'G'=>39,
+            'H'=>40, 'I'=>41, 'J'=>42, 'K'=>43, 'L'=>44, 'M'=>45, 'N'=>46, 'O'=>47,
+            'P'=>48, 'Q'=>49, 'R'=>50, 'S'=>51, 'T'=>52, 'U'=>53, 'V'=>54, 'W'=>55,
+            'X'=>56, 'Y'=>57, 'Z'=>58, '['=>59, '\\'=>60, ']'=>61, '^'=>62, '_'=>63,
+        ];
+
+        // Pola bar tiap simbol (11 bit: 1=bar, 0=space)
+        $patterns = [
+            '11011001100','11001101100','11001100110','10010011000','10010001100',
+            '10001001100','10011001000','10011000100','10001100100','11001001000',
+            '11001000100','11000100100','10110011100','10011011100','10011001110',
+            '10111001100','10011101100','10011100110','11001110010','11001011100',
+            '11001001110','11011100100','11001110100','11101101110','11101001100',
+            '11100101100','11100100110','11101100100','11100110100','11100110010',
+            '11011011000','11011000110','11000110110','10100011000','10001011000',
+            '10001000110','10110001000','10001101000','10001100010','11010001000',
+            '11000101000','11000100010','10110111000','10110001110','10001101110',
+            '10111011000','10111000110','10001110110','11101110110','11010001110',
+            '11000101110','11011101000','11011100010','11011101110','11101011000',
+            '11101000110','11100010110','11101101000','11101100010','11100011010',
+            '11101111010','11001000010','11110001010','10100110000','10100001100',
+        ];
+
+        // Start Code B = index 104, stop = 106
+        $startPattern  = '11010010000';
+        $stopPattern   = '1100011101011';
+        $checksum      = 104;
+        $codeValues    = [];
+
+        foreach (str_split($text) as $char) {
+            $val = isset($code128B[$char]) ? $code128B[$char] : 0;
+            $codeValues[] = $val;
+            $checksum    += $val * (count($codeValues));
+        }
+        $checksum %= 103;
+
+        // Build bit stream
+        $bits = $startPattern;
+        foreach ($codeValues as $val) {
+            $bits .= $patterns[$val] ?? $patterns[0];
+        }
+        $bits .= $patterns[$checksum];
+        $bits .= $stopPattern;
+
+        // Draw PNG dengan GD
+        $barWidth  = 3;
+        $height    = 100;
+        $quiet     = 20; // quiet zone kiri & kanan
+        $width     = strlen($bits) * $barWidth + $quiet * 2;
+
+        $img = imagecreatetruecolor($width, $height + 20);
+        $white = imagecolorallocate($img, 255, 255, 255);
+        $black = imagecolorallocate($img, 0, 0, 0);
+        imagefill($img, 0, 0, $white);
+
+        $x = $quiet;
+        foreach (str_split($bits) as $bit) {
+            if ($bit === '1') {
+                imagefilledrectangle($img, $x, 10, $x + $barWidth - 1, $height + 10, $black);
+            }
+            $x += $barWidth;
+        }
+
+        // Output ke string
+        ob_start();
+        imagepng($img);
+        $png = ob_get_clean();
+        imagedestroy($img);
+
+        return $png;
     }
 
     /**
