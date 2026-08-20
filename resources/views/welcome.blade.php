@@ -679,17 +679,14 @@
                 }
             };
 
-            // Config dual camera: TANPA facingMode agar deviceId dipatuhi
+            // Config dual camera: TANPA videoConstraints agar deviceId dipatuhi penuh
             const configDual = {
                 fps: 30,
                 qrbox: 300,
                 aspectRatio: 1.0,
                 disableFlip: false,
-                rememberLastUsedCamera: false, // jangan ingat kamera lama
-                videoConstraints: {
-                    width: { ideal: 1280, max: 1920 },
-                    height: { ideal: 720, max: 1080 }
-                }
+                rememberLastUsedCamera: false
+                // TIDAK ada videoConstraints — library pakai deviceId constraint saja
             };
 
             const doStart = (constraint, cfg) => {
