@@ -716,26 +716,22 @@
                     camerasCache = cameras;
                     console.log('📷 Kamera tersedia:', cameras.map((c,i) => `[${i}] ${c.label}`));
 
-                    // Cari kamera QR by deviceId dulu, fallback ke index
-                    const qrCamera = (QR_CAM_DEVICEID && cameras.find(c => c.id === QR_CAM_DEVICEID))
-                                     || cameras[QR_CAM_IDX];
+                    // Dual camera HANYA jika deviceId match persis (kamera sudah dikonfigurasi)
+                    const qrCamera = QR_CAM_DEVICEID ? cameras.find(c => c.id === QR_CAM_DEVICEID) : null;
 
-                    // Jika deviceId tidak match sama sekali (HP/PC baru) → single camera mode
-                    const deviceIdMatched = QR_CAM_DEVICEID && cameras.find(c => c.id === QR_CAM_DEVICEID);
-
-                    if (qrCamera && (deviceIdMatched || cameras.length >= 2)) {
+                    if (qrCamera) {
+                        // PC terkonfigurasi: dual camera mode
                         qrCameraId = qrCamera.id;
                         console.log('🎥 QR scanner pakai:', qrCamera.label);
                         doStart(qrCamera.id, configDual);
-                        // Init face camera hanya kalau ada kamera lain
-                        if (cameras.length >= 2) setTimeout(() => initDualCamera(), 800);
+                        setTimeout(() => initDualCamera(), 800);
                     } else {
-                        // Fallback: facingMode:environment (aman di semua device)
-                        console.log('📷 Single camera mode (facingMode: environment)');
+                        // HP/PC baru/belum setting: single camera aman
+                        console.log('📷 DeviceId tidak match → facingMode:environment');
                         doStart({ facingMode: 'environment' }, configDefault);
                     }
                 }).catch(() => {
-                    console.log('📷 getCameras gagal, fallback facingMode:environment');
+                    console.log('📷 getCameras gagal → facingMode:environment');
                     doStart({ facingMode: 'environment' }, configDefault);
                 });
             } else {
