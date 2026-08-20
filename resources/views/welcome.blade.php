@@ -741,8 +741,7 @@
         async function initDualCamera() {
             console.log('🔧 initDualCamera called | DUAL_CAMERA:', DUAL_CAMERA, '| cacheLen:', camerasCache?.length, '| qrCameraId:', qrCameraId?.substring(0,12));
             if (!DUAL_CAMERA) { console.log('🔧 skip: DUAL_CAMERA=false'); return; }
-            const isMobile = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
-            if (isMobile) { console.log('🔧 skip: is mobile'); return; }
+            // Mobile check dihapus — cameras.length < 2 sudah handle single-camera device
 
             try {
                 const cameras = camerasCache;
