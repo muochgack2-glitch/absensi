@@ -85,18 +85,16 @@ class WhatsAppSetting extends Model
      */
     public static function set(string $key, $value): bool
     {
-        $setting = self::where('key', $key)->first();
-
-        if (!$setting) {
-            return false;
-        }
-
         // Convert value to string for storage
-        $stringValue = is_array($value) || is_object($value) 
-            ? json_encode($value) 
+        $stringValue = is_array($value) || is_object($value)
+            ? json_encode($value)
             : (string) $value;
 
-        $setting->update(['value' => $stringValue]);
+        // updateOrCreate agar bisa insert key baru jika belum ada
+        self::updateOrCreate(
+            ['key' => $key],
+            ['value' => $stringValue]
+        );
 
         // Clear cache
         Cache::forget(self::CACHE_PREFIX . $key);
