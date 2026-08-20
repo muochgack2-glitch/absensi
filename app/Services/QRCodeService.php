@@ -71,8 +71,8 @@ class QRCodeService
             $barcodeImage = $generator->getBarcode(
                 $qrContent,
                 $generator::TYPE_CODE_128,
-                3,   // bar width
-                100  // height
+                5,   // bar width 5px — cukup tebal untuk printer biasa
+                120  // height 120px
             );
         } else {
             // Fallback: generate barcode menggunakan GD (built-in PHP)
