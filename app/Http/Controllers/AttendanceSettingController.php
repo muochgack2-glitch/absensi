@@ -101,8 +101,11 @@ class AttendanceSettingController extends Controller
         AttendanceSetting::set('use_dual_camera', $dualCam === '1' ? '1' : '0', 'camera');
 
         // Simpan index kamera dari hidden input yang di-update JS
-        AttendanceSetting::set('qr_camera_index',    $request->input('settings.qr_camera_index',    '0'), 'camera');
-        AttendanceSetting::set('photo_camera_index', $request->input('settings.photo_camera_index', '1'), 'camera');
+        AttendanceSetting::set('qr_camera_index',      $request->input('settings.qr_camera_index',      '0'), 'camera');
+        AttendanceSetting::set('photo_camera_index',   $request->input('settings.photo_camera_index',   '1'), 'camera');
+        // Simpan deviceId kamera agar welcome page bisa match by ID (tidak bergantung urutan enumerate)
+        AttendanceSetting::set('qr_camera_deviceid',   $request->input('settings.qr_camera_deviceid',   ''), 'camera');
+        AttendanceSetting::set('photo_camera_deviceid',$request->input('settings.photo_camera_deviceid',''), 'camera');
 
 
         // Handle absent notify days (dari checkbox terpisah, sudah dikumpulkan JS)

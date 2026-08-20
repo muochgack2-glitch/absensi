@@ -574,11 +574,13 @@
 
         // --- Dual Camera Config (dari server setting) ---
         const DUAL_CAMERA = {{ ($useDualCamera ?? '0') === '1' ? 'true' : 'false' }};
-        const QR_CAM_IDX  = {{ (int)($qrCameraIndex ?? 0) }};
-        const PHO_CAM_IDX = {{ (int)($photoCameraIndex ?? 1) }};
-        let fotoStream    = null; // MediaStream kamera wajah
-        let faceReadyAt  = null; // Timestamp saat face camera mulai streaming frame
-        let camerasCache = null; // Cache cameras list agar tidak double-call getCameras()
+        const QR_CAM_IDX       = {{ (int)($qrCameraIndex ?? 0) }};
+        const PHO_CAM_IDX      = {{ (int)($photoCameraIndex ?? 1) }};
+        const QR_CAM_DEVICEID  = "{{ $qrCameraDeviceId ?? '' }}";
+        const PHO_CAM_DEVICEID = "{{ $photoCameraDeviceId ?? '' }}";
+        let fotoStream    = null;
+        let faceReadyAt  = null;
+        let camerasCache = null;
 
         // Real-time clock
         function updateClock() {
@@ -709,11 +711,14 @@
 
             if (DUAL_CAMERA) {
                 Html5Qrcode.getCameras().then(cameras => {
-                    camerasCache = cameras; // simpan untuk initDualCamera
+                    camerasCache = cameras;
                     console.log('📷 Kamera tersedia:', cameras.map((c,i) => `[${i}] ${c.label}`));
-                    if (cameras.length >= 1 && cameras[QR_CAM_IDX]) {
-                        console.log('🎥 QR scanner pakai:', cameras[QR_CAM_IDX].label);
-                        doStart(cameras[QR_CAM_IDX].id, configDual);
+                    // Cari kamera by deviceId dulu (lebih reliable), fallback ke index
+                    const qrCamera = (QR_CAM_DEVICEID && cameras.find(c => c.id === QR_CAM_DEVICEID))
+                                     || cameras[QR_CAM_IDX];
+                    if (qrCamera) {
+                        console.log('🎥 QR scanner pakai:', qrCamera.label);
+                        doStart(qrCamera.id, configDual);
                     } else {
                         doStart({ facingMode: 'environment' }, configDefault);
                     }
@@ -740,8 +745,11 @@
                     console.warn('⚠️ Dual camera: kamera tidak cukup atau cache kosong');
                     return;
                 }
-                const fotoDevice = cameras[PHO_CAM_IDX] || cameras[cameras.length - 1];
-                console.log('📷 Face camera pakai:', fotoDevice.label, 'idx:', PHO_CAM_IDX);
+                // Cari kamera wajah by deviceId dulu, fallback ke index
+                const fotoDevice = (PHO_CAM_DEVICEID && cameras.find(c => c.id === PHO_CAM_DEVICEID))
+                                   || cameras[PHO_CAM_IDX]
+                                   || cameras[cameras.length - 1];
+                console.log('📷 Face camera pakai:', fotoDevice.label, '| id:', fotoDevice.id.substring(0, 20) + '...');
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: { deviceId: { exact: fotoDevice.id } }
                 });

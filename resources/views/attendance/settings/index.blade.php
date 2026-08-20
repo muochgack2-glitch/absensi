@@ -614,6 +614,9 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                             <input type="hidden" name="settings[qr_camera_index]"
                                    id="qr_camera_index_val"
                                    value="{{ old('settings.qr_camera_index', $settings['camera']['qr_camera_index'] ?? '0') }}">
+                            <input type="hidden" name="settings[qr_camera_deviceid]"
+                                   id="qr_camera_deviceid_val"
+                                   value="{{ old('settings.qr_camera_deviceid', $settings['camera']['qr_camera_deviceid'] ?? '') }}">
 
                             {{-- Preview QR Cam --}}
                             <div id="qr-preview-wrap" class="hidden">
@@ -644,6 +647,9 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                             <input type="hidden" name="settings[photo_camera_index]"
                                    id="photo_camera_index_val"
                                    value="{{ old('settings.photo_camera_index', $settings['camera']['photo_camera_index'] ?? '1') }}">
+                            <input type="hidden" name="settings[photo_camera_deviceid]"
+                                   id="photo_camera_deviceid_val"
+                                   value="{{ old('settings.photo_camera_deviceid', $settings['camera']['photo_camera_deviceid'] ?? '') }}">
 
                             {{-- Preview Foto Cam --}}
                             <div id="photo-preview-wrap" class="hidden">
@@ -978,8 +984,14 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                 });
 
                 // Auto-preview kamera yang sudah tersimpan
-                if (allCameras[savedQr])    openCamPreview('qr',    allCameras[savedQr].deviceId);
-                if (allCameras[savedPhoto]) openCamPreview('photo', allCameras[savedPhoto].deviceId);
+                if (allCameras[savedQr]) {
+                    document.getElementById('qr_camera_deviceid_val').value = allCameras[savedQr].deviceId;
+                    openCamPreview('qr', allCameras[savedQr].deviceId);
+                }
+                if (allCameras[savedPhoto]) {
+                    document.getElementById('photo_camera_deviceid_val').value = allCameras[savedPhoto].deviceId;
+                    openCamPreview('photo', allCameras[savedPhoto].deviceId);
+                }
 
             } catch (err) {
                 console.warn('Gagal deteksi kamera:', err.message);
@@ -987,11 +999,13 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
         }
 
         function onCameraSelect(role) {
-            const sel   = document.getElementById(role + '_camera_select');
-            const idx   = parseInt(sel.value);
-            const cam   = allCameras[idx];
+            const sel    = document.getElementById(role + '_camera_select');
+            const idx    = parseInt(sel.value);
+            const cam    = allCameras[idx];
             const hidden = document.getElementById(role + '_camera_index_val');
-            if (hidden) hidden.value = idx;
+            const hiddenDev = document.getElementById(role + '_camera_deviceid_val');
+            if (hidden)    hidden.value    = idx;
+            if (hiddenDev) hiddenDev.value = cam?.deviceId || '';
 
             stopCamPreview(role);
             if (cam) openCamPreview(role, cam.deviceId);
