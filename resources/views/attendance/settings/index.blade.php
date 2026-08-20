@@ -631,6 +631,42 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                         Index 0 = kamera pertama yang terdeteksi, 1 = kedua, dst.
                         Cabut-pasang USB webcam bisa mengubah urutan index.
                     </p>
+
+                    {{-- Deteksi & Preview Kamera --}}
+                    <div class="border border-indigo-200 dark:border-indigo-800 rounded-xl p-4 bg-indigo-50 dark:bg-indigo-900/20">
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="text-sm font-semibold text-indigo-800 dark:text-indigo-300">
+                                <i class="fas fa-search mr-1"></i> Deteksi Kamera Tersedia
+                            </p>
+                            <button type="button" onclick="detectCameras()"
+                                class="px-3 py-1 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
+                                <i class="fas fa-sync mr-1"></i> Deteksi
+                            </button>
+                        </div>
+
+                        {{-- Daftar kamera --}}
+                        <div id="camera-list" class="space-y-2 mb-3">
+                            <p class="text-xs text-indigo-600 dark:text-indigo-400 italic">
+                                Klik "Deteksi" untuk melihat daftar kamera yang terhubung.
+                            </p>
+                        </div>
+
+                        {{-- Preview video --}}
+                        <div id="camera-preview-wrap" class="hidden">
+                            <p class="text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-1">
+                                <i class="fas fa-video mr-1"></i> Preview:
+                                <span id="camera-preview-label" class="font-normal"></span>
+                            </p>
+                            <div class="relative bg-black rounded-lg overflow-hidden" style="max-height:200px;">
+                                <video id="camera-preview-video" autoplay muted playsinline
+                                       class="w-full rounded-lg" style="max-height:200px; object-fit:cover;"></video>
+                                <button type="button" onclick="stopPreview()"
+                                    class="absolute top-2 right-2 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs flex items-center justify-center">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </x-card>
 
@@ -898,6 +934,73 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                 'Sudah download backup terbaru?\n\n' +
                 'Klik OK untuk melanjutkan restore.'
             );
+        }
+
+        // ===== Kamera: Deteksi & Preview =====
+        let previewStream = null;
+
+        async function detectCameras() {
+            const listEl = document.getElementById('camera-list');
+            listEl.innerHTML = '<p class="text-xs text-indigo-500 italic"><i class="fas fa-spinner fa-spin mr-1"></i> Mendeteksi kamera...</p>';
+
+            try {
+                // Minta izin dulu agar label terisi
+                await navigator.mediaDevices.getUserMedia({ video: true }).then(s => s.getTracks().forEach(t => t.stop()));
+
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const cameras = devices.filter(d => d.kind === 'videoinput');
+
+                if (cameras.length === 0) {
+                    listEl.innerHTML = '<p class="text-xs text-red-500"><i class="fas fa-times-circle mr-1"></i> Tidak ada kamera terdeteksi.</p>';
+                    return;
+                }
+
+                listEl.innerHTML = '';
+                cameras.forEach((cam, idx) => {
+                    const label = cam.label || 'Kamera ' + idx;
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center justify-between bg-white dark:bg-gray-700 border border-indigo-200 dark:border-indigo-700 rounded-lg px-3 py-2';
+                    div.innerHTML = `
+                        <div>
+                            <span class="inline-block w-6 h-6 bg-indigo-500 text-white text-xs font-bold rounded text-center leading-6 mr-2">${idx}</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-200">${label}</span>
+                        </div>
+                        <button type="button" onclick="previewCamera('${cam.deviceId}', '${label.replace(/'/g, '')} (index ${idx})')"
+                            class="px-2 py-1 text-xs bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-800 dark:hover:bg-indigo-700 text-indigo-700 dark:text-indigo-200 rounded font-medium transition-colors">
+                            <i class="fas fa-play mr-1"></i> Preview
+                        </button>`;
+                    listEl.appendChild(div);
+                });
+
+            } catch (err) {
+                listEl.innerHTML = `<p class="text-xs text-red-500"><i class="fas fa-exclamation-triangle mr-1"></i> Gagal: ${err.message}</p>`;
+            }
+        }
+
+        async function previewCamera(deviceId, label) {
+            stopPreview();
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { deviceId: { exact: deviceId }, width: { ideal: 640 }, height: { ideal: 360 } }
+                });
+                previewStream = stream;
+                const video = document.getElementById('camera-preview-video');
+                video.srcObject = stream;
+                document.getElementById('camera-preview-label').textContent = label;
+                document.getElementById('camera-preview-wrap').classList.remove('hidden');
+            } catch (err) {
+                alert('Gagal membuka kamera: ' + err.message);
+            }
+        }
+
+        function stopPreview() {
+            if (previewStream) {
+                previewStream.getTracks().forEach(t => t.stop());
+                previewStream = null;
+            }
+            document.getElementById('camera-preview-wrap').classList.add('hidden');
+            const video = document.getElementById('camera-preview-video');
+            if (video) video.srcObject = null;
         }
 
         // ===== Initialize toggle states on page load =====
