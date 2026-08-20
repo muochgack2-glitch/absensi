@@ -851,6 +851,9 @@
 
         async function processScan(nis) {
             try {
+                // DEBUG: log exact token
+                console.log('📤 Token dikirim ke server:', JSON.stringify(nis), '| panjang:', nis ? nis.length : 0);
+
                 // Capture photo from video (optional, bisa pakai dummy)
                 const photoBase64 = await capturePhoto();
 
