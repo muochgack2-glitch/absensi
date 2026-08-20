@@ -581,7 +581,9 @@
         let fotoStream    = null;
         let faceReadyAt  = null;
         let camerasCache  = null;
-        let qrCameraId    = null; // deviceId kamera QR yang aktif
+        let qrCameraId    = null;
+        let dualCamInited = false; // guard agar initDualCamera hanya jalan sekali
+
 
         // Real-time clock
         function updateClock() {
@@ -739,9 +741,12 @@
          * Inisialisasi kamera wajah di background (Dual Camera Mode)
          */
         async function initDualCamera() {
+            if (dualCamInited) return; // sudah diinit, skip
+            dualCamInited = true;
             console.log('🔧 initDualCamera called | DUAL_CAMERA:', DUAL_CAMERA, '| cacheLen:', camerasCache?.length, '| qrCameraId:', qrCameraId?.substring(0,12));
             if (!DUAL_CAMERA) { console.log('🔧 skip: DUAL_CAMERA=false'); return; }
             // Mobile check dihapus — cameras.length < 2 sudah handle single-camera device
+
 
             try {
                 const cameras = camerasCache;
