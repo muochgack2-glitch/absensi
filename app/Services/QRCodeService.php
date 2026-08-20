@@ -85,13 +85,28 @@ class QRCodeService
 
         // Generate EAN-13 barcode — kompatibel dengan EP5000G
         if (class_exists('Picqer\Barcode\BarcodeGeneratorPNG')) {
-            $generator    = new \Picqer\Barcode\BarcodeGeneratorPNG();
-            $barcodeImage = $generator->getBarcode(
+            $generator  = new \Picqer\Barcode\BarcodeGeneratorPNG();
+            $barcodeRaw = $generator->getBarcode(
                 $qrContent,
-                $generator::TYPE_EAN_13, // EAN-13 = format barcode produk
-                5,                       // bar width 5px
-                120                      // height 120px
+                $generator::TYPE_EAN_13,
+                5,   // bar width 5px
+                120  // height 120px
             );
+
+            // Picqer v3 pakai transparent background → fix dengan white background
+            // Tanpa ini barcode tampak terbalik (putih di hitam) → tidak bisa discan
+            $src   = imagecreatefromstring($barcodeRaw);
+            $w     = imagesx($src);
+            $h     = imagesy($src);
+            $dst   = imagecreatetruecolor($w, $h);
+            $white = imagecolorallocate($dst, 255, 255, 255);
+            imagefill($dst, 0, 0, $white);
+            imagecopy($dst, $src, 0, 0, 0, 0, $w, $h);
+            ob_start();
+            imagepng($dst);
+            $barcodeImage = ob_get_clean();
+            imagedestroy($src);
+            imagedestroy($dst);
         } else {
             // Fallback GD jika picqer tidak ada
             $barcodeImage = $this->generateCode128GD($qrContent);
