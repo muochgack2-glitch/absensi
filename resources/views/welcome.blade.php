@@ -563,6 +563,41 @@
     </style>
     @endpush
 
+    {{-- ── Camera Status Badge (Fixed pojok kiri bawah) ── --}}
+    <div id="cameraStatusBadge" class="fixed bottom-4 left-4 z-50 flex flex-col items-start">
+
+        {{-- Expanded panel (muncul di atas badge saat diklik) --}}
+        <div id="camStatusPanel"
+             class="hidden mb-2 bg-gray-900/95 backdrop-blur-sm border border-gray-700/60
+                    rounded-2xl p-3 shadow-2xl min-w-[200px] transition-all duration-200">
+            <p class="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mb-2">
+                <i class="fas fa-camera mr-1"></i> Status Kamera
+            </p>
+            {{-- QR Camera --}}
+            <div class="flex items-center gap-2 mb-1.5">
+                <span id="qrStatusDot" class="w-2 h-2 rounded-full bg-gray-500 flex-shrink-0 transition-colors duration-300"></span>
+                <span class="text-[11px] text-gray-400 flex-shrink-0">QR</span>
+                <span id="qrCamName" class="text-[11px] text-white truncate max-w-[130px]">—</span>
+            </div>
+            {{-- Face Camera --}}
+            <div class="flex items-center gap-2">
+                <span id="fotoStatusDot" class="w-2 h-2 rounded-full bg-gray-500 flex-shrink-0 transition-colors duration-300"></span>
+                <span class="text-[11px] text-gray-400 flex-shrink-0">Foto</span>
+                <span id="fotoCamName" class="text-[11px] text-white truncate max-w-[130px]">—</span>
+            </div>
+        </div>
+
+        {{-- Collapsed pill (selalu terlihat) --}}
+        <button onclick="toggleCameraStatus()"
+                class="flex items-center gap-2 bg-gray-900/80 backdrop-blur-sm
+                       border border-gray-700/60 rounded-full px-3 py-1.5
+                       shadow-lg hover:bg-gray-800/90 transition-all duration-200 group">
+            <span id="camMainDot" class="w-2 h-2 rounded-full bg-gray-500 transition-colors duration-300"></span>
+            <span id="camModeText" class="text-xs text-gray-300 font-medium">Mendeteksi...</span>
+            <i id="camChevron" class="fas fa-chevron-up text-gray-500 text-[10px] transition-transform duration-200"></i>
+        </button>
+    </div>
+
     @push('scripts')
 
     <script>
@@ -723,6 +758,7 @@
                         console.log('🎥 QR scanner pakai:', qrCamera.label);
                         doStart(qrCamera.id, configDual);
                         setTimeout(() => initDualCamera(), 800);
+                        setTimeout(updateCameraStatus, 500);
                     } else {
                         // HP/PC baru: pakai camera ID langsung (lebih aman dari facingMode)
                         // Android: cameras biasanya [back, front] → pakai cameras[0] = belakang
@@ -731,6 +767,7 @@
                             console.log('📷 Fallback → pakai kamera:', fallbackCam.label);
                             // Pakai configDual (tanpa videoConstraints) agar tidak konflik dengan deviceId
                             doStart(fallbackCam.id, configDual);
+                            setTimeout(updateCameraStatus, 500);
                         } else {
                             console.log('📷 Tidak ada kamera → facingMode:environment');
                             doStart({ facingMode: 'environment' }, configDefault);
@@ -807,14 +844,74 @@
                         console.log('✅ Face camera aktif! Label:', fotoDevice.label);
                     }
                 };
-                faceVideo.onplaying  = markReady;
-                faceVideo.onloadeddata = markReady;
+                faceVideo.onplaying   = () => { markReady(); updateCameraStatus(); };
+                faceVideo.onloadeddata = () => { markReady(); updateCameraStatus(); };
 
                 // Paksa play — autoplay tidak selalu jalan untuk elemen offscreen
                 faceVideo.play().catch(e => console.warn('face play():', e.message));
 
             } catch (err) {
                 console.error('❌ Gagal init face camera:', err.name, err.message);
+                updateCameraStatus();
+            }
+        }
+
+        /* ── Camera Status Badge ── */
+        let camStatusOpen = false;
+
+        function toggleCameraStatus() {
+            camStatusOpen = !camStatusOpen;
+            const panel   = document.getElementById('camStatusPanel');
+            const chevron = document.getElementById('camChevron');
+            panel.classList.toggle('hidden', !camStatusOpen);
+            chevron.style.transform = camStatusOpen ? 'rotate(180deg)' : '';
+        }
+
+        function updateCameraStatus() {
+            const qrDot    = document.getElementById('qrStatusDot');
+            const fotoDot  = document.getElementById('fotoStatusDot');
+            const mainDot  = document.getElementById('camMainDot');
+            const modeText = document.getElementById('camModeText');
+            const qrName   = document.getElementById('qrCamName');
+            const fotoName = document.getElementById('fotoCamName');
+            if (!qrDot) return;
+
+            // ── QR Camera status ──
+            const qrCam = camerasCache?.find(c => c.id === qrCameraId);
+            if (qrCameraId && qrCam) {
+                qrDot.className = 'w-2 h-2 rounded-full flex-shrink-0 transition-colors duration-300 bg-green-400';
+                qrName.textContent = qrCam.label.replace(/\s*\(.*?\)\s*$/, '') || 'QR Camera';
+            } else if (camerasCache?.length > 0) {
+                qrDot.className = 'w-2 h-2 rounded-full flex-shrink-0 transition-colors duration-300 bg-yellow-400';
+                qrName.textContent = camerasCache[0]?.label?.replace(/\s*\(.*?\)\s*$/, '') || 'Default Camera';
+            } else {
+                qrDot.className = 'w-2 h-2 rounded-full flex-shrink-0 transition-colors duration-300 bg-red-400';
+                qrName.textContent = 'Tidak tersedia';
+            }
+
+            // ── Face Camera status ──
+            if (fotoStream && faceReadyAt) {
+                const fotoCam = camerasCache?.find(c => c.id !== qrCameraId);
+                fotoDot.className = 'w-2 h-2 rounded-full flex-shrink-0 transition-colors duration-300 bg-green-400';
+                fotoName.textContent = fotoCam?.label?.replace(/\s*\(.*?\)\s*$/, '') || 'Foto Camera';
+            } else if (fotoStream && !faceReadyAt) {
+                fotoDot.className = 'w-2 h-2 rounded-full flex-shrink-0 transition-colors duration-300 bg-yellow-400 animate-pulse';
+                fotoName.textContent = 'Menginisialisasi...';
+            } else {
+                fotoDot.className = 'w-2 h-2 rounded-full flex-shrink-0 transition-colors duration-300 bg-gray-600';
+                fotoName.textContent = 'Tidak aktif';
+            }
+
+            // ── Main pill ──
+            if (fotoStream && faceReadyAt) {
+                mainDot.className = 'w-2 h-2 rounded-full transition-colors duration-300 bg-green-400';
+                modeText.textContent = 'Dual Camera';
+            } else if (qrCameraId || camerasCache?.length > 0) {
+                mainDot.className = 'w-2 h-2 rounded-full transition-colors duration-300 bg-yellow-400';
+                modeText.textContent = 'Single Camera';
+            } else {
+                mainDot.className = 'w-2 h-2 rounded-full transition-colors duration-300 bg-red-400';
+                modeText.textContent = 'Kamera Error';
             }
         }
 
