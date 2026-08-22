@@ -564,7 +564,7 @@
     @endpush
 
     {{-- ── Camera Status Badge (Fixed pojok kiri bawah) ── --}}
-    <div id="cameraStatusBadge" class="fixed bottom-4 left-4 z-50 flex flex-col items-start">
+    <div id="cameraStatusBadge" class="fixed bottom-4 right-4 z-50 flex flex-col items-end">
 
         {{-- Expanded panel (muncul di atas badge saat diklik) --}}
         <div id="camStatusPanel"
