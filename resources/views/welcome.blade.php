@@ -567,9 +567,9 @@
     <div id="cameraStatusBadge" style="position:fixed; bottom:16px; right:16px; z-index:50; display:flex; flex-direction:column; align-items:flex-end;">
 
         {{-- Expanded panel --}}
-        <div id="camStatusPanel" style="display:none; margin-bottom:8px; background:rgba(17,24,39,0.97);
-             border:1px solid rgba(75,85,99,0.6); border-radius:14px; padding:12px 14px;
-             box-shadow:0 10px 40px rgba(0,0,0,0.4); min-width:200px;">
+        <div id="camStatusPanel" style="display:none; margin-bottom:8px; background:#111827;
+             border:1px solid #374151; border-radius:14px; padding:12px 14px;
+             box-shadow:0 10px 40px rgba(0,0,0,0.5); min-width:200px;">
             <p style="font-size:10px; color:#6b7280; font-weight:700; text-transform:uppercase;
                        letter-spacing:.05em; margin:0 0 8px;">
                 <i class="fas fa-camera" style="margin-right:4px;"></i> Status Kamera
@@ -591,11 +591,11 @@
         {{-- Collapsed pill --}}
         <button onclick="toggleCameraStatus()"
                 style="display:flex; align-items:center; gap:8px;
-                       background:rgba(17,24,39,0.85); border:1px solid rgba(75,85,99,0.5);
-                       border-radius:999px; padding:6px 12px; box-shadow:0 4px 16px rgba(0,0,0,0.3);
+                       background:#111827; border:1px solid #374151;
+                       border-radius:999px; padding:6px 12px; box-shadow:0 4px 16px rgba(0,0,0,0.4);
                        cursor:pointer; transition:background .2s;"
-                onmouseover="this.style.background='rgba(31,41,55,0.95)'"
-                onmouseout="this.style.background='rgba(17,24,39,0.85)'">
+                onmouseover="this.style.background='#1f2937'"
+                onmouseout="this.style.background='#111827'">
             <span id="camMainDot" style="width:8px; height:8px; border-radius:50%; background:#6b7280;"></span>
             <span id="camModeText" style="font-size:12px; color:#d1d5db; font-weight:500;">Mendeteksi...</span>
             <i id="camChevron" class="fas fa-chevron-up" style="color:#6b7280; font-size:10px; transition:transform .2s;"></i>
