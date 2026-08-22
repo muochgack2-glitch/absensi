@@ -563,40 +563,45 @@
     </style>
     @endpush
 
-    {{-- ── Camera Status Badge (Fixed pojok kiri bawah) ── --}}
-    <div id="cameraStatusBadge" class="fixed bottom-4 right-4 z-50 flex flex-col items-end">
+    {{-- ── Camera Status Badge (Fixed pojok kanan bawah) ── --}}
+    <div id="cameraStatusBadge" style="position:fixed; bottom:16px; right:16px; z-index:50; display:flex; flex-direction:column; align-items:flex-end;">
 
-        {{-- Expanded panel (muncul di atas badge saat diklik) --}}
-        <div id="camStatusPanel"
-             class="hidden mb-2 bg-gray-900/95 backdrop-blur-sm border border-gray-700/60
-                    rounded-2xl p-3 shadow-2xl min-w-[200px] transition-all duration-200">
-            <p class="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mb-2">
-                <i class="fas fa-camera mr-1"></i> Status Kamera
+        {{-- Expanded panel --}}
+        <div id="camStatusPanel" style="display:none; margin-bottom:8px; background:rgba(17,24,39,0.97);
+             border:1px solid rgba(75,85,99,0.6); border-radius:14px; padding:12px 14px;
+             box-shadow:0 10px 40px rgba(0,0,0,0.4); min-width:200px;">
+            <p style="font-size:10px; color:#6b7280; font-weight:700; text-transform:uppercase;
+                       letter-spacing:.05em; margin:0 0 8px;">
+                <i class="fas fa-camera" style="margin-right:4px;"></i> Status Kamera
             </p>
             {{-- QR Camera --}}
-            <div class="flex items-center gap-2 mb-1.5">
-                <span id="qrStatusDot" class="w-2 h-2 rounded-full bg-gray-500 flex-shrink-0 transition-colors duration-300"></span>
-                <span class="text-[11px] text-gray-400 flex-shrink-0">QR</span>
-                <span id="qrCamName" class="text-[11px] text-white truncate max-w-[130px]">—</span>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                <span id="qrStatusDot" style="width:8px; height:8px; border-radius:50%; background:#6b7280; flex-shrink:0;"></span>
+                <span style="font-size:11px; color:#9ca3af; flex-shrink:0;">QR</span>
+                <span id="qrCamName" style="font-size:11px; color:#f9fafb; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; max-width:130px;">—</span>
             </div>
             {{-- Face Camera --}}
-            <div class="flex items-center gap-2">
-                <span id="fotoStatusDot" class="w-2 h-2 rounded-full bg-gray-500 flex-shrink-0 transition-colors duration-300"></span>
-                <span class="text-[11px] text-gray-400 flex-shrink-0">Foto</span>
-                <span id="fotoCamName" class="text-[11px] text-white truncate max-w-[130px]">—</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span id="fotoStatusDot" style="width:8px; height:8px; border-radius:50%; background:#6b7280; flex-shrink:0;"></span>
+                <span style="font-size:11px; color:#9ca3af; flex-shrink:0;">Foto</span>
+                <span id="fotoCamName" style="font-size:11px; color:#f9fafb; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; max-width:130px;">—</span>
             </div>
         </div>
 
-        {{-- Collapsed pill (selalu terlihat) --}}
+        {{-- Collapsed pill --}}
         <button onclick="toggleCameraStatus()"
-                class="flex items-center gap-2 bg-gray-900/80 backdrop-blur-sm
-                       border border-gray-700/60 rounded-full px-3 py-1.5
-                       shadow-lg hover:bg-gray-800/90 transition-all duration-200 group">
-            <span id="camMainDot" class="w-2 h-2 rounded-full bg-gray-500 transition-colors duration-300"></span>
-            <span id="camModeText" class="text-xs text-gray-300 font-medium">Mendeteksi...</span>
-            <i id="camChevron" class="fas fa-chevron-up text-gray-500 text-[10px] transition-transform duration-200"></i>
+                style="display:flex; align-items:center; gap:8px;
+                       background:rgba(17,24,39,0.85); border:1px solid rgba(75,85,99,0.5);
+                       border-radius:999px; padding:6px 12px; box-shadow:0 4px 16px rgba(0,0,0,0.3);
+                       cursor:pointer; transition:background .2s;"
+                onmouseover="this.style.background='rgba(31,41,55,0.95)'"
+                onmouseout="this.style.background='rgba(17,24,39,0.85)'">
+            <span id="camMainDot" style="width:8px; height:8px; border-radius:50%; background:#6b7280;"></span>
+            <span id="camModeText" style="font-size:12px; color:#d1d5db; font-weight:500;">Mendeteksi...</span>
+            <i id="camChevron" class="fas fa-chevron-up" style="color:#6b7280; font-size:10px; transition:transform .2s;"></i>
         </button>
     </div>
+
 
     @push('scripts')
 
@@ -863,7 +868,7 @@
             camStatusOpen = !camStatusOpen;
             const panel   = document.getElementById('camStatusPanel');
             const chevron = document.getElementById('camChevron');
-            panel.classList.toggle('hidden', !camStatusOpen);
+            panel.style.display = camStatusOpen ? 'block' : 'none';
             chevron.style.transform = camStatusOpen ? 'rotate(180deg)' : '';
         }
 
