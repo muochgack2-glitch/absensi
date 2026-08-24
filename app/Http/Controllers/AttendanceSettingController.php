@@ -115,6 +115,24 @@ class AttendanceSettingController extends Controller
             AttendanceSetting::set('absent_notify_days', $days);
         }
 
+        // Handle summary_wali_kelas_enabled checkbox
+        if (!isset($request->settings['summary_wali_kelas_enabled'])) {
+            AttendanceSetting::set('summary_wali_kelas_enabled', '0', 'notification');
+        } else {
+            AttendanceSetting::set('summary_wali_kelas_enabled', '1', 'notification');
+        }
+
+        // Handle summary send days
+        if ($request->has('settings') && isset($request->settings['summary_send_days'])) {
+            $summaryDays = $request->settings['summary_send_days'] ?? '';
+            AttendanceSetting::set('summary_send_days', $summaryDays, 'notification');
+        }
+
+        // Handle summary send time
+        if ($request->has('settings') && isset($request->settings['summary_send_time'])) {
+            AttendanceSetting::set('summary_send_time', $request->settings['summary_send_time'], 'notification');
+        }
+
         // Handle logo upload
         if ($request->hasFile('school_logo')) {
             $logo = $request->file('school_logo');
@@ -373,6 +391,30 @@ class AttendanceSettingController extends Controller
             return back()->withErrors([
                 'sql_file' => '❌ Restore gagal: ' . $e->getMessage()
             ]);
+        }
+    }
+
+    /**
+     * Kirim ringkasan kehadiran ke wali kelas sekarang (manual trigger)
+     */
+    public function sendSummaryNow(): \Illuminate\Http\JsonResponse
+    {
+        try {
+            $exitCode = \Illuminate\Support\Facades\Artisan::call('attendance:send-summary');
+            $output   = \Illuminate\Support\Facades\Artisan::output();
+
+            return response()->json([
+                'success' => $exitCode === 0,
+                'message' => $exitCode === 0
+                    ? 'Ringkasan berhasil dikirim ke wali kelas!'
+                    : 'Ada masalah saat pengiriman.',
+                'output'  => $output,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+            ], 500);
         }
     }
 }

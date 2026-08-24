@@ -354,6 +354,115 @@
                 </div>
             </x-card>
 
+            {{-- Ringkasan Kehadiran ke Wali Kelas --}}
+            <x-card>
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center text-white text-2xl mr-4">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">📊 Ringkasan Kehadiran ke Wali Kelas</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Kirim ringkasan harian (hadir/izin/alfa) ke wali kelas masing-masing kelas via WhatsApp</p>
+                    </div>
+                </div>
+
+                <div class="space-y-5">
+                    {{-- Toggle aktif --}}
+                    <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                            <label class="text-sm font-medium text-gray-900 dark:text-white">
+                                Aktifkan Ringkasan Otomatis ke Wali Kelas
+                            </label>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Sistem akan kirim WA ringkasan kehadiran ke setiap wali kelas secara otomatis</p>
+                        </div>
+                        <div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox"
+                                       name="settings[summary_wali_kelas_enabled]"
+                                       value="1"
+                                       id="summaryWaliKelasEnabled"
+                                       @if(old('settings.summary_wali_kelas_enabled', $settings['notification']['summary_wali_kelas_enabled'] ?? '0') == '1') checked @endif
+                                       onchange="toggleSummaryFields()"
+                                       class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                            </label>
+                        </div>
+                    </div>
+
+                    {{-- Sub-settings --}}
+                    <div id="summaryWaliKelasFields" class="space-y-4 {{ old('settings.summary_wali_kelas_enabled', $settings['notification']['summary_wali_kelas_enabled'] ?? '0') == '1' ? '' : 'opacity-40 pointer-events-none' }}">
+
+                        {{-- Jam pengiriman --}}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <x-input
+                                type="time"
+                                name="settings[summary_send_time]"
+                                label="Jam Pengiriman Ringkasan"
+                                :value="old('settings.summary_send_time', $settings['notification']['summary_send_time'] ?? '14:00')"
+                                helper="WA ringkasan dikirim ke wali kelas pada jam ini"
+                            />
+                        </div>
+
+                        {{-- Hari aktif --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">📅 Hari Pengiriman Ringkasan</label>
+                            @php
+                                $summaryDays = old('settings.summary_send_days',
+                                    $settings['notification']['summary_send_days'] ?? '1,2,3,4,5'
+                                );
+                                $summaryDaysArr = explode(',', $summaryDays);
+                                $dayNames = ['1'=>'Senin','2'=>'Selasa','3'=>'Rabu','4'=>'Kamis','5'=>'Jumat','6'=>'Sabtu'];
+                            @endphp
+                            <input type="hidden" name="settings[summary_send_days]" value="" id="summaryDaysHidden">
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($dayNames as $num => $name)
+                                    <label class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 cursor-pointer transition-all
+                                        {{ in_array($num, $summaryDaysArr)
+                                            ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
+                                            : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400' }}"
+                                        id="summaryDayLabel{{ $num }}"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            name="summary_days[]"
+                                            value="{{ $num }}"
+                                            {{ in_array($num, $summaryDaysArr) ? 'checked' : '' }}
+                                            onchange="updateSummaryDayStyle(this, '{{ $num }}')"
+                                            class="accent-green-500"
+                                        >
+                                        {{ $name }}
+                                    </label>
+                                @endforeach
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Pilih hari pengiriman ringkasan ke wali kelas</p>
+                        </div>
+
+                        {{-- Info persyaratan --}}
+                        <div class="p-4 bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 rounded">
+                            <h4 class="font-semibold text-green-900 dark:text-green-300 mb-2">📋 Persyaratan:</h4>
+                            <ul class="text-xs text-green-800 dark:text-green-400 space-y-1 list-disc list-inside">
+                                <li>Setiap kelas harus memiliki wali kelas yang terdaftar di sistem</li>
+                                <li>Nomor HP wali kelas harus diisi di profil pengguna</li>
+                                <li>WhatsApp Gateway harus aktif saat jam pengiriman</li>
+                                <li>Cron job Laravel harus terpasang di server</li>
+                            </ul>
+                        </div>
+
+                        {{-- Tombol kirim manual --}}
+                        <div class="flex items-center gap-3">
+                            <button type="button"
+                                    onclick="sendSummaryNow()"
+                                    class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-all duration-200">
+                                <i class="fas fa-paper-plane mr-2"></i>
+                                Kirim Ringkasan Sekarang
+                            </button>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Kirim manual ke semua wali kelas hari ini</p>
+                        </div>
+                        <div id="summaryResult" class="hidden"></div>
+                    </div>
+                </div>
+            </x-card>
+
             {{-- Late Warning Settings --}}
             <x-card>
                 <div class="flex items-center mb-6">
@@ -865,6 +974,60 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
             }
         }
 
+        // ===== Toggle summary wali kelas fields =====
+        function toggleSummaryFields() {
+            const checkbox = document.getElementById('summaryWaliKelasEnabled');
+            const fields   = document.getElementById('summaryWaliKelasFields');
+            if (checkbox.checked) {
+                fields.classList.remove('opacity-40', 'pointer-events-none');
+            } else {
+                fields.classList.add('opacity-40', 'pointer-events-none');
+            }
+        }
+
+        function updateSummaryDayStyle(checkbox, num) {
+            const label = document.getElementById('summaryDayLabel' + num);
+            if (checkbox.checked) {
+                label.className = label.className.replace(/border-gray-300[^'"]*/g, '');
+                label.classList.add('border-green-500', 'bg-green-50', 'text-green-700');
+                label.classList.remove('border-gray-300', 'text-gray-600');
+            } else {
+                label.classList.remove('border-green-500', 'bg-green-50', 'text-green-700');
+                label.classList.add('border-gray-300', 'text-gray-600');
+            }
+        }
+
+        async function sendSummaryNow() {
+            const btn    = event.currentTarget;
+            const result = document.getElementById('summaryResult');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mengirim...';
+            result.className = 'mt-3 p-3 rounded-lg text-sm bg-blue-50 text-blue-700';
+            result.textContent = 'Sedang mengirim ringkasan ke wali kelas...';
+            result.classList.remove('hidden');
+
+            try {
+                const res = await fetch('{{ route("attendance.settings.send-summary") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    }
+                });
+                const data = await res.json();
+                result.className = 'mt-3 p-3 rounded-lg text-sm ' +
+                    (data.success ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700');
+                result.innerHTML = '<strong>' + data.message + '</strong>' +
+                    (data.output ? '<pre class="mt-2 text-xs whitespace-pre-wrap">' + data.output + '</pre>' : '');
+            } catch (e) {
+                result.className = 'mt-3 p-3 rounded-lg text-sm bg-red-50 text-red-700';
+                result.textContent = 'Gagal terhubung ke server.';
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Kirim Ringkasan Sekarang';
+        }
+
         // ===== Toggle late warning fields =====
         function toggleLateWarningFields() {
             const checkbox = document.getElementById('lateWarningEnabled');
@@ -896,6 +1059,11 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                 const checked = [...document.querySelectorAll('input[name="absent_days[]"]:checked')]
                     .map(el => el.value);
                 document.querySelector('input[name="settings[absent_notify_days]"]').value = checked.join(',');
+
+                // Kumpulkan hari ringkasan ke settings[summary_send_days]
+                const summaryChecked = [...document.querySelectorAll('input[name="summary_days[]"]:checked')]
+                    .map(el => el.value);
+                document.getElementById('summaryDaysHidden').value = summaryChecked.join(',');
             });
 
         // ===== Copy command ke clipboard =====
