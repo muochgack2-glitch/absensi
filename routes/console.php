@@ -67,3 +67,34 @@ Schedule::command('holidays:sync')
   ->withoutOverlapping()
   ->appendOutputTo(storage_path('logs/holiday-sync.log'));
 
+/*
+|--------------------------------------------------------------------------
+| Ringkasan Kehadiran Harian ke Wali Kelas
+|--------------------------------------------------------------------------
+|
+| Kirim ringkasan kehadiran ke wali kelas setiap hari kerja.
+| Waktu kirim bisa diatur dari setting: summary_send_time (default: 14:00)
+| Bisa juga dijalankan manual: php artisan attendance:send-summary
+|
+*/
+Schedule::call(function () {
+    $enabled   = AttendanceSetting::get('summary_wali_kelas_enabled', '0');
+    $sendTime  = AttendanceSetting::get('summary_send_time', '14:00');
+    $sendDays  = AttendanceSetting::get('summary_send_days', '1,2,3,4,5');
+
+    if ($enabled !== '1') return;
+
+    $todayDow  = now()->timezone('Asia/Jakarta')->dayOfWeekIso;
+    $activeDays = array_filter(explode(',', $sendDays));
+    if (!in_array((string) $todayDow, $activeDays)) return;
+
+    $now = now()->timezone('Asia/Jakarta')->format('H:i');
+    if ($now < $sendTime) return;
+
+    Artisan::call('attendance:send-summary');
+})
+  ->everyMinute()
+  ->name('summary-wali-kelas')
+  ->timezone('Asia/Jakarta')
+  ->withoutOverlapping()
+  ->appendOutputTo(storage_path('logs/attendance-summary.log'));
