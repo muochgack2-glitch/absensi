@@ -611,6 +611,7 @@
         let lastScannedNis = null;
         let recentScans = [];
         let autoCloseTimer = null; // Timer untuk auto-close modal
+        const MODAL_AUTO_CLOSE = {{ (int) (\App\Models\AttendanceSetting::get('modal_auto_close', '3')) }}; // detik
 
         // --- Dual Camera Config (dari server setting) ---
         const DUAL_CAMERA = {{ ($useDualCamera ?? '0') === '1' ? 'true' : 'false' }};
@@ -1172,8 +1173,8 @@
             // 6. Play sound (if exists)
             playNotificationSound();
 
-            // 7. Start countdown timer (3 seconds)
-            startAutoCloseCountdown(3);
+            // 7. Start countdown timer (dari setting)
+            startAutoCloseCountdown(MODAL_AUTO_CLOSE);
         }
 
         function showError(message, errorData = null) {
@@ -1282,7 +1283,7 @@
             modalOverlay.classList.remove('hidden');
 
             // 4. Start countdown timer (3 seconds for errors)
-            startAutoCloseCountdown(3);
+            startAutoCloseCountdown(MODAL_AUTO_CLOSE);
         }
 
         function hideModal() {

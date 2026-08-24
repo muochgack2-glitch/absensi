@@ -85,6 +85,17 @@
                             helper="Siswa otomatis alpha jika belum absen sampai jam ini"
                             required
                         />
+
+                        {{-- Modal Auto Close --}}
+                        <x-input
+                            type="number"
+                            name="settings[modal_auto_close]"
+                            label="⏱️ Popup Auto-tutup (detik)"
+                            :value="old('settings.modal_auto_close', $settings['general']['modal_auto_close'] ?? $settings['time']['modal_auto_close'] ?? '3')"
+                            min="1"
+                            max="10"
+                            helper="Popup scan otomatis tutup setelah X detik (1–10)"
+                        />
                     </div>
 
                     {{-- Example Timeline --}}
