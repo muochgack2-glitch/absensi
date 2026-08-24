@@ -754,6 +754,33 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                         </p>
                     </div>
 
+                    {{-- Resolusi Kamera --}}
+                    <div class="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                            📹 Resolusi Kamera Scanner
+                        </label>
+                        @php $currentRes = $settings['camera']['scan_resolution'] ?? $settings['general']['scan_resolution'] ?? 'hd'; @endphp
+                        <div class="grid grid-cols-3 gap-3">
+                            @foreach(['sd' => ['label'=>'SD','desc'=>'640×480','note'=>'Hemat bandwidth'], 'hd' => ['label'=>'HD','desc'=>'1280×720','note'=>'✅ Recommended'], 'fhd' => ['label'=>'FHD','desc'=>'1920×1080','note'=>'Butuh webcam HD']] as $val => $info)
+                            <label class="cursor-pointer">
+                                <input type="radio" name="settings[scan_resolution]" value="{{ $val }}"
+                                       {{ old('settings.scan_resolution', $currentRes) === $val ? 'checked' : '' }}
+                                       class="sr-only peer">
+                                <div class="p-3 rounded-lg border-2 text-center transition-all
+                                    peer-checked:border-purple-500 peer-checked:bg-purple-100 dark:peer-checked:bg-purple-900/40
+                                    border-gray-200 dark:border-gray-600 hover:border-purple-300">
+                                    <div class="font-bold text-sm text-gray-900 dark:text-white">{{ $info['label'] }}</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ $info['desc'] }}</div>
+                                    <div class="text-xs text-purple-600 dark:text-purple-400 mt-1">{{ $info['note'] }}</div>
+                                </div>
+                            </label>
+                            @endforeach
+                        </div>
+                        <p class="text-xs text-purple-700 dark:text-purple-400 mt-2">
+                            Resolusi lebih tinggi = gambar lebih jelas, tapi lebih berat. Untuk QR scan, HD sudah cukup.
+                        </p>
+                    </div>
+
                     {{-- Dropdown + Preview per kamera --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 

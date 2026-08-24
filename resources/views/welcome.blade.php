@@ -612,7 +612,8 @@
         let recentScans = [];
         let autoCloseTimer = null; // Timer untuk auto-close modal
         const MODAL_AUTO_CLOSE = {{ (int) (\App\Models\AttendanceSetting::get('modal_auto_close', '3')) }}; // detik
-        const SCAN_FPS = {{ (int) (\App\Models\AttendanceSetting::get('scan_fps', '10')) }}; // frame per detik scan kamera
+        const SCAN_FPS = {{ (int) (\App\Models\AttendanceSetting::get('scan_fps', '10')) }}; // frame per detik
+        const SCAN_RESOLUTION = '{{ \App\Models\AttendanceSetting::get('scan_resolution', 'hd') }}'; // sd|hd|fhd
 
         // --- Dual Camera Config (dari server setting) ---
         const DUAL_CAMERA = {{ ($useDualCamera ?? '0') === '1' ? 'true' : 'false' }};
@@ -715,6 +716,14 @@
             const Html5Qrcode = window.Html5Qrcode;
             html5QrCode = new Html5Qrcode("reader");
 
+            // Preset resolusi kamera dari setting
+            const resolutionMap = {
+                'sd':  { width: { ideal: 640,  max: 854  }, height: { ideal: 480,  max: 600  } },
+                'hd':  { width: { ideal: 1280, max: 1920 }, height: { ideal: 720,  max: 1080 } },
+                'fhd': { width: { ideal: 1920, max: 2560 }, height: { ideal: 1080, max: 1440 } },
+            };
+            const camResolution = resolutionMap[SCAN_RESOLUTION] || resolutionMap['hd'];
+
             // Config default (single camera / facingMode)
             const configDefault = {
                 fps: SCAN_FPS,
@@ -724,8 +733,8 @@
                 rememberLastUsedCamera: true,
                 videoConstraints: {
                     facingMode: "environment",
-                    width: { ideal: 1280, max: 1920 },
-                    height: { ideal: 720, max: 1080 }
+                    width: camResolution.width,
+                    height: camResolution.height
                 }
             };
 
