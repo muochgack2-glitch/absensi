@@ -819,6 +819,11 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                     </div>
 
                     <script>
+                    const resMap = {
+                        'sd':  { width: { ideal: 640  }, height: { ideal: 480  } },
+                        'hd':  { width: { ideal: 1280 }, height: { ideal: 720  } },
+                        'fhd': { width: { ideal: 1920 }, height: { ideal: 1080 } },
+                    };
                     function selectResCard(clickedLabel, group, color) {
                         // Reset semua kartu di group ini
                         document.querySelectorAll('[data-group="' + group + '"]').forEach(function(card) {
@@ -829,7 +834,18 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                         var card = clickedLabel.querySelector('[data-group="' + group + '"]');
                         if (card) {
                             card.style.borderColor = color;
-                            card.style.background  = color + '22'; // transparan 13%
+                            card.style.background  = color + '22';
+                        }
+                        // Restart preview kamera dengan resolusi baru (jika preview aktif)
+                        var role = group === 'res-qr' ? 'qr' : 'photo';
+                        var radio = clickedLabel.querySelector('input[type=radio]');
+                        var resKey = radio ? radio.value : 'hd';
+                        if (typeof camStreams !== 'undefined' && camStreams[role]) {
+                            var deviceId = camStreams[role].getVideoTracks()[0]?.getSettings()?.deviceId;
+                            if (deviceId) {
+                                stopCamPreview(role);
+                                openCamPreview(role, deviceId, resMap[resKey]);
+                            }
                         }
                     }
                     </script>
@@ -1305,11 +1321,12 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
             if (cam) openCamPreview(role, cam.deviceId);
         }
 
-        async function openCamPreview(role, deviceId) {
+        async function openCamPreview(role, deviceId, resConstraint) {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { deviceId: { exact: deviceId } } // native resolution
-                });
+                const videoConstraint = resConstraint
+                    ? { deviceId: { exact: deviceId }, width: resConstraint.width, height: resConstraint.height }
+                    : { deviceId: { exact: deviceId } };
+                const stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraint });
                 camStreams[role] = stream;
 
                 const video = document.getElementById(role + '-preview-video');
