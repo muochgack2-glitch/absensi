@@ -91,7 +91,7 @@ class SendAttendanceSummary extends Command
             if ($dryRun) { $sent++; continue; }
 
             try {
-                $result = $this->waService->send($wali->phone, $message, ['type' => 'summary', 'sent_by' => 'system']);
+                $result = $this->waService->send($wali->phone, $message, ['type' => 'summary', 'sent_by' => null]);
                 if ($result['success'] ?? false) {
                     $this->info("  Terkirim ke {$wali->name} ({$wali->phone})");
                     $sent++;
