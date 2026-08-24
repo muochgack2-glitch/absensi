@@ -84,12 +84,20 @@ Schedule::call(function () {
 
     if ($enabled !== '1') return;
 
-    $todayDow  = now()->timezone('Asia/Jakarta')->dayOfWeekIso;
+    $todayDow   = now()->timezone('Asia/Jakarta')->dayOfWeekIso;
     $activeDays = array_filter(explode(',', $sendDays));
     if (!in_array((string) $todayDow, $activeDays)) return;
 
     $now = now()->timezone('Asia/Jakarta')->format('H:i');
     if ($now < $sendTime) return;
+
+    // Cek apakah sudah dikirim hari ini — hindari kirim berulang
+    $today        = now()->timezone('Asia/Jakarta')->toDateString(); // Y-m-d
+    $lastSentDate = AttendanceSetting::get('summary_last_sent_date', '');
+    if ($lastSentDate === $today) return; // sudah dikirim hari ini
+
+    // Tandai sudah dikirim SEBELUM jalankan agar tidak race condition
+    AttendanceSetting::set('summary_last_sent_date', $today);
 
     Artisan::call('attendance:send-summary');
 })
