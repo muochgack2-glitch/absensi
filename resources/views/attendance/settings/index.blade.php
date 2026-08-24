@@ -397,9 +397,16 @@
                             <x-input
                                 type="time"
                                 name="settings[summary_send_time]"
-                                label="Jam Pengiriman Ringkasan"
-                                :value="old('settings.summary_send_time', $settings['notification']['summary_send_time'] ?? '14:00')"
-                                helper="WA ringkasan dikirim ke wali kelas pada jam ini"
+                                label="🌅 Jam Ringkasan Masuk"
+                                :value="old('settings.summary_send_time', $settings['notification']['summary_send_time'] ?? '09:00')"
+                                helper="Ringkasan kehadiran masuk dikirim pada jam ini"
+                            />
+                            <x-input
+                                type="time"
+                                name="settings[summary_pulang_send_time]"
+                                label="🌆 Jam Ringkasan Pulang"
+                                :value="old('settings.summary_pulang_send_time', $settings['notification']['summary_pulang_send_time'] ?? '15:00')"
+                                helper="Ringkasan kehadiran pulang dikirim pada jam ini"
                             />
                         </div>
 

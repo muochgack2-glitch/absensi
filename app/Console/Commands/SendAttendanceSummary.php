@@ -12,11 +12,12 @@ use Carbon\Carbon;
 class SendAttendanceSummary extends Command
 {
     protected $signature = 'attendance:send-summary
-                            {--date= : Tanggal ringkasan (Y-m-d, default: hari ini)}
-                            {--class= : ID kelas tertentu (default: semua kelas aktif)}
-                            {--dry-run : Tampilkan ringkasan tanpa benar-benar mengirim WA}';
+                            {--date=    : Tanggal ringkasan (Y-m-d, default: hari ini)}
+                            {--class=   : ID kelas tertentu (default: semua kelas aktif)}
+                            {--type=masuk : Jenis ringkasan: masuk atau pulang}
+                            {--dry-run  : Tampilkan ringkasan tanpa benar-benar mengirim WA}';
 
-    protected $description = 'Kirim ringkasan kehadiran harian ke wali kelas via WhatsApp';
+    protected $description = 'Kirim ringkasan kehadiran (masuk/pulang) ke wali kelas via WhatsApp';
 
     public function __construct(
         protected AttendanceWhatsAppService $waService
@@ -32,9 +33,11 @@ class SendAttendanceSummary extends Command
 
         $classId = $this->option('class');
         $dryRun  = $this->option('dry-run');
+        $type    = $this->option('type') ?? 'masuk'; // masuk | pulang
         $dayName = Carbon::parse($date)->locale('id')->translatedFormat('l, d F Y');
 
-        $this->info("Mengirim ringkasan kehadiran: {$dayName}");
+        $label = $type === 'pulang' ? '🌆 Ringkasan Pulang' : '🌅 Ringkasan Masuk';
+        $this->info("{$label}: {$dayName}");
         if ($dryRun) $this->warn('-- DRY RUN: pesan tidak akan dikirim --');
 
         $query = AttendanceClass::with('waliKelas')
@@ -84,9 +87,17 @@ class SendAttendanceSummary extends Command
             $alfa  = count($alfaStudents);
             $hadir = max(0, $totalSiswa - $alfa - $izin);
 
-            $message = $this->buildMessage($kelas->nama_kelas, $dayName, $totalSiswa, $hadir, $izin, $alfa, $alfaStudents);
-
-            $this->line("  {$kelas->nama_kelas} | Hadir:{$hadir} Izin:{$izin} Alfa:{$alfa} Total:{$totalSiswa}");
+            if ($type === 'pulang') {
+                // Hitung yang sudah check-out
+                $pulangIds    = $records->whereNotNull('check_out_time')->pluck('student_id')->toArray();
+                $belumPulang  = count($hadirIds) - count(array_intersect($hadirIds, $pulangIds));
+                $belumPulang  = max(0, $belumPulang);
+                $message = $this->buildPulangMessage($kelas->nama_kelas, $dayName, $totalSiswa, $hadir, $izin, $alfa, count($pulangIds), $belumPulang);
+                $this->line("  {$kelas->nama_kelas} | Hadir:{$hadir} Sudah pulang:".count($pulangIds)." Belum:{$belumPulang}");
+            } else {
+                $message = $this->buildMasukMessage($kelas->nama_kelas, $dayName, $totalSiswa, $hadir, $izin, $alfa, $alfaStudents);
+                $this->line("  {$kelas->nama_kelas} | Hadir:{$hadir} Izin:{$izin} Alfa:{$alfa} Total:{$totalSiswa}");
+            }
 
             if ($dryRun) { $sent++; continue; }
 
@@ -110,12 +121,12 @@ class SendAttendanceSummary extends Command
         return Command::SUCCESS;
     }
 
-    protected function buildMessage(string $namaKelas, string $tanggal, int $total, int $hadir, int $izin, int $alfa, array $alfaStudents): string
+    protected function buildMasukMessage(string $namaKelas, string $tanggal, int $total, int $hadir, int $izin, int $alfa, array $alfaStudents): string
     {
         $persen = $total > 0 ? round(($hadir / $total) * 100) : 0;
 
         $lines = [
-            "*RINGKASAN KEHADIRAN HARIAN*",
+            "*RINGKASAN KEHADIRAN MASUK*",
             "Kelas  : *{$namaKelas}*",
             "Tanggal: {$tanggal}",
             "",
@@ -133,6 +144,27 @@ class SendAttendanceSummary extends Command
                 $lines[] = ($i + 1) . ". {$nama}";
             }
         }
+
+        $lines[] = "";
+        $lines[] = "_Sistem Absensi SMK PGRI Blora_";
+
+        return implode("\n", $lines);
+    }
+
+    protected function buildPulangMessage(string $namaKelas, string $tanggal, int $total, int $hadir, int $izin, int $alfa, int $sudahPulang, int $belumPulang): string
+    {
+        $lines = [
+            "*RINGKASAN KEPULANGAN*",
+            "Kelas  : *{$namaKelas}*",
+            "Tanggal: {$tanggal}",
+            "",
+            "Hadir hari ini : {$hadir} siswa",
+            "Sudah pulang   : {$sudahPulang} siswa",
+            "Belum pulang   : {$belumPulang} siswa",
+            "Izin           : {$izin} siswa",
+            "Alfa           : {$alfa} siswa",
+            "Total          : {$total} siswa",
+        ];
 
         $lines[] = "";
         $lines[] = "_Sistem Absensi SMK PGRI Blora_";

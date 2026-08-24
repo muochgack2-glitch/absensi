@@ -128,9 +128,14 @@ class AttendanceSettingController extends Controller
             AttendanceSetting::set('summary_send_days', $summaryDays, 'notification');
         }
 
-        // Handle summary send time
+        // Handle summary send time (masuk)
         if ($request->has('settings') && isset($request->settings['summary_send_time'])) {
             AttendanceSetting::set('summary_send_time', $request->settings['summary_send_time'], 'notification');
+        }
+
+        // Handle summary pulang send time
+        if ($request->has('settings') && isset($request->settings['summary_pulang_send_time'])) {
+            AttendanceSetting::set('summary_pulang_send_time', $request->settings['summary_pulang_send_time'], 'notification');
         }
 
         // Handle logo upload

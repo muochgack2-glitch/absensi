@@ -69,17 +69,12 @@ Schedule::command('holidays:sync')
 
 /*
 |--------------------------------------------------------------------------
-| Ringkasan Kehadiran Harian ke Wali Kelas
+| Ringkasan Masuk ke Wali Kelas
 |--------------------------------------------------------------------------
-|
-| Kirim ringkasan kehadiran ke wali kelas setiap hari kerja.
-| Waktu kirim bisa diatur dari setting: summary_send_time (default: 14:00)
-| Bisa juga dijalankan manual: php artisan attendance:send-summary
-|
 */
 Schedule::call(function () {
     $enabled   = AttendanceSetting::get('summary_wali_kelas_enabled', '0');
-    $sendTime  = AttendanceSetting::get('summary_send_time', '14:00');
+    $sendTime  = AttendanceSetting::get('summary_send_time', '09:00');
     $sendDays  = AttendanceSetting::get('summary_send_days', '1,2,3,4,5');
 
     if ($enabled !== '1') return;
@@ -91,18 +86,48 @@ Schedule::call(function () {
     $now = now()->timezone('Asia/Jakarta')->format('H:i');
     if ($now < $sendTime) return;
 
-    // Cek apakah sudah dikirim hari ini — hindari kirim berulang
-    $today        = now()->timezone('Asia/Jakarta')->toDateString(); // Y-m-d
-    $lastSentDate = AttendanceSetting::get('summary_last_sent_date', '');
-    if ($lastSentDate === $today) return; // sudah dikirim hari ini
+    // Cek sudah dikirim hari ini
+    $today = now()->timezone('Asia/Jakarta')->toDateString();
+    if (AttendanceSetting::get('summary_last_sent_date', '') === $today) return;
 
-    // Tandai sudah dikirim SEBELUM jalankan agar tidak race condition
     AttendanceSetting::set('summary_last_sent_date', $today);
-
-    Artisan::call('attendance:send-summary');
+    Artisan::call('attendance:send-summary', ['--type' => 'masuk']);
 })
   ->everyMinute()
-  ->name('summary-wali-kelas')
+  ->name('summary-masuk-wali-kelas')
   ->timezone('Asia/Jakarta')
   ->withoutOverlapping()
   ->appendOutputTo(storage_path('logs/attendance-summary.log'));
+
+/*
+|--------------------------------------------------------------------------
+| Ringkasan Pulang ke Wali Kelas
+|--------------------------------------------------------------------------
+*/
+Schedule::call(function () {
+    $enabled   = AttendanceSetting::get('summary_wali_kelas_enabled', '0');
+    $sendTime  = AttendanceSetting::get('summary_pulang_send_time', '15:00');
+    $sendDays  = AttendanceSetting::get('summary_send_days', '1,2,3,4,5');
+
+    if ($enabled !== '1') return;
+
+    $todayDow   = now()->timezone('Asia/Jakarta')->dayOfWeekIso;
+    $activeDays = array_filter(explode(',', $sendDays));
+    if (!in_array((string) $todayDow, $activeDays)) return;
+
+    $now = now()->timezone('Asia/Jakarta')->format('H:i');
+    if ($now < $sendTime) return;
+
+    // Cek sudah dikirim hari ini
+    $today = now()->timezone('Asia/Jakarta')->toDateString();
+    if (AttendanceSetting::get('summary_pulang_last_sent_date', '') === $today) return;
+
+    AttendanceSetting::set('summary_pulang_last_sent_date', $today);
+    Artisan::call('attendance:send-summary', ['--type' => 'pulang']);
+})
+  ->everyMinute()
+  ->name('summary-pulang-wali-kelas')
+  ->timezone('Asia/Jakarta')
+  ->withoutOverlapping()
+  ->appendOutputTo(storage_path('logs/attendance-summary.log'));
+
