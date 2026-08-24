@@ -218,6 +218,9 @@ class AttendanceWhatsAppService
      */
     public function send(string $phone, string $message, array $options = []): array
     {
+        // Normalisasi nomor HP sebelum dikirim
+        $phone = $this->normalizePhone($phone);
+
         // Get appropriate gateway URL based on context
         $serverUrl = $this->getActiveServerUrl($options['type'] ?? null);
         
@@ -356,6 +359,9 @@ class AttendanceWhatsAppService
      */
     public function sendWithMedia(string $phone, string $caption, string $mediaPath, array $options = []): array
     {
+        // Normalisasi nomor HP sebelum dikirim
+        $phone = $this->normalizePhone($phone);
+
         // Get appropriate gateway URL
         $serverUrl = $this->getActiveServerUrl($options['type'] ?? null);
         
@@ -675,5 +681,31 @@ class AttendanceWhatsAppService
             'total_templates' => WhatsAppTemplate::count(),
             'active_templates' => WhatsAppTemplate::active()->count(),
         ];
+    }
+
+    /**
+     * Normalisasi nomor HP ke format 62xxxxxxxxxx
+     * Handle berbagai format: 08xx, +62xx, 62xx@c.us, spasi, strip, dll
+     *
+     * @param string $phone
+     * @return string
+     */
+    public function normalizePhone(string $phone): string
+    {
+        // Hapus whitespace, strip, kurung, dan suffix @c.us / @s.whatsapp.net
+        $phone = preg_replace('/\s+|[-().@c.us@s.whatsapp.net]/', '', $phone);
+        $phone = preg_replace('/@.*$/', '', $phone); // hapus bagian setelah @
+        $phone = preg_replace('/[^0-9]/', '', $phone); // hanya angka
+
+        // Konversi ke format 62xxx
+        if (str_starts_with($phone, '0')) {
+            $phone = '62' . substr($phone, 1);
+        } elseif (str_starts_with($phone, '+62')) {
+            $phone = '62' . substr($phone, 3);
+        } elseif (!str_starts_with($phone, '62')) {
+            $phone = '62' . $phone;
+        }
+
+        return $phone;
     }
 }
