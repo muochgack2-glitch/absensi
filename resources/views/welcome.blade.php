@@ -1095,10 +1095,16 @@
                     bg: 'from-gray-400 to-gray-500',
                     icon: 'fa-times-circle',
                     text: 'text-gray-600'
+                },
+                'pulang': {
+                    bg: 'from-blue-400 to-indigo-500',
+                    icon: 'fa-person-walking-arrow-right',
+                    text: 'text-blue-600'
                 }
             };
 
-            const status = result.data?.status || 'hadir';
+            // Check-out tidak punya status terlambat — paksa warna pulang (biru)
+            const status = isCheckIn ? (result.data?.status || 'hadir') : 'pulang';
             const colors = statusColors[status] || statusColors['hadir'];
 
             // Icon based on action
@@ -1137,7 +1143,7 @@
                         </div>
                         <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
                             <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Status</p>
-                            <p class="text-sm font-bold ${colors.text}">${(result.data?.status || 'hadir').toUpperCase()}</p>
+                            <p class="text-sm font-bold ${colors.text}">${isCheckIn ? (result.data?.status || 'hadir').toUpperCase() : 'PULANG'}</p>
                         </div>
                     </div>
 
