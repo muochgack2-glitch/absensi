@@ -107,6 +107,11 @@ class AttendanceSettingController extends Controller
         AttendanceSetting::set('qr_camera_deviceid',   $request->input('settings.qr_camera_deviceid',   ''), 'camera');
         AttendanceSetting::set('photo_camera_deviceid',$request->input('settings.photo_camera_deviceid',''), 'camera');
 
+        // Simpan agresivitas scan (FPS) — pastikan dalam range 5–30
+        $scanFps = (int) $request->input('settings.scan_fps', 10);
+        $scanFps = max(5, min(30, $scanFps));
+        AttendanceSetting::set('scan_fps', $scanFps, 'camera');
+
 
         // Handle absent notify days (dari checkbox terpisah, sudah dikumpulkan JS)
         // Jika kosong (semua dicentang batal), simpan string kosong

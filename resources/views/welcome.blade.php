@@ -612,6 +612,7 @@
         let recentScans = [];
         let autoCloseTimer = null; // Timer untuk auto-close modal
         const MODAL_AUTO_CLOSE = {{ (int) (\App\Models\AttendanceSetting::get('modal_auto_close', '3')) }}; // detik
+        const SCAN_FPS = {{ (int) (\App\Models\AttendanceSetting::get('scan_fps', '10')) }}; // frame per detik scan kamera
 
         // --- Dual Camera Config (dari server setting) ---
         const DUAL_CAMERA = {{ ($useDualCamera ?? '0') === '1' ? 'true' : 'false' }};
@@ -716,7 +717,7 @@
 
             // Config default (single camera / facingMode)
             const configDefault = {
-                fps: 30,
+                fps: SCAN_FPS,
                 qrbox: 300,
                 aspectRatio: 1.0,
                 disableFlip: false,
@@ -730,7 +731,7 @@
 
             // Config dual camera: TANPA videoConstraints agar deviceId dipatuhi penuh
             const configDual = {
-                fps: 30,
+                fps: SCAN_FPS,
                 qrbox: 300,
                 aspectRatio: 1.0,
                 disableFlip: false,

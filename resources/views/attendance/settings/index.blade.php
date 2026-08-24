@@ -726,6 +726,34 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                         </label>
                     </div>
 
+                    {{-- Scan FPS (Agresivitas scan) --}}
+                    <div class="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-700">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            🎯 Agresivitas Scan Kamera (FPS)
+                        </label>
+                        @php $currentFps = (int) ($settings['camera']['scan_fps'] ?? $settings['general']['scan_fps'] ?? 10); @endphp
+                        <div class="flex items-center gap-4">
+                            <input type="range"
+                                   name="settings[scan_fps]"
+                                   id="scanFpsRange"
+                                   min="5" max="30" step="5"
+                                   value="{{ old('settings.scan_fps', $currentFps) }}"
+                                   oninput="document.getElementById('scanFpsVal').textContent = this.value"
+                                   class="flex-1 accent-indigo-500">
+                            <span class="text-sm font-bold text-indigo-700 dark:text-indigo-300 w-16 text-center">
+                                <span id="scanFpsVal">{{ $currentFps }}</span> fps
+                            </span>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-400 mt-1 px-1">
+                            <span>5 — Hemat baterai</span>
+                            <span>15 — Seimbang</span>
+                            <span>30 — Cepat</span>
+                        </div>
+                        <p class="text-xs text-indigo-700 dark:text-indigo-400 mt-2">
+                            Semakin tinggi = scan lebih cepat & responsif, tapi lebih boros CPU. Default: <strong>10 fps</strong>
+                        </p>
+                    </div>
+
                     {{-- Dropdown + Preview per kamera --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
