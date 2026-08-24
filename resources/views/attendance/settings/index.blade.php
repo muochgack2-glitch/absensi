@@ -774,15 +774,16 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                             </label>
                             <div class="grid grid-cols-3 gap-2">
                                 @foreach($resOptions as $val => $info)
-                                <label class="cursor-pointer">
+                                <label class="cursor-pointer" onclick="selectResCard(this, 'res-qr', '#6366f1')">
                                     <input type="radio" name="settings[scan_resolution_qr]" value="{{ $val }}"
                                            {{ old('settings.scan_resolution_qr', $currentResQr) === $val ? 'checked' : '' }}
-                                           class="sr-only peer">
-                                    <div class="p-2 rounded-lg border-2 text-center transition-all
-                                        peer-checked:border-indigo-500 peer-checked:bg-indigo-100 dark:peer-checked:bg-indigo-900/40
-                                        border-gray-200 dark:border-gray-600 hover:border-indigo-300">
+                                           class="sr-only">
+                                    <div data-group="res-qr"
+                                         style="{{ old('settings.scan_resolution_qr', $currentResQr) === $val ? 'border-color:#6366f1;background:#eef2ff;' : '' }}"
+                                         class="p-2 rounded-lg border-2 border-gray-200 text-center transition-all hover:border-indigo-300">
                                         <div class="font-bold text-sm text-gray-900 dark:text-white">{{ $info['label'] }}</div>
                                         <div class="text-xs text-gray-500">{{ $info['desc'] }}</div>
+                                        <div class="text-xs text-indigo-500 mt-1">{{ $info['note'] }}</div>
                                     </div>
                                 </label>
                                 @endforeach
@@ -796,15 +797,16 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                             </label>
                             <div class="grid grid-cols-3 gap-2">
                                 @foreach($resOptions as $val => $info)
-                                <label class="cursor-pointer">
+                                <label class="cursor-pointer" onclick="selectResCard(this, 'res-photo', '#a855f7')">
                                     <input type="radio" name="settings[scan_resolution_photo]" value="{{ $val }}"
                                            {{ old('settings.scan_resolution_photo', $currentResPhoto) === $val ? 'checked' : '' }}
-                                           class="sr-only peer">
-                                    <div class="p-2 rounded-lg border-2 text-center transition-all
-                                        peer-checked:border-purple-500 peer-checked:bg-purple-100 dark:peer-checked:bg-purple-900/40
-                                        border-gray-200 dark:border-gray-600 hover:border-purple-300">
+                                           class="sr-only">
+                                    <div data-group="res-photo"
+                                         style="{{ old('settings.scan_resolution_photo', $currentResPhoto) === $val ? 'border-color:#a855f7;background:#faf5ff;' : '' }}"
+                                         class="p-2 rounded-lg border-2 border-gray-200 text-center transition-all hover:border-purple-300">
                                         <div class="font-bold text-sm text-gray-900 dark:text-white">{{ $info['label'] }}</div>
                                         <div class="text-xs text-gray-500">{{ $info['desc'] }}</div>
+                                        <div class="text-xs text-purple-500 mt-1">{{ $info['note'] }}</div>
                                     </div>
                                 </label>
                                 @endforeach
@@ -815,6 +817,22 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                             Resolusi lebih tinggi = gambar lebih jelas, tapi lebih berat. Untuk QR scan, HD sudah cukup.
                         </p>
                     </div>
+
+                    <script>
+                    function selectResCard(clickedLabel, group, color) {
+                        // Reset semua kartu di group ini
+                        document.querySelectorAll('[data-group="' + group + '"]').forEach(function(card) {
+                            card.style.borderColor = '';
+                            card.style.background  = '';
+                        });
+                        // Highlight kartu yang dipilih
+                        var card = clickedLabel.querySelector('[data-group="' + group + '"]');
+                        if (card) {
+                            card.style.borderColor = color;
+                            card.style.background  = color + '22'; // transparan 13%
+                        }
+                    }
+                    </script>
 
                     {{-- Dropdown + Preview per kamera --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
