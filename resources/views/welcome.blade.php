@@ -612,8 +612,9 @@
         let recentScans = [];
         let autoCloseTimer = null; // Timer untuk auto-close modal
         const MODAL_AUTO_CLOSE = {{ (int) (\App\Models\AttendanceSetting::get('modal_auto_close', '3')) }}; // detik
-        const SCAN_FPS = {{ (int) (\App\Models\AttendanceSetting::get('scan_fps', '10')) }}; // frame per detik
-        const SCAN_RESOLUTION = '{{ \App\Models\AttendanceSetting::get('scan_resolution', 'hd') }}'; // sd|hd|fhd
+        const SCAN_FPS         = {{ (int) (\App\Models\AttendanceSetting::get('scan_fps', '10')) }}; // frame per detik
+        const SCAN_RES_QR      = '{{ \App\Models\AttendanceSetting::get('scan_resolution_qr', 'hd') }}';  // sd|hd|fhd — kamera QR
+        const SCAN_RES_PHOTO   = '{{ \App\Models\AttendanceSetting::get('scan_resolution_photo', 'hd') }}'; // sd|hd|fhd — kamera Foto
 
         // --- Dual Camera Config (dari server setting) ---
         const DUAL_CAMERA = {{ ($useDualCamera ?? '0') === '1' ? 'true' : 'false' }};
@@ -716,15 +717,16 @@
             const Html5Qrcode = window.Html5Qrcode;
             html5QrCode = new Html5Qrcode("reader");
 
-            // Preset resolusi kamera dari setting
+            // Preset resolusi kamera
             const resolutionMap = {
                 'sd':  { width: { ideal: 640,  max: 854  }, height: { ideal: 480,  max: 600  } },
                 'hd':  { width: { ideal: 1280, max: 1920 }, height: { ideal: 720,  max: 1080 } },
                 'fhd': { width: { ideal: 1920, max: 2560 }, height: { ideal: 1080, max: 1440 } },
             };
-            const camResolution = resolutionMap[SCAN_RESOLUTION] || resolutionMap['hd'];
+            const qrRes    = resolutionMap[SCAN_RES_QR]    || resolutionMap['hd'];
+            const photoRes = resolutionMap[SCAN_RES_PHOTO] || resolutionMap['hd'];
 
-            // Config default (single camera / facingMode)
+            // Config default (single camera / facingMode) — pakai resolusi QR
             const configDefault = {
                 fps: SCAN_FPS,
                 qrbox: 300,
@@ -733,19 +735,22 @@
                 rememberLastUsedCamera: true,
                 videoConstraints: {
                     facingMode: "environment",
-                    width: camResolution.width,
-                    height: camResolution.height
+                    width: qrRes.width,
+                    height: qrRes.height
                 }
             };
 
-            // Config dual camera: TANPA videoConstraints agar deviceId dipatuhi penuh
+            // Config dual camera — tambahkan resolusi QR via videoConstraints
             const configDual = {
                 fps: SCAN_FPS,
                 qrbox: 300,
                 aspectRatio: 1.0,
                 disableFlip: false,
-                rememberLastUsedCamera: false
-                // TIDAK ada videoConstraints — library pakai deviceId constraint saja
+                rememberLastUsedCamera: false,
+                videoConstraints: {
+                    width: qrRes.width,
+                    height: qrRes.height
+                }
             };
 
             const doStart = (constraint, cfg) => {
@@ -846,8 +851,14 @@
                 }
 
                 console.log('📷 Face camera pakai:', fotoDevice.label);
+                const photoW = { 'sd': 640, 'hd': 1280, 'fhd': 1920 }[SCAN_RES_PHOTO] || 1280;
+                const photoH = { 'sd': 480, 'hd':  720, 'fhd': 1080 }[SCAN_RES_PHOTO] ||  720;
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { deviceId: { exact: fotoDevice.id } }
+                    video: {
+                        deviceId: { exact: fotoDevice.id },
+                        width:  { ideal: photoW },
+                        height: { ideal: photoH }
+                    }
                 });
                 const faceVideo = document.getElementById('face-camera');
                 faceVideo.srcObject = stream;

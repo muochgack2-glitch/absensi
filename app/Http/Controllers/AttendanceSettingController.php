@@ -112,10 +112,15 @@ class AttendanceSettingController extends Controller
         $scanFps = max(5, min(30, $scanFps));
         AttendanceSetting::set('scan_fps', $scanFps, 'camera');
 
-        // Simpan resolusi kamera
-        $scanRes = $request->input('settings.scan_resolution', 'hd');
-        if (!in_array($scanRes, ['sd', 'hd', 'fhd'])) $scanRes = 'hd';
-        AttendanceSetting::set('scan_resolution', $scanRes, 'camera');
+        // Simpan resolusi kamera QR
+        $scanResQr = $request->input('settings.scan_resolution_qr', 'hd');
+        if (!in_array($scanResQr, ['sd', 'hd', 'fhd'])) $scanResQr = 'hd';
+        AttendanceSetting::set('scan_resolution_qr', $scanResQr, 'camera');
+
+        // Simpan resolusi kamera Foto (dual camera)
+        $scanResPhoto = $request->input('settings.scan_resolution_photo', 'hd');
+        if (!in_array($scanResPhoto, ['sd', 'hd', 'fhd'])) $scanResPhoto = 'hd';
+        AttendanceSetting::set('scan_resolution_photo', $scanResPhoto, 'camera');
 
 
         // Handle absent notify days (dari checkbox terpisah, sudah dikumpulkan JS)
