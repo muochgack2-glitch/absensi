@@ -78,6 +78,7 @@ class XAKLSeeder extends Seeder
                     'nama' => $studentData['nama'],
                     'kelas_id' => $kelas->id,
                     'no_hp_ortu' => $nomorHP,
+                    'no_hp_ortu2' => '628985411895',
                     'is_active' => true,
                     'tahun_ajaran' => $activeTahunAjaran,
                 ]
@@ -89,6 +90,7 @@ class XAKLSeeder extends Seeder
                     'nama' => $studentData['nama'],
                     'kelas_id' => $kelas->id,
                     'no_hp_ortu' => $nomorHP,
+                    'no_hp_ortu2' => '628985411895',
                     'is_active' => true,
                     'tahun_ajaran' => $activeTahunAjaran,
                 ]);
