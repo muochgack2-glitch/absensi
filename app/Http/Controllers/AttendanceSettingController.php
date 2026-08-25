@@ -45,6 +45,7 @@ class AttendanceSettingController extends Controller
             'settings.use_dual_camera'               => 'nullable|in:0,1',
             'settings.qr_camera_index'               => 'nullable|integer|min:0|max:9',
             'settings.photo_camera_index'            => 'nullable|integer|min:0|max:9',
+            'settings.modal_auto_close'              => 'nullable|integer|min:1|max:10',
         ];
 
         $messages = [
