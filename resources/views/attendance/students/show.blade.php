@@ -74,6 +74,19 @@
                                 </div>
                             </div>
                         </div>
+                        @if($student->no_hp_ortu2)
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-500 dark:text-purple-400">
+                                <i class="fas fa-user-shield"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm text-gray-500 dark:text-gray-400">HP Wali / Alternatif</div>
+                                <div class="font-semibold text-gray-900 dark:text-white">
+                                    {{ $student->no_hp_ortu2 }}
+                                </div>
+                            </div>
+                        </div>
+                        @endif
                     </div>
 
                     <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 space-y-2">

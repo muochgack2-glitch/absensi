@@ -102,7 +102,8 @@ class AttendanceStudentController extends Controller
             ],
             'nama' => 'required|string|max:255',
             'kelas_id' => 'required|exists:attendance_classes,id',
-            'no_hp_ortu' => 'nullable|string|max:20',
+            'no_hp_ortu'  => 'nullable|string|max:20',
+            'no_hp_ortu2' => 'nullable|string|max:20',
             'foto_profil' => 'nullable|image|max:2048',
             'is_active' => 'boolean',
         ]);
@@ -171,7 +172,8 @@ class AttendanceStudentController extends Controller
             ],
             'nama' => 'required|string|max:255',
             'kelas_id' => 'required|exists:attendance_classes,id',
-            'no_hp_ortu' => 'nullable|string|max:20',
+            'no_hp_ortu'  => 'nullable|string|max:20',
+            'no_hp_ortu2' => 'nullable|string|max:20',
             'foto_profil' => 'nullable|image|max:2048',
             'is_active' => 'boolean',
         ]);

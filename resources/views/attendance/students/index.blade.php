@@ -450,6 +450,11 @@
                             <span class="text-gray-600 dark:text-gray-400 text-sm">
                                 {{ $student->no_hp_ortu ?? '-' }}
                             </span>
+                            @if($student->no_hp_ortu2)
+                            <span class="block text-xs text-purple-500 dark:text-purple-400 mt-0.5">
+                                <i class="fas fa-user-shield mr-1"></i>{{ $student->no_hp_ortu2 }}
+                            </span>
+                            @endif
                         </x-table.cell>
                         
                         {{-- QR Code (shown on all devices) --}}
