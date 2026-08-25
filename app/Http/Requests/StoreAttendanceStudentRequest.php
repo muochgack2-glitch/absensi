@@ -24,7 +24,8 @@ class StoreAttendanceStudentRequest extends FormRequest
             'nis' => 'required|string|max:20|unique:attendance_students,nis',
             'nama' => 'required|string|max:100',
             'kelas_id' => 'required|exists:attendance_classes,id',
-            'no_hp_ortu' => 'required|string|regex:/^628[0-9]{9,12}$/',
+            'no_hp_ortu'  => 'required|string|regex:/^628[0-9]{9,12}$/',
+            'no_hp_ortu2' => 'nullable|string|regex:/^628[0-9]{9,12}$/',
             'foto_profil' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
             'is_active' => 'boolean'
         ];
@@ -44,7 +45,8 @@ class StoreAttendanceStudentRequest extends FormRequest
             'kelas_id.required' => 'Kelas wajib dipilih.',
             'kelas_id.exists' => 'Kelas yang dipilih tidak valid.',
             'no_hp_ortu.required' => 'Nomor HP orang tua wajib diisi.',
-            'no_hp_ortu.regex' => 'Format nomor HP tidak valid. Gunakan format: 628xxxxxxxxxx',
+            'no_hp_ortu.regex'    => 'Format nomor HP tidak valid. Gunakan format: 628xxxxxxxxxx',
+            'no_hp_ortu2.regex'   => 'Format nomor HP wali tidak valid. Gunakan format: 628xxxxxxxxxx',
             'foto_profil.image' => 'File harus berupa gambar.',
             'foto_profil.mimes' => 'Format gambar harus JPEG, JPG, atau PNG.',
             'foto_profil.max' => 'Ukuran gambar maksimal 2MB.',

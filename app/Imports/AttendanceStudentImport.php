@@ -48,11 +48,12 @@ class AttendanceStudentImport implements ToModel, WithHeadingRow, WithValidation
 
             // Create student
             $student = AttendanceStudent::create([
-                'nis' => $row['nis'],
-                'nama' => $row['nama'],
-                'kelas_id' => $row['kelas_id'],
-                'no_hp_ortu' => $row['no_hp_ortu'] ?? null,
-                'is_active' => true,
+                'nis'         => $row['nis'],
+                'nama'        => $row['nama'],
+                'kelas_id'    => $row['kelas_id'],
+                'no_hp_ortu'  => $row['no_hp_ortu']  ?? null,
+                'no_hp_ortu2' => $row['no_hp_ortu2'] ?? null,
+                'is_active'   => true,
             ]);
 
             // Generate QR Code
@@ -84,7 +85,8 @@ class AttendanceStudentImport implements ToModel, WithHeadingRow, WithValidation
             'nis' => 'required|string|max:50',
             'nama' => 'required|string|max:255',
             'kelas_id' => 'required|integer|exists:attendance_classes,id',
-            'no_hp_ortu' => 'nullable|string|max:20',
+            'no_hp_ortu'  => 'nullable|string|max:20',
+            'no_hp_ortu2' => 'nullable|string|max:20',
         ];
     }
 

@@ -119,9 +119,9 @@ class MarkAbsentStudents extends Command
 
             if (!$student) continue;
 
-            // Skip jika tidak ada nomor HP ortu
-            if (empty($student->no_hp_ortu)) {
-                $this->warn("  ⚠ {$student->nama} — tidak ada nomor HP orang tua");
+            // Skip jika tidak ada nomor HP sama sekali
+            if (empty($student->getParentPhones())) {
+                $this->warn("  ⚠ {$student->nama} — tidak ada nomor HP orang tua/wali");
                 $noPhone++;
                 continue;
             }
@@ -135,7 +135,8 @@ class MarkAbsentStudents extends Command
 
             try {
                 $this->notificationService->notifyAbsent($student, $record);
-                $this->line("  ✓ WA terkirim ke orang tua {$student->nama} ({$student->no_hp_ortu})");
+                $phones = implode(', ', $student->getParentPhones());
+                $this->line("  ✓ WA terkirim ke {$student->nama} ({$phones})");
                 $success++;
             } catch (\Exception $e) {
                 $this->error("  ✗ Gagal kirim WA ke {$student->nama}: " . $e->getMessage());

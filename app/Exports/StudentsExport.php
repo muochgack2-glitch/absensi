@@ -45,6 +45,7 @@ class StudentsExport implements FromCollection, WithHeadings, WithMapping, WithS
             'Kelas',
             'Jurusan',
             'No HP Orang Tua',
+            'No HP Wali / Alternatif',
             'Status',
             'Tanggal Dibuat',
         ];
@@ -62,6 +63,7 @@ class StudentsExport implements FromCollection, WithHeadings, WithMapping, WithS
             $student->kelas->nama_kelas ?? '-',
             $student->kelas->jurusan ?? '-',
             $student->no_hp_ortu ?? '-',
+            $student->no_hp_ortu2 ?? '-',
             $student->is_active ? 'Aktif' : 'Tidak Aktif',
             $student->created_at?->format('d/m/Y') ?? '-',
         ];
