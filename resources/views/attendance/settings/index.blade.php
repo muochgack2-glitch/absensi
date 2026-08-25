@@ -30,6 +30,18 @@
             @csrf
             @method('PUT')
 
+            {{-- ═══════════════════════════════════════════════════════ --}}
+            {{-- SECTION: PENGATURAN GLOBAL --}}
+            {{-- ═══════════════════════════════════════════════════════ --}}
+            <div class="flex items-center gap-4 mb-2">
+                <div class="flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-full">
+                    <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <span class="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wider">🌐 Pengaturan Global</span>
+                </div>
+                <div class="flex-1 border-t border-blue-200 dark:border-blue-700/50"></div>
+                <span class="text-xs text-gray-400 dark:text-gray-500 italic">Berlaku di semua perangkat</span>
+            </div>
+
             {{-- Schedule Settings --}}
             <x-card>
                 <div class="flex items-center mb-6">
@@ -696,6 +708,18 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                     </div>
                 </div>
             </x-card>
+
+            {{-- ═══════════════════════════════════════════════════════ --}}
+            {{-- SECTION: PENGATURAN LOKAL --}}
+            {{-- ═══════════════════════════════════════════════════════ --}}
+            <div class="flex items-center gap-4 mt-4 mb-2">
+                <div class="flex items-center gap-2 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-full">
+                    <div class="w-2 h-2 rounded-full bg-amber-500"></div>
+                    <span class="text-xs font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wider">💻 Pengaturan Lokal</span>
+                </div>
+                <div class="flex-1 border-t border-amber-200 dark:border-amber-700/50"></div>
+                <span class="text-xs text-gray-400 dark:text-gray-500 italic">Khusus perangkat ini — tidak disinkron</span>
+            </div>
 
             {{-- Card: Pengaturan Kamera Scanner --}}
             <x-card>
