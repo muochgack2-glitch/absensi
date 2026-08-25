@@ -104,10 +104,16 @@
                             
                             <td class="px-4 py-3 text-center text-sm text-gray-900 dark:text-white font-mono">
                                 {{ $record->check_in_time ? \Carbon\Carbon::parse($record->check_in_time)->format('H:i') : '-' }}
+                                @if($record->status === 'terlambat')
+                                    <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold" style="background:#431407; color:#f97316; border:1px solid #f97316">TERLAMBAT</span>
+                                @endif
                             </td>
                             
                             <td class="px-4 py-3 text-center text-sm text-gray-900 dark:text-white font-mono hidden sm:table-cell">
                                 {{ $record->check_out_time ? \Carbon\Carbon::parse($record->check_out_time)->format('H:i') : '-' }}
+                                @if($record->check_out_status === 'pulang_cepat')
+                                    <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold" style="background:#422006; color:#fbbf24; border:1px solid #fbbf24">PULANG CEPAT</span>
+                                @endif
                             </td>
                             
                             {{-- Foto Icons --}}

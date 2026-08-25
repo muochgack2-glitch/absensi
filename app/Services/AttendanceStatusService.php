@@ -71,6 +71,20 @@ class AttendanceStatusService
     }
 
     /**
+     * Determine check-out status based on current time vs official check-out time.
+     *
+     * @return string 'pulang' if on time or late, 'pulang_cepat' if before schedule
+     */
+    public function determineCheckOutStatus(): string
+    {
+        $officialCheckOutTime = AttendanceSetting::get('check_out_time', '15:00');
+        $now = Carbon::now();
+        $checkOut = Carbon::createFromTimeString($officialCheckOutTime);
+
+        return $now->greaterThanOrEqualTo($checkOut) ? 'pulang' : 'pulang_cepat';
+    }
+
+    /**
      * Get time window information for display.
      *
      * @return array Time window details

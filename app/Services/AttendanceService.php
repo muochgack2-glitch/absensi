@@ -289,10 +289,14 @@ class AttendanceService
             $photoPath = $this->photoCaptureService->savePhoto($photoBase64, $student->nis, 'check_out');
         }
 
+        // Determine checkout status: 'pulang' (tepat/lewat jadwal) or 'pulang_cepat' (sebelum jadwal)
+        $checkOutStatus = $this->statusService->determineCheckOutStatus();
+
         // Update record
         $record->update([
-            'check_out_time' => $currentTime,
-            'check_out_photo' => $photoPath,
+            'check_out_time'   => $currentTime,
+            'check_out_photo'  => $photoPath,
+            'check_out_status' => $checkOutStatus,
         ]);
 
         DB::commit();
@@ -319,13 +323,13 @@ class AttendanceService
 
         return [
             'success' => true,
-            'message' => 'Check-out berhasil!',
+            'message' => $checkOutStatus === 'pulang_cepat' ? 'Pulang lebih awal!' : 'Check-out berhasil!',
             'data' => [
-                'nama' => $student->nama,
-                'nis' => $student->nis,
-                'kelas' => $student->kelas->nama_kelas ?? '-',
-                'status' => $record->status,
-                'time' => Carbon::parse($currentTime)->format('H:i'),
+                'nama'   => $student->nama,
+                'nis'    => $student->nis,
+                'kelas'  => $student->kelas->nama_kelas ?? '-',
+                'status' => $checkOutStatus,  // 'pulang' atau 'pulang_cepat'
+                'time'   => Carbon::parse($currentTime)->format('H:i'),
             ],
         ];
     }

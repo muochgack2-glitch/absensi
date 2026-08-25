@@ -89,14 +89,19 @@ class SendAttendanceSummary extends Command
 
             if ($type === 'pulang') {
                 // Hitung yang sudah check-out
-                $pulangIds    = $records->whereNotNull('check_out_time')->pluck('student_id')->toArray();
-                $belumPulang  = count($hadirIds) - count(array_intersect($hadirIds, $pulangIds));
-                $belumPulang  = max(0, $belumPulang);
-                $message = $this->buildPulangMessage($kelas->nama_kelas, $dayName, $totalSiswa, $hadir, $izin, $alfa, count($pulangIds), $belumPulang);
-                $this->line("  {$kelas->nama_kelas} | Hadir:{$hadir} Sudah pulang:".count($pulangIds)." Belum:{$belumPulang}");
+                $pulangIds       = $records->whereNotNull('check_out_time')->pluck('student_id')->toArray();
+                $pulangCepatIds  = $records->where('check_out_status', 'pulang_cepat')->pluck('student_id')->toArray();
+                $pulangTepatIds  = array_diff($pulangIds, $pulangCepatIds);
+                $belumPulang     = count($hadirIds) - count(array_intersect($hadirIds, $pulangIds));
+                $belumPulang     = max(0, $belumPulang);
+                $message = $this->buildPulangMessage($kelas->nama_kelas, $dayName, $totalSiswa, $hadir, $izin, $alfa, count($pulangTepatIds), count($pulangCepatIds), $belumPulang);
+                $this->line("  {$kelas->nama_kelas} | Hadir:{$hadir} PulangTepat:".count($pulangTepatIds)." PulangCepat:".count($pulangCepatIds)." Belum:{$belumPulang}");
             } else {
-                $message = $this->buildMasukMessage($kelas->nama_kelas, $dayName, $totalSiswa, $hadir, $izin, $alfa, $alfaStudents);
-                $this->line("  {$kelas->nama_kelas} | Hadir:{$hadir} Izin:{$izin} Alfa:{$alfa} Total:{$totalSiswa}");
+                // Hitung terlambat untuk summary masuk
+                $terlambat = $records->where('status', 'terlambat')->count();
+                $hadirTepat = max(0, $hadir - $terlambat);
+                $message = $this->buildMasukMessage($kelas->nama_kelas, $dayName, $totalSiswa, $hadirTepat, $terlambat, $izin, $alfa, $alfaStudents);
+                $this->line("  {$kelas->nama_kelas} | HadirTepat:{$hadirTepat} Terlambat:{$terlambat} Izin:{$izin} Alfa:{$alfa} Total:{$totalSiswa}");
             }
 
             if ($dryRun) { $sent++; continue; }
@@ -121,8 +126,9 @@ class SendAttendanceSummary extends Command
         return Command::SUCCESS;
     }
 
-    protected function buildMasukMessage(string $namaKelas, string $tanggal, int $total, int $hadir, int $izin, int $alfa, array $alfaStudents): string
+    protected function buildMasukMessage(string $namaKelas, string $tanggal, int $total, int $hadirTepat, int $terlambat, int $izin, int $alfa, array $alfaStudents): string
     {
+        $hadir  = $hadirTepat + $terlambat;
         $persen = $total > 0 ? round(($hadir / $total) * 100) : 0;
 
         $lines = [
@@ -130,11 +136,12 @@ class SendAttendanceSummary extends Command
             "Kelas  : *{$namaKelas}*",
             "Tanggal: {$tanggal}",
             "",
-            "Hadir  : {$hadir} siswa",
-            "Izin   : {$izin} siswa",
-            "Alfa   : {$alfa} siswa",
-            "Total  : {$total} siswa",
-            "Kehadiran: {$persen}%",
+            "Hadir tepat waktu : {$hadirTepat} siswa",
+            "Terlambat         : {$terlambat} siswa",
+            "Izin              : {$izin} siswa",
+            "Alfa              : {$alfa} siswa",
+            "Total             : {$total} siswa",
+            "Kehadiran         : {$persen}%",
         ];
 
         if (!empty($alfaStudents)) {
@@ -151,19 +158,20 @@ class SendAttendanceSummary extends Command
         return implode("\n", $lines);
     }
 
-    protected function buildPulangMessage(string $namaKelas, string $tanggal, int $total, int $hadir, int $izin, int $alfa, int $sudahPulang, int $belumPulang): string
+    protected function buildPulangMessage(string $namaKelas, string $tanggal, int $total, int $hadir, int $izin, int $alfa, int $pulangTepat, int $pulangCepat, int $belumPulang): string
     {
         $lines = [
             "*RINGKASAN KEPULANGAN*",
             "Kelas  : *{$namaKelas}*",
             "Tanggal: {$tanggal}",
             "",
-            "Hadir hari ini : {$hadir} siswa",
-            "Sudah pulang   : {$sudahPulang} siswa",
-            "Belum pulang   : {$belumPulang} siswa",
-            "Izin           : {$izin} siswa",
-            "Alfa           : {$alfa} siswa",
-            "Total          : {$total} siswa",
+            "Hadir hari ini     : {$hadir} siswa",
+            "Pulang tepat waktu : {$pulangTepat} siswa",
+            "Pulang lebih awal  : {$pulangCepat} siswa",
+            "Belum pulang       : {$belumPulang} siswa",
+            "Izin               : {$izin} siswa",
+            "Alfa               : {$alfa} siswa",
+            "Total              : {$total} siswa",
         ];
 
         $lines[] = "";

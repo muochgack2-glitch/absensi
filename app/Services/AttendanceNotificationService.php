@@ -326,16 +326,29 @@ class AttendanceNotificationService
     private function formatCheckOutMessage(AttendanceStudent $student, AttendanceRecord $record, string $schoolName): string
     {
         $time = \Carbon\Carbon::parse($record->check_out_time)->format('H:i');
+        $isPulangCepat = $record->check_out_status === 'pulang_cepat';
 
-        $message = "🏫 *{$schoolName}*\n";
-        $message .= "📍 Notifikasi Pulang\n\n";
+        // Icon & judul berbeda untuk pulang cepat vs pulang normal
+        $icon  = $isPulangCepat ? '⚠️' : '🏫';
+        $label = $isPulangCepat ? 'Notifikasi Pulang Lebih Awal' : 'Notifikasi Pulang';
+
+        $message  = "{$icon} *{$schoolName}*\n";
+        $message .= "📍 {$label}\n\n";
         $message .= "Siswa: *{$student->nama}*\n";
         $message .= "Kelas: {$student->kelas->nama_kelas}\n";
         $message .= "Waktu Pulang: *{$time}*\n";
+
+        // Tambah peringatan jika pulang lebih awal
+        if ($isPulangCepat) {
+            $officialCheckOutTime = \App\Models\AttendanceSetting::get('check_out_time', '15:00');
+            $message .= "⚠️ _Siswa meninggalkan sekolah sebelum jam pulang ({$officialCheckOutTime})_\n";
+        }
+
         $message .= "\n_Pesan otomatis dari sistem absensi_";
 
         return $message;
     }
+
 
     /**
      * Log notification attempt.

@@ -51,6 +51,7 @@ class AttendanceRecord extends Model
         'check_out_time',
         'check_in_photo',
         'check_out_photo',
+        'check_out_status',
         'status',
         'notes',
         'tahun_ajaran',
