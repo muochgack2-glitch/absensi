@@ -1265,24 +1265,37 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                 const devices = await navigator.mediaDevices.enumerateDevices();
                 allCameras = devices.filter(d => d.kind === 'videoinput');
 
+                // DeviceId dari localStorage per-browser (prioritas) atau DB (fallback)
+                const localQrDeviceId    = localStorage.getItem('absensi_qr_camera_deviceid') || '';
+                const localPhotoDeviceId = localStorage.getItem('absensi_photo_camera_deviceid') || '';
+
                 const _qrRaw    = document.getElementById('qr_camera_index_val').value;
                 const _photoRaw = document.getElementById('photo_camera_index_val').value;
-                // Gunakan Number() lalu fallback hanya jika NaN (bukan 0!)
                 const savedQr    = isNaN(parseInt(_qrRaw))    ? 0 : parseInt(_qrRaw);
                 const savedPhoto = isNaN(parseInt(_photoRaw)) ? 1 : parseInt(_photoRaw);
 
+                // Fungsi bantu: cari index kamera berdasarkan deviceId, fallback ke index DB
+                function resolveIdx(localDeviceId, dbIdx) {
+                    if (localDeviceId) {
+                        const found = allCameras.findIndex(c => c.deviceId === localDeviceId);
+                        if (found >= 0) return found;
+                    }
+                    return dbIdx;
+                }
+                const resolvedQr    = resolveIdx(localQrDeviceId, savedQr);
+                const resolvedPhoto = resolveIdx(localPhotoDeviceId, savedPhoto);
 
                 ['qr_camera_select', 'photo_camera_select'].forEach((selectId, si) => {
                     const sel = document.getElementById(selectId);
                     sel.innerHTML = '';
-                    const savedIdx = si === 0 ? savedQr : savedPhoto;
+                    const resolvedIdx = si === 0 ? resolvedQr : resolvedPhoto;
 
                     allCameras.forEach((cam, idx) => {
                         const lbl = cam.label || ('Kamera ' + idx);
                         const opt = document.createElement('option');
                         opt.value = idx;
                         opt.textContent = `[${idx}] ${lbl}`;
-                        if (idx === savedIdx) opt.selected = true;
+                        if (idx === resolvedIdx) opt.selected = true;
                         sel.appendChild(opt);
                     });
 
@@ -1294,19 +1307,21 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                 });
 
                 // Auto-preview kamera yang sudah tersimpan
-                if (allCameras[savedQr]) {
-                    document.getElementById('qr_camera_deviceid_val').value = allCameras[savedQr].deviceId;
-                    openCamPreview('qr', allCameras[savedQr].deviceId);
+                if (allCameras[resolvedQr]) {
+                    document.getElementById('qr_camera_deviceid_val').value = allCameras[resolvedQr].deviceId;
+                    openCamPreview('qr', allCameras[resolvedQr].deviceId);
                 }
-                if (allCameras[savedPhoto]) {
-                    document.getElementById('photo_camera_deviceid_val').value = allCameras[savedPhoto].deviceId;
-                    openCamPreview('photo', allCameras[savedPhoto].deviceId);
+                if (allCameras[resolvedPhoto]) {
+                    document.getElementById('photo_camera_deviceid_val').value = allCameras[resolvedPhoto].deviceId;
+                    openCamPreview('photo', allCameras[resolvedPhoto].deviceId);
                 }
+
 
             } catch (err) {
                 console.warn('Gagal deteksi kamera:', err.message);
             }
         }
+
 
         function onCameraSelect(role) {
             const sel    = document.getElementById(role + '_camera_select');
@@ -1317,9 +1332,16 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
             if (hidden)    hidden.value    = idx;
             if (hiddenDev) hiddenDev.value = cam?.deviceId || '';
 
+            // Simpan deviceId ke localStorage — per browser/PC ini
+            if (cam?.deviceId) {
+                localStorage.setItem('absensi_' + role + '_camera_deviceid', cam.deviceId);
+                console.log('💾 Camera saved to localStorage:', role, cam.deviceId);
+            }
+
             stopCamPreview(role);
             if (cam) openCamPreview(role, cam.deviceId);
         }
+
 
         async function openCamPreview(role, deviceId, resConstraint) {
             try {

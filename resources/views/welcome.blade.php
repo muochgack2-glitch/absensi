@@ -637,8 +637,12 @@
         const DUAL_CAMERA = {{ ($useDualCamera ?? '0') === '1' ? 'true' : 'false' }};
         const QR_CAM_IDX       = {{ (int)($qrCameraIndex ?? 0) }};
         const PHO_CAM_IDX      = {{ (int)($photoCameraIndex ?? 1) }};
-        const QR_CAM_DEVICEID  = "{{ $qrCameraDeviceId ?? '' }}";
-        const PHO_CAM_DEVICEID = "{{ $photoCameraDeviceId ?? '' }}";
+        // DeviceId: localStorage per-browser diprioritaskan, fallback ke DB (global default)
+        const QR_CAM_DEVICEID  = localStorage.getItem('absensi_qr_camera_deviceid')
+                               || "{{ $qrCameraDeviceId ?? '' }}";
+        const PHO_CAM_DEVICEID = localStorage.getItem('absensi_photo_camera_deviceid')
+                               || "{{ $photoCameraDeviceId ?? '' }}";
+
         let fotoStream    = null;
         let faceReadyAt  = null;
         let camerasCache  = null;
