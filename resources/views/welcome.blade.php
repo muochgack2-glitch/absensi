@@ -966,18 +966,19 @@
 
         function onScanSuccess(decodedText, decodedResult) {
             const now = Date.now();
-            const SCAN_COOLDOWN_MS = 6000; // 6 detik — cukup waktu siswa angkat kartu
-
-            // Block jika NIS sama dalam cooldown window
-            if (lastScannedNis === decodedText && window.lastScanTime && (now - window.lastScanTime) < SCAN_COOLDOWN_MS) {
-                return; // Silent block - QR masih di depan kamera, tunggu cooldown
+            
+            // Only block if same NIS scanned within 1 second (prevent double scan)
+            if (lastScannedNis === decodedText && window.lastScanTime && (now - window.lastScanTime) < 1000) {
+                return; // Silent block - same QR within 1 second
             }
-
+            
+            // Allow processing even if previous scan is still processing
+            // This enables rapid scanning without waiting for modal to close
             lastScannedNis = decodedText;
             window.lastScanTime = now;
-
+            
             console.log('✅ QR Code detected:', decodedText);
-
+            
             // Process the scan
             processScan(decodedText);
         }
