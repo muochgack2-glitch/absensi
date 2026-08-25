@@ -28,8 +28,14 @@ class AttendanceWhatsAppService
     public function __construct()
     {
         // Don't set serverUrl in constructor - use getActiveServerUrl() dynamically
-        $this->timeout = WhatsAppSetting::getTimeout();
-        $this->retryAttempts = WhatsAppSetting::getRetryAttempts();
+        // Guard: DB might not be ready (fresh install / local dev)
+        try {
+            $this->timeout = WhatsAppSetting::getTimeout();
+            $this->retryAttempts = WhatsAppSetting::getRetryAttempts();
+        } catch (\Exception $e) {
+            $this->timeout = 30;
+            $this->retryAttempts = 3;
+        }
     }
 
     /**
