@@ -4,6 +4,7 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 use App\Models\AttendanceSetting;
+use App\Models\Holiday;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -41,6 +42,12 @@ Schedule::call(function () {
     $now         = now()->timezone('Asia/Jakarta')->format('H:i');
     if ($now < $notifyTime) {
         return; // Belum waktunya
+    }
+
+    // Cek hari libur — blokir semua notifikasi otomatis
+    $todayStr = now()->timezone('Asia/Jakarta')->toDateString();
+    if (Holiday::isHoliday($todayStr)) {
+        return; // Hari libur, skip notifikasi alfa
     }
 
     // Jalankan command mark absent + kirim WA
@@ -90,6 +97,9 @@ Schedule::call(function () {
     $today = now()->timezone('Asia/Jakarta')->toDateString();
     if (AttendanceSetting::get('summary_last_sent_date', '') === $today) return;
 
+    // Cek hari libur
+    if (Holiday::isHoliday($today)) return;
+
     AttendanceSetting::set('summary_last_sent_date', $today);
     Artisan::call('attendance:send-summary', ['--type' => 'masuk']);
 })
@@ -121,6 +131,9 @@ Schedule::call(function () {
     // Cek sudah dikirim hari ini
     $today = now()->timezone('Asia/Jakarta')->toDateString();
     if (AttendanceSetting::get('summary_pulang_last_sent_date', '') === $today) return;
+
+    // Cek hari libur
+    if (Holiday::isHoliday($today)) return;
 
     AttendanceSetting::set('summary_pulang_last_sent_date', $today);
     Artisan::call('attendance:send-summary', ['--type' => 'pulang']);
