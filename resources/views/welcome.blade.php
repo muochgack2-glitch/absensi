@@ -261,10 +261,27 @@
     {{-- Toast Container --}}
     <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
-    {{-- Modal Overlay untuk Success/Error --}}
-    <div id="modalOverlay" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="animation: fadeIn 0.2s ease-out;">
-        <div id="modalContent" class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full transform" style="animation: scaleIn 0.3s ease-out;">
-            <!-- Modal content will be injected here -->
+    {{-- Bottom Result Bar — slides up from bottom, never covers camera --}}
+    <div id="bottomResultBar"
+         style="position:fixed;bottom:0;left:0;right:0;z-index:50;transform:translateY(110%);transition:transform 0.4s cubic-bezier(0.34,1.4,0.64,1);">
+        <div id="bottomBarInner" class="flex items-center gap-5 px-6 py-3 shadow-2xl" style="min-height:90px;border-top-width:4px;border-top-style:solid;">
+            {{-- Foto siswa --}}
+            <div id="barPhoto" class="flex-shrink-0 w-16 h-16 rounded-full overflow-hidden shadow-xl ring-4 bg-gray-700 flex items-center justify-center" style="ring-color:rgba(255,255,255,0.3)">
+                <i class="fas fa-user text-2xl text-gray-400"></i>
+            </div>
+            {{-- Info siswa --}}
+            <div class="flex-1 min-w-0">
+                <p id="barLabel" class="text-xs font-bold uppercase tracking-widest mb-0.5 opacity-75"></p>
+                <p id="barName" class="text-2xl font-black text-white truncate leading-tight"></p>
+                <p id="barSub" class="text-sm font-medium text-white opacity-70 truncate"></p>
+            </div>
+            {{-- Badge status --}}
+            <div id="barBadge" class="flex-shrink-0 px-5 py-2.5 rounded-full text-white font-black text-base shadow-lg tracking-wide"></div>
+            {{-- Countdown circle --}}
+            <div class="flex-shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-full border-4 border-white/30 bg-white/10 backdrop-blur-sm">
+                <span id="countdownTimer" class="text-xl font-black text-white leading-none">3</span>
+                <span class="text-xs text-white/60 leading-none mt-0.5">det</span>
+            </div>
         </div>
     </div>
 
@@ -1098,92 +1115,46 @@
                 autoCloseTimer = null;
             }
 
-            // 3. Show/Update modal overlay with new data
-            const modalOverlay = document.getElementById('modalOverlay');
-            const modalContent = document.getElementById('modalContent');
-
-            const statusColors = {
-                'hadir': {
-                    bg: 'from-green-400 to-emerald-500',
-                    icon: 'fa-check-circle',
-                    text: 'text-green-600'
-                },
-                'terlambat': {
-                    bg: 'from-yellow-400 to-orange-500',
-                    icon: 'fa-clock',
-                    text: 'text-yellow-600'
-                },
-                'alpha': {
-                    bg: 'from-gray-400 to-gray-500',
-                    icon: 'fa-times-circle',
-                    text: 'text-gray-600'
-                },
-                'pulang': {
-                    bg: 'from-blue-400 to-indigo-500',
-                    icon: 'fa-person-walking-arrow-right',
-                    text: 'text-blue-600'
-                }
+            // 3. Config warna per status
+            const barConfigs = {
+                hadir:     { bg: '#064e3b', border: '#10b981', badge: '#10b981', label: '✅ CHECK IN BERHASIL' },
+                terlambat: { bg: '#431407', border: '#f97316', badge: '#f97316', label: '⚠️ CHECK IN TERLAMBAT' },
+                alpha:     { bg: '#1c1c1c', border: '#6b7280', badge: '#6b7280', label: '❌ TIDAK HADIR' },
+                pulang:    { bg: '#0c1a4a', border: '#3b82f6', badge: '#3b82f6', label: '🚪 CHECK OUT BERHASIL' },
             };
 
-            // Check-out tidak punya status terlambat — paksa warna pulang (biru)
-            const status = isCheckIn ? (result.data?.status || 'hadir') : 'pulang';
-            const colors = statusColors[status] || statusColors['hadir'];
+            const status  = isCheckIn ? (result.data?.status || 'hadir') : 'pulang';
+            const cfg     = barConfigs[status] || barConfigs['hadir'];
+            const badgeLabel = isCheckIn
+                ? (status === 'terlambat' ? 'TERLAMBAT' : 'HADIR')
+                : 'PULANG';
 
-            // Icon based on action
-            const modalIcon = isCheckIn ? 'fa-hand-wave' : 'fa-person-walking-arrow-right';
-            const modalIconAlt = isCheckIn ? '👋' : '🚶‍♂️→';
+            // Foto siswa
+            const photoEl = document.getElementById('barPhoto');
+            const photoUrl = result.data?.foto_profil_url || result.data?.foto_profil || null;
+            if (photoUrl) {
+                photoEl.innerHTML = `<img src="${photoUrl}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-user text-2xl text-gray-400\\'></i>'">`;
+            } else {
+                photoEl.innerHTML = `<i class="fas fa-user text-2xl text-gray-400"></i>`;
+            }
+            photoEl.style.boxShadow = `0 0 0 3px ${cfg.border}`;
 
-            modalContent.innerHTML = `
-                <div class="p-6 text-center">
-                    <!-- Action Icon -->
-                    <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br ${colors.bg} rounded-full mb-4 shadow-lg">
-                        <i class="fas ${modalIcon} text-4xl text-white"></i>
-                    </div>
+            // Isi bar
+            document.getElementById('barLabel').textContent  = cfg.label;
+            document.getElementById('barLabel').style.color  = cfg.border;
+            document.getElementById('barName').textContent   = result.data?.nama || '-';
+            document.getElementById('barSub').textContent    = `${result.data?.kelas || '-'} · ${result.data?.time || '-'} WIB`;
 
-                    <!-- Action Title -->
-                    <h3 class="text-2xl font-black mb-2" style="background: linear-gradient(135deg, ${isCheckIn ? '#10b981, #3b82f6' : '#f59e0b, #ef4444'}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                        ${isCheckIn ? '🌅 SELAMAT DATANG!' : '🌆 SELAMAT JALAN!'}
-                    </h3>
+            const badge = document.getElementById('barBadge');
+            badge.textContent            = badgeLabel;
+            badge.style.backgroundColor  = cfg.badge;
 
-                    <!-- Student Info -->
-                    <p class="text-xl font-bold text-gray-900 dark:text-white mb-1">
-                        ${result.data?.nama || '-'}
-                    </p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                        NIS: ${result.data?.nis || '-'}
-                    </p>
+            const inner = document.getElementById('bottomBarInner');
+            inner.style.backgroundColor  = cfg.bg;
+            inner.style.borderTopColor   = cfg.border;
 
-                    <!-- Details Grid -->
-                    <div class="grid grid-cols-3 gap-3 mb-4">
-                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Kelas</p>
-                            <p class="text-sm font-bold text-gray-900 dark:text-white">${result.data?.kelas || '-'}</p>
-                        </div>
-                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Waktu</p>
-                            <p class="text-sm font-bold text-gray-900 dark:text-white">${result.data?.time || '-'}</p>
-                        </div>
-                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Status</p>
-                            <p class="text-sm font-bold ${colors.text}">${isCheckIn ? (result.data?.status || 'hadir').toUpperCase() : 'PULANG'}</p>
-                        </div>
-                    </div>
-
-                    <!-- Message based on action -->
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                        ${isCheckIn ? '📚 Semangat belajar hari ini!' : '🎒 Sampai jumpa besok!'}
-                    </p>
-
-                    <!-- Auto close indicator -->
-                    <p class="text-xs text-gray-400 dark:text-gray-500">
-                        <i class="fas fa-circle-notch fa-spin mr-1"></i>
-                        Auto-close dalam <span id="countdownTimer">3</span> detik...
-                    </p>
-                </div>
-            `;
-
-            // Show modal if hidden
-            modalOverlay.classList.remove('hidden');
+            // Tampilkan bar (slide up)
+            document.getElementById('bottomResultBar').style.transform = 'translateY(0)';
 
             // 4. Add to recent scans
             addToRecentScans(result.data);
@@ -1200,134 +1171,65 @@
 
         function showError(message, errorData = null) {
             console.log('showError called:', { message, errorData });
-            
+
             // 1. Show toast notification
-            showToast(
-                'warning',
-                '⚠️ Gagal!',
-                message || 'Terjadi kesalahan'
-            );
+            showToast('warning', '⚠️ Gagal!', message || 'Terjadi kesalahan');
 
-            // 2. Clear any existing auto-close timer
-            if (autoCloseTimer) {
-                clearTimeout(autoCloseTimer);
-                autoCloseTimer = null;
-            }
+            // 2. Clear existing timer
+            if (autoCloseTimer) { clearTimeout(autoCloseTimer); autoCloseTimer = null; }
 
-            // 3. Show/Update error modal overlay
-            const modalOverlay = document.getElementById('modalOverlay');
-            const modalContent = document.getElementById('modalContent');
-
-            // Check if this is a duplicate scan with student data
+            // 3. Tampilkan bottom bar
             const isDuplicate = errorData && errorData.duplicate;
-            console.log('isDuplicate:', isDuplicate, 'errorData:', errorData);
-            
+            const inner  = document.getElementById('bottomBarInner');
+            const photoEl = document.getElementById('barPhoto');
+
             if (isDuplicate && errorData.nama) {
-                // Show detailed duplicate info (similar to success but with warning style)
-                const isCheckIn = currentAction === 'check_in';
-                
-                modalContent.innerHTML = `
-                    <div class="p-6 text-center">
-                        <!-- Warning Icon -->
-                        <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full mb-4 shadow-lg">
-                            <i class="fas fa-exclamation-circle text-4xl text-white"></i>
-                        </div>
+                // Sudah absen — warna merah
+                inner.style.backgroundColor = '#450a0a';
+                inner.style.borderTopColor  = '#ef4444';
+                photoEl.innerHTML = `<i class="fas fa-user text-2xl text-gray-400"></i>`;
+                photoEl.style.boxShadow = '0 0 0 3px #ef4444';
 
-                        <!-- Title -->
-                        <h3 class="text-2xl font-black text-orange-800 dark:text-orange-300 mb-2">
-                            ⚠️ SUDAH ABSEN!
-                        </h3>
+                document.getElementById('barLabel').textContent = '❌ SUDAH TERCATAT';
+                document.getElementById('barLabel').style.color = '#ef4444';
+                document.getElementById('barName').textContent  = errorData.nama || '-';
+                document.getElementById('barSub').textContent   = `${errorData.kelas || '-'} · Sudah absen pukul ${errorData.time || '-'}`;
 
-                        <!-- Student Info -->
-                        <p class="text-xl font-bold text-gray-900 dark:text-white mb-1">
-                            ${errorData.nama}
-                        </p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                            NIS: ${errorData.nis}
-                        </p>
-
-                        <!-- Details Grid -->
-                        <div class="grid grid-cols-3 gap-3 mb-4">
-                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Kelas</p>
-                                <p class="text-sm font-bold text-gray-900 dark:text-white">${errorData.kelas}</p>
-                            </div>
-                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Waktu ${isCheckIn ? 'Datang' : 'Pulang'}</p>
-                                <p class="text-sm font-bold text-gray-900 dark:text-white">${errorData.time}</p>
-                            </div>
-                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Status</p>
-                                <p class="text-sm font-bold text-orange-600">${(errorData.status || 'hadir').toUpperCase()}</p>
-                            </div>
-                        </div>
-
-                        <!-- Message -->
-                        <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
-                            ${message}
-                        </p>
-
-                        <!-- Auto close indicator -->
-                        <p class="text-xs text-gray-400 dark:text-gray-500">
-                            <i class="fas fa-circle-notch fa-spin mr-1"></i>
-                            Auto-close dalam <span id="countdownTimer">3</span> detik...
-                        </p>
-                    </div>
-                `;
+                const badge = document.getElementById('barBadge');
+                badge.textContent           = 'SUDAH ABSEN';
+                badge.style.backgroundColor = '#ef4444';
             } else {
-                // Generic error without student data
-                modalContent.innerHTML = `
-                    <div class="p-6 text-center">
-                        <!-- Error Icon -->
-                        <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-red-400 to-pink-500 rounded-full mb-4 shadow-lg">
-                            <i class="fas fa-exclamation-triangle text-4xl text-white"></i>
-                        </div>
+                // Error umum — warna abu gelap
+                inner.style.backgroundColor = '#1a1a2e';
+                inner.style.borderTopColor  = '#6b7280';
+                photoEl.innerHTML = `<i class="fas fa-exclamation-triangle text-2xl text-gray-400"></i>`;
+                photoEl.style.boxShadow = '0 0 0 3px #6b7280';
 
-                        <!-- Error Message -->
-                        <h3 class="text-2xl font-black text-red-800 dark:text-red-300 mb-2">
-                            Oops!
-                        </h3>
-                        <p class="text-base text-gray-700 dark:text-gray-300 mb-4">
-                            ${message || 'Terjadi kesalahan'}
-                        </p>
+                document.getElementById('barLabel').textContent = '⚠️ PERHATIAN';
+                document.getElementById('barLabel').style.color = '#9ca3af';
+                document.getElementById('barName').textContent  = 'Scan Gagal';
+                document.getElementById('barSub').textContent   = message || 'Terjadi kesalahan';
 
-                        <!-- Auto close indicator -->
-                        <p class="text-xs text-gray-400 dark:text-gray-500">
-                            <i class="fas fa-circle-notch fa-spin mr-1"></i>
-                            Auto-close dalam <span id="countdownTimer">3</span> detik...
-                        </p>
-                    </div>
-                `;
+                const badge = document.getElementById('barBadge');
+                badge.textContent           = 'ERROR';
+                badge.style.backgroundColor = '#6b7280';
             }
 
-            // Show modal if hidden
-            modalOverlay.classList.remove('hidden');
+            // Tampilkan bar
+            document.getElementById('bottomResultBar').style.transform = 'translateY(0)';
 
-            // 4. Start countdown timer (3 seconds for errors)
+            // 4. Start countdown
             startAutoCloseCountdown(MODAL_AUTO_CLOSE);
         }
 
         function hideModal() {
-            const modalOverlay = document.getElementById('modalOverlay');
-            const modalContent = document.getElementById('modalContent');
+            // Clear timer
+            if (autoCloseTimer) { clearTimeout(autoCloseTimer); autoCloseTimer = null; }
 
-            // Clear any existing timer
-            if (autoCloseTimer) {
-                clearTimeout(autoCloseTimer);
-                autoCloseTimer = null;
-            }
-
-            // Add fade-out animation
-            modalOverlay.classList.add('modal-fade-out');
-            modalContent.classList.add('modal-scale-out');
-
-            // Remove after animation
-            setTimeout(() => {
-                modalOverlay.classList.add('hidden');
-                modalOverlay.classList.remove('modal-fade-out');
-                modalContent.classList.remove('modal-scale-out');
-            }, 200);
+            // Slide bar keluar ke bawah
+            document.getElementById('bottomResultBar').style.transform = 'translateY(110%)';
         }
+
 
         /**
          * Start auto-close countdown timer
