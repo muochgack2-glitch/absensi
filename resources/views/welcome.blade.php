@@ -581,7 +581,7 @@
     @endpush
 
     {{-- ── Camera Status Badge (Fixed pojok kanan bawah) ── --}}
-    <div id="cameraStatusBadge" style="position:fixed; bottom:16px; right:16px; z-index:50; display:flex; flex-direction:column; align-items:flex-end;">
+    <div id="cameraStatusBadge" style="position:fixed; bottom:16px; right:16px; z-index:50; display:flex; flex-direction:column; align-items:flex-end; transition:opacity 0.3s ease;">
 
         {{-- Expanded panel --}}
         <div id="camStatusPanel" style="display:none; margin-bottom:8px; background:#111827;
@@ -1169,8 +1169,10 @@
             inner.style.backgroundColor  = cfg.bg;
             inner.style.borderTopColor   = cfg.border;
 
-            // Tampilkan bar (slide up)
+            // Tampilkan bar (slide up) — sembunyikan badge kamera agar tidak tumpang tindih
             document.getElementById('bottomResultBar').style.transform = 'translateY(0)';
+            const camBadge = document.getElementById('cameraStatusBadge');
+            if (camBadge) camBadge.style.opacity = '0';
 
             // 4. Add to recent scans
             addToRecentScans(result.data);
@@ -1242,8 +1244,10 @@
             // Clear timer
             if (autoCloseTimer) { clearTimeout(autoCloseTimer); autoCloseTimer = null; }
 
-            // Slide bar keluar ke bawah
+            // Slide bar keluar ke bawah — tampilkan kembali badge kamera
             document.getElementById('bottomResultBar').style.transform = 'translateY(110%)';
+            const camBadge = document.getElementById('cameraStatusBadge');
+            if (camBadge) camBadge.style.opacity = '1';
         }
 
 
