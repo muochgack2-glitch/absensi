@@ -145,13 +145,16 @@ class AttendanceStatsController extends Controller
                     : $record->check_out_time;
                     
                 $scanEvents->push([
-                    'nama' => $student->nama ?? '-',
-                    'nis' => $student->nis ?? '-',
-                    'kelas' => $student->kelas?->nama_kelas ?? '-',
-                    'status' => $record->status,
-                    'time' => $checkOutTime->format('H:i'),
-                    'action' => 'check_out',
-                    'timestamp' => $checkOutTime->timestamp,
+                    'nama'           => $student->nama ?? '-',
+                    'nis'            => $student->nis ?? '-',
+                    'kelas'          => $student->kelas?->nama_kelas ?? '-',
+                    'status'         => $record->status,
+                    'time'           => $checkOutTime->format('H:i'),
+                    'action'         => 'check_out',
+                    'timestamp'      => $checkOutTime->timestamp,
+                    'foto_profil_url'=> $student->foto_profil
+                                        ? url('storage/' . $student->foto_profil)
+                                        : null,
                 ]);
             }
             
@@ -162,13 +165,16 @@ class AttendanceStatsController extends Controller
                     : $record->check_in_time;
                     
                 $scanEvents->push([
-                    'nama' => $student->nama ?? '-',
-                    'nis' => $student->nis ?? '-',
-                    'kelas' => $student->kelas?->nama_kelas ?? '-',
-                    'status' => $record->status,
-                    'time' => $checkInTime->format('H:i'),
-                    'action' => 'check_in',
-                    'timestamp' => $checkInTime->timestamp,
+                    'nama'           => $student->nama ?? '-',
+                    'nis'            => $student->nis ?? '-',
+                    'kelas'          => $student->kelas?->nama_kelas ?? '-',
+                    'status'         => $record->status,
+                    'time'           => $checkInTime->format('H:i'),
+                    'action'         => 'check_in',
+                    'timestamp'      => $checkInTime->timestamp,
+                    'foto_profil_url'=> $student->foto_profil
+                                        ? url('storage/' . $student->foto_profil)
+                                        : null,
                 ]);
             }
         }

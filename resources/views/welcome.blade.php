@@ -142,12 +142,23 @@
                     {{-- QR Scanner Video with Frame --}}
                     <div class="relative inline-block w-full max-w-lg mx-auto">
                         <div class="absolute -inset-3 bg-gradient-to-r from-primary-500 via-purple-500 to-pink-500 rounded-2xl opacity-30 blur-lg animate-pulse"></div>
-                        <div class="relative bg-gray-900 rounded-xl p-3 shadow-xl">
+                        <div id="readerContainer" class="relative bg-gray-900 rounded-xl p-3 shadow-xl" style="transition: box-shadow 0.2s ease;">
                             <div id="reader" class="mx-auto rounded-lg overflow-hidden" style="width: 100%; max-width: 400px; min-height: 300px;"></div>
                             
                             {{-- Scanning Animation Overlay --}}
                             <div id="scanOverlay" class="absolute inset-3 pointer-events-none rounded-lg overflow-hidden">
                                 <div class="scan-line"></div>
+                            </div>
+
+                            {{-- Processing Overlay — tampil saat QR detect, hilang saat bar muncul --}}
+                            <div id="scanProcessingOverlay"
+                                 style="display:none; position:absolute; inset:0; z-index:10; background:rgba(0,0,0,0.55);
+                                        align-items:center; justify-content:center; flex-direction:column; gap:10px;
+                                        border-radius:0.5rem; pointer-events:none;">
+                                <div style="width:38px;height:38px;border:3px solid #4ade80;border-top-color:transparent;
+                                            border-radius:50%;animation:spinLoader 0.7s linear infinite;"></div>
+                                <span style="color:#4ade80;font-size:12px;font-weight:700;letter-spacing:0.08em;
+                                             text-shadow:0 0 8px rgba(74,222,128,0.8);">MEMPROSES...</span>
                             </div>
                         </div>
                     </div>
@@ -480,6 +491,10 @@
         }
 
         /* Animations */
+        @keyframes spinLoader {
+            to { transform: rotate(360deg); }
+        }
+
         @keyframes slideInRight {
             from {
                 transform: translateX(400px);
@@ -739,6 +754,22 @@
             const Html5Qrcode = window.Html5Qrcode;
             html5QrCode = new Html5Qrcode("reader");
 
+            // ── MutationObserver: sembunyikan teks "Scanner paused" bawaan library ──
+            const _pauseObserver = new MutationObserver(() => {
+                document.querySelectorAll('#reader div').forEach(el => {
+                    if (el.textContent.trim() === 'Scanner paused') {
+                        el.style.setProperty('display', 'none', 'important');
+                    }
+                });
+            });
+            _pauseObserver.observe(document.getElementById('reader'), {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['style']
+            });
+            // ─────────────────────────────────────────────────────────────────────────
+
             // Preset resolusi kamera
             const resolutionMap = {
                 'sd':  { width: { ideal: 640,  max: 854  }, height: { ideal: 480,  max: 600  } },
@@ -966,20 +997,39 @@
 
         function onScanSuccess(decodedText, decodedResult) {
             const now = Date.now();
-            
-            // Only block if same NIS scanned within 1 second (prevent double scan)
-            if (lastScannedNis === decodedText && window.lastScanTime && (now - window.lastScanTime) < 1000) {
-                return; // Silent block - same QR within 1 second
+
+            // Block jika scanner sedang pause (bar hasil masih tampil)
+            if (window._scannerPaused) return;
+
+            // Safety guard: block double-scan dalam 500ms
+            if (lastScannedNis === decodedText && window.lastScanTime && (now - window.lastScanTime) < 500) {
+                return;
             }
-            
-            // Allow processing even if previous scan is still processing
-            // This enables rapid scanning without waiting for modal to close
+
             lastScannedNis = decodedText;
             window.lastScanTime = now;
-            
+
+            // PAUSE scanner + DIM kamera — mencegah scan ulang selama bar tampil
+            window._scannerPaused = true;
+            try {
+                if (html5QrCode) html5QrCode.pause();
+                const vid = document.querySelector('#reader video');
+                if (vid) vid.style.opacity = '0.15';
+                // Flash border hijau — feedback instan sebelum server respond
+                const rc = document.getElementById('readerContainer');
+                if (rc) rc.style.boxShadow = '0 0 0 3px #4ade80, 0 0 20px rgba(74,222,128,0.4)';
+                // Tampilkan processing overlay — hilangkan jeda visual
+                const overlay = document.getElementById('scanProcessingOverlay');
+                if (overlay) overlay.style.display = 'flex';
+                // Sembunyikan teks "Scanner paused" dari library (elemen dinamis tanpa ID/class)
+                setTimeout(() => {
+                    document.querySelectorAll('#reader__scan_region div').forEach(el => {
+                        if (el.textContent.trim() === 'Scanner paused') el.style.display = 'none';
+                    });
+                }, 50);
+            } catch(e) {}
+
             console.log('✅ QR Code detected:', decodedText);
-            
-            // Process the scan
             processScan(decodedText);
         }
 
@@ -1103,16 +1153,6 @@
         function showSuccess(result) {
             // Determine action type
             const isCheckIn = currentAction === 'check_in';
-            const actionText = isCheckIn ? 'Datang' : 'Pulang';
-            const actionIcon = isCheckIn ? '👋' : '🏃';
-            const actionMessage = isCheckIn ? 'Selamat datang di sekolah!' : 'Hati-hati di jalan!';
-            
-            // 1. Show toast notification first (instant feedback)
-            showToast(
-                'success',
-                `${actionIcon} ${actionText}!`,
-                result.message || actionMessage
-            );
 
             // 2. Clear any existing auto-close timer
             if (autoCloseTimer) {
@@ -1173,6 +1213,9 @@
             document.getElementById('bottomResultBar').style.transform = 'translateY(0)';
             const camBadge = document.getElementById('cameraStatusBadge');
             if (camBadge) camBadge.style.opacity = '0';
+            // Sembunyikan processing overlay — bar sudah tampil
+            const procOverlay = document.getElementById('scanProcessingOverlay');
+            if (procOverlay) procOverlay.style.display = 'none';
 
             // 4. Add to recent scans
             addToRecentScans(result.data);
@@ -1190,8 +1233,7 @@
         function showError(message, errorData = null) {
             console.log('showError called:', { message, errorData });
 
-            // 1. Show toast notification
-            showToast('warning', '⚠️ Gagal!', message || 'Terjadi kesalahan');
+            // 1. Toast dihapus — bottom bar sudah menampilkan info error
 
             // 2. Clear existing timer
             if (autoCloseTimer) { clearTimeout(autoCloseTimer); autoCloseTimer = null; }
@@ -1205,7 +1247,12 @@
                 // Sudah absen — warna merah
                 inner.style.backgroundColor = '#450a0a';
                 inner.style.borderTopColor  = '#ef4444';
-                photoEl.innerHTML = `<i class="fas fa-user text-2xl text-gray-400"></i>`;
+                const fotoUrl = errorData.foto_profil_url || null;
+                if (fotoUrl) {
+                    photoEl.innerHTML = `<img src="${fotoUrl}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<i class=\'fas fa-user text-2xl text-gray-400\'></i>'">`;
+                } else {
+                    photoEl.innerHTML = `<i class="fas fa-user text-2xl text-gray-400"></i>`;
+                }
                 photoEl.style.boxShadow = '0 0 0 3px #ef4444';
 
                 document.getElementById('barLabel').textContent = '❌ SUDAH TERCATAT';
@@ -1233,8 +1280,13 @@
                 badge.style.backgroundColor = '#6b7280';
             }
 
-            // Tampilkan bar
+            // Tampilkan bar — sembunyikan badge kamera agar tidak tumpang tindih
             document.getElementById('bottomResultBar').style.transform = 'translateY(0)';
+            const camBadge = document.getElementById('cameraStatusBadge');
+            if (camBadge) camBadge.style.opacity = '0';
+            // Sembunyikan processing overlay — bar sudah tampil
+            const procOverlay = document.getElementById('scanProcessingOverlay');
+            if (procOverlay) procOverlay.style.display = 'none';
 
             // 4. Start countdown
             startAutoCloseCountdown(MODAL_AUTO_CLOSE);
@@ -1248,6 +1300,20 @@
             document.getElementById('bottomResultBar').style.transform = 'translateY(110%)';
             const camBadge = document.getElementById('cameraStatusBadge');
             if (camBadge) camBadge.style.opacity = '1';
+
+            // RESUME scanner + kamera normal kembali
+            window._scannerPaused = false;
+            try {
+                if (html5QrCode) html5QrCode.resume();
+                const vid = document.querySelector('#reader video');
+                if (vid) vid.style.opacity = '1';
+                // Reset border glow
+                const rc = document.getElementById('readerContainer');
+                if (rc) rc.style.boxShadow = '';
+                // Fallback: pastikan processing overlay tersembunyi
+                const procOverlay = document.getElementById('scanProcessingOverlay');
+                if (procOverlay) procOverlay.style.display = 'none';
+            } catch(e) {}
         }
 
 
@@ -1317,6 +1383,8 @@
                 nis: data.nis || '-',
                 kelas: data.kelas || '-',
                 status: data.status || 'hadir',
+                action: data.action || currentAction,
+                foto: data.foto_profil_url || data.foto_profil || null,
                 time: timeNow
             });
             
@@ -1348,10 +1416,18 @@
                 const actionLabel = isCheckIn ? 'Datang' : 'Pulang';
                 const actionColor = isCheckIn ? 'from-green-500 to-emerald-500' : 'from-blue-500 to-indigo-500';
                 
+                const avatarHtml = scan.foto
+                    ? `<img src="${scan.foto}" class="w-10 h-10 rounded-lg object-cover"
+                           onerror="this.parentElement.innerHTML='<i class=\'fas ${actionIcon} text-sm\'></i>';this.parentElement.className='flex-shrink-0 w-10 h-10 bg-gradient-to-br ${actionColor} rounded-lg flex items-center justify-center text-white text-sm';">`
+                    : `<i class="fas ${actionIcon}"></i>`;
+                const avatarClass = scan.foto
+                    ? `flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-600`
+                    : `flex-shrink-0 w-10 h-10 bg-gradient-to-br ${actionColor} rounded-lg flex items-center justify-center text-white text-sm`;
+
                 return `
                 <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:shadow-md transition-shadow">
-                    <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br ${actionColor} rounded-lg flex items-center justify-center text-white text-sm">
-                        <i class="fas ${actionIcon}"></i>
+                    <div class="${avatarClass}">
+                        ${avatarHtml}
                     </div>
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">${scan.nama}</p>
@@ -1473,8 +1549,11 @@
                 const result = await response.json();
                 
                 if (result.success && result.data) {
-                    // Load initial data from database
-                    recentScans = result.data;
+                    // Load initial data from database — map foto_profil_url → foto
+                    recentScans = result.data.map(item => ({
+                        ...item,
+                        foto: item.foto_profil_url || null
+                    }));
                     updateRecentScansUI();
                     console.log(`✅ Loaded ${recentScans.length} recent scans from database`);
                 } else {
@@ -2013,6 +2092,7 @@
             height: auto !important;
             display: block !important;
             border-radius: 0.75rem;
+            transition: opacity 0.3s ease; /* smooth dim saat scanner pause */
         }
         
         #reader canvas {
@@ -2022,7 +2102,17 @@
         #reader__scan_region {
             min-height: 400px !important;
         }
-        
+
+        /* Sembunyikan teks "Scanner paused" bawaan library html5-qrcode */
+        #reader__pause_hint,
+        #reader__scan_region > div[style*="position: absolute"],
+        #reader__scan_region > div:last-child,
+        #reader__scan_region > br,
+        #reader__scan_region > span,
+        #reader__scan_region img[alt="Info icon"] {
+            display: none !important;
+        }
+
         /* Card Entrance Animation */
         @keyframes slideUp {
             from {

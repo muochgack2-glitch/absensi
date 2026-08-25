@@ -137,12 +137,15 @@ class AttendanceService
                 'success' => false,
                 'message' => 'Anda sudah melakukan check-in hari ini',
                 'data' => [
-                    'nama' => $student->nama,
-                    'nis' => $student->nis,
-                    'kelas' => $student->kelas->nama_kelas ?? '-',
-                    'status' => $record->status,
-                    'time' => Carbon::parse($record->check_in_time)->format('H:i'),
-                    'duplicate' => true,
+                    'nama'           => $student->nama,
+                    'nis'            => $student->nis,
+                    'kelas'          => $student->kelas->nama_kelas ?? '-',
+                    'status'         => $record->status,
+                    'time'           => Carbon::parse($record->check_in_time)->format('H:i'),
+                    'duplicate'      => true,
+                    'foto_profil_url'=> $student->foto_profil
+                                        ? url('storage/' . $student->foto_profil)
+                                        : null,
                 ],
             ];
         }
@@ -222,12 +225,15 @@ class AttendanceService
             'success' => true,
             'message' => "Check-in berhasil! Status: {$this->statusService->getStatusLabel($status)}",
             'data' => [
-                'nama'         => $student->nama,
-                'nis'          => $student->nis,
-                'kelas'        => $student->kelas->nama_kelas ?? '-',
-                'status'       => $status,
-                'status_label' => $this->statusService->getStatusLabel($status),
-                'time'         => Carbon::parse($currentTime)->format('H:i'),
+                'nama'           => $student->nama,
+                'nis'            => $student->nis,
+                'kelas'          => $student->kelas->nama_kelas ?? '-',
+                'status'         => $status,
+                'status_label'   => $this->statusService->getStatusLabel($status),
+                'time'           => Carbon::parse($currentTime)->format('H:i'),
+                'foto_profil_url'=> $student->foto_profil
+                                    ? url('storage/' . $student->foto_profil)
+                                    : null,
             ],
         ];
     }
@@ -272,12 +278,15 @@ class AttendanceService
                 'success' => false,
                 'message' => 'Anda sudah melakukan check-out hari ini',
                 'data' => [
-                    'nama' => $student->nama,
-                    'nis' => $student->nis,
-                    'kelas' => $student->kelas->nama_kelas ?? '-',
-                    'status' => $record->status,
-                    'time' => Carbon::parse($record->check_out_time)->format('H:i'),
-                    'duplicate' => true,
+                    'nama'           => $student->nama,
+                    'nis'            => $student->nis,
+                    'kelas'          => $student->kelas->nama_kelas ?? '-',
+                    'status'         => $record->status,
+                    'time'           => Carbon::parse($record->check_out_time)->format('H:i'),
+                    'duplicate'      => true,
+                    'foto_profil_url'=> $student->foto_profil
+                                        ? url('storage/' . $student->foto_profil)
+                                        : null,
                 ],
             ];
         }
@@ -325,11 +334,14 @@ class AttendanceService
             'success' => true,
             'message' => $checkOutStatus === 'pulang_cepat' ? 'Pulang lebih awal!' : 'Check-out berhasil!',
             'data' => [
-                'nama'   => $student->nama,
-                'nis'    => $student->nis,
-                'kelas'  => $student->kelas->nama_kelas ?? '-',
-                'status' => $checkOutStatus,  // 'pulang' atau 'pulang_cepat'
-                'time'   => Carbon::parse($currentTime)->format('H:i'),
+                'nama'           => $student->nama,
+                'nis'            => $student->nis,
+                'kelas'          => $student->kelas->nama_kelas ?? '-',
+                'status'         => $checkOutStatus,  // 'pulang' atau 'pulang_cepat'
+                'time'           => Carbon::parse($currentTime)->format('H:i'),
+                'foto_profil_url'=> $student->foto_profil
+                                    ? url('storage/' . $student->foto_profil)
+                                    : null,
             ],
         ];
     }
