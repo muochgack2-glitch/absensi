@@ -1126,7 +1126,7 @@
                 terlambat:    { bg: '#431407', border: '#f97316', badge: '#f97316', label: '⚠️ CHECK IN TERLAMBAT' },
                 alpha:        { bg: '#1c1c1c', border: '#6b7280', badge: '#6b7280', label: '❌ TIDAK HADIR' },
                 pulang:       { bg: '#0c1a4a', border: '#3b82f6', badge: '#3b82f6', label: '🚪 CHECK OUT BERHASIL' },
-                pulang_cepat: { bg: '#422006', border: '#fbbf24', badge: '#f59e0b', label: '⚠️ PULANG LEBIH AWAL' },
+                pulang_cepat: { bg: '#2e1065', border: '#a855f7', badge: '#a855f7', label: '⚡ PULANG LEBIH AWAL' },
             };
 
             // Status: untuk check-in ambil dari data, untuk check-out gunakan status dari response
