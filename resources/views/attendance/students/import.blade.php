@@ -27,6 +27,7 @@
                         <li><strong>Nama:</strong> Nama lengkap siswa (wajib)</li>
                         <li><strong>Kelas ID:</strong> ID kelas dari database (wajib)</li>
                         <li><strong>No HP Ortu:</strong> Format 628XXXXXXXXX (opsional)</li>
+                        <li><strong>No HP Wali / Alternatif:</strong> Format 628XXXXXXXXX (opsional) — jika diisi, notifikasi WA dikirim ke 2 nomor</li>
                     </ul>
                 </li>
                 <li class="pl-2"><strong>Simpan file Excel</strong> Anda</li>
