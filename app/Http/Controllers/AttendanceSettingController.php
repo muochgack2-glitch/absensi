@@ -101,12 +101,11 @@ class AttendanceSettingController extends Controller
         $dualCam = $request->input('settings.use_dual_camera', '0');
         AttendanceSetting::set('use_dual_camera', $dualCam === '1' ? '1' : '0', 'camera');
 
-        // Simpan index kamera dari hidden input yang di-update JS
-        AttendanceSetting::set('qr_camera_index',      $request->input('settings.qr_camera_index',      '0'), 'camera');
-        AttendanceSetting::set('photo_camera_index',   $request->input('settings.photo_camera_index',   '1'), 'camera');
-        // Simpan deviceId kamera agar welcome page bisa match by ID (tidak bergantung urutan enumerate)
-        AttendanceSetting::set('qr_camera_deviceid',   $request->input('settings.qr_camera_deviceid',   ''), 'camera');
-        AttendanceSetting::set('photo_camera_deviceid',$request->input('settings.photo_camera_deviceid',''), 'camera');
+        // Simpan index kamera sebagai fallback global (deviceId disimpan di localStorage per-browser)
+        AttendanceSetting::set('qr_camera_index',    $request->input('settings.qr_camera_index',    '0'), 'camera');
+        AttendanceSetting::set('photo_camera_index', $request->input('settings.photo_camera_index', '1'), 'camera');
+        // Note: qr_camera_deviceid & photo_camera_deviceid TIDAK disimpan di DB
+        // — masing-masing browser/PC menyimpan deviceId di localStorage sendiri
 
         // Simpan agresivitas scan (FPS) — pastikan dalam range 5–30
         $scanFps = (int) $request->input('settings.scan_fps', 10);

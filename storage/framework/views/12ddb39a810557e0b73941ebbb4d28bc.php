@@ -1,23 +1,32 @@
-<x-public-layout>
-    {{-- Holiday Banner --}}
-    @php $publicHoliday = \App\Models\Holiday::getForDate(); @endphp
-    @if($publicHoliday)
+<?php if (isset($component)) { $__componentOriginal58c831a7c3cbf004f2e66a23aed50e5b = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal58c831a7c3cbf004f2e66a23aed50e5b = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.public-layout','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('public-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    
+    <?php $publicHoliday = \App\Models\Holiday::getForDate(); ?>
+    <?php if($publicHoliday): ?>
     <div class="mb-4 flex items-center gap-3 px-5 py-4 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl text-white shadow-lg">
         <div class="w-12 h-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center text-2xl flex-shrink-0">
             🏖️
         </div>
         <div>
             <p class="font-bold text-base">Hari Ini Libur!</p>
-            <p class="text-sm mt-0.5 text-amber-100">{{ $publicHoliday->name }} — Scan absensi tidak aktif hari ini</p>
+            <p class="text-sm mt-0.5 text-amber-100"><?php echo e($publicHoliday->name); ?> — Scan absensi tidak aktif hari ini</p>
         </div>
     </div>
-    @endif
+    <?php endif; ?>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-4" id="scanner-container">
         
-        {{-- LEFT SIDEBAR: Stats Cards --}}
+        
         <div class="lg:col-span-3 space-y-3">
-            {{-- Header with Clock --}}
+            
             <div class="bg-gradient-to-br from-primary-600 to-purple-600 rounded-xl shadow-lg p-4 text-white text-center">
                 <div class="inline-flex items-center justify-center w-10 h-10 bg-white/20 backdrop-blur-lg rounded-lg mb-2">
                     <i class="fas fa-clock text-xl"></i>
@@ -25,7 +34,7 @@
                 <div id="currentTime" class="text-2xl font-black mb-1">00:00:00</div>
                 <div id="currentDate" class="text-xs text-primary-100 mb-3">Loading...</div>
                 
-                {{-- Jam Masuk & Pulang Info --}}
+                
                 <div class="pt-3 border-t border-white/20 space-y-2">
                     <div class="flex items-center justify-between text-xs">
                         <span class="text-primary-100">⏰ Jam Masuk:</span>
@@ -38,7 +47,7 @@
                 </div>
             </div>
 
-            {{-- Pengumuman Card --}}
+            
             <div class="bg-gradient-to-br from-orange-500 to-red-500 rounded-xl shadow-lg p-4 text-white">
                 <div class="flex items-start gap-3">
                     <div class="flex-shrink-0">
@@ -51,7 +60,7 @@
                 </div>
             </div>
 
-            {{-- Stats Cards --}}
+            
             <div class="space-y-2">
                 <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg shadow-lg p-3 text-white">
                     <div class="flex items-center justify-between">
@@ -95,10 +104,10 @@
             </div>
         </div>
 
-        {{-- CENTER: Scanner Area --}}
+        
         <div class="lg:col-span-6 space-y-4">
 
-        {{-- Action Toggle with Modern Design + Login Button --}}
+        
         <div class="flex justify-center items-center gap-4">
             <button 
                 onclick="setAction('check_in')" 
@@ -123,38 +132,47 @@
                 </div>
             </button>
             
-            {{-- Login Admin Button --}}
+            
             <button onclick="showLoginModal()" class="group relative px-8 py-3 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl font-bold text-base transition-all transform hover:scale-105 shadow-lg hover:shadow-2xl">
                 <i class="fas fa-user-shield text-xl mr-2"></i>
                 Login Admin
             </button>
         </div>
 
-        {{-- Scanner Card with Premium Design --}}
+        
         <div class="relative">
             <div class="absolute inset-0 bg-gradient-to-br from-primary-100 to-purple-100 dark:from-primary-900/20 dark:to-purple-900/20 rounded-2xl blur-xl transform scale-95"></div>
-            <x-card class="relative backdrop-blur-sm bg-white/80 dark:bg-gray-800/80 border-2 border-primary-200 dark:border-primary-800/50">
+            <?php if (isset($component)) { $__componentOriginal53747ceb358d30c0105769f8471417f6 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal53747ceb358d30c0105769f8471417f6 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.card','data' => ['class' => 'relative backdrop-blur-sm bg-white/80 dark:bg-gray-800/80 border-2 border-primary-200 dark:border-primary-800/50']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('card'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['class' => 'relative backdrop-blur-sm bg-white/80 dark:bg-gray-800/80 border-2 border-primary-200 dark:border-primary-800/50']); ?>
                 <div class="text-center space-y-3">
                     <h2 class="text-xl font-black text-gray-900 dark:text-white">
                         <span id="scannerTitle">Scan QR Code untuk Check In</span>
                     </h2>
 
-                    {{-- QR Scanner Video with Frame --}}
+                    
                     <div class="relative inline-block w-full max-w-lg mx-auto">
                         <div class="absolute -inset-3 bg-gradient-to-r from-primary-500 via-purple-500 to-pink-500 rounded-2xl opacity-30 blur-lg animate-pulse"></div>
                         <div class="relative bg-gray-900 rounded-xl p-3 shadow-xl">
                             <div id="reader" class="mx-auto rounded-lg overflow-hidden" style="width: 100%; max-width: 400px; min-height: 300px;"></div>
                             
-                            {{-- Scanning Animation Overlay --}}
+                            
                             <div id="scanOverlay" class="absolute inset-3 pointer-events-none rounded-lg overflow-hidden">
                                 <div class="scan-line"></div>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Dual Camera: Face Webcam (HIDDEN — capture background saat QR scan) --}}
-                    {{-- JANGAN display:none — browser stop render frames. Pakai offscreen agar frame tetap aktif --}}
-                    {{-- Ukuran 320x240 agar browser tidak throttle render pada elemen terlalu kecil --}}
+                    
+                    
+                    
                     <video id="face-camera" autoplay muted playsinline
                            style="position:fixed; top:-9999px; left:-9999px; width:320px; height:240px; opacity:0; pointer-events:none; z-index:-1;"
                            aria-hidden="true"></video>
@@ -183,14 +201,32 @@
                         </div>
                     </div>
                 </div>
-            </x-card>
+             <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal53747ceb358d30c0105769f8471417f6)): ?>
+<?php $attributes = $__attributesOriginal53747ceb358d30c0105769f8471417f6; ?>
+<?php unset($__attributesOriginal53747ceb358d30c0105769f8471417f6); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal53747ceb358d30c0105769f8471417f6)): ?>
+<?php $component = $__componentOriginal53747ceb358d30c0105769f8471417f6; ?>
+<?php unset($__componentOriginal53747ceb358d30c0105769f8471417f6); ?>
+<?php endif; ?>
         </div>
 
-        {{-- Result Card with Premium Success Animation --}}
+        
         <div id="resultCard" class="hidden transform transition-all duration-500 scale-95 opacity-0">
             <div class="relative">
                 <div class="absolute inset-0 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 rounded-3xl blur-2xl transform scale-95"></div>
-                <x-card class="relative backdrop-blur-sm bg-white/90 dark:bg-gray-800/90 border-2 border-green-200 dark:border-green-800/50">
+                <?php if (isset($component)) { $__componentOriginal53747ceb358d30c0105769f8471417f6 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal53747ceb358d30c0105769f8471417f6 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.card','data' => ['class' => 'relative backdrop-blur-sm bg-white/90 dark:bg-gray-800/90 border-2 border-green-200 dark:border-green-800/50']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('card'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['class' => 'relative backdrop-blur-sm bg-white/90 dark:bg-gray-800/90 border-2 border-green-200 dark:border-green-800/50']); ?>
                     <div class="text-center space-y-6">
                         <div id="resultIcon" class="relative inline-block">
                             <div class="absolute inset-0 bg-green-400 rounded-full animate-ping opacity-30"></div>
@@ -214,30 +250,39 @@
                             </button>
                         </div>
                     </div>
-                </x-card>
+                 <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal53747ceb358d30c0105769f8471417f6)): ?>
+<?php $attributes = $__attributesOriginal53747ceb358d30c0105769f8471417f6; ?>
+<?php unset($__attributesOriginal53747ceb358d30c0105769f8471417f6); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal53747ceb358d30c0105769f8471417f6)): ?>
+<?php $component = $__componentOriginal53747ceb358d30c0105769f8471417f6; ?>
+<?php unset($__componentOriginal53747ceb358d30c0105769f8471417f6); ?>
+<?php endif; ?>
             </div>
         </div>
 
-        {{-- Old Error Card removed - using modal overlay system now --}}
+        
         </div>
 
-        {{-- RIGHT SIDEBAR: Branding + Recent Scans --}}
+        
         <div class="lg:col-span-3 flex flex-col gap-4">
-            {{-- Logo & School Name --}}
+            
             <div class="bg-gradient-to-br from-primary-600 to-purple-600 rounded-xl shadow-lg p-4 text-white text-center">
-                @if($appLogoUrl)
-                    <img src="{{ $appLogoUrl }}" alt="Logo"
+                <?php if($appLogoUrl): ?>
+                    <img src="<?php echo e($appLogoUrl); ?>" alt="Logo"
                          class="w-12 h-12 rounded-lg object-contain bg-white/20 p-1 mx-auto mb-2">
-                @else
+                <?php else: ?>
                     <div class="inline-flex items-center justify-center w-12 h-12 bg-white/20 backdrop-blur-lg rounded-lg mb-2">
                         <i class="fas fa-graduation-cap text-2xl"></i>
                     </div>
-                @endif
-                <h2 class="text-lg font-black mb-1">{{ $appSchoolName }}</h2>
+                <?php endif; ?>
+                <h2 class="text-lg font-black mb-1"><?php echo e($appSchoolName); ?></h2>
                 <p class="text-xs text-primary-100">Sistem Absensi QR Code</p>
             </div>
 
-            {{-- Recent Scans Timeline --}}
+            
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center gap-2 mb-3">
                     <div class="w-7 h-7 bg-gradient-to-br from-primary-500 to-purple-500 rounded-lg flex items-center justify-center text-white">
@@ -247,8 +292,8 @@
                 </div>
 
                 <div id="recentScansTimeline" class="space-y-2 overflow-y-auto" style="max-height: calc(5 * 88px);">
-                    {{-- Timeline items will be added here dynamically --}}
-                    {{-- Each item is approximately 88px tall (72px content + 16px gap) --}}
+                    
+                    
                     <div class="text-center text-gray-400 dark:text-gray-500 py-4">
                         <i class="fas fa-qrcode text-2xl mb-2"></i>
                         <p class="text-xs">Belum ada scan</p>
@@ -258,26 +303,26 @@
         </div>
     </div>
 
-    {{-- Toast Container --}}
+    
     <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
-    {{-- Bottom Result Bar — slides up from bottom, never covers camera --}}
+    
     <div id="bottomResultBar"
          style="position:fixed;bottom:0;left:0;right:0;z-index:50;transform:translateY(110%);transition:transform 0.4s cubic-bezier(0.34,1.4,0.64,1);">
         <div id="bottomBarInner" class="flex items-center gap-5 px-6 py-3 shadow-2xl" style="min-height:90px;border-top-width:4px;border-top-style:solid;">
-            {{-- Foto siswa --}}
+            
             <div id="barPhoto" class="flex-shrink-0 w-16 h-16 rounded-full overflow-hidden shadow-xl ring-4 bg-gray-700 flex items-center justify-center" style="ring-color:rgba(255,255,255,0.3)">
                 <i class="fas fa-user text-2xl text-gray-400"></i>
             </div>
-            {{-- Info siswa --}}
+            
             <div class="flex-1 min-w-0">
                 <p id="barLabel" class="text-xs font-bold uppercase tracking-widest mb-0.5 opacity-75"></p>
                 <p id="barName" class="text-2xl font-black text-white truncate leading-tight"></p>
                 <p id="barSub" class="text-sm font-medium text-white opacity-70 truncate"></p>
             </div>
-            {{-- Badge status --}}
+            
             <div id="barBadge" class="flex-shrink-0 px-5 py-2.5 rounded-full text-white font-black text-base shadow-lg tracking-wide"></div>
-            {{-- Countdown circle --}}
+            
             <div class="flex-shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-full border-4 border-white/30 bg-white/10 backdrop-blur-sm">
                 <span id="countdownTimer" class="text-xl font-black text-white leading-none">3</span>
                 <span class="text-xs text-white/60 leading-none mt-0.5">det</span>
@@ -285,11 +330,11 @@
         </div>
     </div>
 
-    {{-- Login Modal --}}
+    
     <div id="loginModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="animation: fadeIn 0.2s ease-out;">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full transform" style="animation: scaleIn 0.3s ease-out;">
             <div class="p-6">
-                {{-- Header --}}
+                
                 <div class="text-center mb-6">
                     <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-gray-600 to-gray-800 rounded-full mb-4 shadow-lg">
                         <i class="fas fa-user-shield text-3xl text-white"></i>
@@ -298,7 +343,7 @@
                     <p class="text-sm text-gray-500 dark:text-gray-400">Masuk ke dashboard admin</p>
                 </div>
 
-                {{-- Error Alert --}}
+                
                 <div id="loginError" class="hidden mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
                     <div class="flex items-start gap-2">
                         <i class="fas fa-exclamation-circle text-red-600 dark:text-red-400 mt-0.5"></i>
@@ -306,11 +351,11 @@
                     </div>
                 </div>
 
-                {{-- Login Form --}}
+                
                 <form id="loginForm" class="space-y-4">
-                    @csrf
+                    <?php echo csrf_field(); ?>
                     
-                    {{-- Email Field --}}
+                    
                     <div>
                         <label for="loginEmail" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
                             Email
@@ -331,7 +376,7 @@
                         </div>
                     </div>
 
-                    {{-- Password Field --}}
+                    
                     <div>
                         <label for="loginPassword" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
                             Password
@@ -359,7 +404,7 @@
                         </div>
                     </div>
 
-                    {{-- Remember Me --}}
+                    
                     <div class="flex items-center justify-between">
                         <label class="flex items-center">
                             <input 
@@ -369,12 +414,12 @@
                             >
                             <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">Remember me</span>
                         </label>
-                        <a href="{{ route('password.request') }}" class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 font-medium">
+                        <a href="<?php echo e(route('password.request')); ?>" class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 font-medium">
                             Lupa password?
                         </a>
                     </div>
 
-                    {{-- Buttons --}}
+                    
                     <div class="flex gap-3 pt-2">
                         <button 
                             type="button"
@@ -397,7 +442,7 @@
         </div>
     </div>
 
-    @push('styles')
+    <?php $__env->startPush('styles'); ?>
     <style>
         /* Toast Notification Styles */
         .toast {
@@ -578,12 +623,12 @@
             animation: scaleOut 0.2s ease-out forwards;
         }
     </style>
-    @endpush
+    <?php $__env->stopPush(); ?>
 
-    {{-- ── Camera Status Badge (Fixed pojok kanan bawah) ── --}}
+    
     <div id="cameraStatusBadge" style="position:fixed; bottom:16px; right:16px; z-index:50; display:flex; flex-direction:column; align-items:flex-end;">
 
-        {{-- Expanded panel --}}
+        
         <div id="camStatusPanel" style="display:none; margin-bottom:8px; background:#111827;
              border:1px solid #374151; border-radius:14px; padding:12px 14px;
              box-shadow:0 10px 40px rgba(0,0,0,0.5); min-width:200px;">
@@ -591,13 +636,13 @@
                        letter-spacing:.05em; margin:0 0 8px;">
                 <i class="fas fa-camera" style="margin-right:4px;"></i> Status Kamera
             </p>
-            {{-- QR Camera --}}
+            
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
                 <span id="qrStatusDot" style="width:8px; height:8px; border-radius:50%; background:#6b7280; flex-shrink:0;"></span>
                 <span style="font-size:11px; color:#9ca3af; flex-shrink:0;">QR</span>
                 <span id="qrCamName" style="font-size:11px; color:#f9fafb; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; max-width:130px;">—</span>
             </div>
-            {{-- Face Camera --}}
+            
             <div style="display:flex; align-items:center; gap:8px;">
                 <span id="fotoStatusDot" style="width:8px; height:8px; border-radius:50%; background:#6b7280; flex-shrink:0;"></span>
                 <span style="font-size:11px; color:#9ca3af; flex-shrink:0;">Foto</span>
@@ -605,7 +650,7 @@
             </div>
         </div>
 
-        {{-- Collapsed pill --}}
+        
         <button onclick="toggleCameraStatus()"
                 style="display:flex; align-items:center; gap:8px;
                        background:#111827; border:1px solid #374151;
@@ -620,7 +665,7 @@
     </div>
 
 
-    @push('scripts')
+    <?php $__env->startPush('scripts'); ?>
 
     <script>
         let currentAction = 'check_in';
@@ -628,21 +673,20 @@
         let lastScannedNis = null;
         let recentScans = [];
         let autoCloseTimer = null; // Timer untuk auto-close modal
-        const MODAL_AUTO_CLOSE = {{ (int) (\App\Models\AttendanceSetting::get('modal_auto_close', '3')) }}; // detik
-        const SCAN_FPS         = {{ (int) (\App\Models\AttendanceSetting::get('scan_fps', '10')) }}; // frame per detik
-        const SCAN_RES_QR      = '{{ \App\Models\AttendanceSetting::get('scan_resolution_qr', 'hd') }}';  // sd|hd|fhd — kamera QR
-        const SCAN_RES_PHOTO   = '{{ \App\Models\AttendanceSetting::get('scan_resolution_photo', 'hd') }}'; // sd|hd|fhd — kamera Foto
+        const MODAL_AUTO_CLOSE = <?php echo e((int) (\App\Models\AttendanceSetting::get('modal_auto_close', '3'))); ?>; // detik
+        const SCAN_FPS         = <?php echo e((int) (\App\Models\AttendanceSetting::get('scan_fps', '10'))); ?>; // frame per detik
+        const SCAN_RES_QR      = '<?php echo e(\App\Models\AttendanceSetting::get('scan_resolution_qr', 'hd')); ?>';  // sd|hd|fhd — kamera QR
+        const SCAN_RES_PHOTO   = '<?php echo e(\App\Models\AttendanceSetting::get('scan_resolution_photo', 'hd')); ?>'; // sd|hd|fhd — kamera Foto
 
         // --- Dual Camera Config (dari server setting) ---
-        const DUAL_CAMERA = {{ ($useDualCamera ?? '0') === '1' ? 'true' : 'false' }};
-        const QR_CAM_IDX       = {{ (int)($qrCameraIndex ?? 0) }};
-        const PHO_CAM_IDX      = {{ (int)($photoCameraIndex ?? 1) }};
-        // DeviceId dari localStorage per-browser (prioritas).
-        // Fallback: index QR_CAM_IDX / PHO_CAM_IDX jika localStorage kosong.
-        // DeviceId TIDAK disimpan di DB — murni per browser/PC.
-        const QR_CAM_DEVICEID  = localStorage.getItem('absensi_qr_camera_deviceid')  || '';
-        const PHO_CAM_DEVICEID = localStorage.getItem('absensi_photo_camera_deviceid') || '';
-
+        const DUAL_CAMERA = <?php echo e(($useDualCamera ?? '0') === '1' ? 'true' : 'false'); ?>;
+        const QR_CAM_IDX       = <?php echo e((int)($qrCameraIndex ?? 0)); ?>;
+        const PHO_CAM_IDX      = <?php echo e((int)($photoCameraIndex ?? 1)); ?>;
+        // DeviceId: localStorage per-browser diprioritaskan, fallback ke DB (global default)
+        const QR_CAM_DEVICEID  = localStorage.getItem('absensi_qr_camera_deviceid')
+                               || "<?php echo e($qrCameraDeviceId ?? ''); ?>";
+        const PHO_CAM_DEVICEID = localStorage.getItem('absensi_photo_camera_deviceid')
+                               || "<?php echo e($photoCameraDeviceId ?? ''); ?>";
 
         let fotoStream    = null;
         let faceReadyAt  = null;
@@ -1748,7 +1792,7 @@
                         
                         if (response.ok && result.success !== false) {
                             // Login success - redirect to dashboard
-                            window.location.href = result.redirect || '{{ route("dashboard") }}';
+                            window.location.href = result.redirect || '<?php echo e(route("dashboard")); ?>';
                         } else {
                             // Login failed - show error
                             const errorMessage = result.message || result.errors?.email?.[0] || 'Login gagal. Periksa email dan password Anda.';
@@ -2026,6 +2070,16 @@
             animation-delay: 0.3s;
         }
     </style>
-    @endpush
-</x-app-layout>
+    <?php $__env->stopPush(); ?>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal58c831a7c3cbf004f2e66a23aed50e5b)): ?>
+<?php $attributes = $__attributesOriginal58c831a7c3cbf004f2e66a23aed50e5b; ?>
+<?php unset($__attributesOriginal58c831a7c3cbf004f2e66a23aed50e5b); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal58c831a7c3cbf004f2e66a23aed50e5b)): ?>
+<?php $component = $__componentOriginal58c831a7c3cbf004f2e66a23aed50e5b; ?>
+<?php unset($__componentOriginal58c831a7c3cbf004f2e66a23aed50e5b); ?>
+<?php endif; ?>
 
+<?php /**PATH C:\Users\DMCenter\Music\SPMB2\SPMB\absensi\resources\views/welcome.blade.php ENDPATH**/ ?>
