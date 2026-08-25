@@ -31,7 +31,8 @@ class AttendanceNotificationService
         }
 
         // Check if student has parent phone number
-        if (empty($student->no_hp_ortu)) {
+        $phones = $student->getParentPhones();
+        if (empty($phones)) {
             Log::warning("No parent phone number for student {$student->nis}");
             return;
         }
@@ -47,12 +48,11 @@ class AttendanceNotificationService
         $shouldIncludePhoto = in_array($includePhoto, ['true', '1', 1, true], true);
         $photoPath = $shouldIncludePhoto ? $record->check_in_photo : null;
 
-        // Send notification
-        $result = $this->whatsAppService->sendParentNotification(
-            $student->no_hp_ortu,
-            $message,
-            $photoPath
-        );
+        // Send notification ke semua nomor
+        $result = ['success' => false];
+        foreach ($phones as $phone) {
+            $result = $this->whatsAppService->sendParentNotification($phone, $message, $photoPath);
+        }
 
         // Log notification attempt
         $this->logNotification($student->id, 'check_in', $result);
@@ -150,11 +150,11 @@ class AttendanceNotificationService
             $trend
         );
 
-        // Send notification
-        $result = $this->whatsAppService->sendParentNotification(
-            $student->no_hp_ortu,
-            $message
-        );
+        // Send notification ke semua nomor
+        $result = ['success' => false];
+        foreach ($student->getParentPhones() as $phone) {
+            $result = $this->whatsAppService->sendParentNotification($phone, $message);
+        }
 
         // Log notification attempt
         $this->logNotification($student->id, 'late_warning', $result);
@@ -268,7 +268,8 @@ class AttendanceNotificationService
         }
 
         // Check if student has parent phone number
-        if (empty($student->no_hp_ortu)) {
+        $phones = $student->getParentPhones();
+        if (empty($phones)) {
             return;
         }
 
@@ -283,12 +284,11 @@ class AttendanceNotificationService
         $shouldIncludePhoto = in_array($includePhoto, ['true', '1', 1, true], true);
         $photoPath = $shouldIncludePhoto ? $record->check_out_photo : null;
 
-        // Send notification
-        $result = $this->whatsAppService->sendParentNotification(
-            $student->no_hp_ortu,
-            $message,
-            $photoPath
-        );
+        // Send notification ke semua nomor
+        $result = ['success' => false];
+        foreach ($phones as $phone) {
+            $result = $this->whatsAppService->sendParentNotification($phone, $message, $photoPath);
+        }
 
         // Log notification attempt
         $this->logNotification($student->id, 'check_out', $result);
@@ -371,7 +371,8 @@ class AttendanceNotificationService
         }
 
         // Check if student has parent phone number
-        if (empty($student->no_hp_ortu)) {
+        $phones = $student->getParentPhones();
+        if (empty($phones)) {
             return;
         }
 
@@ -388,11 +389,11 @@ class AttendanceNotificationService
         $message .= "Mohon segera menghubungi pihak sekolah.\n";
         $message .= "\n_Pesan otomatis dari sistem absensi_";
 
-        // Send notification
-        $result = $this->whatsAppService->sendParentNotification(
-            $student->no_hp_ortu,
-            $message
-        );
+        // Send notification ke semua nomor
+        $result = ['success' => false];
+        foreach ($phones as $phone) {
+            $result = $this->whatsAppService->sendParentNotification($phone, $message);
+        }
 
         // Log notification attempt
         $this->logNotification($student->id, 'absent', $result);

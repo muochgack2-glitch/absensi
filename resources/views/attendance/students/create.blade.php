@@ -68,6 +68,17 @@
                         :error="$errors->first('no_hp_ortu')"
                     />
 
+                    {{-- No HP Wali / Alternatif --}}
+                    <x-input
+                        type="text"
+                        name="no_hp_ortu2"
+                        label="No HP Wali / Alternatif"
+                        :value="old('no_hp_ortu2')"
+                        placeholder="Contoh: 628987654321 (opsional)"
+                        helper="Jika diisi, notifikasi WA dikirim ke 2 nomor"
+                        :error="$errors->first('no_hp_ortu2')"
+                    />
+
                     {{-- Foto Profil --}}
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

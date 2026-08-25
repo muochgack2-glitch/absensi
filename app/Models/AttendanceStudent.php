@@ -14,7 +14,7 @@ class AttendanceStudent extends Model
     use HasFactory;
 
     protected $fillable = [
-        'nis', 'nama', 'kelas_id', 'no_hp_ortu',
+        'nis', 'nama', 'kelas_id', 'no_hp_ortu', 'no_hp_ortu2',
         'qr_code_path', 'foto_profil', 'is_active', 'tahun_ajaran',
     ];
 
@@ -49,6 +49,20 @@ class AttendanceStudent extends Model
         return [
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * Kembalikan semua nomor HP ortu/wali yang terisi (tidak kosong).
+     * Digunakan oleh notification service untuk kirim WA ke semua nomor.
+     *
+     * @return array<string>
+     */
+    public function getParentPhones(): array
+    {
+        return array_values(array_filter([
+            $this->no_hp_ortu,
+            $this->no_hp_ortu2,
+        ]));
     }
 
     /**
