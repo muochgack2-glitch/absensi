@@ -1293,6 +1293,16 @@
             hideModal();
         }
 
+        // ── DEV HELPER: test bottom bar dari console browser ──────────────────
+        // window._testBottomBar(result, isCheckIn)
+        // Contoh: window._testBottomBar({success:true,data:{nama:'Budi',nis:'123',kelas:'X AKL',status:'pulang_cepat',time:'13:20'}}, false)
+        window._testBottomBar = function(result, forceCheckIn) {
+            currentAction = forceCheckIn ? 'check_in' : 'check_out';
+            showSuccess(result);
+        };
+        // ─────────────────────────────────────────────────────────────────────
+
+
         function addToRecentScans(data) {
             if (!data) return;
             
