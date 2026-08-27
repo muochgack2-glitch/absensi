@@ -835,6 +835,7 @@
                         // JANGAN pakai cameras[0] — di iOS kamera depan bisa ada di index 0
                         console.log('📷 Fallback (localStorage kosong) → facingMode:environment (kamera belakang)');
                         doStart({ facingMode: 'environment' }, configDefault);
+                        setTimeout(updateCameraStatus, 500);
                     }
                 }).catch(() => {
                     // getCameras gagal (permission denied?) → coba facingMode langsung
@@ -974,7 +975,7 @@
                 modeText.textContent = 'Dual Camera';
             } else if (qrCameraId || camerasCache?.length > 0) {
                 mainDot.className = 'w-2 h-2 rounded-full transition-colors duration-300 bg-yellow-400';
-                modeText.textContent = 'Single Camera';
+                modeText.textContent = qrCameraId ? 'Single Camera' : 'Single Camera (auto)';
             } else {
                 mainDot.className = 'w-2 h-2 rounded-full transition-colors duration-300 bg-red-400';
                 modeText.textContent = 'Kamera Error';
@@ -2129,6 +2130,8 @@
     </style>
     @endpush
 </x-app-layout>
+
+
 
 
 
