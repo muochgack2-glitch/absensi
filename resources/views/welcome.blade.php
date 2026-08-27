@@ -275,23 +275,23 @@
     {{-- Bottom Result Bar — slides up from bottom, never covers camera --}}
     <div id="bottomResultBar"
          style="position:fixed;bottom:0;left:0;right:0;z-index:50;transform:translateY(110%);transition:transform 0.4s cubic-bezier(0.34,1.4,0.64,1);">
-        <div id="bottomBarInner" class="flex items-center gap-5 px-6 py-3 shadow-2xl" style="min-height:90px;border-top-width:4px;border-top-style:solid;">
+        <div id="bottomBarInner" class="flex items-center gap-2 sm:gap-5 px-3 sm:px-6 py-2 sm:py-3 shadow-2xl" style="min-height:70px;border-top-width:4px;border-top-style:solid;">
             {{-- Foto siswa --}}
-            <div id="barPhoto" class="flex-shrink-0 w-16 h-16 rounded-full overflow-hidden shadow-xl ring-4 bg-gray-700 flex items-center justify-center" style="ring-color:rgba(255,255,255,0.3)">
+            <div id="barPhoto" class="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden shadow-xl ring-2 sm:ring-4 bg-gray-700 flex items-center justify-center" style="ring-color:rgba(255,255,255,0.3)">
                 <i class="fas fa-user text-2xl text-gray-400"></i>
             </div>
             {{-- Info siswa --}}
             <div class="flex-1 min-w-0">
-                <p id="barLabel" class="text-xs font-bold uppercase tracking-widest mb-0.5 opacity-75"></p>
-                <p id="barName" class="text-2xl font-black text-white truncate leading-tight"></p>
-                <p id="barSub" class="text-sm font-medium text-white opacity-70 truncate"></p>
+                <p id="barLabel" class="hidden sm:block text-xs font-bold uppercase tracking-widest mb-0.5 opacity-75"></p>
+                <p id="barName" class="text-base sm:text-2xl font-black text-white truncate leading-tight"></p>
+                <p id="barSub" class="text-xs sm:text-sm font-medium text-white opacity-70 truncate"></p>
             </div>
             {{-- Badge status --}}
-            <div id="barBadge" class="flex-shrink-0 px-5 py-2.5 rounded-full text-white font-black text-base shadow-lg tracking-wide"></div>
+            <div id="barBadge" class="flex-shrink-0 px-2.5 py-1.5 sm:px-5 sm:py-2.5 rounded-full text-white font-black text-xs sm:text-base shadow-lg tracking-wide"></div>
             {{-- Countdown circle --}}
-            <div class="flex-shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-full border-4 border-white/30 bg-white/10 backdrop-blur-sm">
-                <span id="countdownTimer" class="text-xl font-black text-white leading-none">3</span>
-                <span class="text-xs text-white/60 leading-none mt-0.5">det</span>
+            <div class="flex-shrink-0 flex flex-col items-center justify-center w-10 h-10 sm:w-14 sm:h-14 rounded-full border-2 sm:border-4 border-white/30 bg-white/10 backdrop-blur-sm">
+                <span id="countdownTimer" class="text-base sm:text-xl font-black text-white leading-none">3</span>
+                <span class="hidden sm:block text-xs text-white/60 leading-none mt-0.5">det</span>
             </div>
         </div>
     </div>
@@ -2130,6 +2130,7 @@
     </style>
     @endpush
 </x-app-layout>
+
 
 
 
