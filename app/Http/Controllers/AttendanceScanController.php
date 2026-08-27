@@ -86,10 +86,10 @@ class AttendanceScanController extends Controller
      */
     public function showScanner()
     {
-        $useDualCamera    = \App\Models\AttendanceSetting::get('use_dual_camera', '0');
-        $qrCameraIndex    = \App\Models\AttendanceSetting::get('qr_camera_index', '0');
-        $photoCameraIndex = \App\Models\AttendanceSetting::get('photo_camera_index', '1');
+        $useDualCamera = \App\Models\AttendanceSetting::get('use_dual_camera', '0');
+        // qr_camera_index & photo_camera_index dihapus — kamera dipilih via localStorage per-browser
 
-        return view('attendance.scanner', compact('useDualCamera', 'qrCameraIndex', 'photoCameraIndex'));
+        return view('attendance.scanner', compact('useDualCamera'));
     }
 }
+

@@ -43,8 +43,6 @@ class AttendanceSettingController extends Controller
             'settings.late_warning_threshold_minutes' => 'nullable|integer|min:1|max:120',
             'settings.late_warning_min_count'        => 'nullable|integer|min:1|max:20',
             'settings.use_dual_camera'               => 'nullable|in:0,1',
-            'settings.qr_camera_index'               => 'nullable|integer|min:0|max:9',
-            'settings.photo_camera_index'            => 'nullable|integer|min:0|max:9',
             'settings.modal_auto_close'              => 'nullable|integer|min:1|max:10',
         ];
 
@@ -101,10 +99,6 @@ class AttendanceSettingController extends Controller
         $dualCam = $request->input('settings.use_dual_camera', '0');
         AttendanceSetting::set('use_dual_camera', $dualCam === '1' ? '1' : '0', 'camera');
 
-        // Simpan index kamera sebagai fallback global (deviceId disimpan di localStorage per-browser)
-        AttendanceSetting::set('qr_camera_index',    $request->input('settings.qr_camera_index',    '0'), 'camera');
-        AttendanceSetting::set('photo_camera_index', $request->input('settings.photo_camera_index', '1'), 'camera');
-        // Note: qr_camera_deviceid & photo_camera_deviceid TIDAK disimpan di DB
         // — masing-masing browser/PC menyimpan deviceId di localStorage sendiri
 
         // Simpan agresivitas scan (FPS) — pastikan dalam range 5–30

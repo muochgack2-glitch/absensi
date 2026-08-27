@@ -650,11 +650,8 @@
 
         // --- Dual Camera Config (dari server setting) ---
         const DUAL_CAMERA = {{ ($useDualCamera ?? '0') === '1' ? 'true' : 'false' }};
-        const QR_CAM_IDX       = {{ (int)($qrCameraIndex ?? 0) }};
-        const PHO_CAM_IDX      = {{ (int)($photoCameraIndex ?? 1) }};
-        // DeviceId dari localStorage per-browser (prioritas).
-        // Fallback: index QR_CAM_IDX / PHO_CAM_IDX jika localStorage kosong.
-        // DeviceId TIDAK disimpan di DB — murni per browser/PC.
+        // DeviceId dari localStorage per-browser — tidak disimpan di DB.
+        // Jika kosong (belum setup), dual camera skip otomatis.
         const QR_CAM_DEVICEID  = localStorage.getItem('absensi_qr_camera_deviceid')  || '';
         const PHO_CAM_DEVICEID = localStorage.getItem('absensi_photo_camera_deviceid') || '';
 
@@ -887,15 +884,12 @@
                     fotoDevice = cameras.find(c => c.id === PHO_CAM_DEVICEID) || null;
                 }
 
-                // Step 2: index tersimpan — tapi HANYA jika bukan kamera QR
-                if (!fotoDevice) {
-                    const byIdx = cameras[PHO_CAM_IDX];
-                    if (byIdx && byIdx.id !== qrCameraId) fotoDevice = byIdx;
-                }
-
-                // Step 3: kamera pertama yang BUKAN kamera QR
+                // Step 2: kamera pertama yang BUKAN kamera QR (auto-select, no index needed)
                 if (!fotoDevice) {
                     fotoDevice = cameras.find(c => c.id !== qrCameraId) || null;
+                    if (fotoDevice && !PHO_CAM_DEVICEID) {
+                        console.info('ℹ️ Face camera auto-selected (localStorage belum diset). Buka /settings untuk konfigurasi manual.');
+                    }
                 }
 
                 if (!fotoDevice) {
@@ -2143,4 +2137,5 @@
     </style>
     @endpush
 </x-app-layout>
+
 
