@@ -16,7 +16,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-4" id="scanner-container">
         
         {{-- LEFT SIDEBAR: Stats Cards --}}
-        <div class="lg:col-span-3 space-y-3">
+        <div class="lg:col-span-3 space-y-3 order-2 lg:order-1">
             {{-- Header with Clock --}}
             <div class="bg-gradient-to-br from-primary-600 to-purple-600 rounded-xl shadow-lg p-4 text-white text-center">
                 <div class="inline-flex items-center justify-center w-10 h-10 bg-white/20 backdrop-blur-lg rounded-lg mb-2">
@@ -96,14 +96,14 @@
         </div>
 
         {{-- CENTER: Scanner Area --}}
-        <div class="lg:col-span-6 space-y-4">
+        <div class="lg:col-span-6 space-y-4 order-1 lg:order-2">
 
         {{-- Action Toggle with Modern Design + Login Button --}}
-        <div class="flex justify-center items-center gap-4">
+        <div class="flex flex-wrap justify-center items-center gap-2 lg:gap-4">
             <button 
                 onclick="setAction('check_in')" 
                 id="btnCheckIn"
-                class="action-btn group relative px-8 py-3 rounded-xl font-bold text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
+                class="action-btn group relative px-5 py-2.5 lg:px-8 lg:py-3 rounded-xl font-bold text-sm lg:text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
             >
                 <div class="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div class="relative flex items-center gap-2">
@@ -114,7 +114,7 @@
             <button 
                 onclick="setAction('check_out')" 
                 id="btnCheckOut"
-                class="action-btn group relative px-8 py-3 rounded-xl font-bold text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
+                class="action-btn group relative px-5 py-2.5 lg:px-8 lg:py-3 rounded-xl font-bold text-sm lg:text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
             >
                 <div class="absolute inset-0 bg-gradient-to-r from-red-400 to-pink-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div class="relative flex items-center gap-2">
@@ -124,7 +124,7 @@
             </button>
             
             {{-- Login Admin Button --}}
-            <button onclick="showLoginModal()" class="group relative px-8 py-3 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl font-bold text-base transition-all transform hover:scale-105 shadow-lg hover:shadow-2xl">
+            <button onclick="showLoginModal()" class="group relative px-5 py-2.5 lg:px-8 lg:py-3 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl font-bold text-sm lg:text-base transition-all transform hover:scale-105 shadow-lg hover:shadow-2xl">
                 <i class="fas fa-user-shield text-xl mr-2"></i>
                 Login Admin
             </button>
@@ -233,7 +233,7 @@
         </div>
 
         {{-- RIGHT SIDEBAR: Branding + Recent Scans --}}
-        <div class="lg:col-span-3 flex flex-col gap-4">
+        <div class="lg:col-span-3 flex flex-col gap-4 order-3 lg:order-3">
             {{-- Logo & School Name --}}
             <div class="bg-gradient-to-br from-primary-600 to-purple-600 rounded-xl shadow-lg p-4 text-white text-center">
                 @if($appLogoUrl)
@@ -2130,6 +2130,8 @@
     </style>
     @endpush
 </x-app-layout>
+
+
 
 
 
