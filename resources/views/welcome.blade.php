@@ -831,18 +831,10 @@
                         setTimeout(() => initDualCamera(), 800);
                         setTimeout(updateCameraStatus, 500);
                     } else {
-                        // HP/PC baru: pakai camera ID langsung (lebih aman dari facingMode)
-                        // Android: cameras biasanya [back, front] → pakai cameras[0] = belakang
-                        const fallbackCam = cameras[0] || null;
-                        if (fallbackCam) {
-                            console.log('📷 Fallback → pakai kamera:', fallbackCam.label);
-                            // Pakai configDual (tanpa videoConstraints) agar tidak konflik dengan deviceId
-                            doStart(fallbackCam.id, configDual);
-                            setTimeout(updateCameraStatus, 500);
-                        } else {
-                            console.log('📷 Tidak ada kamera → facingMode:environment');
-                            doStart({ facingMode: 'environment' }, configDefault);
-                        }
+                        // HP/PC baru: pakai facingMode:environment → kamera BELAKANG
+                        // JANGAN pakai cameras[0] — di iOS kamera depan bisa ada di index 0
+                        console.log('📷 Fallback (localStorage kosong) → facingMode:environment (kamera belakang)');
+                        doStart({ facingMode: 'environment' }, configDefault);
                     }
                 }).catch(() => {
                     // getCameras gagal (permission denied?) → coba facingMode langsung
@@ -2137,5 +2129,6 @@
     </style>
     @endpush
 </x-app-layout>
+
 
 
