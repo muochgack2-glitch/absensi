@@ -27,11 +27,13 @@ class AttendanceScanController extends Controller
         $validated = $request->validated();
 
         // Process scan
+        $tStart = microtime(true);
         $result = $this->attendanceService->processScan(
             $validated['nis'],
             $validated['photo_base64'],
             $validated['action']
         );
+        \Log::info('[SCAN-TIMING] TOTAL processScan: ' . round((microtime(true) - $tStart) * 1000, 1) . 'ms | action=' . $validated['action']);
 
         // If successful, broadcast to SSE clients
         if ($result['success'] && isset($result['data'])) {
@@ -46,9 +48,6 @@ class AttendanceScanController extends Controller
             ], now()->addSeconds(5)); // Cache for 5 seconds
         }
 
-        // Return response
-        // Use 200 for all responses (success/business logic errors)
-        // Use 422 only for validation errors (handled by FormRequest)
         return response()->json($result, 200);
     }
 

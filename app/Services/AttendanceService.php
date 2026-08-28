@@ -172,21 +172,27 @@ class AttendanceService
 
         // Save photo (skip if empty for performance)
         $photoPath = null;
+        $tPhoto = microtime(true);
         if ($photoBase64 && !empty(trim($photoBase64))) {
             $photoPath = $this->photoCaptureService->savePhoto($photoBase64, $student->nis, 'check_in');
         }
+        \Log::info('[SCAN-TIMING] savePhoto: ' . round((microtime(true) - $tPhoto) * 1000, 1) . 'ms');
 
         // Determine status
         $status = $this->statusService->determineStatus($currentTime);
 
         // Update record
+        $tDb = microtime(true);
         $record->update([
             'check_in_time' => $currentTime,
             'check_in_photo' => $photoPath,
             'status' => $status,
         ]);
+        \Log::info('[SCAN-TIMING] DB update check_in: ' . round((microtime(true) - $tDb) * 1000, 1) . 'ms');
 
+        $tCommit = microtime(true);
         DB::commit();
+        \Log::info('[SCAN-TIMING] DB commit: ' . round((microtime(true) - $tCommit) * 1000, 1) . 'ms');
 
         // Kirim notifikasi WA untuk check-in
         // Cek apakah notifikasi aktif untuk semua check-in atau hanya terlambat
