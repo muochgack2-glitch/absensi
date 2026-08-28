@@ -152,13 +152,22 @@
 
                             {{-- Processing Overlay — tampil saat QR detect, hilang saat bar muncul --}}
                             <div id="scanProcessingOverlay"
-                                 style="display:none; position:absolute; inset:0; z-index:10; background:rgba(0,0,0,0.55);
-                                        align-items:center; justify-content:center; flex-direction:column; gap:10px;
+                                 style="display:none; position:absolute; inset:0; z-index:10; background:rgba(0,0,0,0.72);
+                                        align-items:center; justify-content:center; flex-direction:column; gap:8px;
                                         border-radius:0.5rem; pointer-events:none;">
-                                <div style="width:38px;height:38px;border:3px solid #4ade80;border-top-color:transparent;
+                                {{-- Spinner --}}
+                                <div style="width:42px;height:42px;border:3px solid #4ade80;border-top-color:transparent;
                                             border-radius:50%;animation:spinLoader 0.7s linear infinite;"></div>
-                                <span style="color:#4ade80;font-size:12px;font-weight:700;letter-spacing:0.08em;
-                                             text-shadow:0 0 8px rgba(74,222,128,0.8);">MEMPROSES...</span>
+                                {{-- Status --}}
+                                <span style="color:#4ade80;font-size:13px;font-weight:700;letter-spacing:0.08em;
+                                             text-shadow:0 0 8px rgba(74,222,128,0.8);">QR TERDETEKSI ✓</span>
+                                {{-- Instruksi turunkan kartu --}}
+                                <div style="margin-top:4px;text-align:center;padding:6px 14px;
+                                            background:rgba(255,255,255,0.12);border-radius:20px;border:1px solid rgba(255,255,255,0.2);">
+                                    <span style="color:#ffffff;font-size:11px;font-weight:600;letter-spacing:0.03em;">
+                                        👇 Turunkan kartu QR Anda
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
