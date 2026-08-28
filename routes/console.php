@@ -144,8 +144,8 @@ Schedule::call(function () {
   ->withoutOverlapping()
   ->appendOutputTo(storage_path('logs/attendance-summary.log'));
 
-// Auto-cleanup foto absensi lebih tua dari 90 hari — setiap Minggu jam 01:00
-Schedule::command('attendance:cleanup-photos --days=90')
+// Auto-cleanup foto absensi lebih tua dari 30 hari — setiap Minggu jam 01:00
+Schedule::command('attendance:cleanup-photos --days=30')
   ->weekly()
   ->sundays()
   ->at('01:00')
