@@ -205,11 +205,17 @@ class AttendanceService
         
         if ($shouldNotify) {
             $record->refresh(); // pastikan data terbaru
-            try {
-                $this->notificationService->notifyCheckIn($student->load('kelas'), $record);
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::warning('Check-in WA notification failed: ' . $e->getMessage());
-            }
+            $studentSnap = $student->load('kelas');
+            $recordSnap  = $record;
+            $notifSvc    = $this->notificationService;
+            // Kirim WA SETELAH response sampai ke browser — scanner tidak perlu nunggu
+            app()->terminating(function() use ($notifSvc, $studentSnap, $recordSnap) {
+                try {
+                    $notifSvc->notifyCheckIn($studentSnap, $recordSnap);
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('Check-in WA failed: ' . $e->getMessage());
+                }
+            });
         }
 
         // Log success
@@ -314,11 +320,17 @@ class AttendanceService
         $notifyCheckOut = AttendanceSetting::get('notify_checkout', 'false');
         if ($notifyCheckOut === 'true') {
             $record->refresh(); // pastikan data terbaru
-            try {
-                $this->notificationService->notifyCheckOut($student->load('kelas'), $record);
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::warning('Check-out WA notification failed: ' . $e->getMessage());
-            }
+            $studentSnap = $student->load('kelas');
+            $recordSnap  = $record;
+            $notifSvc    = $this->notificationService;
+            // Kirim WA SETELAH response sampai ke browser — scanner tidak perlu nunggu
+            app()->terminating(function() use ($notifSvc, $studentSnap, $recordSnap) {
+                try {
+                    $notifSvc->notifyCheckOut($studentSnap, $recordSnap);
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('Check-out WA failed: ' . $e->getMessage());
+                }
+            });
         }
 
         // Log success
@@ -577,3 +589,4 @@ class AttendanceService
         ];
     }
 }
+
