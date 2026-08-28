@@ -70,9 +70,19 @@
                         <x-input
                             type="time"
                             name="settings[check_out_time]"
-                            label="Jam Pulang"
+                            label="Jam Pulang (Resmi)"
                             :value="old('settings.check_out_time', $settings['time']['check_out_time'] ?? $settings['schedule']['check_out_time'] ?? '15:00')"
-                            helper="Jam mulai absensi pulang"
+                            helper="Jam resmi pulang — untuk menandai pulang cepat/tepat waktu"
+                            required
+                        />
+
+                        {{-- Check Out Start Time (Scanner switch) --}}
+                        <x-input
+                            type="time"
+                            name="settings[check_out_start_time]"
+                            label="⏱️ Jam Mulai Scanner Pulang"
+                            :value="old('settings.check_out_start_time', $settings['time']['check_out_start_time'] ?? '12:00')"
+                            helper="Scanner otomatis beralih ke mode PULANG mulai jam ini"
                             required
                         />
 

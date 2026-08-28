@@ -721,10 +721,12 @@
             const now = new Date();
             const currentHour = now.getHours();
             const currentMinute = now.getMinutes();
-            const currentTime = currentHour * 60 + currentMinute; // Convert to minutes
-            
-            // Check-out start time: 12:00 siang = 720 minutes
-            const checkOutStartTime = 12 * 60; // 12:00 in minutes
+            const currentTime = currentHour * 60 + currentMinute;
+
+            // Jam mulai scanner pulang — dari Settings admin
+            const checkOutStartRaw = '{{ $checkOutStartTime ?? "12:00" }}';
+            const [coHour, coMin]  = checkOutStartRaw.split(':').map(Number);
+            const checkOutStartTime = coHour * 60 + coMin;
             
             // Determine initial action based on time
             const initialAction = currentTime >= checkOutStartTime ? 'check_out' : 'check_in';
