@@ -29,6 +29,7 @@ class AttendanceSettingController extends Controller
         $rules = [
             'settings.check_in_time'                 => 'required|date_format:H:i',
             'settings.check_out_time'                => 'required|date_format:H:i|after:settings.check_in_time',
+            'settings.check_out_start_time'          => 'nullable|date_format:H:i',
             'settings.tolerance_minutes'             => 'required|integer|min:0|max:60',
             'settings.cutoff_time'                   => 'required|date_format:H:i|after:settings.check_in_time',
             'settings.enable_parent_notification'    => 'nullable|boolean',
