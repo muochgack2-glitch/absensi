@@ -215,6 +215,15 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/attendance/settings/send-summary', [AttendanceSettingController::class, 'sendSummaryNow'])
         ->name('attendance.settings.send-summary');
 
+    Route::get('/attendance/settings/photos/stats', [AttendanceSettingController::class, 'photoStats'])
+        ->name('attendance.settings.photos.stats');
+
+    Route::get('/attendance/settings/photos/download', [AttendanceSettingController::class, 'photoDownload'])
+        ->name('attendance.settings.photos.download');
+
+    Route::post('/attendance/settings/photos/cleanup', [AttendanceSettingController::class, 'photoCleanup'])
+        ->name('attendance.settings.photos.cleanup');
+
     // ==========================================
     // WhatsApp Gateway Management
     // ==========================================

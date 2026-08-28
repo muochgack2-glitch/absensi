@@ -431,4 +431,110 @@ class AttendanceSettingController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Get photo storage stats (JSON)
+     */
+    public function photoStats()
+    {
+        $basePath = storage_path('app/public/attendance/photos');
+        $totalFiles = 0;
+        $totalBytes = 0;
+        $oldest = null;
+        $newest = null;
+
+        if (is_dir($basePath)) {
+            $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($basePath, \FilesystemIterator::SKIP_DOTS));
+            foreach ($it as $file) {
+                if ($file->isFile() && in_array(strtolower($file->getExtension()), ['jpg','jpeg','png','webp'])) {
+                    $totalFiles++;
+                    $totalBytes += $file->getSize();
+                    // Ambil tanggal dari nama folder (format Y-m-d)
+                    $parts = explode(DIRECTORY_SEPARATOR, $file->getPath());
+                    $datePart = end($parts);
+                    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $datePart)) {
+                        if ($oldest === null || $datePart < $oldest) $oldest = $datePart;
+                        if ($newest === null || $datePart > $newest) $newest = $datePart;
+                    }
+                }
+            }
+        }
+
+        return response()->json([
+            'total_files' => $totalFiles,
+            'total_mb'    => round($totalBytes / 1024 / 1024, 2),
+            'oldest_date' => $oldest,
+            'newest_date' => $newest,
+        ]);
+    }
+
+    /**
+     * Download all photos as ZIP
+     */
+    public function photoDownload(\Illuminate\Http\Request $request)
+    {
+        $days    = (int) $request->get('days', 0); // 0 = semua
+        $basePath = storage_path('app/public/attendance/photos');
+        $zipName  = 'foto_absensi_' . now()->format('Y-m-d') . ($days ? "_older{$days}days" : '_all') . '.zip';
+        $tmpZip   = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $zipName;
+
+        $zip = new \ZipArchive();
+        if ($zip->open($tmpZip, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            abort(500, 'Gagal membuat file ZIP');
+        }
+
+        $cutoff = $days > 0 ? \Carbon\Carbon::now()->subDays($days)->toDateString() : null;
+
+        if (is_dir($basePath)) {
+            $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($basePath, \FilesystemIterator::SKIP_DOTS));
+            foreach ($it as $file) {
+                if (!$file->isFile()) continue;
+                // Cek cutoff
+                if ($cutoff) {
+                    $parts    = explode(DIRECTORY_SEPARATOR, $file->getPath());
+                    $datePart = end($parts);
+                    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $datePart) && $datePart >= $cutoff) continue;
+                }
+                // Relative path di dalam ZIP: NIS/tanggal/filename
+                $relative = str_replace($basePath . DIRECTORY_SEPARATOR, '', $file->getPathname());
+                $zip->addFile($file->getPathname(), $relative);
+            }
+        }
+
+        $zip->close();
+
+        return response()->download($tmpZip, $zipName, [
+            'Content-Type' => 'application/zip',
+        ])->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Manual cleanup old photos
+     */
+    public function photoCleanup(\Illuminate\Http\Request $request)
+    {
+        $days = (int) $request->get('days', 30);
+        if ($days < 1 || $days > 3650) {
+            return response()->json(['success' => false, 'message' => 'Hari tidak valid'], 422);
+        }
+
+        try {
+            $result = \Artisan::call('attendance:cleanup-photos', ['--days' => $days]);
+            $output = \Artisan::output();
+
+            // Ambil angka dari output
+            preg_match('/(\d+) foto \(([0-9.]+) MB\)/', $output, $m);
+            $deleted = $m[1] ?? 0;
+            $mb      = $m[2] ?? 0;
+
+            return response()->json([
+                'success' => true,
+                'message' => "Berhasil menghapus {$deleted} foto ({$mb} MB)",
+                'deleted' => (int) $deleted,
+                'mb'      => (float) $mb,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
 }

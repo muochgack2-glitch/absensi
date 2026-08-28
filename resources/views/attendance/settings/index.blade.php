@@ -998,6 +998,171 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                 </div>
             </div>
         </x-card>
+
+        {{-- 📸 Manajemen Foto Absensi --}}
+        <x-card class="mt-4">
+            <div class="flex items-center mb-5">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white text-2xl mr-4">
+                    <i class="fas fa-images"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Manajemen Foto Absensi</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Download arsip dan cleanup foto lama</p>
+                </div>
+            </div>
+
+            {{-- Stats --}}
+            <div id="photoStatsBox" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 text-center">
+                    <div id="photoStatFiles" class="text-2xl font-black text-gray-900 dark:text-white">—</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Total Foto</div>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 text-center">
+                    <div id="photoStatMB" class="text-2xl font-black text-orange-500">—</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Ukuran Disk</div>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 text-center">
+                    <div id="photoStatOldest" class="text-sm font-bold text-gray-700 dark:text-gray-300 mt-1">—</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Foto Terlama</div>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 text-center">
+                    <div id="photoStatNewest" class="text-sm font-bold text-gray-700 dark:text-gray-300 mt-1">—</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Foto Terbaru</div>
+                </div>
+            </div>
+
+            {{-- Info auto-cleanup --}}
+            <div class="flex items-center gap-2 mb-5 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm text-blue-700 dark:text-blue-300">
+                <i class="fas fa-clock-rotate-left"></i>
+                <span>Auto cleanup aktif: foto lebih tua dari <strong>30 hari</strong> dihapus otomatis setiap hari Minggu jam 01:00</span>
+            </div>
+
+            {{-- Action buttons --}}
+            <div class="flex flex-wrap gap-3">
+                {{-- Download --}}
+                <a href="{{ route('attendance.settings.photos.download') }}"
+                   class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl font-semibold text-sm transition-all shadow-md hover:shadow-lg">
+                    <i class="fas fa-download"></i> Download Semua Foto (ZIP)
+                </a>
+
+                {{-- Manual Cleanup --}}
+                <button onclick="document.getElementById('cleanupModal').classList.remove('hidden')"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl font-semibold text-sm transition-all shadow-md hover:shadow-lg">
+                    <i class="fas fa-trash-alt"></i> Cleanup Manual
+                </button>
+
+                {{-- Refresh stats --}}
+                <button onclick="loadPhotoStats()"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-semibold text-sm transition-all">
+                    <i class="fas fa-refresh" id="photoRefreshIcon"></i> Refresh
+                </button>
+            </div>
+        </x-card>
+
+        {{-- Cleanup Confirmation Modal --}}
+        <div id="cleanupModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6">
+                <div class="text-center mb-5">
+                    <div class="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-trash-alt text-2xl text-red-500"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-gray-900 dark:text-white">Cleanup Foto Manual</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Foto yang dihapus tidak bisa dikembalikan</p>
+                </div>
+
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Hapus foto lebih tua dari:
+                    </label>
+                    <div class="flex gap-2">
+                        <select id="cleanupDays" class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-red-500">
+                            <option value="7">7 hari (1 minggu)</option>
+                            <option value="14">14 hari (2 minggu)</option>
+                            <option value="30" selected>30 hari (1 bulan)</option>
+                            <option value="60">60 hari (2 bulan)</option>
+                            <option value="90">90 hari (3 bulan)</option>
+                        </select>
+                        <span class="flex items-center text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">yang lalu</span>
+                    </div>
+                </div>
+
+                <div id="cleanupResult" class="hidden mb-4 p-3 rounded-lg text-sm font-medium"></div>
+
+                <div class="flex gap-3">
+                    <button onclick="document.getElementById('cleanupModal').classList.add('hidden')"
+                            class="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-semibold text-sm hover:bg-gray-200 transition-all">
+                        Batal
+                    </button>
+                    <button id="cleanupConfirmBtn" onclick="runCleanup()"
+                            class="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold text-sm hover:from-red-600 hover:to-red-700 transition-all">
+                        <i class="fas fa-trash-alt mr-1"></i> Ya, Hapus
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        @push('scripts')
+        <script>
+        // Load photo stats on page load
+        document.addEventListener('DOMContentLoaded', loadPhotoStats);
+
+        function loadPhotoStats() {
+            const icon = document.getElementById('photoRefreshIcon');
+            icon.classList.add('fa-spin');
+            fetch('{{ route("attendance.settings.photos.stats") }}')
+                .then(r => r.json())
+                .then(d => {
+                    document.getElementById('photoStatFiles').textContent = d.total_files.toLocaleString('id-ID');
+                    document.getElementById('photoStatMB').textContent    = d.total_mb + ' MB';
+                    document.getElementById('photoStatOldest').textContent = d.oldest_date || '—';
+                    document.getElementById('photoStatNewest').textContent = d.newest_date || '—';
+                })
+                .catch(() => {})
+                .finally(() => icon.classList.remove('fa-spin'));
+        }
+
+        function runCleanup() {
+            const days = document.getElementById('cleanupDays').value;
+            const btn  = document.getElementById('cleanupConfirmBtn');
+            const res  = document.getElementById('cleanupResult');
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Menghapus...';
+            res.classList.add('hidden');
+
+            fetch('{{ route("attendance.settings.photos.cleanup") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ days: parseInt(days) }),
+            })
+            .then(r => r.json())
+            .then(d => {
+                res.classList.remove('hidden');
+                if (d.success) {
+                    res.className = 'mb-4 p-3 rounded-lg text-sm font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300';
+                    res.innerHTML = '<i class="fas fa-check-circle mr-1"></i>' + d.message;
+                    loadPhotoStats(); // refresh stats
+                } else {
+                    res.className = 'mb-4 p-3 rounded-lg text-sm font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300';
+                    res.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i>' + d.message;
+                }
+            })
+            .catch(() => {
+                res.classList.remove('hidden');
+                res.className = 'mb-4 p-3 rounded-lg text-sm font-medium bg-red-100 text-red-700';
+                res.textContent = 'Terjadi kesalahan. Coba lagi.';
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-trash-alt mr-1"></i> Ya, Hapus';
+            });
+        }
+        </script>
+        @endpush
+
     </div>
 
     <div class="max-w-5xl mt-6">
