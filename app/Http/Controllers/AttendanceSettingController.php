@@ -107,6 +107,11 @@ class AttendanceSettingController extends Controller
         $scanFps = max(5, min(30, $scanFps));
         AttendanceSetting::set('scan_fps', $scanFps, 'camera');
 
+        // Simpan jam mulai scanner pulang dengan group 'time'
+        if ($request->has('settings') && isset($request->settings['check_out_start_time'])) {
+            AttendanceSetting::set('check_out_start_time', $request->settings['check_out_start_time'], 'time');
+        }
+
         // Simpan resolusi kamera QR
         $scanResQr = $request->input('settings.scan_resolution_qr', 'hd');
         if (!in_array($scanResQr, ['sd', 'hd', 'fhd'])) $scanResQr = 'hd';
