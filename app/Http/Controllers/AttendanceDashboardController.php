@@ -220,28 +220,69 @@ class AttendanceDashboardController extends Controller
      */
     public function notifications()
     {
+        $user  = auth()->user();
+        $items = [];
+        $total = 0;
+
+        // Kepala Sekolah: hanya rekap kehadiran hari ini (tidak ada akses ke izin)
+        if ($user?->isKepalaSekolah()) {
+            $todayStats = AttendanceRecord::whereDate('date', Carbon::today())
+                ->selectRaw('status, COUNT(*) as jumlah')
+                ->groupBy('status')
+                ->pluck('jumlah', 'status');
+
+            $hadir     = ($todayStats['hadir']     ?? 0) + ($todayStats['terlambat'] ?? 0);
+            $alpha     = $todayStats['alpha']      ?? 0;
+            $sakit     = $todayStats['sakit']      ?? 0;
+            $izinCount = $todayStats['izin']       ?? 0;
+
+            $items[] = [
+                'icon'  => 'fa-chart-bar',
+                'color' => 'blue',
+                'text'  => "Hari ini: {$hadir} hadir, {$alpha} alpha, {$sakit} sakit, {$izinCount} izin",
+                'url'   => route('attendance.dashboard'),
+            ];
+
+            if ($alpha > 0) {
+                $total++;
+                $items[] = [
+                    'icon'  => 'fa-user-times',
+                    'color' => 'red',
+                    'text'  => "{$alpha} siswa alpha hari ini",
+                    'url'   => route('attendance.dashboard'),
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'total'   => $total,
+                'items'   => $items,
+            ]);
+        }
+
+        // Waka, Admin, Petugas: notifikasi penuh termasuk izin
         $pendingIzin = \App\Models\AttendanceIzin::where('status', 'pending')->count();
-        
+
         $todayAlpha = AttendanceRecord::whereDate('date', Carbon::today())
             ->where('status', 'alpha')->count();
-        
-        $items = [];
-        
+
         if ($pendingIzin > 0) {
+            $total += $pendingIzin;
             $items[] = [
-                'icon' => 'fa-envelope',
+                'icon'  => 'fa-envelope',
                 'color' => 'yellow',
-                'text' => "{$pendingIzin} izin menunggu persetujuan",
-                'url' => route('attendance.izin.index'),
+                'text'  => "{$pendingIzin} izin menunggu persetujuan",
+                'url'   => route('attendance.izin.index'),
             ];
         }
-        
+
         if ($todayAlpha > 0) {
+            $total++;
             $items[] = [
-                'icon' => 'fa-user-times',
+                'icon'  => 'fa-user-times',
                 'color' => 'red',
-                'text' => "{$todayAlpha} siswa alpha hari ini",
-                'url' => route('attendance.dashboard'),
+                'text'  => "{$todayAlpha} siswa alpha hari ini",
+                'url'   => route('attendance.dashboard'),
             ];
         }
 
@@ -254,19 +295,20 @@ class AttendanceDashboardController extends Controller
 
         foreach ($recentIzin as $izin) {
             $items[] = [
-                'icon' => 'fa-file-alt',
+                'icon'  => 'fa-file-alt',
                 'color' => 'blue',
-                'text' => ($izin->student->nama ?? 'Siswa') . ' — ' . ucfirst($izin->jenis),
-                'url' => route('attendance.izin.index'),
-                'time' => $izin->created_at->diffForHumans(),
+                'text'  => ($izin->student->nama ?? 'Siswa') . ' — ' . ucfirst($izin->jenis),
+                'url'   => route('attendance.izin.index'),
+                'time'  => $izin->created_at->diffForHumans(),
             ];
         }
 
         return response()->json([
             'success' => true,
-            'total' => $pendingIzin + ($todayAlpha > 0 ? 1 : 0),
-            'items' => $items,
+            'total'   => $total,
+            'items'   => $items,
         ]);
+
     }
 }
 
