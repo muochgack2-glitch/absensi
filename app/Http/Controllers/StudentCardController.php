@@ -131,8 +131,15 @@ class StudentCardController extends Controller
         // Generate data per siswa
         $studentData = [];
         foreach ($students as $student) {
-            // QR Code sebagai PNG via GD — konten = signed HMAC token (bukan NIS polos)
-            $qrBase64 = $this->generateQrPng($this->qrCodeService->buildQRToken($student->nis), 500);
+            // Gunakan QR yang sudah tersimpan di storage (tidak generate ulang)
+            // Ini memastikan QR di PDF identik dengan QR yang sudah dicetak & dibagikan
+            $qrBase64 = null;
+            if ($student->qr_code_path && Storage::disk('public')->exists($student->qr_code_path)) {
+                $qr = $this->qrCodeService->getQRCodeAsBase64($student->qr_code_path);
+                if ($qr['base64']) {
+                    $qrBase64 = 'data:' . $qr['mime'] . ';base64,' . $qr['base64'];
+                }
+            }
 
             // Foto profil
             $fotoBase64 = null;
