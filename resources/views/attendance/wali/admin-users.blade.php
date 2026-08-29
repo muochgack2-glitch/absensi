@@ -112,7 +112,11 @@
                                                 </form>
                                             @endif
                                         @else
-                                            —
+                                            @if($u->phone)
+                                                <span class="text-gray-600 dark:text-gray-400">{{ $u->phone }}</span>
+                                            @else
+                                                <span class="text-gray-400">—</span>
+                                            @endif
                                         @endif
                                     </td>
                                     <td class="px-4 py-3">
