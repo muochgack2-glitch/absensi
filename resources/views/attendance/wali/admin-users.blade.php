@@ -22,11 +22,11 @@
             'kepala_sekolah'=>'Kepala Sekolah','waka_kesiswaan'=>'Waka Kesiswaan',
         ];
         $avatarColors = [
-            'admin'          => 'bg-purple-100 dark:bg-purple-800/60 text-purple-700 dark:text-purple-200',
-            'wali_kelas'     => 'bg-blue-100 dark:bg-blue-800/60 text-blue-700 dark:text-blue-200',
-            'petugas'        => 'bg-green-100 dark:bg-green-800/60 text-green-700 dark:text-green-200',
-            'kepala_sekolah' => 'bg-yellow-100 dark:bg-yellow-800/60 text-yellow-700 dark:text-yellow-200',
-            'waka_kesiswaan' => 'bg-orange-100 dark:bg-orange-800/60 text-orange-700 dark:text-orange-200',
+            'admin'          => 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
+            'wali_kelas'     => 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
+            'petugas'        => 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
+            'kepala_sekolah' => 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300',
+            'waka_kesiswaan' => 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
         ];
     @endphp
 
