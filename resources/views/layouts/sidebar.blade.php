@@ -768,8 +768,8 @@
                 <span class="nav-text font-medium">QR Scanner</span>
             </a>
 
-            {{-- Input Manual: bukan kepala sekolah --}}
-            @if(!auth()->user()?->isKepalaSekolah())
+            {{-- Input Manual: petugas, waka, admin --}}
+            @if(auth()->user()?->isPetugas() || auth()->user()?->isWakaKesiswaan() || auth()->user()?->isAdmin())
             <!-- Input Absensi Manual -->
             <a 
                 href="{{ route('attendance.manual.index') }}"
@@ -844,8 +844,8 @@
                 <span class="nav-text font-medium">Rekap Semester</span>
             </a>
 
-            {{-- Izin Online: bukan kepala sekolah --}}
-            @if(!auth()->user()?->isKepalaSekolah())
+            {{-- Izin Online: petugas, waka, admin --}}
+            @if(auth()->user()?->isPetugas() || auth()->user()?->isWakaKesiswaan() || auth()->user()?->isAdmin())
             @php $pendingIzin = \App\Models\AttendanceIzin::where('status','pending')->count(); @endphp
             <a 
                 href="{{ route('attendance.izin.index') }}"
@@ -861,6 +861,21 @@
                 @else
                     <span class="sidebar-badge" id="notifBadgeNav" style="display: none;">0</span>
                 @endif
+            </a>
+            @endif
+
+            {{-- Menu Wali Kelas: hanya tampil untuk wali_kelas --}}
+            @if(auth()->user()?->isWaliKelas())
+            <!-- Dashboard Kelas -->
+            <a 
+                href="{{ route('wali.dashboard') }}"
+                class="sidebar-menu-item {{ request()->routeIs('wali.dashboard') ? 'active' : '' }}"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="right" 
+                title="Dashboard Kelas"
+            >
+                <i class="fas fa-chalkboard-teacher text-lg"></i>
+                <span class="nav-text font-medium">Dashboard Kelas</span>
             </a>
             @endif
 

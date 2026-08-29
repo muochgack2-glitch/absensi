@@ -32,48 +32,52 @@
             <div class="flex flex-col gap-2">
                 {{-- Baris 1: Download / Import / Cetak --}}
                 <div class="flex flex-wrap gap-2">
+                    {{-- Download Template: admin + waka --}}
                     <a
                         href="{{ route('attendance.students.export.template') }}"
-                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 bg-green-600 hover:bg-green-700 text-white shadow-sm"
                     >
                         <i class="fas fa-file-excel mr-2"></i>
                         Download Template
                     </a>
 
+                    {{-- Import Excel: admin only --}}
+                    @if(auth()->user()?->isAdmin())
                     <a
                         href="{{ route('attendance.students.import.form') }}"
-                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
                     >
                         <i class="fas fa-file-import mr-2"></i>
                         Import Excel
                     </a>
+                    @endif
 
+                    {{-- Export Excel: admin + waka --}}
                     <a
                         href="{{ route('attendance.students.export.excel', request()->only('class', 'status')) }}"
-                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
                     >
                         <i class="fas fa-file-download mr-2"></i>
                         Export Excel
                     </a>
 
+                    {{-- Cetak Kartu: admin + waka --}}
                     <a
                         href="{{ route('attendance.students.card') }}"
-                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 bg-purple-600 hover:bg-purple-700 text-white shadow-sm"
                     >
                         <i class="fas fa-id-card mr-2"></i>
                         Cetak Kartu
                     </a>
                 </div>
 
-                {{-- Baris 2: Generate QR Massal + Tambah Siswa --}}
+                {{-- Baris 2: Generate QR Massal + Tambah Siswa (admin only) --}}
+                @if(auth()->user()?->isAdmin())
                 <div class="flex flex-wrap gap-2">
                     <button
                         type="button"
                         onclick="document.getElementById('modalBulkQR').classList.remove('hidden')"
-                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 text-white"
-                        style="background: linear-gradient(to right, #0d9488, #0f766e);"
-                        onmouseover="this.style.background='linear-gradient(to right, #0f766e, #115e59)'"
-                        onmouseout="this.style.background='linear-gradient(to right, #0d9488, #0f766e)'"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 bg-teal-700 hover:bg-teal-800 text-white shadow-sm"
                     >
                         <i class="fas fa-qrcode mr-2"></i>
                         Generate QR Massal
@@ -81,13 +85,13 @@
 
                     <a
                         href="{{ route('attendance.students.create') }}"
-                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
                     >
                         <i class="fas fa-plus mr-2"></i>
                         Tambah Siswa
                     </a>
-
                 </div>
+                @endif
             </div>
         </div>
 
@@ -479,8 +483,8 @@
                         {{-- Actions --}}
                         <x-table.cell>
                             <div class="flex items-center space-x-2">
-                                {{-- Download QR Card PDF --}}
-                                @if($student->qr_code_path)
+                                {{-- Download QR Card PDF: admin only --}}
+                                @if(auth()->user()?->isAdmin() && $student->qr_code_path)
                                     <a 
                                         href="{{ route('attendance.qr.download-card-pdf', $student->nis) }}" 
                                         class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
@@ -490,7 +494,7 @@
                                     </a>
                                 @endif
 
-                                {{-- Print QR Kartu --}}
+                                {{-- Print QR Kartu: admin + waka --}}
                                 <a 
                                     href="{{ route('attendance.students.print-qr', $student->id) }}" 
                                     class="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
@@ -518,7 +522,8 @@
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 
-                                {{-- Delete (via JS to avoid nested form) --}}
+                                {{-- Delete: admin only --}}
+                                @if(auth()->user()?->isAdmin())
                                 <button 
                                     type="button"
                                     onclick="deleteStudent('{{ route('attendance.students.destroy', $student->id) }}', '{{ addslashes($student->nama) }}')"
@@ -527,6 +532,7 @@
                                 >
                                     <i class="fas fa-trash"></i>
                                 </button>
+                                @endif
                             </div>
                         </x-table.cell>
                     </x-table.row>
@@ -538,13 +544,15 @@
                                 message="Belum ada data siswa"
                             >
                                 <x-slot name="action">
+                                    @if(auth()->user()?->isAdmin())
                                     <a
                                         href="{{ route('attendance.students.create') }}"
-                                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 shadow-md hover:shadow-lg mt-4"
+                                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm mt-4"
                                     >
                                         <i class="fas fa-plus mr-2"></i>
                                         Tambah Siswa Pertama
                                     </a>
+                                    @endif
                                 </x-slot>
                             </x-empty-state>
                         </x-table.cell>
@@ -608,14 +616,15 @@
 
             {{-- Tombol --}}
             <div class="flex gap-2">
+                @if(auth()->user()?->isAdmin())
                 <a
                     id="qrDownloadLink"
                     href="#"
-                    class="flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm text-white shadow-md transition-all"
-                    style="background: linear-gradient(to right, #3b82f6, #2563eb);"
+                    class="flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-all"
                 >
                     <i class="fas fa-download mr-1"></i> Download
                 </a>
+                @endif
                 <button
                     type="button"
                     onclick="closeQrModal()"
