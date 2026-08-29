@@ -210,3 +210,31 @@ Schedule::call(function () {
   ->withoutOverlapping()
   ->appendOutputTo(storage_path('logs/waka-summary.log'));
 
+/*
+|--------------------------------------------------------------------------
+| Laporan Ringkas ke Kepala Sekolah (08:30 — setelah waka dapat detail)
+|--------------------------------------------------------------------------
+*/
+Schedule::call(function () {
+    $sendTime = AttendanceSetting::get('kepsek_summary_time', '08:30');
+    $sendDays = AttendanceSetting::get('kepsek_summary_send_days', '1,2,3,4,5');
+
+    $todayDow   = now()->timezone('Asia/Jakarta')->dayOfWeekIso;
+    $activeDays = array_filter(explode(',', $sendDays));
+    if (!in_array((string) $todayDow, $activeDays)) return;
+
+    $now = now()->timezone('Asia/Jakarta')->format('H:i');
+    if ($now < $sendTime) return;
+
+    $today = now()->timezone('Asia/Jakarta')->toDateString();
+    if (AttendanceSetting::get('kepsek_summary_last_sent', '') === $today) return;
+    if (Holiday::isHoliday($today)) return;
+
+    AttendanceSetting::set('kepsek_summary_last_sent', $today);
+    Artisan::call('attendance:send-kepsek-summary');
+})
+  ->everyMinute()
+  ->name('kepsek-summary')
+  ->timezone('Asia/Jakarta')
+  ->withoutOverlapping()
+  ->appendOutputTo(storage_path('logs/kepsek-summary.log'));
