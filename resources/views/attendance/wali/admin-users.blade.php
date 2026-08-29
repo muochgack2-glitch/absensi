@@ -4,11 +4,11 @@
 
     @php
         $roleStats = [
-            'admin'          => ['label'=>'Admin',          'icon'=>'fa-shield-halved', 'from'=>'from-purple-500', 'to'=>'to-purple-700', 'text'=>'text-purple-600 dark:text-purple-400', 'count'=>$users->where('role','admin')->count()],
-            'wali_kelas'     => ['label'=>'Wali Kelas',     'icon'=>'fa-chalkboard-teacher', 'from'=>'from-blue-500', 'to'=>'to-blue-700', 'text'=>'text-blue-600 dark:text-blue-400', 'count'=>$users->where('role','wali_kelas')->count()],
-            'petugas'        => ['label'=>'Petugas',        'icon'=>'fa-id-card',      'from'=>'from-green-500', 'to'=>'to-green-700', 'text'=>'text-green-600 dark:text-green-400', 'count'=>$users->where('role','petugas')->count()],
-            'kepala_sekolah' => ['label'=>'Kepala Sekolah', 'icon'=>'fa-user-tie',     'from'=>'from-yellow-500','to'=>'to-yellow-600', 'text'=>'text-yellow-600 dark:text-yellow-400','count'=>$users->where('role','kepala_sekolah')->count()],
-            'waka_kesiswaan' => ['label'=>'Waka Kesiswaan', 'icon'=>'fa-briefcase',    'from'=>'from-orange-500','to'=>'to-orange-600', 'text'=>'text-orange-600 dark:text-orange-400','count'=>$users->where('role','waka_kesiswaan')->count()],
+            'admin'          => ['label'=>'Admin',          'icon'=>'fa-shield-halved',       'bg'=>'bg-purple-100 dark:bg-purple-900/40', 'text'=>'text-purple-600 dark:text-purple-300', 'stat'=>'text-purple-700 dark:text-purple-300', 'count'=>$users->where('role','admin')->count()],
+            'wali_kelas'     => ['label'=>'Wali Kelas',     'icon'=>'fa-chalkboard-teacher',  'bg'=>'bg-blue-100 dark:bg-blue-900/40',   'text'=>'text-blue-600 dark:text-blue-300',   'stat'=>'text-blue-700 dark:text-blue-300',   'count'=>$users->where('role','wali_kelas')->count()],
+            'petugas'        => ['label'=>'Petugas',        'icon'=>'fa-id-card',             'bg'=>'bg-green-100 dark:bg-green-900/40', 'text'=>'text-green-600 dark:text-green-300', 'stat'=>'text-green-700 dark:text-green-300', 'count'=>$users->where('role','petugas')->count()],
+            'kepala_sekolah' => ['label'=>'Kepala Sekolah', 'icon'=>'fa-user-tie',            'bg'=>'bg-yellow-100 dark:bg-yellow-900/40','text'=>'text-yellow-700 dark:text-yellow-300','stat'=>'text-yellow-700 dark:text-yellow-300','count'=>$users->where('role','kepala_sekolah')->count()],
+            'waka_kesiswaan' => ['label'=>'Waka Kesiswaan', 'icon'=>'fa-briefcase',           'bg'=>'bg-orange-100 dark:bg-orange-900/40','text'=>'text-orange-600 dark:text-orange-300','stat'=>'text-orange-700 dark:text-orange-300','count'=>$users->where('role','waka_kesiswaan')->count()],
         ];
         $roleColors = [
             'admin'          => 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
@@ -22,9 +22,11 @@
             'kepala_sekolah'=>'Kepala Sekolah','waka_kesiswaan'=>'Waka Kesiswaan',
         ];
         $avatarColors = [
-            'admin'=>'from-purple-500 to-purple-700','wali_kelas'=>'from-blue-500 to-blue-700',
-            'petugas'=>'from-green-500 to-green-700','kepala_sekolah'=>'from-yellow-500 to-yellow-600',
-            'waka_kesiswaan'=>'from-orange-500 to-orange-600',
+            'admin'          => 'bg-purple-100 dark:bg-purple-800/60 text-purple-700 dark:text-purple-200',
+            'wali_kelas'     => 'bg-blue-100 dark:bg-blue-800/60 text-blue-700 dark:text-blue-200',
+            'petugas'        => 'bg-green-100 dark:bg-green-800/60 text-green-700 dark:text-green-200',
+            'kepala_sekolah' => 'bg-yellow-100 dark:bg-yellow-800/60 text-yellow-700 dark:text-yellow-200',
+            'waka_kesiswaan' => 'bg-orange-100 dark:bg-orange-800/60 text-orange-700 dark:text-orange-200',
         ];
     @endphp
 
@@ -55,7 +57,7 @@
     <div class="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {{-- Total --}}
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col items-center text-center col-span-3 lg:col-span-1">
-            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white mb-2 shadow">
+            <div class="w-11 h-11 rounded-xl bg-indigo-100 dark:bg-indigo-800/60 flex items-center justify-center text-indigo-600 dark:text-indigo-200 mb-2 shadow-sm">
                 <i class="fas fa-users text-sm"></i>
             </div>
             <p class="text-3xl font-black text-gray-900 dark:text-white leading-none">{{ $users->count() }}</p>
@@ -65,10 +67,10 @@
         @foreach($roleStats as $roleKey => $rs)
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col items-center text-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 transition-all"
              onclick="filterByRole('{{ $roleKey }}')">
-            <div class="w-11 h-11 rounded-xl bg-gradient-to-br {{ $rs['from'] }} {{ $rs['to'] }} flex items-center justify-center text-white mb-2 shadow">
+            <div class="w-11 h-11 rounded-xl {{ $rs['bg'] }} {{ $rs['text'] }} flex items-center justify-center mb-2 shadow-sm">
                 <i class="fas {{ $rs['icon'] }} text-sm"></i>
             </div>
-            <p class="text-3xl font-black {{ $rs['text'] }} leading-none">{{ $rs['count'] }}</p>
+            <p class="text-3xl font-black {{ $rs['stat'] }} leading-none">{{ $rs['count'] }}</p>
             <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1 leading-tight">{{ $rs['label'] }}</p>
         </div>
         @endforeach
@@ -133,7 +135,7 @@
                     @forelse($users as $u)
                     @php
                         $initials = collect(explode(' ', $u->name))->take(2)->map(fn($w) => strtoupper(substr($w,0,1)))->implode('');
-                        $ac = $avatarColors[$u->role] ?? 'from-gray-400 to-gray-600';
+                        $ac = $avatarColors[$u->role] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300';
                     @endphp
                     <tr class="user-row hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 transition-colors duration-150"
                         data-name="{{ strtolower($u->name) }}"
@@ -143,7 +145,7 @@
                         {{-- Pengguna (avatar + nama) --}}
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-xl bg-gradient-to-br {{ $ac }} flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-sm">
+                                <div class="w-9 h-9 rounded-xl {{ $ac }} flex items-center justify-center text-xs font-bold flex-shrink-0">
                                     {{ $initials }}
                                 </div>
                                 <div>
