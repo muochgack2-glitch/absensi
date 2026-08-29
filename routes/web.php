@@ -119,24 +119,28 @@ Route::middleware(['auth'])->group(function () {
             ->name('attendance.classes.show');
     });
 
-    // Admin Only: create/delete siswa, import, export, card, bulk
-    Route::middleware('role:admin')->group(function () {
+    // Admin + Waka Kesiswaan: cetak kartu, export, bulk action, print QR
+    Route::middleware('role:admin,waka_kesiswaan')->group(function () {
         Route::get('/attendance/students/card', [StudentCardController::class, 'index'])
             ->name('attendance.students.card');
         Route::post('/attendance/students/card/generate', [StudentCardController::class, 'generate'])
             ->name('attendance.students.card.generate');
-        Route::get('/attendance/students/import/form', [AttendanceStudentController::class, 'importForm'])
-            ->name('attendance.students.import.form');
-        Route::post('/attendance/students/import', [AttendanceStudentController::class, 'import'])
-            ->name('attendance.students.import');
+        Route::get('/attendance/students/{student}/print-qr', [StudentCardController::class, 'printSingle'])
+            ->name('attendance.students.print-qr');
         Route::get('/attendance/students/export/template', [AttendanceStudentController::class, 'exportTemplate'])
             ->name('attendance.students.export.template');
         Route::get('/attendance/students/export/excel', [AttendanceStudentController::class, 'exportExcel'])
             ->name('attendance.students.export.excel');
         Route::post('/attendance/students/bulk-action', [AttendanceStudentController::class, 'bulkAction'])
             ->name('attendance.students.bulk-action');
-        Route::get('/attendance/students/{student}/print-qr', [StudentCardController::class, 'printSingle'])
-            ->name('attendance.students.print-qr');
+    });
+
+    // Admin Only: tambah, hapus, import siswa
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/attendance/students/import/form', [AttendanceStudentController::class, 'importForm'])
+            ->name('attendance.students.import.form');
+        Route::post('/attendance/students/import', [AttendanceStudentController::class, 'import'])
+            ->name('attendance.students.import');
         Route::get('/attendance/students/create', [AttendanceStudentController::class, 'create'])
             ->name('attendance.students.create');
         Route::post('/attendance/students', [AttendanceStudentController::class, 'store'])
