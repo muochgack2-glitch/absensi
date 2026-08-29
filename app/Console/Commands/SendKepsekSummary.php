@@ -14,8 +14,9 @@ use Carbon\Carbon;
 class SendKepsekSummary extends Command
 {
     protected $signature = 'attendance:send-kepsek-summary
-                            {--date=    : Tanggal (Y-m-d, default: hari ini)}
-                            {--dry-run  : Tampilkan pesan tanpa benar-benar mengirim}';
+                            {--date=      : Tanggal (Y-m-d, default: hari ini)}
+                            {--type=masuk : Jenis: masuk atau pulang}
+                            {--dry-run    : Tampilkan pesan tanpa benar-benar mengirim}';
 
     protected $description = 'Kirim laporan kehadiran ringkas (executive summary) ke Kepala Sekolah via WhatsApp';
 
@@ -32,9 +33,11 @@ class SendKepsekSummary extends Command
             : Carbon::today()->timezone('Asia/Jakarta')->toDateString();
 
         $dryRun  = $this->option('dry-run');
+        $type    = $this->option('type') ?? 'masuk';
         $dayName = Carbon::parse($date)->locale('id')->translatedFormat('l, d F Y');
+        $label   = $type === 'pulang' ? '🌆 Rekap Pulang Kepsek' : '📊 Rekap Masuk Kepsek';
 
-        $this->info("📊 Rekap Kepsek: {$dayName}");
+        $this->info("{$label}: {$dayName}");
         if ($dryRun) $this->warn('-- DRY RUN --');
 
         // Hitung statistik seluruh sekolah
@@ -46,21 +49,27 @@ class SendKepsekSummary extends Command
             ->groupBy('status')
             ->pluck('jumlah', 'status');
 
-        $hadir      = ($stats['hadir']    ?? 0) + ($stats['terlambat'] ?? 0);
-        $terlambat  = $stats['terlambat'] ?? 0;
-        $alpha      = $stats['alpha']     ?? 0;
-        $izin       = $stats['izin']      ?? 0;
-        $sakit      = $stats['sakit']     ?? 0;
+        $hadir     = ($stats['hadir'] ?? 0) + ($stats['terlambat'] ?? 0);
+        $terlambat = $stats['terlambat'] ?? 0;
+        $alpha     = $stats['alpha']     ?? 0;
+        $izin      = $stats['izin']      ?? 0;
+        $sakit     = $stats['sakit']     ?? 0;
 
-        $persen = $totalSiswa > 0 ? round(($hadir / $totalSiswa) * 100, 1) : 0;
-
-        $status = match(true) {
-            $persen >= 95 => '🟢 BAIK',
-            $persen >= 85 => '🟡 PERLU PERHATIAN',
-            default       => '🔴 RENDAH',
-        };
-
-        $message = $this->buildMessage($dayName, $totalSiswa, $hadir, $terlambat, $alpha, $izin, $sakit, $persen, $status);
+        if ($type === 'pulang') {
+            $records     = AttendanceRecord::withoutGlobalScope('tahun_ajaran')->whereDate('date', $date);
+            $sudahPulang = (clone $records)->whereNotNull('check_out_time')->count();
+            $pulangCepat = (clone $records)->where('check_out_status', 'pulang_cepat')->count();
+            $belumPulang = max(0, $hadir - $sudahPulang);
+            $message     = $this->buildPulangMessage($dayName, $totalSiswa, $hadir, $sudahPulang, $pulangCepat, $belumPulang);
+        } else {
+            $persen  = $totalSiswa > 0 ? round(($hadir / $totalSiswa) * 100, 1) : 0;
+            $status  = match(true) {
+                $persen >= 95 => '🟢 BAIK',
+                $persen >= 85 => '🟡 PERLU PERHATIAN',
+                default       => '🔴 RENDAH',
+            };
+            $message = $this->buildMasukMessage($dayName, $totalSiswa, $hadir, $terlambat, $alpha, $izin, $sakit, $persen, $status);
+        }
 
         $this->line('');
         $this->line($message);
@@ -85,7 +94,7 @@ class SendKepsekSummary extends Command
         $sent = $failed = 0;
         foreach ($kepsekUsers as $kepsek) {
             try {
-                $result = $this->waService->send($kepsek->phone, $message, ['type' => 'kepsek-summary', 'sent_by' => null]);
+                $result = $this->waService->send($kepsek->phone, $message, ['type' => "kepsek-{$type}", 'sent_by' => null]);
                 if ($result['success'] ?? false) {
                     $this->info("Terkirim ke {$kepsek->name} ({$kepsek->phone})");
                     $sent++;
@@ -103,38 +112,41 @@ class SendKepsekSummary extends Command
         return Command::SUCCESS;
     }
 
-    protected function buildMessage(
-        string $dayName,
-        int $totalSiswa,
-        int $hadir,
-        int $terlambat,
-        int $alpha,
-        int $izin,
-        int $sakit,
-        float $persen,
-        string $status
+    protected function buildMasukMessage(
+        string $dayName, int $totalSiswa, int $hadir, int $terlambat,
+        int $alpha, int $izin, int $sakit, float $persen, string $status
     ): string {
         $schoolName = AttendanceSetting::get('school_name', 'SMK');
-        $hadirTepat = $hadir - $terlambat;
-
-        $lines = [
+        return implode("\n", [
             "📊 *LAPORAN KEHADIRAN HARIAN*",
-            "*{$schoolName}*",
-            $dayName,
-            "",
+            "*{$schoolName}*", $dayName, "",
             "👥 Total Siswa   : {$totalSiswa} orang",
             "✅ Hadir         : {$hadir} ({$persen}%)",
-            "   ↳ Tepat waktu : {$hadirTepat} siswa",
+            "   ↳ Tepat waktu : " . ($hadir - $terlambat) . " siswa",
             "   ↳ Terlambat   : {$terlambat} siswa",
             "❌ Alpha         : {$alpha} siswa",
             "📋 Izin          : {$izin} siswa",
             "🤒 Sakit         : {$sakit} siswa",
-            "",
-            "Status: {$status}",
-            "",
+            "", "Status: {$status}", "",
             "_Sistem Absensi Otomatis_",
-        ];
+        ]);
+    }
 
-        return implode("\n", $lines);
+    protected function buildPulangMessage(
+        string $dayName, int $totalSiswa, int $hadir,
+        int $sudahPulang, int $pulangCepat, int $belumPulang
+    ): string {
+        $schoolName  = AttendanceSetting::get('school_name', 'SMK');
+        return implode("\n", [
+            "🌆 *LAPORAN KEPULANGAN HARIAN*",
+            "*{$schoolName}*", $dayName, "",
+            "👥 Total Siswa     : {$totalSiswa} orang",
+            "🏫 Hadir hari ini  : {$hadir} siswa",
+            "✅ Sudah pulang    : {$sudahPulang} siswa",
+            "   ↳ Tepat waktu  : " . ($sudahPulang - $pulangCepat) . " siswa",
+            "   ↳ Pulang cepat : {$pulangCepat} siswa",
+            "⏳ Belum pulang   : {$belumPulang} siswa",
+            "", "_Sistem Absensi Otomatis_",
+        ]);
     }
 }
