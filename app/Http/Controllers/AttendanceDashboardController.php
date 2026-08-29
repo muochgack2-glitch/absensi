@@ -53,11 +53,15 @@ class AttendanceDashboardController extends Controller
 
         // Top 5 siswa paling awal masuk minggu ini
         $startOfWeek   = Carbon::now()->startOfWeek(Carbon::MONDAY);
+        $isSqlite      = \DB::connection()->getDriverName() === 'sqlite';
+        $timeToSec     = $isSqlite
+            ? "(CAST(strftime('%H', check_in_time) AS INTEGER) * 3600 + CAST(strftime('%M', check_in_time) AS INTEGER) * 60 + CAST(strftime('%S', check_in_time) AS INTEGER))"
+            : 'TIME_TO_SEC(check_in_time)';
         $topEarlyWeek  = AttendanceRecord::with('student.kelas')
             ->whereBetween('date', [$startOfWeek->toDateString(), Carbon::today()->toDateString()])
             ->whereNotNull('check_in_time')
             ->whereIn('status', ['hadir', 'terlambat'])
-            ->selectRaw('student_id, AVG(TIME_TO_SEC(check_in_time)) as avg_sec, MIN(check_in_time) as earliest, COUNT(*) as hari_hadir')
+            ->selectRaw("student_id, AVG({$timeToSec}) as avg_sec, MIN(check_in_time) as earliest, COUNT(*) as hari_hadir")
             ->groupBy('student_id')
             ->orderBy('avg_sec', 'asc')
             ->take(5)
@@ -69,7 +73,7 @@ class AttendanceDashboardController extends Controller
             ->whereBetween('date', [$startOfMonth->toDateString(), Carbon::today()->toDateString()])
             ->whereNotNull('check_in_time')
             ->whereIn('status', ['hadir', 'terlambat'])
-            ->selectRaw('student_id, AVG(TIME_TO_SEC(check_in_time)) as avg_sec, MIN(check_in_time) as earliest, COUNT(*) as hari_hadir')
+            ->selectRaw("student_id, AVG({$timeToSec}) as avg_sec, MIN(check_in_time) as earliest, COUNT(*) as hari_hadir")
             ->groupBy('student_id')
             ->orderBy('avg_sec', 'asc')
             ->take(5)
