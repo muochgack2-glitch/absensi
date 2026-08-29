@@ -37,6 +37,7 @@
                             <option value="">Semua Role</option>
                             <option value="admin">Admin</option>
                             <option value="wali_kelas">Wali Kelas</option>
+                            <option value="petugas">Petugas</option>
                         </select>
                     </div>
                     <div class="overflow-x-auto">
@@ -58,9 +59,11 @@
                                     <td class="px-4 py-3 text-gray-600 dark:text-gray-400 text-xs hidden sm:table-cell">{{ $u->email }}</td>
                                     <td class="px-4 py-3">
                                         @if($u->role === 'admin')
-                                            <span class="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-bold rounded-full">Admin</span>
-                                        @else
-                                            <span class="px-2 py-0.5 bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 text-xs font-bold rounded-full">Wali Kelas</span>
+                                            <span class="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs font-semibold">Admin</span>
+                                        @elseif($u->role === 'wali_kelas')
+                                            <span class="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs font-semibold">Wali Kelas</span>
+                                        @elseif($u->role === 'petugas')
+                                            <span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-semibold">Petugas</span>
                                         @endif
                                     </td>
                                     <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-400">
@@ -171,6 +174,7 @@
                                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none">
                                 <option value="admin">Admin</option>
                                 <option value="wali_kelas">Wali Kelas</option>
+                                <option value="petugas">Petugas</option>
                             </select>
                         </div>
 
@@ -237,6 +241,7 @@
                     <select name="role" id="editRole" onchange="toggleKelas('editKelas', this.value)" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-400">
                         <option value="admin">Admin</option>
                         <option value="wali_kelas">Wali Kelas</option>
+                        <option value="petugas">Petugas</option>
                     </select>
                 </div>
                 <div id="editKelas">

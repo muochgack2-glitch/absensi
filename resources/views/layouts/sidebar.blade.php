@@ -783,6 +783,8 @@
             <!-- Divider -->
             <div class="sidebar-divider"></div>
 
+            {{-- Data Siswa & Kelas: hanya admin --}}
+            @if(auth()->user()?->isAdmin())
             <!-- Data Siswa -->
             <a 
                 href="{{ route('attendance.students.index') }}"
@@ -806,6 +808,7 @@
                 <i class="fas fa-school text-lg"></i>
                 <span class="nav-text font-medium">Data Kelas</span>
             </a>
+            @endif
 
 
             <!-- Laporan -->
@@ -899,6 +902,8 @@
             </a>
             @endif
 
+            {{-- WhatsApp: hanya admin --}}
+            @if(auth()->user()?->isAdmin())
             <!-- WhatsApp Collapsible Menu -->
             @php $waOpen = request()->routeIs('whatsapp.*') || request()->routeIs('gateway.*'); @endphp
             <div class="sidebar-submenu-group" data-submenu="whatsapp">
@@ -953,6 +958,7 @@
                     </a>
                 </div>
             </div>
+            @endif
 
             <!-- Divider -->
             <div class="sidebar-divider"></div>

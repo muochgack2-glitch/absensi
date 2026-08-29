@@ -25,6 +25,25 @@ class AttendanceSettingController extends Controller
      */
     public function update(Request $request)
     {
+        // Petugas: hanya boleh simpan setting kamera
+        if (auth()->user()?->isPetugas()) {
+            $dualCam = $request->input('settings.use_dual_camera', '0');
+            AttendanceSetting::set('use_dual_camera', $dualCam === '1' ? '1' : '0', 'camera');
+
+            $scanFps = (int) $request->input('settings.scan_fps', 10);
+            AttendanceSetting::set('scan_fps', max(5, min(30, $scanFps)), 'camera');
+
+            $scanResQr = $request->input('settings.scan_resolution_qr', 'hd');
+            if (!in_array($scanResQr, ['sd', 'hd', 'fhd'])) $scanResQr = 'hd';
+            AttendanceSetting::set('scan_resolution_qr', $scanResQr, 'camera');
+
+            $scanResPhoto = $request->input('settings.scan_resolution_photo', 'hd');
+            if (!in_array($scanResPhoto, ['sd', 'hd', 'fhd'])) $scanResPhoto = 'hd';
+            AttendanceSetting::set('scan_resolution_photo', $scanResPhoto, 'camera');
+
+            return back()->with('success', 'Pengaturan kamera berhasil disimpan.');
+        }
+
         // Validate all settings
         $rules = [
             'settings.check_in_time'                 => 'required|date_format:H:i',

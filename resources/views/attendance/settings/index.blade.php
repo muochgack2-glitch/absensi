@@ -8,8 +8,13 @@
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">⚙️ Pengaturan Sistem</h1>
+                @if(auth()->user()?->isAdmin())
                 <p class="text-gray-600 dark:text-gray-400 mt-1">Konfigurasi waktu absensi dan notifikasi</p>
+                @else
+                <p class="text-gray-600 dark:text-gray-400 mt-1">Pengaturan kamera scanner</p>
+                @endif
             </div>
+            @if(auth()->user()?->isAdmin())
             <div class="flex items-center gap-2">
                 {{-- Reset --}}
                 <form action="{{ route('attendance.settings.reset') }}" method="POST"
@@ -22,6 +27,7 @@
                     </button>
                 </form>
             </div>
+            @endif
         </div>
 
 
@@ -30,6 +36,7 @@
             @csrf
             @method('PUT')
 
+            @if(auth()->user()?->isAdmin())
             {{-- ═══════════════════════════════════════════════════════ --}}
             {{-- SECTION: PENGATURAN GLOBAL --}}
             {{-- ═══════════════════════════════════════════════════════ --}}
@@ -722,6 +729,7 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
             {{-- ═══════════════════════════════════════════════════════ --}}
             {{-- SECTION: PENGATURAN LOKAL --}}
             {{-- ═══════════════════════════════════════════════════════ --}}
+            @endif {{-- end admin-only global settings --}}
             <div class="flex items-center gap-4 mt-4 mb-2">
                 <div class="flex items-center gap-2 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-full">
                     <div class="w-2 h-2 rounded-full bg-amber-500"></div>
@@ -1009,6 +1017,7 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
             </div>
         </x-card>
 
+        @if(auth()->user()?->isAdmin())
         {{-- 📸 Manajemen Foto Absensi --}}
         <x-card class="mt-4">
             <div class="flex items-center mb-5">
@@ -1280,6 +1289,7 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                 </p>
             </div>
         </x-card>
+        @endif {{-- end admin-only foto & backup --}}
     </div>
 
     @push('scripts')

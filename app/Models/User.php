@@ -38,4 +38,14 @@ class User extends Authenticatable
     {
         return $this->role === 'wali_kelas';
     }
+
+    public function isPetugas(): bool
+    {
+        return $this->role === 'petugas';
+    }
+
+    public function isStaff(): bool
+    {
+        return $this->isAdmin() || $this->isPetugas();
+    }
 }
