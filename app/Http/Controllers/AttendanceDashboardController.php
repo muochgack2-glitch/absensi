@@ -51,6 +51,30 @@ class AttendanceDashboardController extends Controller
             'sakit'     => $stats['sakit']     ?? 0,
         ];
 
+        // Top 5 siswa paling awal masuk minggu ini
+        $startOfWeek   = Carbon::now()->startOfWeek(Carbon::MONDAY);
+        $topEarlyWeek  = AttendanceRecord::with('student.kelas')
+            ->whereBetween('date', [$startOfWeek->toDateString(), Carbon::today()->toDateString()])
+            ->whereNotNull('check_in_time')
+            ->whereIn('status', ['hadir', 'terlambat'])
+            ->selectRaw('student_id, AVG(TIME_TO_SEC(check_in_time)) as avg_sec, MIN(check_in_time) as earliest, COUNT(*) as hari_hadir')
+            ->groupBy('student_id')
+            ->orderBy('avg_sec', 'asc')
+            ->take(5)
+            ->get();
+
+        // Top 5 siswa paling awal masuk bulan ini
+        $startOfMonth  = Carbon::now()->startOfMonth();
+        $topEarlyMonth = AttendanceRecord::with('student.kelas')
+            ->whereBetween('date', [$startOfMonth->toDateString(), Carbon::today()->toDateString()])
+            ->whereNotNull('check_in_time')
+            ->whereIn('status', ['hadir', 'terlambat'])
+            ->selectRaw('student_id, AVG(TIME_TO_SEC(check_in_time)) as avg_sec, MIN(check_in_time) as earliest, COUNT(*) as hari_hadir')
+            ->groupBy('student_id')
+            ->orderBy('avg_sec', 'asc')
+            ->take(5)
+            ->get();
+
         return view('attendance.dashboard.index', compact(
             'selectedDate',
             'selectedClass',
@@ -60,7 +84,9 @@ class AttendanceDashboardController extends Controller
             'classes',
             'chartData',
             'donutData',
-            'totalToday'
+            'totalToday',
+            'topEarlyWeek',
+            'topEarlyMonth'
         ));
     }
 

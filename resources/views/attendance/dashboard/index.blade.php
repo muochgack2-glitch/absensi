@@ -134,6 +134,126 @@
         </div>
         {{-- ======================== END CHARTS ======================== --}}
 
+        {{-- 🏆 Top 5 Paling Awal Masuk --}}
+        <x-card class="mt-2">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-white text-lg">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">🏆 Top 5 Paling Awal Masuk</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Berdasarkan rata-rata jam check-in</p>
+                    </div>
+                </div>
+                {{-- Tab Toggle --}}
+                <div class="flex bg-gray-100 dark:bg-gray-700 rounded-xl p-1 gap-1">
+                    <button onclick="switchEarlyTab('week')" id="tab-early-week"
+                        class="px-4 py-1.5 text-sm font-semibold rounded-lg transition-all bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm">
+                        Minggu Ini
+                    </button>
+                    <button onclick="switchEarlyTab('month')" id="tab-early-month"
+                        class="px-4 py-1.5 text-sm font-semibold rounded-lg transition-all text-gray-500 dark:text-gray-400 hover:text-gray-700">
+                        Bulan Ini
+                    </button>
+                </div>
+            </div>
+
+            {{-- Data Minggu --}}
+            <div id="early-week-data">
+                @if($topEarlyWeek->isEmpty())
+                    <p class="text-center text-gray-400 dark:text-gray-500 py-4 text-sm">Belum ada data minggu ini</p>
+                @else
+                    <div class="space-y-2">
+                        @foreach($topEarlyWeek as $i => $rec)
+                            @php
+                                $avgTime = gmdate('H:i', (int)$rec->avg_sec);
+                                $medals  = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+                                $colors  = ['from-yellow-400 to-yellow-500','from-gray-300 to-gray-400','from-orange-400 to-orange-500','from-blue-400 to-blue-500','from-purple-400 to-purple-500'];
+                            @endphp
+                            <div class="flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
+                                <div class="w-9 h-9 rounded-lg bg-gradient-to-br {{ $colors[$i] }} flex items-center justify-center text-white font-black text-sm shadow-sm flex-shrink-0">
+                                    {{ $i + 1 }}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">
+                                        {{ $medals[$i] }} {{ $rec->student->nama ?? '-' }}
+                                    </p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                                        {{ $rec->student->kelas->nama_kelas ?? '-' }} &bull; {{ $rec->hari_hadir }} hari hadir
+                                    </p>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <p class="text-sm font-black text-green-600 dark:text-green-400">⏰ {{ $avgTime }}</p>
+                                    <p class="text-xs text-gray-400">rata-rata</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
+            {{-- Data Bulan --}}
+            <div id="early-month-data" class="hidden">
+                @if($topEarlyMonth->isEmpty())
+                    <p class="text-center text-gray-400 dark:text-gray-500 py-4 text-sm">Belum ada data bulan ini</p>
+                @else
+                    <div class="space-y-2">
+                        @foreach($topEarlyMonth as $i => $rec)
+                            @php
+                                $avgTime = gmdate('H:i', (int)$rec->avg_sec);
+                                $medals  = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+                                $colors  = ['from-yellow-400 to-yellow-500','from-gray-300 to-gray-400','from-orange-400 to-orange-500','from-blue-400 to-blue-500','from-purple-400 to-purple-500'];
+                            @endphp
+                            <div class="flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
+                                <div class="w-9 h-9 rounded-lg bg-gradient-to-br {{ $colors[$i] }} flex items-center justify-center text-white font-black text-sm shadow-sm flex-shrink-0">
+                                    {{ $i + 1 }}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">
+                                        {{ $medals[$i] }} {{ $rec->student->nama ?? '-' }}
+                                    </p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                                        {{ $rec->student->kelas->nama_kelas ?? '-' }} &bull; {{ $rec->hari_hadir }} hari hadir
+                                    </p>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <p class="text-sm font-black text-green-600 dark:text-green-400">⏰ {{ $avgTime }}</p>
+                                    <p class="text-xs text-gray-400">rata-rata</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        </x-card>
+
+        @push('scripts')
+        <script>
+        function switchEarlyTab(tab) {
+            const weekData  = document.getElementById('early-week-data');
+            const monthData = document.getElementById('early-month-data');
+            const tabWeek   = document.getElementById('tab-early-week');
+            const tabMonth  = document.getElementById('tab-early-month');
+
+            const activeClass   = 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm';
+            const inactiveClass = 'text-gray-500 dark:text-gray-400 hover:text-gray-700';
+
+            if (tab === 'week') {
+                weekData.classList.remove('hidden');
+                monthData.classList.add('hidden');
+                tabWeek.className  = tabWeek.className.replace(inactiveClass, activeClass);
+                tabMonth.className = tabMonth.className.replace(activeClass, inactiveClass);
+            } else {
+                weekData.classList.add('hidden');
+                monthData.classList.remove('hidden');
+                tabMonth.className = tabMonth.className.replace(inactiveClass, activeClass);
+                tabWeek.className  = tabWeek.className.replace(activeClass, inactiveClass);
+            }
+        }
+        </script>
+        @endpush
+
         {{-- Attendance Records Table --}}
         <x-card>
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
