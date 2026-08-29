@@ -87,42 +87,75 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/attendance/dashboard/chart-data', [AttendanceDashboardController::class, 'chartApi'])
         ->name('attendance.dashboard.chart-data');
 
-    // Input Absensi Manual
-    Route::get('/attendance/manual', [AttendanceManualController::class, 'index'])
-        ->name('attendance.manual.index');
-    Route::post('/attendance/manual', [AttendanceManualController::class, 'store'])
-        ->name('attendance.manual.store');
-    Route::delete('/attendance/manual/{record}', [AttendanceManualController::class, 'destroy'])
-        ->name('attendance.manual.destroy');
+    // Input Absensi Manual — Petugas, Waka, Admin (bukan Kepala Sekolah)
+    Route::middleware('role:petugas')->group(function () {
+        Route::get('/attendance/manual', [AttendanceManualController::class, 'index'])
+            ->name('attendance.manual.index');
+        Route::post('/attendance/manual', [AttendanceManualController::class, 'store'])
+            ->name('attendance.manual.store');
+        Route::delete('/attendance/manual/{record}', [AttendanceManualController::class, 'destroy'])
+            ->name('attendance.manual.destroy');
+    });
 
-    // Students Management — Admin Only
+    // Students Management
+    // Waka Kesiswaan: view + edit siswa (index, show, edit form, update)
+    Route::middleware('role:waka_kesiswaan')->group(function () {
+        Route::get('/attendance/students', [AttendanceStudentController::class, 'index'])
+            ->name('attendance.students.index');
+        Route::get('/attendance/students/{student}', [AttendanceStudentController::class, 'show'])
+            ->name('attendance.students.show');
+        Route::get('/attendance/students/{student}/edit', [AttendanceStudentController::class, 'edit'])
+            ->name('attendance.students.edit');
+        Route::put('/attendance/students/{student}', [AttendanceStudentController::class, 'update'])
+            ->name('attendance.students.update');
+        Route::patch('/attendance/students/{student}', [AttendanceStudentController::class, 'update']);
+    });
+
+    // Data Kelas: Waka bisa lihat
+    Route::middleware('role:waka_kesiswaan')->group(function () {
+        Route::get('/attendance/classes', [AttendanceClassController::class, 'index'])
+            ->name('attendance.classes.index');
+        Route::get('/attendance/classes/{attendanceClass}', [AttendanceClassController::class, 'show'])
+            ->name('attendance.classes.show');
+    });
+
+    // Admin Only: create/delete siswa, import, export, card, bulk
     Route::middleware('role:admin')->group(function () {
         Route::get('/attendance/students/card', [StudentCardController::class, 'index'])
             ->name('attendance.students.card');
         Route::post('/attendance/students/card/generate', [StudentCardController::class, 'generate'])
             ->name('attendance.students.card.generate');
-
         Route::get('/attendance/students/import/form', [AttendanceStudentController::class, 'importForm'])
             ->name('attendance.students.import.form');
         Route::post('/attendance/students/import', [AttendanceStudentController::class, 'import'])
             ->name('attendance.students.import');
-
         Route::get('/attendance/students/export/template', [AttendanceStudentController::class, 'exportTemplate'])
             ->name('attendance.students.export.template');
         Route::get('/attendance/students/export/excel', [AttendanceStudentController::class, 'exportExcel'])
             ->name('attendance.students.export.excel');
-
         Route::post('/attendance/students/bulk-action', [AttendanceStudentController::class, 'bulkAction'])
             ->name('attendance.students.bulk-action');
         Route::get('/attendance/students/{student}/print-qr', [StudentCardController::class, 'printSingle'])
             ->name('attendance.students.print-qr');
+        Route::get('/attendance/students/create', [AttendanceStudentController::class, 'create'])
+            ->name('attendance.students.create');
+        Route::post('/attendance/students', [AttendanceStudentController::class, 'store'])
+            ->name('attendance.students.store');
+        Route::delete('/attendance/students/{student}', [AttendanceStudentController::class, 'destroy'])
+            ->name('attendance.students.destroy');
 
-        Route::resource('attendance/students', AttendanceStudentController::class)
-            ->names('attendance.students');
-
-        // Classes Management
-        Route::resource('attendance/classes', AttendanceClassController::class)
-            ->names('attendance.classes');
+        // Classes Management (edit/create/delete: admin only)
+        Route::get('/attendance/classes/create', [AttendanceClassController::class, 'create'])
+            ->name('attendance.classes.create');
+        Route::post('/attendance/classes', [AttendanceClassController::class, 'store'])
+            ->name('attendance.classes.store');
+        Route::get('/attendance/classes/{attendanceClass}/edit', [AttendanceClassController::class, 'edit'])
+            ->name('attendance.classes.edit');
+        Route::put('/attendance/classes/{attendanceClass}', [AttendanceClassController::class, 'update'])
+            ->name('attendance.classes.update');
+        Route::patch('/attendance/classes/{attendanceClass}', [AttendanceClassController::class, 'update']);
+        Route::delete('/attendance/classes/{attendanceClass}', [AttendanceClassController::class, 'destroy'])
+            ->name('attendance.classes.destroy');
     });
 
     // Reports
@@ -253,10 +286,12 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
-    // Izin Online — Admin
-    Route::get('/attendance/izin', [AttendanceIzinController::class, 'adminIndex'])->name('attendance.izin.index');
-    Route::post('/attendance/izin/{izin}/approve', [AttendanceIzinController::class, 'approve'])->name('attendance.izin.approve');
-    Route::post('/attendance/izin/{izin}/reject', [AttendanceIzinController::class, 'reject'])->name('attendance.izin.reject');
+    // Izin Online — Petugas, Waka, Admin (bukan Kepala Sekolah)
+    Route::middleware('role:petugas')->group(function () {
+        Route::get('/attendance/izin', [AttendanceIzinController::class, 'adminIndex'])->name('attendance.izin.index');
+        Route::post('/attendance/izin/{izin}/approve', [AttendanceIzinController::class, 'approve'])->name('attendance.izin.approve');
+        Route::post('/attendance/izin/{izin}/reject', [AttendanceIzinController::class, 'reject'])->name('attendance.izin.reject');
+    });
 
     // ==========================================
     // Manajemen User & Wali Kelas (admin only)

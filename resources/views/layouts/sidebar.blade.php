@@ -768,6 +768,8 @@
                 <span class="nav-text font-medium">QR Scanner</span>
             </a>
 
+            {{-- Input Manual: bukan kepala sekolah --}}
+            @if(!auth()->user()?->isKepalaSekolah())
             <!-- Input Absensi Manual -->
             <a 
                 href="{{ route('attendance.manual.index') }}"
@@ -779,12 +781,13 @@
                 <i class="fas fa-clipboard-check text-lg"></i>
                 <span class="nav-text font-medium">Input Manual</span>
             </a>
+            @endif
 
             <!-- Divider -->
             <div class="sidebar-divider"></div>
 
-            {{-- Data Siswa & Kelas: hanya admin --}}
-            @if(auth()->user()?->isAdmin())
+            {{-- Data Siswa & Kelas: admin & waka_kesiswaan --}}
+            @if(auth()->user()?->isAdmin() || auth()->user()?->isWakaKesiswaan())
             <!-- Data Siswa -->
             <a 
                 href="{{ route('attendance.students.index') }}"
@@ -841,7 +844,8 @@
                 <span class="nav-text font-medium">Rekap Semester</span>
             </a>
 
-            <!-- Izin Online -->
+            {{-- Izin Online: bukan kepala sekolah --}}
+            @if(!auth()->user()?->isKepalaSekolah())
             @php $pendingIzin = \App\Models\AttendanceIzin::where('status','pending')->count(); @endphp
             <a 
                 href="{{ route('attendance.izin.index') }}"
@@ -858,6 +862,7 @@
                     <span class="sidebar-badge" id="notifBadgeNav" style="display: none;">0</span>
                 @endif
             </a>
+            @endif
 
             {{-- Menu Pengguna: hanya tampil untuk admin --}}
             @if(auth()->user()?->isAdmin())
@@ -963,6 +968,8 @@
             <!-- Divider -->
             <div class="sidebar-divider"></div>
 
+            {{-- Settings: bukan kepala sekolah --}}
+            @if(!auth()->user()?->isKepalaSekolah())
             <!-- Settings -->
             <a 
                 href="{{ route('attendance.settings.index') }}"
@@ -974,6 +981,7 @@
                 <i class="fas fa-cog text-lg"></i>
                 <span class="nav-text font-medium">Settings</span>
             </a>
+            @endif
 
         </nav>
 

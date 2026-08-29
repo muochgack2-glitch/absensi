@@ -9,10 +9,12 @@ use Symfony\Component\HttpFoundation\Response;
 class WaliKelasMiddleware
 {
     /**
-     * Batasi akses berdasarkan role.
-     * Admin: akses penuh.
-     * Petugas: akses terbatas (dashboard, manual, izin, laporan, kamera settings).
-     * Wali Kelas: hanya akses data kelas sendiri.
+     * Role hierarchy:
+     * - admin          : akses penuh
+     * - waka_kesiswaan : operasional + data siswa/kelas (view/edit)
+     * - petugas        : operasional (dashboard, manual, izin, laporan, kamera)
+     * - kepala_sekolah : viewer (dashboard + laporan saja)
+     * - wali_kelas     : hanya data kelas sendiri
      */
     public function handle(Request $request, Closure $next, string $requiredRole = 'admin'): Response
     {
@@ -22,30 +24,42 @@ class WaliKelasMiddleware
             return redirect()->route('login');
         }
 
-        // Admin bisa akses semua
+        // Admin: akses semua
         if ($user->isAdmin()) {
             return $next($request);
         }
 
-        // Petugas: bisa akses route bertanda 'petugas' atau 'admin'
+        // Waka Kesiswaan: akses petugas + data siswa/kelas
+        if ($user->isWakaKesiswaan() && in_array($requiredRole, ['petugas', 'waka_kesiswaan', 'admin'])) {
+            return $next($request);
+        }
+
+        // Petugas: akses route bertanda 'petugas'
         if ($user->isPetugas() && in_array($requiredRole, ['petugas', 'admin'])) {
             return $next($request);
         }
 
-        // Wali kelas: hanya bisa akses route wali_kelas
+        // Kepala Sekolah: hanya akses route bertanda 'kepala_sekolah'
+        if ($user->isKepalaSekolah() && $requiredRole === 'kepala_sekolah') {
+            return $next($request);
+        }
+
+        // Wali Kelas: hanya akses route wali_kelas
         if ($user->isWaliKelas() && $requiredRole === 'wali_kelas') {
             return $next($request);
         }
 
         // Redirect berdasarkan role
-        if ($user->isPetugas()) {
-            return redirect()->route('attendance.dashboard')
-                ->with('error', 'Akses ditolak. Anda tidak memiliki izin untuk halaman ini.');
-        }
+        $redirectMap = [
+            'kepala_sekolah' => ['route' => 'attendance.dashboard', 'msg' => 'Akses ditolak.'],
+            'waka_kesiswaan' => ['route' => 'attendance.dashboard', 'msg' => 'Akses ditolak.'],
+            'petugas'        => ['route' => 'attendance.dashboard', 'msg' => 'Akses ditolak. Anda tidak memiliki izin untuk halaman ini.'],
+            'wali_kelas'     => ['route' => 'wali.dashboard',       'msg' => 'Akses ditolak. Anda hanya dapat mengakses data kelas Anda.'],
+        ];
 
-        if ($user->isWaliKelas()) {
-            return redirect()->route('wali.dashboard')
-                ->with('error', 'Akses ditolak. Anda hanya dapat mengakses data kelas Anda.');
+        if (isset($redirectMap[$user->role])) {
+            return redirect()->route($redirectMap[$user->role]['route'])
+                ->with('error', $redirectMap[$user->role]['msg']);
         }
 
         abort(403, 'Akses ditolak.');

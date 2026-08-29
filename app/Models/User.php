@@ -44,8 +44,25 @@ class User extends Authenticatable
         return $this->role === 'petugas';
     }
 
+    public function isKepalaSekolah(): bool
+    {
+        return $this->role === 'kepala_sekolah';
+    }
+
+    public function isWakaKesiswaan(): bool
+    {
+        return $this->role === 'waka_kesiswaan';
+    }
+
+    /** Petugas + Waka = operasional staff */
+    public function isOperasional(): bool
+    {
+        return in_array($this->role, ['petugas', 'waka_kesiswaan']);
+    }
+
+    /** Semua role yang bisa login ke panel admin */
     public function isStaff(): bool
     {
-        return $this->isAdmin() || $this->isPetugas();
+        return in_array($this->role, ['admin', 'petugas', 'kepala_sekolah', 'waka_kesiswaan']);
     }
 }

@@ -38,6 +38,8 @@
                             <option value="admin">Admin</option>
                             <option value="wali_kelas">Wali Kelas</option>
                             <option value="petugas">Petugas</option>
+                            <option value="kepala_sekolah">Kepala Sekolah</option>
+                            <option value="waka_kesiswaan">Waka Kesiswaan</option>
                         </select>
                     </div>
                     <div class="overflow-x-auto">
@@ -64,6 +66,10 @@
                                             <span class="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs font-semibold">Wali Kelas</span>
                                         @elseif($u->role === 'petugas')
                                             <span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-semibold">Petugas</span>
+                                        @elseif($u->role === 'kepala_sekolah')
+                                            <span class="px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-full text-xs font-semibold">Kepala Sekolah</span>
+                                        @elseif($u->role === 'waka_kesiswaan')
+                                            <span class="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full text-xs font-semibold">Waka Kesiswaan</span>
                                         @endif
                                     </td>
                                     <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-400">
@@ -175,6 +181,8 @@
                                 <option value="admin">Admin</option>
                                 <option value="wali_kelas">Wali Kelas</option>
                                 <option value="petugas">Petugas</option>
+                                <option value="kepala_sekolah">Kepala Sekolah</option>
+                                <option value="waka_kesiswaan">Waka Kesiswaan</option>
                             </select>
                         </div>
 
@@ -242,6 +250,8 @@
                         <option value="admin">Admin</option>
                         <option value="wali_kelas">Wali Kelas</option>
                         <option value="petugas">Petugas</option>
+                        <option value="kepala_sekolah">Kepala Sekolah</option>
+                        <option value="waka_kesiswaan">Waka Kesiswaan</option>
                     </select>
                 </div>
                 <div id="editKelas">

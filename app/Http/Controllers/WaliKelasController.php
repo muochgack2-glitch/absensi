@@ -31,7 +31,7 @@ class WaliKelasController extends Controller
             'email'    => 'required|email|unique:users,email',
             'phone'    => 'nullable|string|regex:/^[0-9]{9,13}$/|unique:users,phone',
             'password' => 'required|string|min:6',
-            'role'     => 'required|in:admin,wali_kelas,petugas',
+            'role'     => 'required|in:admin,wali_kelas,petugas,kepala_sekolah,waka_kesiswaan',
             'kelas_id' => 'nullable|exists:attendance_classes,id',
         ], [
             'email.unique'    => 'Email sudah digunakan.',
@@ -70,7 +70,7 @@ class WaliKelasController extends Controller
             'name'     => 'required|string|max:100',
             'email'    => 'required|email|unique:users,email,' . $user->id,
             'phone'    => 'nullable|string|regex:/^[0-9]{9,13}$/|unique:users,phone,' . $user->id,
-            'role'     => 'required|in:admin,wali_kelas,petugas',
+            'role'     => 'required|in:admin,wali_kelas,petugas,kepala_sekolah,waka_kesiswaan',
             'kelas_id' => 'nullable|exists:attendance_classes,id',
             'password' => 'nullable|string|min:6',
         ], [
