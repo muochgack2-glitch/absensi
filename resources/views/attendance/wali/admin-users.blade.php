@@ -88,7 +88,7 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Kelola akun dan hak akses seluruh pengguna sistem</p>
             </div>
             <button onclick="openModal('add')"
-                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl text-sm font-semibold shadow-lg shadow-indigo-500/20 transition-all duration-200 hover:shadow-indigo-500/30 hover:-translate-y-0.5 whitespace-nowrap flex-shrink-0">
+                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-xl text-sm font-semibold shadow-sm transition-all duration-150 whitespace-nowrap flex-shrink-0">
                 <i class="fas fa-user-plus"></i>
                 Tambah Pengguna
             </button>
@@ -374,7 +374,7 @@
                         Batal
                     </button>
                     <button type="submit" id="modalSubmitBtn"
-                            class="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl text-sm font-semibold shadow-lg shadow-indigo-500/20 transition-all duration-200 hover:-translate-y-0.5">
+                            class="flex-1 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-xl text-sm font-semibold shadow-sm transition-all duration-150">
                         <i class="fas fa-check mr-1.5"></i><span id="modalSubmitText">Tambah</span>
                     </button>
                 </div>
