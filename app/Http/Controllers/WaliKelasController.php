@@ -29,13 +29,13 @@ class WaliKelasController extends Controller
         $request->validate([
             'name'     => 'required|string|max:100',
             'email'    => 'required|email|unique:users,email',
-            'phone'    => 'nullable|string|regex:/^[0-9]{9,13}$/|unique:users,phone',
+            'phone'    => 'nullable|string|regex:/^[+0-9][0-9]{8,14}$/|unique:users,phone',
             'password' => 'required|string|min:6',
             'role'     => 'required|in:admin,wali_kelas,petugas,kepala_sekolah,waka_kesiswaan',
             'kelas_id' => 'nullable|exists:attendance_classes,id',
         ], [
             'email.unique'    => 'Email sudah digunakan.',
-            'phone.regex'     => 'Format nomor WhatsApp tidak valid (8xxxxxxxxx).',
+            'phone.regex'     => 'Format nomor WA tidak valid. Contoh: 081234567890 atau 6281234567890.',
             'phone.unique'    => 'Nomor WhatsApp sudah terdaftar.',
             'password.min'    => 'Password minimal 6 karakter.',
             'kelas_id.exists' => 'Kelas tidak ditemukan.',
@@ -69,12 +69,12 @@ class WaliKelasController extends Controller
         $request->validate([
             'name'     => 'required|string|max:100',
             'email'    => 'required|email|unique:users,email,' . $user->id,
-            'phone'    => 'nullable|string|regex:/^[0-9]{9,13}$/|unique:users,phone,' . $user->id,
+            'phone'    => 'nullable|string|regex:/^[+0-9][0-9]{8,14}$/|unique:users,phone,' . $user->id,
             'role'     => 'required|in:admin,wali_kelas,petugas,kepala_sekolah,waka_kesiswaan',
             'kelas_id' => 'nullable|exists:attendance_classes,id',
             'password' => 'nullable|string|min:6',
         ], [
-            'phone.regex'  => 'Format nomor WhatsApp tidak valid (8xxxxxxxxx).',
+            'phone.regex'  => 'Format nomor WA tidak valid. Contoh: 081234567890 atau 6281234567890.',
             'phone.unique' => 'Nomor WhatsApp sudah terdaftar.',
         ]);
 
