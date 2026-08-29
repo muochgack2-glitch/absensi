@@ -138,7 +138,7 @@
         <x-card class="mt-2">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-white text-lg">
+                    <div class="w-10 h-10 rounded-xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600 dark:text-yellow-400 text-lg">
                         <i class="fas fa-trophy"></i>
                     </div>
                     <div>
@@ -169,10 +169,10 @@
                             @php
                                 $avgTime = gmdate('H:i', (int)$rec->avg_sec);
                                 $medals  = ['🥇','🥈','🥉','4️⃣','5️⃣'];
-                                $colors  = ['from-yellow-400 to-yellow-500','from-gray-300 to-gray-400','from-orange-400 to-orange-500','from-blue-400 to-blue-500','from-purple-400 to-purple-500'];
+                                $rankBg  = ['#F59E0B','#9CA3AF','#CD7C3A','#6366F1','#8B5CF6'];
                             @endphp
                             <div class="flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
-                                <div class="w-9 h-9 rounded-lg bg-gradient-to-br {{ $colors[$i] }} flex items-center justify-center text-white font-black text-sm shadow-sm flex-shrink-0">
+                                <div class="w-9 h-9 rounded-lg flex items-center justify-center text-white font-black text-sm flex-shrink-0" style="background:{{ $rankBg[$i] }}">
                                     {{ $i + 1 }}
                                 </div>
                                 <div class="flex-1 min-w-0">
@@ -203,10 +203,10 @@
                             @php
                                 $avgTime = gmdate('H:i', (int)$rec->avg_sec);
                                 $medals  = ['🥇','🥈','🥉','4️⃣','5️⃣'];
-                                $colors  = ['from-yellow-400 to-yellow-500','from-gray-300 to-gray-400','from-orange-400 to-orange-500','from-blue-400 to-blue-500','from-purple-400 to-purple-500'];
+                                $rankBg  = ['#F59E0B','#9CA3AF','#CD7C3A','#6366F1','#8B5CF6'];
                             @endphp
                             <div class="flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
-                                <div class="w-9 h-9 rounded-lg bg-gradient-to-br {{ $colors[$i] }} flex items-center justify-center text-white font-black text-sm shadow-sm flex-shrink-0">
+                                <div class="w-9 h-9 rounded-lg flex items-center justify-center text-white font-black text-sm flex-shrink-0" style="background:{{ $rankBg[$i] }}">
                                     {{ $i + 1 }}
                                 </div>
                                 <div class="flex-1 min-w-0">
