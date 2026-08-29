@@ -151,3 +151,62 @@ Schedule::command('attendance:cleanup-photos --days=30')
   ->at('01:00')
   ->timezone('Asia/Jakarta')
   ->appendOutputTo(storage_path('logs/cleanup-photos.log'));
+
+/*
+|--------------------------------------------------------------------------
+| Rekap Masuk ke Waka Kesiswaan
+|--------------------------------------------------------------------------
+*/
+Schedule::call(function () {
+    $sendTime = AttendanceSetting::get('waka_summary_masuk_time', '08:00');
+    $sendDays = AttendanceSetting::get('waka_summary_send_days', '1,2,3,4,5');
+
+    $todayDow   = now()->timezone('Asia/Jakarta')->dayOfWeekIso;
+    $activeDays = array_filter(explode(',', $sendDays));
+    if (!in_array((string) $todayDow, $activeDays)) return;
+
+    $now = now()->timezone('Asia/Jakarta')->format('H:i');
+    if ($now < $sendTime) return;
+
+    $today = now()->timezone('Asia/Jakarta')->toDateString();
+    if (AttendanceSetting::get('waka_summary_masuk_last_sent', '') === $today) return;
+    if (Holiday::isHoliday($today)) return;
+
+    AttendanceSetting::set('waka_summary_masuk_last_sent', $today);
+    Artisan::call('attendance:send-waka-summary', ['--type' => 'masuk']);
+})
+  ->everyMinute()
+  ->name('waka-summary-masuk')
+  ->timezone('Asia/Jakarta')
+  ->withoutOverlapping()
+  ->appendOutputTo(storage_path('logs/waka-summary.log'));
+
+/*
+|--------------------------------------------------------------------------
+| Rekap Pulang ke Waka Kesiswaan
+|--------------------------------------------------------------------------
+*/
+Schedule::call(function () {
+    $sendTime = AttendanceSetting::get('waka_summary_pulang_time', '15:00');
+    $sendDays = AttendanceSetting::get('waka_summary_send_days', '1,2,3,4,5');
+
+    $todayDow   = now()->timezone('Asia/Jakarta')->dayOfWeekIso;
+    $activeDays = array_filter(explode(',', $sendDays));
+    if (!in_array((string) $todayDow, $activeDays)) return;
+
+    $now = now()->timezone('Asia/Jakarta')->format('H:i');
+    if ($now < $sendTime) return;
+
+    $today = now()->timezone('Asia/Jakarta')->toDateString();
+    if (AttendanceSetting::get('waka_summary_pulang_last_sent', '') === $today) return;
+    if (Holiday::isHoliday($today)) return;
+
+    AttendanceSetting::set('waka_summary_pulang_last_sent', $today);
+    Artisan::call('attendance:send-waka-summary', ['--type' => 'pulang']);
+})
+  ->everyMinute()
+  ->name('waka-summary-pulang')
+  ->timezone('Asia/Jakarta')
+  ->withoutOverlapping()
+  ->appendOutputTo(storage_path('logs/waka-summary.log'));
+
