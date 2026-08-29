@@ -172,12 +172,8 @@
                                 Nomor WhatsApp
                                 <span class="text-gray-400 font-normal">(Opsional)</span>
                             </label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">+62</span>
-                                <input type="text" name="phone" placeholder="8123456789" pattern="[0-9]{9,13}"
-                                       class="w-full pl-12 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none">
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1">Format: 8xxxxxxxxx (tanpa 0 atau +62)</p>
+                            <input type="text" name="phone" placeholder="Contoh: 081234567890 atau 6281234567890"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none">
                             @error('phone')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                         </div>
 
@@ -247,12 +243,8 @@
                         Nomor WhatsApp
                         <span class="text-gray-400 font-normal">(Opsional)</span>
                     </label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">+62</span>
-                        <input type="text" name="phone" id="editPhone" placeholder="8123456789" pattern="[0-9]{9,13}"
-                               class="w-full pl-12 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-400">
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">Format: 8xxxxxxxxx (tanpa 0 atau +62)</p>
+                    <input type="text" name="phone" id="editPhone" placeholder="Contoh: 081234567890 atau 6281234567890"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-400">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Password Baru (kosongkan jika tidak diubah)</label>
