@@ -14,6 +14,16 @@
             <i class="fas fa-exclamation-circle text-lg"></i><span>{{ session('error') }}</span>
         </div>
         @endif
+        @if($errors->any())
+        <div class="px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-700 dark:text-red-400">
+            <div class="flex items-center gap-2 font-semibold mb-1"><i class="fas fa-exclamation-triangle"></i> Gagal menyimpan — periksa isian berikut:</div>
+            <ul class="list-disc list-inside space-y-0.5">
+                @foreach($errors->all() as $err)
+                    <li>{{ $err }}</li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
 
         {{-- Grid: Tabel users (kiri) + Form tambah (kanan) --}}
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
