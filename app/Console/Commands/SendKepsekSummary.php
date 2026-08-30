@@ -60,7 +60,31 @@ class SendKepsekSummary extends Command
             $sudahPulang = (clone $records)->whereNotNull('check_out_time')->count();
             $pulangCepat = (clone $records)->where('check_out_status', 'pulang_cepat')->count();
             $belumPulang = max(0, $hadir - $sudahPulang);
-            $message     = $this->buildPulangMessage($dayName, $totalSiswa, $hadir, $sudahPulang, $pulangCepat, $belumPulang);
+
+            // Ambil siswa yang hadir tapi belum check-out, group per kelas
+            $hadirIds     = (clone $records)->whereNotNull('check_in_time')->pluck('student_id')->toArray();
+            $sudahPulangIds = (clone $records)->whereNotNull('check_out_time')->pluck('student_id')->toArray();
+            $belumPulangIds = array_diff($hadirIds, $sudahPulangIds);
+
+            $belumPulangPerKelas = [];
+            if (!empty($belumPulangIds)) {
+                $siswaBelum = AttendanceStudent::with(['kelas.waliKelas'])
+                    ->whereIn('id', $belumPulangIds)
+                    ->orderBy('kelas_id')
+                    ->orderBy('nama')
+                    ->get();
+
+                foreach ($siswaBelum as $s) {
+                    $namaKelas = $s->kelas->nama_kelas ?? '-';
+                    $wali      = $s->kelas->waliKelas->name ?? '-';
+                    if (!isset($belumPulangPerKelas[$namaKelas])) {
+                        $belumPulangPerKelas[$namaKelas] = ['wali' => $wali, 'siswa' => []];
+                    }
+                    $belumPulangPerKelas[$namaKelas]['siswa'][] = $s->nama;
+                }
+            }
+
+            $message = $this->buildPulangMessage($dayName, $totalSiswa, $hadir, $sudahPulang, $pulangCepat, $belumPulang, $belumPulangPerKelas);
         } else {
             $persen  = $totalSiswa > 0 ? round(($hadir / $totalSiswa) * 100, 1) : 0;
             $status  = match(true) {
@@ -134,19 +158,41 @@ class SendKepsekSummary extends Command
 
     protected function buildPulangMessage(
         string $dayName, int $totalSiswa, int $hadir,
-        int $sudahPulang, int $pulangCepat, int $belumPulang
+        int $sudahPulang, int $pulangCepat, int $belumPulang,
+        array $belumPulangPerKelas = []
     ): string {
         $schoolName  = AttendanceSetting::get('school_name', 'SMK');
-        return implode("\n", [
+        $pulangTepat = $sudahPulang - $pulangCepat;
+
+        $lines = [
             "🌆 *LAPORAN KEPULANGAN HARIAN*",
-            "*{$schoolName}*", $dayName, "",
+            "*{$schoolName}*",
+            $dayName,
+            "",
             "👥 Total Siswa     : {$totalSiswa} orang",
             "🏫 Hadir hari ini  : {$hadir} siswa",
             "✅ Sudah pulang    : {$sudahPulang} siswa",
-            "   ↳ Tepat waktu  : " . ($sudahPulang - $pulangCepat) . " siswa",
+            "   ↳ Tepat waktu  : {$pulangTepat} siswa",
             "   ↳ Pulang cepat : {$pulangCepat} siswa",
             "⏳ Belum pulang   : {$belumPulang} siswa",
-            "", "_Sistem Absensi Otomatis_",
-        ]);
+        ];
+
+        if (!empty($belumPulangPerKelas)) {
+            $lines[] = "";
+            $lines[] = "*Detail Belum Pulang:*";
+            foreach ($belumPulangPerKelas as $namaKelas => $data) {
+                $lines[] = "";
+                $lines[] = "📚 *{$namaKelas}*";
+                $lines[] = "   Wali Kelas: {$data['wali']}";
+                foreach ($data['siswa'] as $i => $nama) {
+                    $lines[] = "   " . ($i + 1) . ". {$nama}";
+                }
+            }
+        }
+
+        $lines[] = "";
+        $lines[] = "_Sistem Absensi Otomatis_";
+
+        return implode("\n", $lines);
     }
 }
