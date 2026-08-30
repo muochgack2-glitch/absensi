@@ -290,12 +290,17 @@
             const prevStatus = notesInput.dataset.prevStatus;
 
             if (prevStatus === 'alpha' && selectedStatus !== 'alpha') {
+                // Kosongkan nilai auto-marked dan ubah ke placeholder warning
+                if (notesInput.value.startsWith('Auto-marked')) {
+                    notesInput.value = '';
+                }
                 notesInput.placeholder = '⚠️ Alasan koreksi — contoh: tidak bawa kartu, surat izin terlambat...';
-                notesInput.classList.add('border-orange-400', 'dark:border-orange-500', 'ring-1', 'ring-orange-300');
+                notesInput.classList.add('border-orange-400', 'dark:border-orange-500');
                 notesInput.classList.remove('border-gray-300', 'dark:border-gray-600');
-            } else {
+                notesInput.focus();
+            } else if (prevStatus !== 'alpha' || selectedStatus === 'alpha') {
                 notesInput.placeholder = 'Keterangan opsional...';
-                notesInput.classList.remove('border-orange-400', 'dark:border-orange-500', 'ring-1', 'ring-orange-300');
+                notesInput.classList.remove('border-orange-400', 'dark:border-orange-500');
                 notesInput.classList.add('border-gray-300', 'dark:border-gray-600');
             }
         }
