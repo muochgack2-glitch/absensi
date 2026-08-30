@@ -8,7 +8,7 @@
 @endphp
 
 <x-app-layout>
-    <div class="max-w-2xl mx-auto space-y-6">
+    <div class="space-y-6">
         {{-- QR Card --}}
         <x-card class="print:shadow-none">
             {{-- School Header --}}

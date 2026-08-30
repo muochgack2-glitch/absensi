@@ -7,7 +7,7 @@
 @endphp
 
 <x-app-layout>
-    <div class="max-w-5xl mx-auto space-y-6">
+    <div class="space-y-6">
         {{-- Page Header --}}
         <div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Import Data Siswa dari Excel</h1>
