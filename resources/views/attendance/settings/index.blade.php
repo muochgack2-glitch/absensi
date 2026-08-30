@@ -167,6 +167,8 @@
 
 
 
+            @endif {{-- end admin --}}
+
             {{-- Action Buttons --}}
             <div class="flex justify-end gap-3">
                 <a
@@ -492,10 +494,6 @@
         @endif {{-- end admin-only foto & backup --}}
     </div>
 
-    @push('scripts')
-    <script>
-        // ===== Test Notification =====
-    </script>
-    @endpush
+
 
 </x-app-layout>
