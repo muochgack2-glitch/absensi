@@ -56,8 +56,13 @@ class AttendanceManualController extends Controller
                 ->keyBy('student_id');
         }
 
+        $isWeekend     = Carbon::parse($date)->isWeekend();
+        $holidayRecord = \App\Models\Holiday::getForDate($date);
+        $isHoliday     = !is_null($holidayRecord);
+
         return view('attendance.manual.index', compact(
-            'date', 'classId', 'classes', 'students', 'records'
+            'date', 'classId', 'classes', 'students', 'records',
+            'isWeekend', 'isHoliday', 'holidayRecord'
         ));
     }
 
