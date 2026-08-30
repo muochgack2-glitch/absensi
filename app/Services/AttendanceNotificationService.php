@@ -92,7 +92,10 @@ class AttendanceNotificationService
         // Calculate how late the student is
         $checkInTime = \Carbon\Carbon::parse($record->check_in_time);
         $targetTime = \Carbon\Carbon::parse(AttendanceSetting::get('check_in_time', '07:00:00'));
-        $minutesLate = $checkInTime->diffInMinutes($targetTime, false);
+        // Hitung menit keterlambatan (positif jika check-in SETELAH target)
+        $minutesLate = $checkInTime->greaterThan($targetTime)
+            ? (int) $targetTime->diffInMinutes($checkInTime)
+            : 0;
 
         // If not late enough, skip
         if ($minutesLate < $thresholdMinutes) {
@@ -130,7 +133,9 @@ class AttendanceNotificationService
         foreach ($lateRecords as $lateRecord) {
             $lateCheckIn = \Carbon\Carbon::parse($lateRecord->check_in_time);
             $target = \Carbon\Carbon::parse($lateRecord->date->format('Y-m-d') . ' ' . AttendanceSetting::get('check_in_time', '07:00:00'));
-            $minutes = $lateCheckIn->diffInMinutes($target, false);
+            $minutes = $lateCheckIn->greaterThan($target)
+                ? (int) $target->diffInMinutes($lateCheckIn)
+                : 0;
             
             if ($minutes > 0) {
                 $totalMinutesLate += $minutes;
