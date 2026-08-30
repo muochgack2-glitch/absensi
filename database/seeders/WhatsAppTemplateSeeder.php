@@ -82,40 +82,7 @@ class WhatsAppTemplateSeeder extends Seeder
                 "variables"   => json_encode(["sekolah", "nama", "kelas", "hari_tanggal", "tanggal"]),
                 "usage_count" => 0,
             ],
-            // ── Legacy (non-auto, tetap ada untuk referensi) ──────────
-            [
-                "name"        => "check_in_notification",
-                "label"       => "[Legacy] Notifikasi Check-In",
-                "message"     => "🏫 *{sekolah}*\n📍 Notifikasi Absensi\n\nSiswa: *{nama}*\nKelas: {kelas}\nHari/Tgl: {hari_tanggal}\nWaktu Masuk: *{waktu}*\nStatus: {status}\n\n_Pesan otomatis dari sistem absensi_",
-                "description" => "[Legacy] Tidak dipakai lagi — digantikan check_in_hadir, check_in_terlambat, check_in_izin",
-                "type"        => "check_in",
-                "is_active"   => false,
-                "auto_send"   => false,
-                "variables"   => json_encode(["sekolah", "nama", "kelas", "hari_tanggal", "waktu", "status"]),
-                "usage_count" => 0,
-            ],
-            [
-                "name"        => "check_out_notification",
-                "label"       => "[Legacy] Notifikasi Check-Out",
-                "message"     => "🏫 *{sekolah}*\n📍 Notifikasi Pulang\n\nSiswa: *{nama}*\nKelas: {kelas}\nHari/Tgl: {hari_tanggal}\nWaktu Pulang: *{waktu}*\n{peringatan}\n_Pesan otomatis dari sistem absensi_",
-                "description" => "[Legacy] Tidak dipakai lagi — digantikan check_out_normal, check_out_cepat",
-                "type"        => "check_out",
-                "is_active"   => false,
-                "auto_send"   => false,
-                "variables"   => json_encode(["sekolah", "nama", "kelas", "hari_tanggal", "waktu", "peringatan", "jam_resmi"]),
-                "usage_count" => 0,
-            ],
-            [
-                "name"        => "late_notification",
-                "label"       => "[Legacy] Notifikasi Terlambat",
-                "message"     => "🏫 *{sekolah}*\n⏰ *Notifikasi Keterlambatan*\n\nSiswa: *{nama}*\nKelas: {kelas}\nWaktu Masuk: *{waktu}*\nKeterlambatan: {terlambat} menit\n\nMohon untuk memastikan siswa hadir tepat waktu.\n\n_Pesan otomatis dari sistem absensi_",
-                "description" => "[Legacy] Digantikan oleh check_in_terlambat",
-                "type"        => "check_in",
-                "is_active"   => false,
-                "auto_send"   => false,
-                "variables"   => json_encode(["sekolah", "nama", "kelas", "waktu", "terlambat"]),
-                "usage_count" => 0,
-            ],
+            // ── Broadcast Umum (manual, untuk admin) ──────────────────
             [
                 "name"        => "broadcast_general",
                 "label"       => "Broadcast Umum",
@@ -128,6 +95,13 @@ class WhatsAppTemplateSeeder extends Seeder
                 "usage_count" => 0,
             ],
         ];
+
+        // Hapus legacy templates jika masih ada di DB
+        DB::table("whatsapp_templates")
+            ->whereIn("name", ["check_in_notification", "check_out_notification", "late_notification"])
+            ->delete();
+
+
 
         foreach ($templates as $template) {
             DB::table("whatsapp_templates")->updateOrInsert(
