@@ -183,15 +183,12 @@
                                             </div>
                                         </td>
 
-                                        {{-- Jam masuk (24-hour, force) --}}
+                                        {{-- Jam masuk (24-hour native picker) --}}
                                         <td class="px-4 py-3">
-                                            <input type="text"
+                                            <input type="time"
                                                    name="entries[{{ $i }}][check_in_time]"
                                                    value="{{ $existing?->check_in_time ? \Carbon\Carbon::parse($existing->check_in_time)->format('H:i') : '' }}"
-                                                   placeholder="07:30"
-                                                   maxlength="5"
-                                                   autocomplete="off"
-                                                   class="time-input-24 w-full text-xs px-2 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-primary-400 min-h-[38px] text-center tracking-widest font-mono">
+                                                   class="time-24h w-full text-xs px-2 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-primary-400 min-h-[38px]">
                                         </td>
 
                                         {{-- Keterangan --}}
@@ -371,53 +368,6 @@
             form.action = '/attendance/manual/' + id;
             form.submit();
         }
-        // ===== 24-hour Time Input Auto-formatter =====
-        document.querySelectorAll('.time-input-24').forEach(input => {
-            input.addEventListener('input', function () {
-                // Strip semua non-digit
-                let raw = this.value.replace(/\D/g, '').substring(0, 4);
-
-                if (raw.length === 0) { this.value = ''; return; }
-
-                // Auto-insert colon setelah 2 digit jam
-                if (raw.length <= 2) {
-                    this.value = raw;
-                } else {
-                    this.value = raw.substring(0, 2) + ':' + raw.substring(2);
-                }
-            });
-
-            input.addEventListener('blur', function () {
-                const val = this.value.trim();
-                if (!val) return;
-
-                const match = val.match(/^([0-9]{1,2}):([0-9]{1,2})$/);
-                if (!match) {
-                    this.value = '';
-                    this.classList.add('border-red-400');
-                    return;
-                }
-
-                const hh = parseInt(match[1], 10);
-                const mm = parseInt(match[2], 10);
-
-                if (hh > 23 || mm > 59) {
-                    this.value = '';
-                    this.classList.add('border-red-400');
-                    setTimeout(() => this.classList.remove('border-red-400'), 2000);
-                    return;
-                }
-
-                // Format ke HH:MM
-                this.value = String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
-                this.classList.remove('border-red-400');
-            });
-
-            // Cegah input huruf
-            input.addEventListener('keypress', function (e) {
-                if (!/[0-9]/.test(e.key)) e.preventDefault();
-            });
-        });
     </script>
     @endpush
 </x-app-layout>
