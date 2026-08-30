@@ -88,6 +88,57 @@
                                 <li>Cron job Laravel harus terpasang di server</li>
                             </ul>
                         </div>
+                        </div>
+
+                        {{-- Preview Pesan --}}
+                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                            <button type="button" onclick="togglePreview('previewWali')"
+                                class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                <span class="flex items-center gap-2"><i class="fab fa-whatsapp text-green-500"></i> Preview Pesan WA</span>
+                                <i class="fas fa-chevron-down text-xs transition-transform" id="previewWaliIcon"></i>
+                            </button>
+                            <div id="previewWali" class="hidden p-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-white dark:bg-gray-900">
+                                {{-- Masuk --}}
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">📨 Pesan Masuk</p>
+                                    <div class="bg-[#dcf8c6] dark:bg-green-900/40 rounded-2xl rounded-tl-sm px-4 py-3 text-sm font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap shadow-sm">
+*RINGKASAN KEHADIRAN MASUK*
+Kelas  : *[Nama Kelas]*
+Tanggal: [Hari, DD Bulan YYYY]
+
+Hadir tepat waktu : [N] siswa
+Terlambat         : [N] siswa
+Izin              : [N] siswa
+Alfa              : [N] siswa
+Total             : [N] siswa
+Kehadiran         : [N]%
+
+*Siswa tidak hadir (alfa):*
+1. [Nama Siswa]
+
+_Sistem Absensi SMK PGRI Blora_</div>
+                                </div>
+                                {{-- Pulang --}}
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">📨 Pesan Pulang</p>
+                                    <div class="bg-[#dcf8c6] dark:bg-green-900/40 rounded-2xl rounded-tl-sm px-4 py-3 text-sm font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap shadow-sm">
+*RINGKASAN KEPULANGAN*
+Kelas  : *[Nama Kelas]*
+Tanggal: [Hari, DD Bulan YYYY]
+
+Hadir hari ini     : [N] siswa
+Pulang tepat waktu : [N] siswa
+Pulang lebih awal  : [N] siswa
+Belum pulang       : [N] siswa
+Izin               : [N] siswa
+Alfa               : [N] siswa
+Total              : [N] siswa
+
+_Sistem Absensi SMK PGRI Blora_</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="flex items-center gap-3">
                             <button type="button" onclick="sendSummaryNow()" class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-all duration-200">
                                 <i class="fas fa-paper-plane mr-2"></i>Kirim Ringkasan Sekarang
@@ -146,6 +197,64 @@
                                 @endforeach
                             </div>
                         </div>
+                        </div>
+
+                        {{-- Preview Pesan Waka --}}
+                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                            <button type="button" onclick="togglePreview('previewWaka')"
+                                class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                <span class="flex items-center gap-2"><i class="fab fa-whatsapp text-green-500"></i> Preview Pesan WA</span>
+                                <i class="fas fa-chevron-down text-xs transition-transform" id="previewWakaIcon"></i>
+                            </button>
+                            <div id="previewWaka" class="hidden p-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-white dark:bg-gray-900">
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">📨 Pesan Masuk</p>
+                                    <div class="bg-[#dcf8c6] dark:bg-green-900/40 rounded-2xl rounded-tl-sm px-4 py-3 text-sm font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap shadow-sm">
+📊 *LAPORAN KEHADIRAN HARIAN*
+*[Nama Sekolah]*
+[Hari, DD Bulan YYYY]
+
+👥 Total Siswa   : [N] orang
+✅ Hadir         : [N] ([N]%)
+   ↳ Tepat waktu : [N] siswa
+   ↳ Terlambat   : [N] siswa
+❌ Alpha         : [N] siswa
+📋 Izin          : [N] siswa
+🤒 Sakit         : [N] siswa
+
+Status: [Baik/Perhatian]
+
+*Detail Siswa Alpha:*
+📚 *[Kelas]*
+   Wali Kelas: [Nama]
+   1. [Nama Siswa]
+
+_Sistem Absensi Otomatis_</div>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">📨 Pesan Pulang</p>
+                                    <div class="bg-[#dcf8c6] dark:bg-green-900/40 rounded-2xl rounded-tl-sm px-4 py-3 text-sm font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap shadow-sm">
+🌆 *LAPORAN KEPULANGAN HARIAN*
+*[Nama Sekolah]*
+[Hari, DD Bulan YYYY]
+
+👥 Total Siswa     : [N] orang
+🏫 Hadir hari ini  : [N] siswa
+✅ Sudah pulang    : [N] siswa
+   ↳ Tepat waktu  : [N] siswa
+   ↳ Pulang cepat : [N] siswa
+⏳ Belum pulang   : [N] siswa
+
+*Detail Belum Pulang:*
+📚 *[Kelas]*
+   Wali Kelas: [Nama]
+   1. [Nama Siswa]
+
+_Sistem Absensi Otomatis_</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="flex flex-wrap items-center gap-3">
                             <button type="button" onclick="sendWakaNow('masuk')" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-all duration-200"><i class="fas fa-paper-plane mr-2"></i>Kirim Masuk Sekarang</button>
                             <button type="button" onclick="sendWakaNow('pulang')" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-all duration-200"><i class="fas fa-paper-plane mr-2"></i>Kirim Pulang Sekarang</button>
@@ -202,6 +311,64 @@
                                 @endforeach
                             </div>
                         </div>
+                        </div>
+
+                        {{-- Preview Pesan Kepsek --}}
+                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                            <button type="button" onclick="togglePreview('previewKepsek')"
+                                class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                <span class="flex items-center gap-2"><i class="fab fa-whatsapp text-green-500"></i> Preview Pesan WA</span>
+                                <i class="fas fa-chevron-down text-xs transition-transform" id="previewKepsekIcon"></i>
+                            </button>
+                            <div id="previewKepsek" class="hidden p-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-white dark:bg-gray-900">
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">📨 Pesan Masuk</p>
+                                    <div class="bg-[#dcf8c6] dark:bg-green-900/40 rounded-2xl rounded-tl-sm px-4 py-3 text-sm font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap shadow-sm">
+📊 *LAPORAN KEHADIRAN HARIAN*
+*[Nama Sekolah]*
+[Hari, DD Bulan YYYY]
+
+👥 Total Siswa   : [N] orang
+✅ Hadir         : [N] ([N]%)
+   ↳ Tepat waktu : [N] siswa
+   ↳ Terlambat   : [N] siswa
+❌ Alpha         : [N] siswa
+📋 Izin          : [N] siswa
+🤒 Sakit         : [N] siswa
+
+Status: [Baik/Perhatian]
+
+*Detail Siswa Alpha:*
+📚 *[Kelas]*
+   Wali Kelas: [Nama]
+   1. [Nama Siswa]
+
+_Sistem Absensi Otomatis_</div>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">📨 Pesan Pulang</p>
+                                    <div class="bg-[#dcf8c6] dark:bg-green-900/40 rounded-2xl rounded-tl-sm px-4 py-3 text-sm font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap shadow-sm">
+🌆 *LAPORAN KEPULANGAN HARIAN*
+*[Nama Sekolah]*
+[Hari, DD Bulan YYYY]
+
+👥 Total Siswa     : [N] orang
+🏫 Hadir hari ini  : [N] siswa
+✅ Sudah pulang    : [N] siswa
+   ↳ Tepat waktu  : [N] siswa
+   ↳ Pulang cepat : [N] siswa
+⏳ Belum pulang   : [N] siswa
+
+*Detail Belum Pulang:*
+📚 *[Kelas]*
+   Wali Kelas: [Nama]
+   1. [Nama Siswa]
+
+_Sistem Absensi Otomatis_</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="flex flex-wrap items-center gap-3">
                             <button type="button" onclick="sendKepsekNow('masuk')" class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-all duration-200"><i class="fas fa-paper-plane mr-2"></i>Kirim Masuk Sekarang</button>
                             <button type="button" onclick="sendKepsekNow('pulang')" class="inline-flex items-center px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-lg transition-all duration-200"><i class="fas fa-paper-plane mr-2"></i>Kirim Pulang Sekarang</button>
@@ -300,6 +467,13 @@
         toggleWakaFields();
         toggleKepsekFields();
     });
+
+    function togglePreview(id) {
+        const el   = document.getElementById(id);
+        const icon = document.getElementById(id + 'Icon');
+        el.classList.toggle('hidden');
+        icon.style.transform = el.classList.contains('hidden') ? '' : 'rotate(180deg)';
+    }
     </script>
     @endpush
 </x-app-layout>
