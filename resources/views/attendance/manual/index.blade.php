@@ -183,16 +183,12 @@
                                         {{-- Hapus record (jika ada) --}}
                                         <td class="px-4 py-3 text-center">
                                             @if($hasRecord)
-                                                <form action="{{ route('attendance.manual.destroy', $existing->id) }}" method="POST" class="inline"
-                                                      onsubmit="return confirm('Hapus record absensi {{ $student->nama }}?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit"
-                                                            class="inline-flex items-center px-2 py-1.5 text-xs rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 transition-all"
-                                                            title="Hapus record">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form>
+                                                <button type="button"
+                                                        onclick="deleteRecord({{ $existing->id }}, '{{ addslashes($student->nama) }}')"
+                                                        class="inline-flex items-center px-2 py-1.5 text-xs rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 transition-all"
+                                                        title="Hapus record">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
                                             @else
                                                 <span class="text-gray-300 dark:text-gray-600 text-xs">—</span>
                                             @endif
@@ -254,7 +250,13 @@
 
     </div>
 
-    @push('scripts')
+    {{-- Form delete di LUAR main form — cegah nested form --}}
+    <form id="deleteRecordForm" method="POST" action="" style="display:none;">
+        @csrf
+        @method('DELETE')
+    </form>
+
+@push('scripts')
     <script>
         // ===== Style update saat radio dipilih =====
         const allStatuses = ['hadir','terlambat','izin','sakit','alpha','skip'];
@@ -287,6 +289,13 @@
                 radio.checked = true;
                 updateRowStyle(radio.dataset.row, status);
             });
+        }
+        // ===== Hapus record individual (luar form utama) =====
+        function deleteRecord(id, nama) {
+            if (!confirm('Hapus record absensi ' + nama + '?')) return;
+            const form = document.getElementById('deleteRecordForm');
+            form.action = '/attendance/manual/' + id;
+            form.submit();
         }
     </script>
     @endpush
