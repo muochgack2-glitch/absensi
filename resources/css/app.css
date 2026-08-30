@@ -807,7 +807,6 @@ body.sidebar-collapsed .main-content {
 @media (max-width: 639px) {
     .main-content main {
         padding: 0.75rem !important;
-        padding-top: 4.5rem !important;
     }
     /* Smaller stat cards on mobile */
     .stat-card-value {
@@ -821,7 +820,6 @@ body.sidebar-collapsed .main-content {
 @media (min-width: 640px) and (max-width: 767px) {
     .main-content main {
         padding: 1rem !important;
-        padding-top: 5rem !important;
     }
 }
 
