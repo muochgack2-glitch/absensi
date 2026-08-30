@@ -81,10 +81,15 @@
 
                 <!-- Brand -->
                 <div class="mobile-topbar-brand">
-                    <img src="{{ asset('images/logo.png') }}" 
-                         alt="Logo" 
-                         class="mobile-topbar-logo"
-                         onerror="this.style.display='none'">
+                    @if(!empty($appLogoUrl))
+                        <img src="{{ $appLogoUrl }}"
+                             alt="Logo"
+                             class="mobile-topbar-logo">
+                    @else
+                        <div style="width:28px;height:28px;background:rgba(255,255,255,0.2);border-radius:6px;display:flex;align-items:center;justify-content:center;">
+                            <i class="fas fa-qrcode" style="color:white;font-size:14px;"></i>
+                        </div>
+                    @endif
                     <span class="mobile-topbar-title">{{ config('app.name', 'Absensi QR') }}</span>
                 </div>
 
