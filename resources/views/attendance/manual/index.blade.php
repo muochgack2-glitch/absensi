@@ -294,14 +294,16 @@
                 if (notesInput.value.startsWith('Auto-marked')) {
                     notesInput.value = '';
                 }
-                notesInput.placeholder = '⚠️ Alasan koreksi — contoh: tidak bawa kartu, surat izin terlambat...';
-                notesInput.classList.add('border-orange-400', 'dark:border-orange-500');
-                notesInput.classList.remove('border-gray-300', 'dark:border-gray-600');
+                notesInput.placeholder = '⚠️ Isi alasan koreksi...';
+                notesInput.style.outline = '2px solid #f97316';
+                notesInput.style.outlineOffset = '1px';
+                notesInput.style.backgroundColor = '#fff7ed'; // orange-50
                 notesInput.focus();
             } else if (prevStatus !== 'alpha' || selectedStatus === 'alpha') {
                 notesInput.placeholder = 'Keterangan opsional...';
-                notesInput.classList.remove('border-orange-400', 'dark:border-orange-500');
-                notesInput.classList.add('border-gray-300', 'dark:border-gray-600');
+                notesInput.style.outline = '';
+                notesInput.style.outlineOffset = '';
+                notesInput.style.backgroundColor = '';
             }
         }
 
