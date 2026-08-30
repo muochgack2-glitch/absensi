@@ -307,12 +307,14 @@ class AttendanceNotificationService
             default => ucfirst($record->status),
         };
 
-        $time = \Carbon\Carbon::parse($record->check_in_time)->format('H:i');
+        $time    = \Carbon\Carbon::parse($record->check_in_time)->format('H:i');
+        $tanggal = \Carbon\Carbon::parse($record->date)->locale('id')->translatedFormat('l, d/m/Y');
 
         $message = "🏫 *{$schoolName}*\n";
         $message .= "📍 Notifikasi Absensi\n\n";
         $message .= "Siswa: *{$student->nama}*\n";
         $message .= "Kelas: {$student->kelas->nama_kelas}\n";
+        $message .= "Hari/Tgl: {$tanggal}\n";
         $message .= "Waktu Masuk: *{$time}*\n";
         $message .= "Status: {$statusLabel}\n";
         $message .= "\n_Pesan otomatis dari sistem absensi_";
@@ -325,7 +327,8 @@ class AttendanceNotificationService
      */
     private function formatCheckOutMessage(AttendanceStudent $student, AttendanceRecord $record, string $schoolName): string
     {
-        $time = \Carbon\Carbon::parse($record->check_out_time)->format('H:i');
+        $time          = \Carbon\Carbon::parse($record->check_out_time)->format('H:i');
+        $tanggal       = \Carbon\Carbon::parse($record->date)->locale('id')->translatedFormat('l, d/m/Y');
         $isPulangCepat = $record->check_out_status === 'pulang_cepat';
 
         // Icon & judul berbeda untuk pulang cepat vs pulang normal
@@ -336,6 +339,7 @@ class AttendanceNotificationService
         $message .= "📍 {$label}\n\n";
         $message .= "Siswa: *{$student->nama}*\n";
         $message .= "Kelas: {$student->kelas->nama_kelas}\n";
+        $message .= "Hari/Tgl: {$tanggal}\n";
         $message .= "Waktu Pulang: *{$time}*\n";
 
         // Tambah peringatan jika pulang lebih awal
@@ -393,11 +397,13 @@ class AttendanceNotificationService
         $schoolName = AttendanceSetting::get('school_name', 'Sekolah');
 
         // Format message
+        $tanggal = \Carbon\Carbon::parse($record->date)->locale('id')->translatedFormat('l, d/m/Y');
+
         $message = "🏫 *{$schoolName}*\n";
         $message .= "⚠️ *Notifikasi Ketidakhadiran*\n\n";
         $message .= "Siswa: *{$student->nama}*\n";
         $message .= "Kelas: {$student->kelas->nama_kelas}\n";
-        $message .= "Tanggal: " . $record->date->format('d/m/Y') . "\n";
+        $message .= "Hari/Tgl: {$tanggal}\n";
         $message .= "Status: ❌ *Alpha (Tidak Hadir)*\n\n";
         $message .= "Mohon segera menghubungi pihak sekolah.\n";
         $message .= "\n_Pesan otomatis dari sistem absensi_";
