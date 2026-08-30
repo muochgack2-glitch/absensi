@@ -1000,6 +1000,18 @@
             </a>
             @endif
 
+            {{-- Kamera --}}
+            <a
+                href="{{ route('attendance.kamera.index') }}"
+                class="sidebar-menu-item {{ request()->routeIs('attendance.kamera.*') ? 'active' : '' }}"
+                data-bs-toggle="tooltip"
+                data-bs-placement="right"
+                title="Kamera"
+            >
+                <i class="fas fa-camera text-lg"></i>
+                <span class="nav-text font-medium">Kamera</span>
+            </a>
+
             <!-- Settings -->
             <a
                 href="{{ route('attendance.settings.index') }}"

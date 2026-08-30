@@ -52,9 +52,39 @@ class AttendanceSettingController extends Controller
     }
 
     /**
+     * Setting Kamera page
+     */
+    public function kamera()
+    {
+        $settings = AttendanceSetting::getGrouped();
+        return view('attendance.settings.kamera', compact('settings'));
+    }
+
+    public function updateKamera(Request $request)
+    {
+        // use_dual_camera (checkbox)
+        AttendanceSetting::set('use_dual_camera',
+            $request->input('settings.use_dual_camera', '0') == '1' ? '1' : '0', 'camera');
+
+        $camKeys = ['scan_fps', 'scan_resolution_qr', 'scan_resolution_photo', 'qr_camera_index', 'photo_camera_index'];
+        foreach ($camKeys as $key) {
+            if (isset($request->settings[$key])) {
+                AttendanceSetting::set($key, $request->settings[$key], 'camera');
+            }
+        }
+
+        AttendanceSetting::clearCache();
+
+        return redirect()
+            ->route('attendance.kamera.index')
+            ->with('success', 'Setting kamera berhasil disimpan.');
+    }
+
+    /**
      * Update settings
      */
     public function update(Request $request)
+
     {
         // Petugas: hanya boleh simpan setting kamera
         if (auth()->user()?->isPetugas()) {

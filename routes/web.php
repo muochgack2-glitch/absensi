@@ -244,6 +244,10 @@ Route::middleware(['auth'])->group(function () {
         ->name('attendance.setting-waktu.index');
     Route::put('/attendance/setting-waktu', [AttendanceSettingController::class, 'updateSettingWaktu'])
         ->name('attendance.setting-waktu.update');
+    Route::get('/attendance/kamera', [AttendanceSettingController::class, 'kamera'])
+        ->name('attendance.kamera.index');
+    Route::put('/attendance/kamera', [AttendanceSettingController::class, 'updateKamera'])
+        ->name('attendance.kamera.update');
 
 
     // Settings admin-only
