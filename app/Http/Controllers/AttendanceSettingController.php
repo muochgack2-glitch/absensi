@@ -14,10 +14,41 @@ class AttendanceSettingController extends Controller
      */
     public function index()
     {
-        // Get settings grouped by group_name
         $settings = AttendanceSetting::getGrouped();
-
         return view('attendance.settings.index', compact('settings'));
+    }
+
+    /**
+     * Setting Waktu page
+     */
+    public function settingWaktu()
+    {
+        $settings = AttendanceSetting::getGrouped();
+        return view('attendance.settings.waktu', compact('settings'));
+    }
+
+    public function updateSettingWaktu(Request $request)
+    {
+        $keys = [
+            'check_in_time'      => ['group' => 'time'],
+            'check_out_time'     => ['group' => 'time'],
+            'check_out_start_time' => ['group' => 'time'],
+            'cutoff_time'        => ['group' => 'time'],
+            'tolerance_minutes'  => ['group' => 'tolerance'],
+            'modal_auto_close'   => ['group' => 'general'],
+        ];
+
+        foreach ($keys as $key => $meta) {
+            if (isset($request->settings[$key])) {
+                AttendanceSetting::set($key, $request->settings[$key], $meta['group']);
+            }
+        }
+
+        AttendanceSetting::clearCache();
+
+        return redirect()
+            ->route('attendance.setting-waktu.index')
+            ->with('success', 'Setting waktu berhasil disimpan.');
     }
 
     /**

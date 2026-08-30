@@ -240,6 +240,11 @@ Route::middleware(['auth'])->group(function () {
         ->name('attendance.settings.index');
     Route::put('/attendance/settings', [AttendanceSettingController::class, 'update'])
         ->name('attendance.settings.update');
+    Route::get('/attendance/setting-waktu', [AttendanceSettingController::class, 'settingWaktu'])
+        ->name('attendance.setting-waktu.index');
+    Route::put('/attendance/setting-waktu', [AttendanceSettingController::class, 'updateSettingWaktu'])
+        ->name('attendance.setting-waktu.update');
+
 
     // Settings admin-only
     Route::middleware('role:admin')->group(function () {

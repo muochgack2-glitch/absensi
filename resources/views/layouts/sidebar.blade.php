@@ -985,18 +985,34 @@
 
             {{-- Settings: bukan kepala sekolah --}}
             @if(!auth()->user()?->isKepalaSekolah())
+
+            {{-- Setting Waktu --}}
+            @if(auth()->user()?->isAdmin())
+            <a
+                href="{{ route('attendance.setting-waktu.index') }}"
+                class="sidebar-menu-item {{ request()->routeIs('attendance.setting-waktu.*') ? 'active' : '' }}"
+                data-bs-toggle="tooltip"
+                data-bs-placement="right"
+                title="Setting Waktu"
+            >
+                <i class="fas fa-clock text-lg"></i>
+                <span class="nav-text font-medium">Setting Waktu</span>
+            </a>
+            @endif
+
             <!-- Settings -->
-            <a 
+            <a
                 href="{{ route('attendance.settings.index') }}"
                 class="sidebar-menu-item {{ request()->routeIs('attendance.settings.*') ? 'active' : '' }}"
-                data-bs-toggle="tooltip" 
-                data-bs-placement="right" 
+                data-bs-toggle="tooltip"
+                data-bs-placement="right"
                 title="Settings"
             >
                 <i class="fas fa-cog text-lg"></i>
                 <span class="nav-text font-medium">Settings</span>
             </a>
             @endif
+
 
         </nav>
 
