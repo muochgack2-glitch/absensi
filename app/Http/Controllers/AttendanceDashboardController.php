@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AttendanceClass;
 use App\Models\AttendanceRecord;
 use App\Models\AttendanceStudent;
+use App\Models\Holiday;
 use App\Services\AttendanceService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -130,7 +131,8 @@ class AttendanceDashboardController extends Controller
      */
     private function getChartData7Days(?int $classId = null): array
     {
-        $labels    = [];
+        $labels   = [];
+        $dayTypes = []; // 'normal' | 'weekend' | 'holiday'
         $hadir     = [];
         $alpha     = [];
         $terlambat = [];
@@ -148,6 +150,16 @@ class AttendanceDashboardController extends Controller
 
                 $records   = $query->get();
                 $labels[]    = $date->translatedFormat('d M');
+
+                // Determine day type for chart coloring
+                if ($date->isWeekend()) {
+                    $dayTypes[] = 'weekend';
+                } elseif (Holiday::isHoliday($date->toDateString())) {
+                    $dayTypes[] = 'holiday';
+                } else {
+                    $dayTypes[] = 'normal';
+                }
+
                 $hadir[]     = $records->where('status', 'hadir')->count()
                              + $records->where('status', 'terlambat')->count();
                 $alpha[]     = $records->where('status', 'alpha')->count();
@@ -159,6 +171,7 @@ class AttendanceDashboardController extends Controller
 
         return [
             'labels'    => array_reverse($labels),
+            'dayTypes'  => array_reverse($dayTypes),
             'hadir'     => array_reverse($hadir),
             'alpha'     => array_reverse($alpha),
             'terlambat' => array_reverse($terlambat),

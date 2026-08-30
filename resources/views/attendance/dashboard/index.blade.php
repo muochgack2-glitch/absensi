@@ -688,14 +688,53 @@
         });
 
         // ===== Bar Chart: bisa diupdate via AJAX =====
+        const dayTypes = chartBarData.dayTypes || [];
+
+        function tickColorForIndex(index, types) {
+            const t = types[index];
+            if (t === 'weekend') return '#ef4444';  // merah
+            if (t === 'holiday') return '#f97316';  // orange
+            return labelColor;                       // normal
+        }
+
         const barChartOptions = {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
                 legend: { labels: { color: labelColor, font: { size: 11 } } },
+                tooltip: {
+                    callbacks: {
+                        // Footer tooltip: keterangan weekend / libur
+                        footer: (tooltipItems) => {
+                            const i    = tooltipItems[0].dataIndex;
+                            const type = (barChart?.data?.dayTypes || dayTypes)[i];
+                            if (type === 'weekend') return '📅 Weekend — tidak ada absensi';
+                            if (type === 'holiday') return '🎌 Hari Libur — tidak ada absensi';
+                            return '';
+                        },
+                        footerColor: (ctx) => {
+                            const i    = ctx.dataIndex;
+                            const type = (barChart?.data?.dayTypes || dayTypes)[i];
+                            return type === 'weekend' ? '#ef4444' : '#f97316';
+                        },
+                    },
+                    footerFont: { style: 'italic', size: 11 },
+                    footerMarginTop: 6,
+                },
             },
             scales: {
-                x: { grid: { color: gridColor }, ticks: { color: labelColor } },
+                x: {
+                    grid: { color: gridColor },
+                    ticks: {
+                        color: (ctx) => tickColorForIndex(ctx.index, dayTypes),
+                        font: (ctx) => {
+                            const t = dayTypes[ctx.index];
+                            return t === 'weekend' || t === 'holiday'
+                                ? { size: 11, weight: 'bold' }
+                                : { size: 11 };
+                        },
+                    },
+                },
                 y: { grid: { color: gridColor }, ticks: { color: labelColor, stepSize: 1 }, beginAtZero: true },
             },
         };
@@ -712,6 +751,7 @@
             type: 'bar',
             data: {
                 labels:   chartBarData.labels,
+                dayTypes: chartBarData.dayTypes,   // simpan di data untuk akses di tooltip
                 datasets: makeBarDatasets(chartBarData),
             },
             options: barChartOptions,
@@ -730,7 +770,19 @@
                 const data = await resp.json();
 
                 barChart.data.labels   = data.labels;
+                barChart.data.dayTypes = data.dayTypes || [];
                 barChart.data.datasets = makeBarDatasets(data);
+
+                // Update x-axis tick colors berdasarkan dayTypes baru
+                const newTypes = data.dayTypes || [];
+                barChart.options.scales.x.ticks.color = (ctx) => tickColorForIndex(ctx.index, newTypes);
+                barChart.options.scales.x.ticks.font  = (ctx) => {
+                    const t = newTypes[ctx.index];
+                    return t === 'weekend' || t === 'holiday'
+                        ? { size: 11, weight: 'bold' }
+                        : { size: 11 };
+                };
+
                 barChart.update('active');
 
                 // Update judul subtitle
