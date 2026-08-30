@@ -756,6 +756,8 @@
                 <span class="nav-text font-medium">Dashboard</span>
             </a>
 
+            {{-- QR Scanner: admin only --}}
+            @if(auth()->user()?->isAdmin())
             <!-- QR Scanner -->
             <a 
                 href="{{ route('attendance.scanner') }}"
@@ -767,6 +769,7 @@
                 <i class="fas fa-camera text-lg"></i>
                 <span class="nav-text font-medium">QR Scanner</span>
             </a>
+            @endif
 
             {{-- Input Manual: petugas, waka, admin --}}
             @if(auth()->user()?->isPetugas() || auth()->user()?->isWakaKesiswaan() || auth()->user()?->isAdmin())

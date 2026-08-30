@@ -76,12 +76,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/attendance/notifications', [AttendanceDashboardController::class, 'notifications'])
         ->name('api.attendance.notifications');
 
-    // QR Scanner
-    Route::get('/attendance/scanner', [AttendanceScanController::class, 'showScanner'])
-        ->name('attendance.scanner');
-    
-    Route::post('/attendance/scan', [AttendanceScanController::class, 'scan'])
-        ->name('attendance.scan');
+    // QR Scanner — Admin Only
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/attendance/scanner', [AttendanceScanController::class, 'showScanner'])
+            ->name('attendance.scanner');
+
+        Route::post('/attendance/scan', [AttendanceScanController::class, 'scan'])
+            ->name('attendance.scan');
+    });
 
     // Dashboard Chart API (AJAX)
     Route::get('/attendance/dashboard/chart-data', [AttendanceDashboardController::class, 'chartApi'])
