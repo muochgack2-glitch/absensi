@@ -999,16 +999,16 @@
             {{-- Settings: bukan kepala sekolah --}}
             @if(!auth()->user()?->isKepalaSekolah())
 
-            {{-- Kamera --}}
+            {{-- Setting Kamera --}}
             <a
                 href="{{ route('attendance.kamera.index') }}"
                 class="sidebar-menu-item {{ request()->routeIs('attendance.kamera.*') ? 'active' : '' }}"
                 data-bs-toggle="tooltip"
                 data-bs-placement="right"
-                title="Kamera"
+                title="Setting Kamera"
             >
                 <i class="fas fa-camera text-lg"></i>
-                <span class="nav-text font-medium">Kamera</span>
+                <span class="nav-text font-medium">Setting Kamera</span>
             </a>
 
             {{-- Notifikasi: admin & waka only --}}
