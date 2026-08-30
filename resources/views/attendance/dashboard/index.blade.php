@@ -790,14 +790,56 @@
             ];
         }
 
+        // Plugin: gambar teks vertikal di kolom weekend/libur
+        const dayLabelPlugin = {
+            id: 'dayLabels',
+            afterDraw(chart) {
+                const { ctx, chartArea, scales } = chart;
+                const xScale  = scales.x;
+                const types   = chart.data.dayTypes || [];
+                const yCenter = (chartArea.top + chartArea.bottom) / 2;
+
+                types.forEach((type, i) => {
+                    if (type !== 'weekend' && type !== 'holiday') return;
+
+                    const xPos  = xScale.getPixelForValue(i);
+                    const text  = type === 'weekend' ? '🏖️ Sabtu' : '🎌 Libur Nasional';
+                    const color = type === 'weekend' ? '#ef4444' : '#f97316';
+                    const bgCol = type === 'weekend'
+                        ? 'rgba(239,68,68,0.06)'
+                        : 'rgba(249,115,22,0.06)';
+
+                    // Lebar kolom (estimasi)
+                    const colW = xScale.getPixelForValue(1) - xScale.getPixelForValue(0);
+
+                    // Background tipis di area kolom
+                    ctx.save();
+                    ctx.fillStyle = bgCol;
+                    ctx.fillRect(xPos - colW / 2, chartArea.top, colW, chartArea.bottom - chartArea.top);
+
+                    // Teks vertikal
+                    ctx.translate(xPos, yCenter);
+                    ctx.rotate(-Math.PI / 2);
+                    ctx.fillStyle   = color;
+                    ctx.font        = 'bold 11px sans-serif';
+                    ctx.textAlign   = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.globalAlpha = 0.85;
+                    ctx.fillText(text, 0, 0);
+                    ctx.restore();
+                });
+            }
+        };
+
         const barChart = new Chart(document.getElementById('chartBar'), {
             type: 'bar',
             data: {
                 labels:   chartBarData.labels,
-                dayTypes: chartBarData.dayTypes,   // simpan di data untuk akses di tooltip
+                dayTypes: chartBarData.dayTypes,
                 datasets: makeBarDatasets(chartBarData),
             },
             options: barChartOptions,
+            plugins: [dayLabelPlugin],
         });
 
         // ===== AJAX: Filter Per Kelas =====
