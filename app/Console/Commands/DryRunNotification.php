@@ -48,7 +48,13 @@ class DryRunNotification extends Command
         $cases = [
             ["CHECK-IN: Hadir", "check_in_hadir", [
                 "sekolah" => $schoolName, "nama" => $nama, "kelas" => $kelas,
-                "waktu" => "07:00", "tanggal" => $today, "hari_tanggal" => $hariTanggal, "terlambat" => 0,
+                "waktu" => "07:00", "tanggal" => $today, "hari_tanggal" => $hariTanggal,
+                "terlambat" => 0, "toleransi" => 15, "jam_resmi_masuk" => "07:00",
+            ]],
+            ["CHECK-IN: Hadir dalam Toleransi (07:10)", "check_in_toleransi", [
+                "sekolah" => $schoolName, "nama" => $nama, "kelas" => $kelas,
+                "waktu" => "07:10", "tanggal" => $today, "hari_tanggal" => $hariTanggal,
+                "terlambat" => 10, "toleransi" => 15, "jam_resmi_masuk" => "07:00",
             ]],
             ["CHECK-IN: Terlambat 35 Menit", "check_in_terlambat", [
                 "sekolah" => $schoolName, "nama" => $nama, "kelas" => $kelas,

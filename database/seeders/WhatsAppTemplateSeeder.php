@@ -82,6 +82,18 @@ class WhatsAppTemplateSeeder extends Seeder
                 "variables"   => json_encode(["sekolah", "nama", "kelas", "hari_tanggal", "tanggal"]),
                 "usage_count" => 0,
             ],
+            // ── 7. Check-in: Hadir dalam Toleransi ───────────────────
+            [
+                "name"        => "check_in_toleransi",
+                "label"       => "Check-In: Hadir (Toleransi)",
+                "message"     => "🏫 *{sekolah}*\n✅ *Notifikasi Hadir (Toleransi)*\n📅 {hari_tanggal}\n\nSiswa: *{nama}*\nKelas: {kelas}\nWaktu Masuk: *{waktu}*\nStatus: ✅ Hadir (dalam toleransi)\n\nℹ️ _Siswa masuk {terlambat} menit setelah jam resmi ({jam_resmi_masuk}). Batas toleransi sekolah: {toleransi} menit. Siswa tetap tercatat hadir._\n\n_Pesan otomatis dari sistem absensi_",
+                "description" => "Template soft-warning untuk siswa hadir setelah jam resmi tapi masih dalam batas toleransi. Gunakan {toleransi} untuk menit toleransi dari setting, {jam_resmi_masuk} untuk jam resmi masuk.",
+                "type"        => "check_in",
+                "is_active"   => true,
+                "auto_send"   => true,
+                "variables"   => json_encode(["sekolah", "nama", "kelas", "hari_tanggal", "waktu", "terlambat", "toleransi", "jam_resmi_masuk"]),
+                "usage_count" => 0,
+            ],
             // ── Broadcast Umum (manual, untuk admin) ──────────────────
             [
                 "name"        => "broadcast_general",

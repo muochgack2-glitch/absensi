@@ -312,31 +312,41 @@ class AttendanceNotificationService
         $tanggal     = \Carbon\Carbon::parse($record->date)->format('d/m/Y');
         $hariTanggal = \Carbon\Carbon::parse($record->date)->locale('id')->translatedFormat('l, d/m/Y');
 
-        // Hitung menit terlambat (jika terlambat)
-        $terlambatMenit = 0;
-        if ($record->status === 'terlambat') {
-            $checkInTime = \Carbon\Carbon::parse($record->check_in_time);
-            $targetTime  = \Carbon\Carbon::parse(AttendanceSetting::get('check_in_time', '07:00:00'));
-            $terlambatMenit = max(0, $checkInTime->diffInMinutes($targetTime, false));
-        }
+        // Setting waktu
+        $jamResmiMasuk    = AttendanceSetting::get('check_in_time', '07:00');
+        $toleransiMenit   = (int) AttendanceSetting::get('tolerance_minutes', 15);
+        $checkInCarbon    = \Carbon\Carbon::parse($record->check_in_time);
+        $jamResmiCarbon   = \Carbon\Carbon::parse($jamResmiMasuk);
+
+        // Hitung menit setelah jam resmi (untuk hadir-toleransi dan terlambat)
+        $menitSetelahResmi = max(0, $checkInCarbon->diffInMinutes($jamResmiCarbon, false));
+
+        // Deteksi hadir dalam toleransi (masuk setelah jam resmi tapi masih dalam toleransi)
+        $isDalamToleransi = $record->status === 'hadir' && $menitSetelahResmi > 0;
 
         $data = [
-            'sekolah'      => $schoolName,
-            'nama'         => $student->nama,
-            'kelas'        => $student->kelas->nama_kelas,
-            'waktu'        => $time,
-            'status'       => $statusLabel,
-            'tanggal'      => $tanggal,
-            'hari_tanggal' => $hariTanggal,
-            'terlambat'    => $terlambatMenit,
+            'sekolah'         => $schoolName,
+            'nama'            => $student->nama,
+            'kelas'           => $student->kelas->nama_kelas,
+            'waktu'           => $time,
+            'status'          => $statusLabel,
+            'tanggal'         => $tanggal,
+            'hari_tanggal'    => $hariTanggal,
+            'terlambat'       => $menitSetelahResmi,   // menit setelah jam resmi
+            'toleransi'       => $toleransiMenit,       // dari setting (misal: 15)
+            'jam_resmi_masuk' => $jamResmiMasuk,        // misal: 07:00
         ];
 
-        // Pilih template berdasarkan status
-        $templateName = match ($record->status) {
-            'terlambat' => 'check_in_terlambat',
-            'izin'      => 'check_in_izin',
-            default     => 'check_in_hadir',
-        };
+        // Pilih template berdasarkan kondisi
+        if ($record->status === 'terlambat') {
+            $templateName = 'check_in_terlambat';
+        } elseif ($record->status === 'izin') {
+            $templateName = 'check_in_izin';
+        } elseif ($isDalamToleransi) {
+            $templateName = 'check_in_toleransi';
+        } else {
+            $templateName = 'check_in_hadir';
+        }
 
         // Coba pakai template dari DB
         $message = $this->resolveTemplateByName($templateName, $data);
