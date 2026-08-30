@@ -705,5 +705,73 @@ class AttendanceNotificationService
             ? 'manual_toleransi'
             : 'manual_hadir';
     }
+
+    /**
+     * Kirim WA saat terjadi perubahan status SIGNIFIKAN antar grup (hadir↔absen)
+     * yang bukan koreksi dari alpha dan bukan first entry.
+     * Contoh: terlambat → sakit, sakit → terlambat, hadir → izin, izin → hadir.
+     *
+     * @param AttendanceStudent $student
+     * @param AttendanceRecord  $record
+     * @param string            $statusLama  Status sebelum diubah
+     * @param string            $statusBaru  Status setelah diubah
+     * @param string|null       $keterangan
+     * @param string            $date        Tanggal absensi (Y-m-d)
+     */
+    public function notifyManualStatusChange(
+        AttendanceStudent $student,
+        AttendanceRecord  $record,
+        string            $statusLama,
+        string            $statusBaru,
+        ?string           $keterangan,
+        string            $date
+    ): void {
+        $phones = $student->getParentPhones();
+        if (empty($phones)) {
+            Log::debug("Manual status change notif skipped — no parent phone", ['nis' => $student->nis]);
+            return;
+        }
+
+        $hariTanggal   = \Carbon\Carbon::parse($date)->locale('id')->translatedFormat('l, d F Y');
+        $schoolName    = AttendanceSetting::get('school_name', 'Sekolah');
+
+        $labelMap = [
+            'hadir'     => '✅ Hadir',
+            'terlambat' => '⚠️ Terlambat',
+            'izin'      => '📝 Izin',
+            'sakit'     => '🤒 Sakit',
+        ];
+
+        $data = [
+            'sekolah'         => $schoolName,
+            'nama'            => $student->nama,
+            'kelas'           => $student->kelas->nama_kelas ?? '-',
+            'hari_tanggal'    => $hariTanggal,
+            'tanggal_koreksi' => now()->format('d/m/Y'),
+            'status_lama'     => $labelMap[$statusLama] ?? $statusLama,
+            'status_baru'     => $labelMap[$statusBaru] ?? $statusBaru,
+            'keterangan'      => $keterangan ?: '-',
+        ];
+
+        $message = $this->resolveTemplateByName('manual_status_change', $data);
+        if (!$message) {
+            Log::debug("manual_status_change template not found or inactive");
+            return;
+        }
+
+        $result = ['success' => false];
+        foreach ($phones as $phone) {
+            $result = $this->whatsAppService->sendParentNotification($phone, $message);
+        }
+
+        $this->logNotification($student->id, 'manual_status_change', $result);
+
+        Log::info("Manual status change notif sent", [
+            'student_id'  => $student->id,
+            'status_lama' => $statusLama,
+            'status_baru' => $statusBaru,
+            'date'        => $date,
+        ]);
+    }
 }
 

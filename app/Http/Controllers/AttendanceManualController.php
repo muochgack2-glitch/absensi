@@ -123,6 +123,28 @@ class AttendanceManualController extends Controller
                     $date
                 );
             }
+
+            // Block 3: Perubahan signifikan antar grup (hadir↔absen), bukan alpha, bukan first entry
+            $hadirGroup = ['hadir', 'terlambat'];
+            $absenGroup = ['izin', 'sakit'];
+            $isSignifikan = $statusLama !== null
+                && $statusLama !== 'alpha'
+                && (
+                    (in_array($statusLama, $hadirGroup) && in_array($entry['status'], $absenGroup)) ||
+                    (in_array($statusLama, $absenGroup) && in_array($entry['status'], $hadirGroup))
+                );
+
+            if ($isSignifikan) {
+                $student ??= AttendanceStudent::with('kelas')->find($entry['student_id']);
+                $this->notificationService->notifyManualStatusChange(
+                    $student,
+                    $record->fresh(),
+                    $statusLama,
+                    $entry['status'],
+                    $entry['notes'] ?? null,
+                    $date
+                );
+            }
         }
 
         return redirect()

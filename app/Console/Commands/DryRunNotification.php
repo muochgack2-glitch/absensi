@@ -126,6 +126,22 @@ class DryRunNotification extends Command
                 "hari_tanggal"=> $hariTanggal,
                 "keterangan"  => "Demam tinggi sejak kemarin",
             ]],
+            ["STATUS CHANGE: Terlambat → Sakit", "manual_status_change", [
+                "sekolah"         => $schoolName, "nama" => $nama, "kelas" => $kelas,
+                "hari_tanggal"    => $hariTanggal,
+                "tanggal_koreksi" => now()->format('d/m/Y'),
+                "status_lama"     => "⚠️ Terlambat",
+                "status_baru"     => "🤒 Sakit",
+                "keterangan"      => "Pulang ke rumah karena pusing",
+            ]],
+            ["STATUS CHANGE: Sakit → Terlambat", "manual_status_change", [
+                "sekolah"         => $schoolName, "nama" => $nama, "kelas" => $kelas,
+                "hari_tanggal"    => $hariTanggal,
+                "tanggal_koreksi" => now()->format('d/m/Y'),
+                "status_lama"     => "🤒 Sakit",
+                "status_baru"     => "⚠️ Terlambat",
+                "keterangan"      => "Ternyata masuk setelah berobat",
+            ]],
         ];
 
         foreach ($cases as [$judul, $templateName, $data]) {

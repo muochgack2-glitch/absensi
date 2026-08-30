@@ -106,7 +106,20 @@ class WhatsAppTemplateSeeder extends Seeder
                 "variables"   => json_encode(["sekolah","nama","kelas","tanggal_absensi","tanggal_koreksi","status_lama","status_baru","waktu_masuk","keterangan"]),
                 "usage_count" => 0,
             ],
-            // ── 9. Manual Input: Hadir Tepat Waktu ───────────────────
+            // ── 9. Perubahan Status Signifikan (hadir↔absen, non-alpha) ──
+            [
+                "name"        => "manual_status_change",
+                "label"       => "Perubahan Status Signifikan",
+                "message"     => "🏫 *{sekolah}*\n🔄 *Pembaruan Status Absensi*\n📅 {hari_tanggal}\n\nSiswa: *{nama}*\nKelas: {kelas}\n\nStatus diperbarui:\n{status_lama}  →  {status_baru}\n📝 Keterangan: {keterangan}\n\n_Diperbarui pada {tanggal_koreksi} oleh admin sekolah._\n_Pesan otomatis dari sistem absensi_",
+                "description" => "Template WA saat admin mengubah status antara grup hadir (hadir/terlambat) dan grup absen (izin/sakit). Misal: terlambat→sakit atau sakit→terlambat.",
+                "type"        => "manual",
+                "is_active"   => true,
+                "auto_send"   => true,
+                "variables"   => json_encode(["sekolah","nama","kelas","hari_tanggal","tanggal_koreksi","status_lama","status_baru","keterangan"]),
+                "usage_count" => 0,
+            ],
+            // ── 10. Manual Input: Hadir Tepat Waktu ──────────────────────
+
             [
                 "name"        => "manual_hadir",
                 "label"       => "Manual Input: Hadir",
