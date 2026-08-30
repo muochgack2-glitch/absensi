@@ -254,6 +254,124 @@
         </script>
         @endpush
 
+        {{-- 🚨 Top 5 Paling Sering Alpha --}}
+        <x-card class="mt-2">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400 text-lg">
+                        <i class="fas fa-user-times"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">🚨 Top 5 Paling Sering Alpha</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Siswa dengan absen alpha terbanyak</p>
+                    </div>
+                </div>
+                {{-- Tab Toggle --}}
+                <div class="flex bg-gray-100 dark:bg-gray-700 rounded-xl p-1 gap-1">
+                    <button onclick="switchAlphaTab('week')" id="tab-alpha-week"
+                        class="px-4 py-1.5 text-sm font-semibold rounded-lg transition-all bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm">
+                        Minggu Ini
+                    </button>
+                    <button onclick="switchAlphaTab('month')" id="tab-alpha-month"
+                        class="px-4 py-1.5 text-sm font-semibold rounded-lg transition-all text-gray-500 dark:text-gray-400 hover:text-gray-700">
+                        Bulan Ini
+                    </button>
+                </div>
+            </div>
+
+            {{-- Data Minggu --}}
+            <div id="alpha-week-data">
+                @if($topAlphaWeek->isEmpty())
+                    <p class="text-center text-gray-400 dark:text-gray-500 py-4 text-sm">✅ Tidak ada siswa alpha minggu ini</p>
+                @else
+                    <div class="space-y-2">
+                        @foreach($topAlphaWeek as $i => $rec)
+                            @php
+                                $medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+                                $rankBg = ['#ef4444','#f97316','#eab308','#6366F1','#8B5CF6'];
+                            @endphp
+                            <div class="flex items-center gap-3 p-2.5 rounded-xl bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20 transition-all">
+                                <div class="w-9 h-9 rounded-lg flex items-center justify-center text-white font-black text-sm flex-shrink-0" style="background:{{ $rankBg[$i] }}">
+                                    {{ $i + 1 }}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">
+                                        {{ $medals[$i] }} {{ $rec->student->nama ?? '-' }}
+                                    </p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                                        {{ $rec->student->kelas->nama_kelas ?? '-' }}
+                                    </p>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <p class="text-sm font-black text-red-600 dark:text-red-400">{{ $rec->jumlah_alpha }}x</p>
+                                    <p class="text-xs text-gray-400">alpha</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
+            {{-- Data Bulan --}}
+            <div id="alpha-month-data" class="hidden">
+                @if($topAlphaMonth->isEmpty())
+                    <p class="text-center text-gray-400 dark:text-gray-500 py-4 text-sm">✅ Tidak ada siswa alpha bulan ini</p>
+                @else
+                    <div class="space-y-2">
+                        @foreach($topAlphaMonth as $i => $rec)
+                            @php
+                                $medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+                                $rankBg = ['#ef4444','#f97316','#eab308','#6366F1','#8B5CF6'];
+                            @endphp
+                            <div class="flex items-center gap-3 p-2.5 rounded-xl bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20 transition-all">
+                                <div class="w-9 h-9 rounded-lg flex items-center justify-center text-white font-black text-sm flex-shrink-0" style="background:{{ $rankBg[$i] }}">
+                                    {{ $i + 1 }}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">
+                                        {{ $medals[$i] }} {{ $rec->student->nama ?? '-' }}
+                                    </p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                                        {{ $rec->student->kelas->nama_kelas ?? '-' }}
+                                    </p>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <p class="text-sm font-black text-red-600 dark:text-red-400">{{ $rec->jumlah_alpha }}x</p>
+                                    <p class="text-xs text-gray-400">alpha</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        </x-card>
+
+        @push('scripts')
+        <script>
+        function switchAlphaTab(tab) {
+            const weekData  = document.getElementById('alpha-week-data');
+            const monthData = document.getElementById('alpha-month-data');
+            const tabWeek   = document.getElementById('tab-alpha-week');
+            const tabMonth  = document.getElementById('tab-alpha-month');
+
+            const activeClass   = 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm';
+            const inactiveClass = 'text-gray-500 dark:text-gray-400 hover:text-gray-700';
+
+            if (tab === 'week') {
+                weekData.classList.remove('hidden');
+                monthData.classList.add('hidden');
+                tabWeek.className  = tabWeek.className.replace(inactiveClass, activeClass);
+                tabMonth.className = tabMonth.className.replace(activeClass, inactiveClass);
+            } else {
+                weekData.classList.add('hidden');
+                monthData.classList.remove('hidden');
+                tabMonth.className = tabMonth.className.replace(inactiveClass, activeClass);
+                tabWeek.className  = tabWeek.className.replace(activeClass, inactiveClass);
+            }
+        }
+        </script>
+        @endpush
+
         {{-- Attendance Records Table --}}
         <x-card>
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">

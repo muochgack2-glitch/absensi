@@ -79,6 +79,26 @@ class AttendanceDashboardController extends Controller
             ->take(5)
             ->get();
 
+        // Top 5 siswa paling sering alpha minggu ini
+        $topAlphaWeek = AttendanceRecord::with('student.kelas')
+            ->whereBetween('date', [$startOfWeek->toDateString(), Carbon::today()->toDateString()])
+            ->where('status', 'alpha')
+            ->selectRaw('student_id, COUNT(*) as jumlah_alpha')
+            ->groupBy('student_id')
+            ->orderBy('jumlah_alpha', 'desc')
+            ->take(5)
+            ->get();
+
+        // Top 5 siswa paling sering alpha bulan ini
+        $topAlphaMonth = AttendanceRecord::with('student.kelas')
+            ->whereBetween('date', [$startOfMonth->toDateString(), Carbon::today()->toDateString()])
+            ->where('status', 'alpha')
+            ->selectRaw('student_id, COUNT(*) as jumlah_alpha')
+            ->groupBy('student_id')
+            ->orderBy('jumlah_alpha', 'desc')
+            ->take(5)
+            ->get();
+
         return view('attendance.dashboard.index', compact(
             'selectedDate',
             'selectedClass',
@@ -90,7 +110,9 @@ class AttendanceDashboardController extends Controller
             'donutData',
             'totalToday',
             'topEarlyWeek',
-            'topEarlyMonth'
+            'topEarlyMonth',
+            'topAlphaWeek',
+            'topAlphaMonth'
         ));
     }
 
