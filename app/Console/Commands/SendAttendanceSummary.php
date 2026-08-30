@@ -132,16 +132,16 @@ class SendAttendanceSummary extends Command
         $persen = $total > 0 ? round(($hadir / $total) * 100) : 0;
 
         $lines = [
-            "*RINGKASAN KEHADIRAN MASUK*",
-            "Kelas  : *{$namaKelas}*",
-            "Tanggal: {$tanggal}",
+            "📋 *RINGKASAN KEHADIRAN MASUK*",
+            "📚 Kelas  : *{$namaKelas}*",
+            "📅 Tanggal: {$tanggal}",
             "",
-            "Hadir tepat waktu : {$hadirTepat} siswa",
-            "Terlambat         : {$terlambat} siswa",
-            "Izin              : {$izin} siswa",
-            "Alfa              : {$alfa} siswa",
-            "Total             : {$total} siswa",
-            "Kehadiran         : {$persen}%",
+            "👥 Total             : {$total} siswa",
+            "✅ Hadir tepat waktu : {$hadirTepat} siswa",
+            "⏰ Terlambat         : {$terlambat} siswa",
+            "📝 Izin              : {$izin} siswa",
+            "❌ Alfa              : {$alfa} siswa",
+            "📊 Kehadiran         : {$persen}%",
         ];
 
         if (!empty($alfaStudents)) {
@@ -161,17 +161,17 @@ class SendAttendanceSummary extends Command
     protected function buildPulangMessage(string $namaKelas, string $tanggal, int $total, int $hadir, int $izin, int $alfa, int $pulangTepat, int $pulangCepat, int $belumPulang): string
     {
         $lines = [
-            "*RINGKASAN KEPULANGAN*",
-            "Kelas  : *{$namaKelas}*",
-            "Tanggal: {$tanggal}",
+            "🌆 *RINGKASAN KEPULANGAN*",
+            "📚 Kelas  : *{$namaKelas}*",
+            "📅 Tanggal: {$tanggal}",
             "",
-            "Hadir hari ini     : {$hadir} siswa",
-            "Pulang tepat waktu : {$pulangTepat} siswa",
-            "Pulang lebih awal  : {$pulangCepat} siswa",
-            "Belum pulang       : {$belumPulang} siswa",
-            "Izin               : {$izin} siswa",
-            "Alfa               : {$alfa} siswa",
-            "Total              : {$total} siswa",
+            "👥 Total              : {$total} siswa",
+            "🏫 Hadir hari ini     : {$hadir} siswa",
+            "✅ Pulang tepat waktu : {$pulangTepat} siswa",
+            "⚡ Pulang lebih awal  : {$pulangCepat} siswa",
+            "⏳ Belum pulang       : {$belumPulang} siswa",
+            "📝 Izin               : {$izin} siswa",
+            "❌ Alfa               : {$alfa} siswa",
         ];
 
         $lines[] = "";

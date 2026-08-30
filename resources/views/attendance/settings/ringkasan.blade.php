@@ -100,16 +100,16 @@
                                 <div>
                                     <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">📨 Pesan Masuk</p>
                                     <div class="bg-[#dcf8c6] dark:bg-green-900/40 rounded-2xl rounded-tl-sm px-4 py-3 text-sm font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap shadow-sm">
-*RINGKASAN KEHADIRAN MASUK*
-Kelas  : *[Nama Kelas]*
-Tanggal: [Hari, DD Bulan YYYY]
+📋 *RINGKASAN KEHADIRAN MASUK*
+📚 Kelas  : *[Nama Kelas]*
+📅 Tanggal: [Hari, DD Bulan YYYY]
 
-Hadir tepat waktu : [N] siswa
-Terlambat         : [N] siswa
-Izin              : [N] siswa
-Alfa              : [N] siswa
-Total             : [N] siswa
-Kehadiran         : [N]%
+👥 Total             : [N] siswa
+✅ Hadir tepat waktu : [N] siswa
+⏰ Terlambat         : [N] siswa
+📝 Izin              : [N] siswa
+❌ Alfa              : [N] siswa
+📊 Kehadiran         : [N]%
 
 *Siswa tidak hadir (alfa):*
 1. [Nama Siswa]
@@ -120,17 +120,17 @@ _Sistem Absensi SMK PGRI Blora_</div>
                                 <div>
                                     <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">📨 Pesan Pulang</p>
                                     <div class="bg-[#dcf8c6] dark:bg-green-900/40 rounded-2xl rounded-tl-sm px-4 py-3 text-sm font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap shadow-sm">
-*RINGKASAN KEPULANGAN*
-Kelas  : *[Nama Kelas]*
-Tanggal: [Hari, DD Bulan YYYY]
+🌆 *RINGKASAN KEPULANGAN*
+📚 Kelas  : *[Nama Kelas]*
+📅 Tanggal: [Hari, DD Bulan YYYY]
 
-Hadir hari ini     : [N] siswa
-Pulang tepat waktu : [N] siswa
-Pulang lebih awal  : [N] siswa
-Belum pulang       : [N] siswa
-Izin               : [N] siswa
-Alfa               : [N] siswa
-Total              : [N] siswa
+👥 Total              : [N] siswa
+🏫 Hadir hari ini     : [N] siswa
+✅ Pulang tepat waktu : [N] siswa
+⚡ Pulang lebih awal  : [N] siswa
+⏳ Belum pulang       : [N] siswa
+📝 Izin               : [N] siswa
+❌ Alfa               : [N] siswa
 
 _Sistem Absensi SMK PGRI Blora_</div>
                                 </div>
