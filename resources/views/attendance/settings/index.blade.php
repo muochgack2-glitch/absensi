@@ -494,6 +494,37 @@
         @endif {{-- end admin-only foto & backup --}}
     </div>
 
+    @push('scripts')
+    <script>
+        // ===== Restore: konfirmasi & preview file =====
+        document.getElementById('sqlFileInput')?.addEventListener('change', function () {
+            const file = this.files[0];
+            const info = document.getElementById('fileInfo');
+            if (file) {
+                document.getElementById('fileName').textContent = file.name;
+                const sizeMb = (file.size / 1024 / 1024).toFixed(2);
+                document.getElementById('fileSize').textContent = `(${sizeMb} MB)`;
+                info.classList.remove('hidden');
+            } else {
+                info.classList.add('hidden');
+            }
+        });
 
+        function confirmRestore() {
+            const file = document.getElementById('sqlFileInput').files[0];
+            if (!file) {
+                alert('Pilih file SQL backup terlebih dahulu.');
+                return false;
+            }
+            return confirm(
+                '⚠️ PERINGATAN!\n\n' +
+                'Restore akan MENIMPA semua data yang ada saat ini!\n' +
+                'File: ' + file.name + '\n\n' +
+                'Sudah download backup terbaru?\n\n' +
+                'Klik OK untuk melanjutkan restore.'
+            );
+        }
+    </script>
+    @endpush
 
 </x-app-layout>
