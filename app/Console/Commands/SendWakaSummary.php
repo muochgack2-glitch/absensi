@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\AttendanceClass;
 use App\Models\AttendanceRecord;
 use App\Models\AttendanceStudent;
 use App\Models\AttendanceSetting;
@@ -19,7 +18,7 @@ class SendWakaSummary extends Command
                             {--type=masuk : Jenis: masuk atau pulang}
                             {--dry-run    : Tampilkan pesan tanpa benar-benar mengirim}';
 
-    protected $description = 'Kirim rekap kehadiran seluruh sekolah (per kelas + nama siswa) ke Waka Kesiswaan via WhatsApp';
+    protected $description = 'Kirim rekap kehadiran seluruh sekolah ke Waka Kesiswaan via WhatsApp (format sama dengan Kepala Sekolah)';
 
     public function __construct(
         protected AttendanceWhatsAppService $waService
@@ -33,137 +32,112 @@ class SendWakaSummary extends Command
             ? Carbon::parse($this->option('date'))->toDateString()
             : Carbon::today()->timezone('Asia/Jakarta')->toDateString();
 
-        $type   = $this->option('type') ?? 'masuk';
-        $dryRun = $this->option('dry-run');
+        $dryRun  = $this->option('dry-run');
+        $type    = $this->option('type') ?? 'masuk';
         $dayName = Carbon::parse($date)->locale('id')->translatedFormat('l, d F Y');
+        $label   = $type === 'pulang' ? '🌆 Rekap Pulang Waka' : '📊 Rekap Masuk Waka';
 
-        $label = $type === 'pulang' ? '🌆 Rekap Pulang Waka' : '🌅 Rekap Masuk Waka';
         $this->info("{$label}: {$dayName}");
         if ($dryRun) $this->warn('-- DRY RUN --');
 
-        // Ambil semua user dengan role waka_kesiswaan yang punya nomor HP
-        $wakaUsers = User::where('role', 'waka_kesiswaan')
-            ->whereNotNull('phone')
-            ->where('phone', '!=', '')
-            ->get();
+        // Hitung statistik seluruh sekolah
+        $totalSiswa = AttendanceStudent::where('is_active', true)->count();
 
-        if ($wakaUsers->isEmpty()) {
-            $this->warn('Tidak ada user waka_kesiswaan dengan nomor HP yang dikonfigurasi.');
-            return Command::SUCCESS;
-        }
+        $stats = AttendanceRecord::withoutGlobalScope('tahun_ajaran')
+            ->whereDate('date', $date)
+            ->selectRaw('status, COUNT(*) as jumlah')
+            ->groupBy('status')
+            ->pluck('jumlah', 'status');
 
-        // Ambil semua kelas aktif
-        $classes = AttendanceClass::active()
-            ->orderBy('tingkat')
-            ->orderBy('nama_kelas')
-            ->get();
+        $hadir     = ($stats['hadir'] ?? 0) + ($stats['terlambat'] ?? 0);
+        $terlambat = $stats['terlambat'] ?? 0;
+        $alpha     = $stats['alpha']     ?? 0;
+        $izin      = $stats['izin']      ?? 0;
+        $sakit     = $stats['sakit']     ?? 0;
 
-        if ($classes->isEmpty()) {
-            $this->warn('Tidak ada kelas aktif.');
-            return Command::SUCCESS;
-        }
+        if ($type === 'pulang') {
+            $records        = AttendanceRecord::withoutGlobalScope('tahun_ajaran')->whereDate('date', $date);
+            $sudahPulang    = (clone $records)->whereNotNull('check_out_time')->count();
+            $pulangCepat    = (clone $records)->where('check_out_status', 'pulang_cepat')->count();
+            $belumPulang    = max(0, $hadir - $sudahPulang);
 
-        // Bangun data per kelas
-        $classData = [];
-        $totalHadir = $totalTerlambat = $totalAlpha = $totalIzinSakit = 0;
-        $totalSudahPulang = $totalBelumPulang = $totalPulangCepat = 0;
+            $hadirIds       = (clone $records)->whereNotNull('check_in_time')->pluck('student_id')->toArray();
+            $sudahPulangIds = (clone $records)->whereNotNull('check_out_time')->pluck('student_id')->toArray();
+            $belumPulangIds = array_diff($hadirIds, $sudahPulangIds);
 
-        foreach ($classes as $kelas) {
-            $studentIds = AttendanceStudent::where('kelas_id', $kelas->id)
-                ->where('is_active', true)
-                ->pluck('id');
+            $belumPulangPerKelas = [];
+            if (!empty($belumPulangIds)) {
+                $siswaBelum = AttendanceStudent::with(['kelas.waliKelas'])
+                    ->whereIn('id', $belumPulangIds)
+                    ->orderBy('kelas_id')->orderBy('nama')->get();
 
-            $totalSiswa = $studentIds->count();
-            if ($totalSiswa === 0) continue;
-
-            $records = AttendanceRecord::withoutGlobalScope('tahun_ajaran')
-                ->whereDate('date', $date)
-                ->whereIn('student_id', $studentIds)
-                ->with('student')
-                ->get();
-
-            if ($type === 'masuk') {
-                $hadirIds    = $records->where('status', 'hadir')->pluck('student_id')->toArray();
-                $terlambatIds = $records->where('status', 'terlambat')->pluck('student_id')->toArray();
-                $izinIds     = $records->whereIn('status', ['izin', 'sakit'])->pluck('student_id')->toArray();
-                $recorded    = array_unique(array_merge($hadirIds, $terlambatIds, $izinIds));
-
-                // Alpha = siswa aktif yang tidak ada record atau belum check-in
-                $alphaStudents = AttendanceStudent::where('kelas_id', $kelas->id)
-                    ->where('is_active', true)
-                    ->whereNotIn('id', $recorded)
-                    ->pluck('nama')
-                    ->toArray();
-
-                $hadir      = count($hadirIds);
-                $terlambat  = count($terlambatIds);
-                $izinSakit  = count($izinIds);
-                $alpha      = count($alphaStudents);
-
-                $totalHadir      += $hadir + $terlambat;
-                $totalTerlambat  += $terlambat;
-                $totalAlpha      += $alpha;
-                $totalIzinSakit  += $izinSakit;
-
-                $classData[] = [
-                    'nama'        => $kelas->nama_kelas,
-                    'total'       => $totalSiswa,
-                    'hadir'       => $hadir,
-                    'terlambat'   => $terlambat,
-                    'alpha'       => $alpha,
-                    'izin_sakit'  => $izinSakit,
-                    'alpha_names' => $alphaStudents,
-                ];
-
-            } else {
-                // Pulang
-                $hadirIds       = $records->whereNotNull('check_in_time')->pluck('student_id')->toArray();
-                $pulangCepatIds = $records->where('check_out_status', 'pulang_cepat')->pluck('student_id')->toArray();
-                $pulangTepatIds = $records->whereNotNull('check_out_time')
-                    ->where('check_out_status', '!=', 'pulang_cepat')
-                    ->pluck('student_id')->toArray();
-                $sudahPulangIds = $records->whereNotNull('check_out_time')->pluck('student_id')->toArray();
-
-                $belumPulangStudents = AttendanceStudent::where('kelas_id', $kelas->id)
-                    ->where('is_active', true)
-                    ->whereIn('id', $hadirIds)
-                    ->whereNotIn('id', $sudahPulangIds)
-                    ->pluck('nama')
-                    ->toArray();
-
-                $totalSudahPulang += count($sudahPulangIds);
-                $totalBelumPulang += count($belumPulangStudents);
-                $totalPulangCepat += count($pulangCepatIds);
-
-                if (empty($hadirIds)) continue; // skip kelas yang tidak ada yang hadir
-
-                $classData[] = [
-                    'nama'          => $kelas->nama_kelas,
-                    'hadir'         => count($hadirIds),
-                    'pulang_tepat'  => count($pulangTepatIds),
-                    'pulang_cepat'  => count($pulangCepatIds),
-                    'belum_pulang'  => count($belumPulangStudents),
-                    'belum_names'   => $belumPulangStudents,
-                ];
+                foreach ($siswaBelum as $s) {
+                    $namaKelas = $s->kelas->nama_kelas ?? '-';
+                    $wali      = $s->kelas->waliKelas->name ?? '-';
+                    if (!isset($belumPulangPerKelas[$namaKelas])) {
+                        $belumPulangPerKelas[$namaKelas] = ['wali' => $wali, 'siswa' => []];
+                    }
+                    $belumPulangPerKelas[$namaKelas]['siswa'][] = $s->nama;
+                }
             }
+
+            $message = $this->buildPulangMessage($dayName, $totalSiswa, $hadir, $sudahPulang, $pulangCepat, $belumPulang, $belumPulangPerKelas);
+        } else {
+            $persen = $totalSiswa > 0 ? round(($hadir / $totalSiswa) * 100, 1) : 0;
+            $status = match(true) {
+                $persen >= 95 => '🟢 BAIK',
+                $persen >= 85 => '🟡 PERLU PERHATIAN',
+                default       => '🔴 RENDAH',
+            };
+
+            $recordsToday  = AttendanceRecord::withoutGlobalScope('tahun_ajaran')->whereDate('date', $date);
+            $hadirIds2     = (clone $recordsToday)->whereNotNull('check_in_time')->pluck('student_id')->toArray();
+            $izinSakitIds  = (clone $recordsToday)->whereIn('status', ['izin', 'sakit'])->pluck('student_id')->toArray();
+            $tidakHadirIds = array_diff(
+                AttendanceStudent::where('is_active', true)->pluck('id')->toArray(),
+                array_unique(array_merge($hadirIds2, $izinSakitIds))
+            );
+
+            $alphaPerKelas = [];
+            if (!empty($tidakHadirIds)) {
+                $siswaAlpha = AttendanceStudent::with(['kelas.waliKelas'])
+                    ->whereIn('id', $tidakHadirIds)
+                    ->orderBy('kelas_id')->orderBy('nama')->get();
+
+                foreach ($siswaAlpha as $s) {
+                    $namaKelas = $s->kelas->nama_kelas ?? '-';
+                    $wali      = $s->kelas->waliKelas->name ?? '-';
+                    if (!isset($alphaPerKelas[$namaKelas])) {
+                        $alphaPerKelas[$namaKelas] = ['wali' => $wali, 'siswa' => []];
+                    }
+                    $alphaPerKelas[$namaKelas]['siswa'][] = $s->nama;
+                }
+            }
+
+            $message = $this->buildMasukMessage($dayName, $totalSiswa, $hadir, $terlambat, $alpha, $izin, $sakit, $persen, $status, $alphaPerKelas);
         }
 
-        // Bangun pesan
-        $message = $type === 'pulang'
-            ? $this->buildPulangMessage($dayName, $classData, $totalSudahPulang, $totalBelumPulang, $totalPulangCepat)
-            : $this->buildMasukMessage($dayName, $classData, $totalHadir, $totalTerlambat, $totalAlpha, $totalIzinSakit);
-
+        $this->line('');
         $this->line($message);
+        $this->line('');
 
         if ($dryRun) {
             $this->info('Pesan TIDAK dikirim (dry-run).');
             return Command::SUCCESS;
         }
 
+        $wakaUsers = User::where('role', 'waka_kesiswaan')
+            ->whereNotNull('phone')->where('phone', '!=', '')->get();
+
+        if ($wakaUsers->isEmpty()) {
+            $this->warn('Tidak ada user waka_kesiswaan dengan nomor HP yang dikonfigurasi.');
+            return Command::SUCCESS;
+        }
+
         $sent = $failed = 0;
         foreach ($wakaUsers as $waka) {
             try {
-                $result = $this->waService->send($waka->phone, $message, ['type' => 'waka-summary', 'sent_by' => null]);
+                $result = $this->waService->send($waka->phone, $message, ['type' => "waka-{$type}", 'sent_by' => null]);
                 if ($result['success'] ?? false) {
                     $this->info("Terkirim ke {$waka->name} ({$waka->phone})");
                     $sent++;
@@ -182,44 +156,39 @@ class SendWakaSummary extends Command
     }
 
     protected function buildMasukMessage(
-        string $dayName,
-        array $classData,
-        int $totalHadir,
-        int $totalTerlambat,
-        int $totalAlpha,
-        int $totalIzinSakit
+        string $dayName, int $totalSiswa, int $hadir, int $terlambat,
+        int $alpha, int $izin, int $sakit, float $persen, string $status,
+        array $alphaPerKelas = []
     ): string {
         $schoolName = AttendanceSetting::get('school_name', 'SMK');
-        $totalSemua = $totalHadir + $totalAlpha + $totalIzinSakit;
-        $persen     = $totalSemua > 0 ? round(($totalHadir / $totalSemua) * 100, 1) : 0;
+        $hadirTepat = $hadir - $terlambat;
 
         $lines = [
-            "🌅 *REKAP MASUK HARIAN*",
+            "📊 *LAPORAN KEHADIRAN HARIAN*",
             "*{$schoolName}*",
             $dayName,
             "",
-            "📊 *Total Seluruh Sekolah*",
-            "✅ Hadir tepat  : " . ($totalHadir - $totalTerlambat) . " siswa",
-            "⏰ Terlambat    : {$totalTerlambat} siswa",
-            "❌ Alpha        : {$totalAlpha} siswa",
-            "📋 Izin/Sakit   : {$totalIzinSakit} siswa",
-            "📈 Kehadiran    : {$persen}%",
+            "👥 Total Siswa   : {$totalSiswa} orang",
+            "✅ Hadir         : {$hadir} ({$persen}%)",
+            "   ↳ Tepat waktu : {$hadirTepat} siswa",
+            "   ↳ Terlambat   : {$terlambat} siswa",
+            "❌ Alpha         : {$alpha} siswa",
+            "📋 Izin          : {$izin} siswa",
+            "🤒 Sakit         : {$sakit} siswa",
             "",
-            "━━━━━━━━━━━━━━━━━━",
+            "Status: {$status}",
         ];
 
-        foreach ($classData as $k) {
+        if (!empty($alphaPerKelas)) {
             $lines[] = "";
-            $lines[] = "📚 *{$k['nama']}* ({$k['total']} siswa)";
-            $parts = [];
-            if ($k['hadir'] > 0)      $parts[] = "✅ {$k['hadir']} hadir";
-            if ($k['terlambat'] > 0)  $parts[] = "⏰ {$k['terlambat']} terlambat";
-            if ($k['alpha'] > 0)      $parts[] = "❌ {$k['alpha']} alpha";
-            if ($k['izin_sakit'] > 0) $parts[] = "📋 {$k['izin_sakit']} izin/sakit";
-            $lines[] = implode(' | ', $parts);
-
-            if (!empty($k['alpha_names'])) {
-                $lines[] = "   Alpha: " . implode(', ', $k['alpha_names']);
+            $lines[] = "*Detail Siswa Alpha:*";
+            foreach ($alphaPerKelas as $namaKelas => $data) {
+                $lines[] = "";
+                $lines[] = "📚 *{$namaKelas}*";
+                $lines[] = "   Wali Kelas: {$data['wali']}";
+                foreach ($data['siswa'] as $i => $nama) {
+                    $lines[] = "   " . ($i + 1) . ". {$nama}";
+                }
             }
         }
 
@@ -230,39 +199,36 @@ class SendWakaSummary extends Command
     }
 
     protected function buildPulangMessage(
-        string $dayName,
-        array $classData,
-        int $totalSudahPulang,
-        int $totalBelumPulang,
-        int $totalPulangCepat
+        string $dayName, int $totalSiswa, int $hadir,
+        int $sudahPulang, int $pulangCepat, int $belumPulang,
+        array $belumPulangPerKelas = []
     ): string {
-        $schoolName = AttendanceSetting::get('school_name', 'SMK');
+        $schoolName  = AttendanceSetting::get('school_name', 'SMK');
+        $pulangTepat = $sudahPulang - $pulangCepat;
 
         $lines = [
-            "🌆 *REKAP PULANG HARIAN*",
+            "🌆 *LAPORAN KEPULANGAN HARIAN*",
             "*{$schoolName}*",
             $dayName,
             "",
-            "📊 *Total Seluruh Sekolah*",
-            "✅ Sudah pulang    : {$totalSudahPulang} siswa",
-            "⚡ Pulang cepat   : {$totalPulangCepat} siswa",
-            "⏳ Belum pulang   : {$totalBelumPulang} siswa",
-            "",
-            "━━━━━━━━━━━━━━━━━━",
+            "👥 Total Siswa     : {$totalSiswa} orang",
+            "🏫 Hadir hari ini  : {$hadir} siswa",
+            "✅ Sudah pulang    : {$sudahPulang} siswa",
+            "   ↳ Tepat waktu  : {$pulangTepat} siswa",
+            "   ↳ Pulang cepat : {$pulangCepat} siswa",
+            "⏳ Belum pulang   : {$belumPulang} siswa",
         ];
 
-        foreach ($classData as $k) {
-            if ($k['hadir'] === 0) continue;
+        if (!empty($belumPulangPerKelas)) {
             $lines[] = "";
-            $lines[] = "📚 *{$k['nama']}* (hadir {$k['hadir']})";
-            $parts = [];
-            if ($k['pulang_tepat'] > 0) $parts[] = "✅ {$k['pulang_tepat']} tepat";
-            if ($k['pulang_cepat'] > 0) $parts[] = "⚡ {$k['pulang_cepat']} cepat";
-            if ($k['belum_pulang'] > 0) $parts[] = "⏳ {$k['belum_pulang']} belum";
-            $lines[] = implode(' | ', $parts);
-
-            if (!empty($k['belum_names'])) {
-                $lines[] = "   Belum: " . implode(', ', $k['belum_names']);
+            $lines[] = "*Detail Belum Pulang:*";
+            foreach ($belumPulangPerKelas as $namaKelas => $data) {
+                $lines[] = "";
+                $lines[] = "📚 *{$namaKelas}*";
+                $lines[] = "   Wali Kelas: {$data['wali']}";
+                foreach ($data['siswa'] as $i => $nama) {
+                    $lines[] = "   " . ($i + 1) . ". {$nama}";
+                }
             }
         }
 
