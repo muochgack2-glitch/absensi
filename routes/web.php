@@ -164,18 +164,18 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('role:waka_kesiswaan')->group(function () {
         Route::get('/attendance/classes', [AttendanceClassController::class, 'index'])
             ->name('attendance.classes.index');
-        Route::get('/attendance/classes/{attendanceClass}', [AttendanceClassController::class, 'show'])
+        Route::get('/attendance/classes/{class}', [AttendanceClassController::class, 'show'])
             ->name('attendance.classes.show');
     });
 
     // Admin: Classes edit/delete (wildcard)
     Route::middleware('role:admin')->group(function () {
-        Route::get('/attendance/classes/{attendanceClass}/edit', [AttendanceClassController::class, 'edit'])
+        Route::get('/attendance/classes/{class}/edit', [AttendanceClassController::class, 'edit'])
             ->name('attendance.classes.edit');
-        Route::put('/attendance/classes/{attendanceClass}', [AttendanceClassController::class, 'update'])
+        Route::put('/attendance/classes/{class}', [AttendanceClassController::class, 'update'])
             ->name('attendance.classes.update');
-        Route::patch('/attendance/classes/{attendanceClass}', [AttendanceClassController::class, 'update']);
-        Route::delete('/attendance/classes/{attendanceClass}', [AttendanceClassController::class, 'destroy'])
+        Route::patch('/attendance/classes/{class}', [AttendanceClassController::class, 'update']);
+        Route::delete('/attendance/classes/{class}', [AttendanceClassController::class, 'destroy'])
             ->name('attendance.classes.destroy');
     });
 
