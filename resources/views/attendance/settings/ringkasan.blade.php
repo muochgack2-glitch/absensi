@@ -87,8 +87,6 @@
                                 <li>WhatsApp Gateway harus aktif saat jam pengiriman</li>
                                 <li>Cron job Laravel harus terpasang di server</li>
                             </ul>
-                        </div>
-                        </div>
 
                         {{-- Preview Pesan --}}
                         <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
@@ -196,7 +194,6 @@ _Sistem Absensi SMK PGRI Blora_</div>
                                     </label>
                                 @endforeach
                             </div>
-                        </div>
                         </div>
 
                         {{-- Preview Pesan Waka --}}
@@ -310,7 +307,6 @@ _Sistem Absensi Otomatis_</div>
                                     </label>
                                 @endforeach
                             </div>
-                        </div>
                         </div>
 
                         {{-- Preview Pesan Kepsek --}}
