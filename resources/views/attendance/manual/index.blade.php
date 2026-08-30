@@ -54,7 +54,7 @@
 
         {{-- Tabel Input Absensi --}}
         @if($classId && $students->isNotEmpty())
-            <form method="POST" action="{{ route('attendance.manual.store') }}" id="manualForm" novalidate>
+            <form method="POST" action="{{ route('attendance.manual.store') }}" id="manualForm">
                 @csrf
                 <input type="hidden" name="date" value="{{ $date }}">
                 <input type="hidden" name="class_id" value="{{ $classId }}">
@@ -318,7 +318,7 @@
                     notesInput.placeholder = '⚠️ Wajib: alasan ketidakhadiran...';
                 }
 
-                notesInput.required = false;
+                notesInput.required = true;
                 notesInput.style.outline         = '2px solid #f97316';
                 notesInput.style.outlineOffset   = '1px';
                 notesInput.style.backgroundColor = '#fff7ed';
