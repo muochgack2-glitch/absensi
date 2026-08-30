@@ -100,39 +100,13 @@
                                 <div>
                                     <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">📨 Pesan Masuk</p>
                                     <div class="bg-[#dcf8c6] dark:bg-green-900/40 rounded-2xl rounded-tl-sm px-4 py-3 text-sm font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap shadow-sm">
-📋 *RINGKASAN KEHADIRAN MASUK*
-📚 Kelas  : *[Nama Kelas]*
-📅 Tanggal: [Hari, DD Bulan YYYY]
-
-👥 Total             : [N] siswa
-✅ Hadir tepat waktu : [N] siswa
-⏰ Terlambat         : [N] siswa
-📝 Izin              : [N] siswa
-❌ Alfa              : [N] siswa
-📊 Kehadiran         : [N]%
-
-*Siswa tidak hadir (alfa):*
-1. [Nama Siswa]
-
-_Sistem Absensi SMK PGRI Blora_</div>
+{{ $previews['wali_masuk'] }}</div>
                                 </div>
                                 {{-- Pulang --}}
                                 <div>
                                     <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">📨 Pesan Pulang</p>
                                     <div class="bg-[#dcf8c6] dark:bg-green-900/40 rounded-2xl rounded-tl-sm px-4 py-3 text-sm font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap shadow-sm">
-🌆 *RINGKASAN KEPULANGAN*
-📚 Kelas  : *[Nama Kelas]*
-📅 Tanggal: [Hari, DD Bulan YYYY]
-
-👥 Total              : [N] siswa
-🏫 Hadir hari ini     : [N] siswa
-✅ Pulang tepat waktu : [N] siswa
-⚡ Pulang lebih awal  : [N] siswa
-⏳ Belum pulang       : [N] siswa
-📝 Izin               : [N] siswa
-❌ Alfa               : [N] siswa
-
-_Sistem Absensi SMK PGRI Blora_</div>
+{{ $previews['wali_pulang'] }}</div>
                                 </div>
                             </div>
                         </div>
@@ -207,57 +181,12 @@ _Sistem Absensi SMK PGRI Blora_</div>
                                 <div>
                                     <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">📨 Pesan Masuk</p>
                                     <div class="bg-[#dcf8c6] dark:bg-green-900/40 rounded-2xl rounded-tl-sm px-4 py-3 text-sm font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap shadow-sm">
-📊 *LAPORAN KEHADIRAN HARIAN*
-*[Nama Sekolah]*
-[Hari, DD Bulan YYYY]
-
-👥 Total Siswa   : [N] orang
-✅ Hadir         : [N] ([N]%)
-   ↳ Tepat waktu : [N] siswa
-   ↳ Terlambat   : [N] siswa
-❌ Alpha         : [N] siswa
-📋 Izin          : [N] siswa
-🤒 Sakit         : [N] siswa
-
-Status: [Baik/Perhatian]
-
-*Detail Siswa Terlambat:*
-📚 *[Kelas]*
-   Wali Kelas: [Nama]
-   1. [Nama Siswa]
-
-*Detail Siswa Alpha:*
-📚 *[Kelas]*
-   Wali Kelas: [Nama]
-   1. [Nama Siswa]
-
-_Sistem Absensi Otomatis_</div>
+{{ $previews['waka_masuk'] }}</div>
                                 </div>
                                 <div>
                                     <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">📨 Pesan Pulang</p>
                                     <div class="bg-[#dcf8c6] dark:bg-green-900/40 rounded-2xl rounded-tl-sm px-4 py-3 text-sm font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap shadow-sm">
-🌆 *LAPORAN KEPULANGAN HARIAN*
-*[Nama Sekolah]*
-[Hari, DD Bulan YYYY]
-
-👥 Total Siswa     : [N] orang
-🏫 Hadir hari ini  : [N] siswa
-✅ Sudah pulang    : [N] siswa
-   ↳ Tepat waktu  : [N] siswa
-   ↳ Pulang cepat : [N] siswa
-⏳ Belum pulang   : [N] siswa
-
-*Detail Pulang Cepat:*
-📚 *[Kelas]*
-   Wali Kelas: [Nama]
-   1. [Nama Siswa]
-
-*Detail Belum Pulang:*
-📚 *[Kelas]*
-   Wali Kelas: [Nama]
-   1. [Nama Siswa]
-
-_Sistem Absensi Otomatis_</div>
+{{ $previews['waka_pulang'] }}</div>
                                 </div>
                             </div>
                         </div>
@@ -330,47 +259,12 @@ _Sistem Absensi Otomatis_</div>
                                 <div>
                                     <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">📨 Pesan Masuk</p>
                                     <div class="bg-[#dcf8c6] dark:bg-green-900/40 rounded-2xl rounded-tl-sm px-4 py-3 text-sm font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap shadow-sm">
-📊 *LAPORAN KEHADIRAN HARIAN*
-*[Nama Sekolah]*
-[Hari, DD Bulan YYYY]
-
-👥 Total Siswa   : [N] orang
-✅ Hadir         : [N] ([N]%)
-   ↳ Tepat waktu : [N] siswa
-   ↳ Terlambat   : [N] siswa
-❌ Alpha         : [N] siswa
-📋 Izin          : [N] siswa
-🤒 Sakit         : [N] siswa
-
-Status: [Baik/Perhatian]
-
-*Detail Siswa Alpha:*
-📚 *[Kelas]*
-   Wali Kelas: [Nama]
-   1. [Nama Siswa]
-
-_Sistem Absensi Otomatis_</div>
+{{ $previews['waka_masuk'] }}</div>
                                 </div>
                                 <div>
                                     <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">📨 Pesan Pulang</p>
                                     <div class="bg-[#dcf8c6] dark:bg-green-900/40 rounded-2xl rounded-tl-sm px-4 py-3 text-sm font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap shadow-sm">
-🌆 *LAPORAN KEPULANGAN HARIAN*
-*[Nama Sekolah]*
-[Hari, DD Bulan YYYY]
-
-👥 Total Siswa     : [N] orang
-🏫 Hadir hari ini  : [N] siswa
-✅ Sudah pulang    : [N] siswa
-   ↳ Tepat waktu  : [N] siswa
-   ↳ Pulang cepat : [N] siswa
-⏳ Belum pulang   : [N] siswa
-
-*Detail Belum Pulang:*
-📚 *[Kelas]*
-   Wali Kelas: [Nama]
-   1. [Nama Siswa]
-
-_Sistem Absensi Otomatis_</div>
+{{ $previews['waka_pulang'] }}</div>
                                 </div>
                             </div>
                         </div>
