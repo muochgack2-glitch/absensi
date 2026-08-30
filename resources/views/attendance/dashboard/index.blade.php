@@ -743,11 +743,17 @@
                             const type = (barChart?.data?.dayTypes || dayTypes)[i];
                             return type === 'weekend' ? '#ef4444' : '#f97316';
                         },
-                        // Sembunyikan items jika semua 0 (hari libur/weekend)
+                        // Label dinamis untuk hari libur/weekend
                         label: (ctx) => {
                             const i    = ctx.dataIndex;
                             const type = (barChart?.data?.dayTypes || dayTypes)[i];
-                            if (type === 'weekend' || type === 'holiday') return null;
+                            if (type === 'weekend') {
+                                // Hanya tampil di slot dataset pertama
+                                return ctx.datasetIndex === 0 ? '🏖️ Sabtu — Hari libur sekolah' : null;
+                            }
+                            if (type === 'holiday') {
+                                return ctx.datasetIndex === 0 ? '🎌 Hari Libur Nasional' : null;
+                            }
                             return ` ${ctx.dataset.label}: ${ctx.raw}`;
                         },
                     },
