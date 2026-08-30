@@ -36,7 +36,7 @@
                     onchange="this.form.submit()"
                 />
                 <x-select name="class_id" label="Kelas" onchange="this.form.submit()">
-                    <option value="">-- Pilih Kelas --</option>
+                    <option value="all" {{ $classId === 'all' ? 'selected' : '' }}>📋 Semua Kelas</option>
                     @foreach($classes as $class)
                         <option value="{{ $class->id }}" {{ $classId == $class->id ? 'selected' : '' }}>
                             {{ $class->nama_kelas }}
@@ -53,7 +53,7 @@
         </x-card>
 
         {{-- Tabel Input Absensi --}}
-        @if($classId && $students->isNotEmpty())
+        @if($students->isNotEmpty())
             <form method="POST" action="{{ route('attendance.manual.store') }}" id="manualForm">
                 @csrf
                 <input type="hidden" name="date" value="{{ $date }}">
@@ -227,7 +227,7 @@
                 </x-card>
             </form>
 
-        @elseif($classId && $students->isEmpty())
+        @elseif($students->isEmpty())
             <x-card>
                 <div class="text-center py-12 text-gray-400 dark:text-gray-600">
                     <i class="fas fa-users text-4xl mb-3"></i>

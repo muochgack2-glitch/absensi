@@ -21,7 +21,7 @@ class AttendanceManualController extends Controller
     public function index(Request $request)
     {
         $date    = $request->input('date', Carbon::today()->format('Y-m-d'));
-        $classId = $request->input('class_id');
+        $classId = $request->input('class_id', 'all'); // default: semua kelas
 
         $classes = AttendanceClass::where('is_active', true)
             ->orderBy('tingkat')->orderBy('nama_kelas')->get();
@@ -29,18 +29,31 @@ class AttendanceManualController extends Controller
         $students = collect();
         $records  = collect();
 
-        if ($classId) {
+        if ($classId === 'all') {
+            // Tampilkan semua siswa aktif dari semua kelas
+            $students = AttendanceStudent::with('kelas')
+                ->where('is_active', true)
+                ->whereHas('kelas', fn($q) => $q->where('is_active', true))
+                ->orderBy('kelas_id')
+                ->orderBy('nama')
+                ->get();
+
+            $records = AttendanceRecord::whereDate('date', $date)
+                ->whereIn('student_id', $students->pluck('id'))
+                ->get()
+                ->keyBy('student_id');
+
+        } elseif ($classId) {
             $students = AttendanceStudent::with('kelas')
                 ->where('kelas_id', $classId)
                 ->where('is_active', true)
                 ->orderBy('nama')
                 ->get();
 
-            // Ambil record yang sudah ada untuk tanggal ini
             $records = AttendanceRecord::whereDate('date', $date)
                 ->whereIn('student_id', $students->pluck('id'))
                 ->get()
-                ->keyBy('student_id'); // key by student_id agar mudah dicari
+                ->keyBy('student_id');
         }
 
         return view('attendance.manual.index', compact(
