@@ -59,13 +59,25 @@
                     <textarea name="message" rows="8" required placeholder="Tulis pesan template..."
                         class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-mono text-sm">{{ old('message', $template->message ?? '') }}</textarea>
                     <div class="mt-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-                        <p class="text-xs font-medium text-blue-700 dark:text-blue-400 mb-1">Variabel yang tersedia:</p>
+                        <p class="text-xs font-medium text-blue-700 dark:text-blue-400 mb-1">Variabel yang tersedia untuk template ini:</p>
                         <div class="flex flex-wrap gap-1.5">
-                            @foreach(['nama', 'kelas', 'waktu', 'tanggal', 'status', 'terlambat', 'sekolah', 'pesan'] as $var)
+                            @php
+                                // Tampilkan variabel dari DB jika edit, atau semua variabel jika buat baru
+                                $allVars = ['sekolah','nama','kelas','hari_tanggal','tanggal','waktu','status','terlambat','jam_resmi','peringatan','pesan'];
+                                $showVars = $template && $template->variables
+                                    ? (is_array($template->variables) ? $template->variables : json_decode($template->variables, true))
+                                    : $allVars;
+                                $showVars = $showVars ?: $allVars;
+                            @endphp
+                            @foreach($showVars as $var)
                                 <code class="px-2 py-0.5 text-xs rounded bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-300 cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-700 transition"
                                     onclick="insertVar('{{ $var }}')">{!! '{' . $var . '}' !!}</code>
                             @endforeach
                         </div>
+                        <p class="text-xs text-blue-600 dark:text-blue-400 mt-1.5">
+                            💡 <strong>{hari_tanggal}</strong> = format panjang (Senin, 30/08/2026) &nbsp;|&nbsp;
+                            <strong>{tanggal}</strong> = format pendek (30/08/2026)
+                        </p>
                     </div>
                 </div>
 
