@@ -14,7 +14,7 @@ class WhatsAppTemplateSeeder extends Seeder
             [
                 "name"        => "check_in_hadir",
                 "label"       => "Check-In: Hadir",
-                "message"     => "🏫 *{sekolah}*\n📍 Notifikasi Absensi\n\nSiswa: *{nama}*\nKelas: {kelas}\nHari/Tgl: {hari_tanggal}\nWaktu Masuk: *{waktu}*\nStatus: ✅ Hadir\n\n_Pesan otomatis dari sistem absensi_",
+                "message"     => "🏫 *{sekolah}*\n📍 Notifikasi Absensi\n📅 {hari_tanggal}\n\nSiswa: *{nama}*\nKelas: {kelas}\nWaktu Masuk: *{waktu}*\nStatus: ✅ Hadir\n\n_Pesan otomatis dari sistem absensi_",
                 "description" => "Template notifikasi saat siswa hadir tepat waktu",
                 "type"        => "check_in",
                 "is_active"   => true,
@@ -26,7 +26,7 @@ class WhatsAppTemplateSeeder extends Seeder
             [
                 "name"        => "check_in_terlambat",
                 "label"       => "Check-In: Terlambat",
-                "message"     => "🏫 *{sekolah}*\n⏰ *Notifikasi Keterlambatan*\n\nSiswa: *{nama}*\nKelas: {kelas}\nHari/Tgl: {hari_tanggal}\nWaktu Masuk: *{waktu}*\nKeterlambatan: *{terlambat} menit*\n\nMohon pastikan siswa hadir tepat waktu.\n\n_Pesan otomatis dari sistem absensi_",
+                "message"     => "🏫 *{sekolah}*\n⏰ *Notifikasi Keterlambatan*\n📅 {hari_tanggal}\n\nSiswa: *{nama}*\nKelas: {kelas}\nWaktu Masuk: *{waktu}*\nKeterlambatan: *{terlambat} menit*\n\nMohon pastikan siswa hadir tepat waktu.\n\n_Pesan otomatis dari sistem absensi_",
                 "description" => "Template notifikasi saat siswa terlambat masuk. Gunakan {terlambat} untuk menit keterlambatan.",
                 "type"        => "check_in",
                 "is_active"   => true,
@@ -38,7 +38,7 @@ class WhatsAppTemplateSeeder extends Seeder
             [
                 "name"        => "check_in_izin",
                 "label"       => "Check-In: Izin",
-                "message"     => "🏫 *{sekolah}*\n📝 *Notifikasi Izin*\n\nSiswa: *{nama}*\nKelas: {kelas}\nHari/Tgl: {hari_tanggal}\nWaktu: *{waktu}*\nStatus: 📝 Izin\n\n_Pesan otomatis dari sistem absensi_",
+                "message"     => "🏫 *{sekolah}*\n📝 *Notifikasi Izin*\n📅 {hari_tanggal}\n\nSiswa: *{nama}*\nKelas: {kelas}\nWaktu: *{waktu}*\nStatus: 📝 Izin\n\n_Pesan otomatis dari sistem absensi_",
                 "description" => "Template notifikasi saat siswa masuk dengan status izin",
                 "type"        => "check_in",
                 "is_active"   => true,
@@ -50,7 +50,7 @@ class WhatsAppTemplateSeeder extends Seeder
             [
                 "name"        => "check_out_normal",
                 "label"       => "Check-Out: Pulang Normal",
-                "message"     => "🏫 *{sekolah}*\n📍 Notifikasi Pulang\n\nSiswa: *{nama}*\nKelas: {kelas}\nHari/Tgl: {hari_tanggal}\nWaktu Pulang: *{waktu}*\nStatus: ✅ Pulang Normal\n\n_Pesan otomatis dari sistem absensi_",
+                "message"     => "🏫 *{sekolah}*\n📍 Notifikasi Pulang\n📅 {hari_tanggal}\n\nSiswa: *{nama}*\nKelas: {kelas}\nWaktu Pulang: *{waktu}*\nStatus: ✅ Pulang Normal\n\n_Pesan otomatis dari sistem absensi_",
                 "description" => "Template notifikasi saat siswa pulang tepat/setelah jam sekolah",
                 "type"        => "check_out",
                 "is_active"   => true,
@@ -62,7 +62,7 @@ class WhatsAppTemplateSeeder extends Seeder
             [
                 "name"        => "check_out_cepat",
                 "label"       => "Check-Out: Pulang Lebih Awal",
-                "message"     => "🏫 *{sekolah}*\n⚠️ *Notifikasi Pulang Lebih Awal*\n\nSiswa: *{nama}*\nKelas: {kelas}\nHari/Tgl: {hari_tanggal}\nWaktu Pulang: *{waktu}*\nJam Resmi Pulang: {jam_resmi}\n\n⚠️ _Siswa meninggalkan sekolah sebelum jam pulang resmi._\n\n_Pesan otomatis dari sistem absensi_",
+                "message"     => "🏫 *{sekolah}*\n⚠️ *Notifikasi Pulang Lebih Awal*\n📅 {hari_tanggal}\n\nSiswa: *{nama}*\nKelas: {kelas}\nWaktu Pulang: *{waktu}*\nJam Resmi Pulang: {jam_resmi}\n\n⚠️ _Siswa meninggalkan sekolah sebelum jam pulang resmi._\n\n_Pesan otomatis dari sistem absensi_",
                 "description" => "Template notifikasi saat siswa pulang sebelum jam resmi. Gunakan {jam_resmi} untuk jam pulang sekolah.",
                 "type"        => "check_out",
                 "is_active"   => true,
@@ -74,7 +74,7 @@ class WhatsAppTemplateSeeder extends Seeder
             [
                 "name"        => "absent_notification",
                 "label"       => "Tidak Hadir (Alpha)",
-                "message"     => "🏫 *{sekolah}*\n⚠️ *Notifikasi Ketidakhadiran*\n\nSiswa: *{nama}*\nKelas: {kelas}\nHari/Tgl: {hari_tanggal}\nStatus: ❌ *Alpha (Tidak Hadir)*\n\nMohon segera menghubungi pihak sekolah.\n\n_Pesan otomatis dari sistem absensi_",
+                "message"     => "🏫 *{sekolah}*\n⚠️ *Notifikasi Ketidakhadiran*\n📅 {hari_tanggal}\n\nSiswa: *{nama}*\nKelas: {kelas}\nStatus: ❌ *Alpha (Tidak Hadir)*\n\nMohon segera menghubungi pihak sekolah.\n\n_Pesan otomatis dari sistem absensi_",
                 "description" => "Template notifikasi jika siswa tidak hadir (alpha) — dikirim otomatis oleh cron",
                 "type"        => "absent",
                 "is_active"   => true,
