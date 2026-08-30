@@ -318,11 +318,13 @@ class AttendanceNotificationService
         $checkInCarbon    = \Carbon\Carbon::parse($record->check_in_time);
         $jamResmiCarbon   = \Carbon\Carbon::parse($jamResmiMasuk);
 
-        // Hitung menit setelah jam resmi (untuk hadir-toleransi dan terlambat)
-        $menitSetelahResmi = max(0, $checkInCarbon->diffInMinutes($jamResmiCarbon, false));
+        // Hitung menit setelah jam resmi (hanya positif jika check-in SETELAH jam resmi)
+        $menitSetelahResmi = $checkInCarbon->greaterThan($jamResmiCarbon)
+            ? (int) $jamResmiCarbon->diffInMinutes($checkInCarbon)
+            : 0;
 
         // Deteksi hadir dalam toleransi (masuk setelah jam resmi tapi masih dalam toleransi)
-        $isDalamToleransi = $record->status === 'hadir' && $menitSetelahResmi > 0;
+        $isDalamToleransi = $record->status === 'hadir' && $menitSetelahResmi > 0 && $menitSetelahResmi <= $toleransiMenit;
 
         $data = [
             'sekolah'         => $schoolName,
