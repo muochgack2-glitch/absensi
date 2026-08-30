@@ -134,7 +134,24 @@ class SendKepsekSummary extends Command
                 }
             }
 
-            $message = $this->buildMasukMessage($dayName, $totalSiswa, $hadir, $terlambat, $alpha, $izin, $sakit, $persen, $status, $alphaPerKelas);
+            // Siswa terlambat per kelas
+            $terlambatIds = (clone $recordsToday)->where('status', 'terlambat')->pluck('student_id')->toArray();
+            $terlambatPerKelas = [];
+            if (!empty($terlambatIds)) {
+                $siswaTerlambat = AttendanceStudent::with(['kelas.waliKelas'])
+                    ->whereIn('id', $terlambatIds)
+                    ->orderBy('kelas_id')->orderBy('nama')->get();
+                foreach ($siswaTerlambat as $s) {
+                    $namaKelas = $s->kelas->nama_kelas ?? '-';
+                    $wali      = $s->kelas->waliKelas->name ?? '-';
+                    if (!isset($terlambatPerKelas[$namaKelas])) {
+                        $terlambatPerKelas[$namaKelas] = ['wali' => $wali, 'siswa' => []];
+                    }
+                    $terlambatPerKelas[$namaKelas]['siswa'][] = $s->nama;
+                }
+            }
+
+            $message = $this->buildMasukMessage($dayName, $totalSiswa, $hadir, $terlambat, $alpha, $izin, $sakit, $persen, $status, $alphaPerKelas, $terlambatPerKelas);
         }
 
         $this->line('');
@@ -181,7 +198,8 @@ class SendKepsekSummary extends Command
     protected function buildMasukMessage(
         string $dayName, int $totalSiswa, int $hadir, int $terlambat,
         int $alpha, int $izin, int $sakit, float $persen, string $status,
-        array $alphaPerKelas = []
+        array $alphaPerKelas = [],
+        array $terlambatPerKelas = []
     ): string {
         $schoolName = AttendanceSetting::get('school_name', 'SMK');
         $hadirTepat = $hadir - $terlambat;
@@ -201,6 +219,19 @@ class SendKepsekSummary extends Command
             "",
             "Status: {$status}",
         ];
+
+        if (!empty($terlambatPerKelas)) {
+            $lines[] = "";
+            $lines[] = "*Detail Siswa Terlambat:*";
+            foreach ($terlambatPerKelas as $namaKelas => $data) {
+                $lines[] = "";
+                $lines[] = "📚 *{$namaKelas}*";
+                $lines[] = "   Wali Kelas: {$data['wali']}";
+                foreach ($data['siswa'] as $i => $nama) {
+                    $lines[] = "   " . ($i + 1) . ". {$nama}";
+                }
+            }
+        }
 
         if (!empty($alphaPerKelas)) {
             $lines[] = "";
