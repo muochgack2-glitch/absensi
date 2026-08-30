@@ -360,6 +360,10 @@ class AttendanceNotificationService
         $hariTanggal   = \Carbon\Carbon::parse($record->date)->locale('id')->translatedFormat('l, d/m/Y');
         $isPulangCepat = $record->check_out_status === 'pulang_cepat';
         $statusLabel   = $isPulangCepat ? '⚠️ Pulang Lebih Awal' : '✅ Pulang Normal';
+        $jamResmi      = \App\Models\AttendanceSetting::get('check_out_time', '15:00');
+        $peringatan    = $isPulangCepat
+            ? "⚠️ _Siswa meninggalkan sekolah sebelum jam pulang ({$jamResmi})_"
+            : '';
 
         $data = [
             'sekolah'      => $schoolName,
@@ -369,6 +373,8 @@ class AttendanceNotificationService
             'status'       => $statusLabel,
             'tanggal'      => $tanggal,
             'hari_tanggal' => $hariTanggal,
+            'jam_resmi'    => $jamResmi,
+            'peringatan'   => $peringatan,
         ];
 
         // Coba pakai template dari DB
@@ -389,8 +395,7 @@ class AttendanceNotificationService
         $message .= "Waktu Pulang: *{$time}*\n";
 
         if ($isPulangCepat) {
-            $officialCheckOutTime = \App\Models\AttendanceSetting::get('check_out_time', '15:00');
-            $message .= "⚠️ _Siswa meninggalkan sekolah sebelum jam pulang ({$officialCheckOutTime})_\n";
+            $message .= "{$peringatan}\n";
         }
 
         $message .= "\n_Pesan otomatis dari sistem absensi_";

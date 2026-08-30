@@ -27,12 +27,12 @@ class WhatsAppTemplateSeeder extends Seeder
             [
                 'name'        => 'check_out_notification',
                 'label'       => 'Notifikasi Check-Out',
-                'message'     => "🏫 *{sekolah}*\n📍 Notifikasi Pulang\n\nSiswa: *{nama}*\nKelas: {kelas}\nHari/Tgl: {hari_tanggal}\nWaktu Pulang: *{waktu}*\n\n_Pesan otomatis dari sistem absensi_",
-                'description' => 'Template notifikasi saat siswa check-out / pulang sekolah',
+                'message'     => "🏫 *{sekolah}*\n📍 Notifikasi Pulang\n\nSiswa: *{nama}*\nKelas: {kelas}\nHari/Tgl: {hari_tanggal}\nWaktu Pulang: *{waktu}*\n{peringatan}\n_Pesan otomatis dari sistem absensi_",
+                'description' => 'Template notifikasi saat siswa check-out. {peringatan} otomatis berisi peringatan jika pulang lebih awal, kosong jika pulang normal.',
                 'type'        => 'check_out',
                 'is_active'   => true,
                 'auto_send'   => true,
-                'variables'   => json_encode(['sekolah', 'nama', 'kelas', 'hari_tanggal', 'waktu']),
+                'variables'   => json_encode(['sekolah', 'nama', 'kelas', 'hari_tanggal', 'waktu', 'status', 'peringatan', 'jam_resmi']),
                 'usage_count' => 0,
             ],
             [

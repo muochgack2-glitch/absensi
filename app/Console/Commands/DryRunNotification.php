@@ -42,14 +42,18 @@ class DryRunNotification extends Command
                 'hari_tanggal' => $hariTanggal, 'terlambat' => 0,
             ]],
             ['CHECK-OUT: Pulang Normal', 'check_out', [
-                'sekolah' => $schoolName, 'nama' => 'Ahmad Rizki', 'kelas' => 'X Busana 1',
-                'waktu' => '15:30', 'status' => '✅ Pulang Normal', 'tanggal' => $today,
+                'sekolah'      => $schoolName, 'nama' => 'Ahmad Rizki', 'kelas' => 'X Busana 1',
+                'waktu'        => '15:30', 'status' => '✅ Pulang Normal', 'tanggal' => $today,
                 'hari_tanggal' => $hariTanggal,
+                'jam_resmi'    => '15:00',
+                'peringatan'   => '', // kosong = pulang normal
             ]],
             ['CHECK-OUT: Pulang Lebih Awal', 'check_out', [
-                'sekolah' => $schoolName, 'nama' => 'Siti Rahayu', 'kelas' => 'XII AKL 2',
-                'waktu' => '13:10', 'status' => '⚠️ Pulang Lebih Awal', 'tanggal' => $today,
+                'sekolah'      => $schoolName, 'nama' => 'Siti Rahayu', 'kelas' => 'XII AKL 2',
+                'waktu'        => '13:10', 'status' => '⚠️ Pulang Lebih Awal', 'tanggal' => $today,
                 'hari_tanggal' => $hariTanggal,
+                'jam_resmi'    => '15:00',
+                'peringatan'   => '⚠️ _Siswa meninggalkan sekolah sebelum jam pulang (15:00)_',
             ]],
             ['TIDAK HADIR: Alpha', 'absent', [
                 'sekolah' => $schoolName, 'nama' => 'Dewi Anggraini', 'kelas' => 'XI RPL 1',
