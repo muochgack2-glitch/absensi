@@ -70,7 +70,6 @@ class SendWakaSummary extends Command
                 $siswaBelum = AttendanceStudent::with(['kelas.waliKelas'])
                     ->whereIn('id', $belumPulangIds)
                     ->orderBy('kelas_id')->orderBy('nama')->get();
-
                 foreach ($siswaBelum as $s) {
                     $namaKelas = $s->kelas->nama_kelas ?? '-';
                     $wali      = $s->kelas->waliKelas->name ?? '-';
@@ -81,7 +80,23 @@ class SendWakaSummary extends Command
                 }
             }
 
-            $message = $this->buildPulangMessage($dayName, $totalSiswa, $hadir, $sudahPulang, $pulangCepat, $belumPulang, $belumPulangPerKelas);
+            $pulangCepatIds = (clone $records)->where('check_out_status', 'pulang_cepat')->pluck('student_id')->toArray();
+            $pulangCepatPerKelas = [];
+            if (!empty($pulangCepatIds)) {
+                $siswaCepat = AttendanceStudent::with(['kelas.waliKelas'])
+                    ->whereIn('id', $pulangCepatIds)
+                    ->orderBy('kelas_id')->orderBy('nama')->get();
+                foreach ($siswaCepat as $s) {
+                    $namaKelas = $s->kelas->nama_kelas ?? '-';
+                    $wali      = $s->kelas->waliKelas->name ?? '-';
+                    if (!isset($pulangCepatPerKelas[$namaKelas])) {
+                        $pulangCepatPerKelas[$namaKelas] = ['wali' => $wali, 'siswa' => []];
+                    }
+                    $pulangCepatPerKelas[$namaKelas]['siswa'][] = $s->nama;
+                }
+            }
+
+            $message = $this->buildPulangMessage($dayName, $totalSiswa, $hadir, $sudahPulang, $pulangCepat, $belumPulang, $belumPulangPerKelas, $pulangCepatPerKelas);
         } else {
             $persen = $totalSiswa > 0 ? round(($hadir / $totalSiswa) * 100, 1) : 0;
             $status = match(true) {
@@ -201,7 +216,8 @@ class SendWakaSummary extends Command
     protected function buildPulangMessage(
         string $dayName, int $totalSiswa, int $hadir,
         int $sudahPulang, int $pulangCepat, int $belumPulang,
-        array $belumPulangPerKelas = []
+        array $belumPulangPerKelas = [],
+        array $pulangCepatPerKelas = []
     ): string {
         $schoolName  = AttendanceSetting::get('school_name', 'SMK');
         $pulangTepat = $sudahPulang - $pulangCepat;
@@ -218,6 +234,19 @@ class SendWakaSummary extends Command
             "   ↳ Pulang cepat : {$pulangCepat} siswa",
             "⏳ Belum pulang   : {$belumPulang} siswa",
         ];
+
+        if (!empty($pulangCepatPerKelas)) {
+            $lines[] = "";
+            $lines[] = "*Detail Pulang Cepat:*";
+            foreach ($pulangCepatPerKelas as $namaKelas => $data) {
+                $lines[] = "";
+                $lines[] = "📚 *{$namaKelas}*";
+                $lines[] = "   Wali Kelas: {$data['wali']}";
+                foreach ($data['siswa'] as $i => $nama) {
+                    $lines[] = "   " . ($i + 1) . ". {$nama}";
+                }
+            }
+        }
 
         if (!empty($belumPulangPerKelas)) {
             $lines[] = "";

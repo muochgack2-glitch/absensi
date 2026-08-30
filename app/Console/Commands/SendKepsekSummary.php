@@ -56,13 +56,13 @@ class SendKepsekSummary extends Command
         $sakit     = $stats['sakit']     ?? 0;
 
         if ($type === 'pulang') {
-            $records     = AttendanceRecord::withoutGlobalScope('tahun_ajaran')->whereDate('date', $date);
-            $sudahPulang = (clone $records)->whereNotNull('check_out_time')->count();
-            $pulangCepat = (clone $records)->where('check_out_status', 'pulang_cepat')->count();
-            $belumPulang = max(0, $hadir - $sudahPulang);
+            $records        = AttendanceRecord::withoutGlobalScope('tahun_ajaran')->whereDate('date', $date);
+            $sudahPulang    = (clone $records)->whereNotNull('check_out_time')->count();
+            $pulangCepat    = (clone $records)->where('check_out_status', 'pulang_cepat')->count();
+            $belumPulang    = max(0, $hadir - $sudahPulang);
 
-            // Ambil siswa yang hadir tapi belum check-out, group per kelas
-            $hadirIds     = (clone $records)->whereNotNull('check_in_time')->pluck('student_id')->toArray();
+            // Belum pulang per kelas
+            $hadirIds       = (clone $records)->whereNotNull('check_in_time')->pluck('student_id')->toArray();
             $sudahPulangIds = (clone $records)->whereNotNull('check_out_time')->pluck('student_id')->toArray();
             $belumPulangIds = array_diff($hadirIds, $sudahPulangIds);
 
@@ -70,10 +70,7 @@ class SendKepsekSummary extends Command
             if (!empty($belumPulangIds)) {
                 $siswaBelum = AttendanceStudent::with(['kelas.waliKelas'])
                     ->whereIn('id', $belumPulangIds)
-                    ->orderBy('kelas_id')
-                    ->orderBy('nama')
-                    ->get();
-
+                    ->orderBy('kelas_id')->orderBy('nama')->get();
                 foreach ($siswaBelum as $s) {
                     $namaKelas = $s->kelas->nama_kelas ?? '-';
                     $wali      = $s->kelas->waliKelas->name ?? '-';
@@ -84,7 +81,24 @@ class SendKepsekSummary extends Command
                 }
             }
 
-            $message = $this->buildPulangMessage($dayName, $totalSiswa, $hadir, $sudahPulang, $pulangCepat, $belumPulang, $belumPulangPerKelas);
+            // Pulang cepat per kelas
+            $pulangCepatIds = (clone $records)->where('check_out_status', 'pulang_cepat')->pluck('student_id')->toArray();
+            $pulangCepatPerKelas = [];
+            if (!empty($pulangCepatIds)) {
+                $siswaCepat = AttendanceStudent::with(['kelas.waliKelas'])
+                    ->whereIn('id', $pulangCepatIds)
+                    ->orderBy('kelas_id')->orderBy('nama')->get();
+                foreach ($siswaCepat as $s) {
+                    $namaKelas = $s->kelas->nama_kelas ?? '-';
+                    $wali      = $s->kelas->waliKelas->name ?? '-';
+                    if (!isset($pulangCepatPerKelas[$namaKelas])) {
+                        $pulangCepatPerKelas[$namaKelas] = ['wali' => $wali, 'siswa' => []];
+                    }
+                    $pulangCepatPerKelas[$namaKelas]['siswa'][] = $s->nama;
+                }
+            }
+
+            $message = $this->buildPulangMessage($dayName, $totalSiswa, $hadir, $sudahPulang, $pulangCepat, $belumPulang, $belumPulangPerKelas, $pulangCepatPerKelas);
         } else {
             $persen  = $totalSiswa > 0 ? round(($hadir / $totalSiswa) * 100, 1) : 0;
             $status  = match(true) {
@@ -210,7 +224,8 @@ class SendKepsekSummary extends Command
     protected function buildPulangMessage(
         string $dayName, int $totalSiswa, int $hadir,
         int $sudahPulang, int $pulangCepat, int $belumPulang,
-        array $belumPulangPerKelas = []
+        array $belumPulangPerKelas = [],
+        array $pulangCepatPerKelas = []
     ): string {
         $schoolName  = AttendanceSetting::get('school_name', 'SMK');
         $pulangTepat = $sudahPulang - $pulangCepat;
@@ -227,6 +242,19 @@ class SendKepsekSummary extends Command
             "   ↳ Pulang cepat : {$pulangCepat} siswa",
             "⏳ Belum pulang   : {$belumPulang} siswa",
         ];
+
+        if (!empty($pulangCepatPerKelas)) {
+            $lines[] = "";
+            $lines[] = "*Detail Pulang Cepat:*";
+            foreach ($pulangCepatPerKelas as $namaKelas => $data) {
+                $lines[] = "";
+                $lines[] = "📚 *{$namaKelas}*";
+                $lines[] = "   Wali Kelas: {$data['wali']}";
+                foreach ($data['siswa'] as $i => $nama) {
+                    $lines[] = "   " . ($i + 1) . ". {$nama}";
+                }
+            }
+        }
 
         if (!empty($belumPulangPerKelas)) {
             $lines[] = "";
