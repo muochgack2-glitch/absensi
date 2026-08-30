@@ -720,13 +720,19 @@
         const barChartOptions = {
             responsive: true,
             maintainAspectRatio: false,
+            // mode 'index' + intersect:false = tooltip muncul di seluruh kolom
+            // meski bar tingginya 0 (weekend/libur)
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
             plugins: {
                 legend: { labels: { color: labelColor, font: { size: 11 } } },
                 tooltip: {
                     callbacks: {
                         // Footer tooltip: keterangan weekend / libur
                         footer: (tooltipItems) => {
-                            const i    = tooltipItems[0].dataIndex;
+                            const i    = tooltipItems[0]?.dataIndex;
                             const type = (barChart?.data?.dayTypes || dayTypes)[i];
                             if (type === 'weekend') return '📅 Weekend — tidak ada absensi';
                             if (type === 'holiday') return '🎌 Hari Libur — tidak ada absensi';
@@ -737,9 +743,20 @@
                             const type = (barChart?.data?.dayTypes || dayTypes)[i];
                             return type === 'weekend' ? '#ef4444' : '#f97316';
                         },
+                        // Sembunyikan items jika semua 0 (hari libur/weekend)
+                        label: (ctx) => {
+                            const i    = ctx.dataIndex;
+                            const type = (barChart?.data?.dayTypes || dayTypes)[i];
+                            if (type === 'weekend' || type === 'holiday') return null;
+                            return ` ${ctx.dataset.label}: ${ctx.raw}`;
+                        },
                     },
                     footerFont: { style: 'italic', size: 11 },
                     footerMarginTop: 6,
+                    filter: (item, data) => {
+                        // Untuk weekend/holiday: tetap tampilkan tooltip (jangan filter)
+                        return true;
+                    },
                 },
             },
             scales: {
