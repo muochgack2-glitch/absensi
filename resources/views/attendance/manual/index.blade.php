@@ -69,7 +69,7 @@
                             <div>
                                 <h3 class="font-bold text-gray-900 dark:text-white">
                                     {{ $classes->find($classId)?->nama_kelas ?? '' }} —
-                                    {{ \Carbon\Carbon::parse($date)->translatedFormat('l, d F Y') }}
+                                    {{ \Carbon\Carbon::parse($date)->locale('id')->translatedFormat('l, d F Y') }}
                                 </h3>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">{{ $students->count() }} siswa aktif</p>
                             </div>
