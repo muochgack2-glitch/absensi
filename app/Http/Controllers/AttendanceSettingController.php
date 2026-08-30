@@ -457,6 +457,42 @@ class AttendanceSettingController extends Controller
         }
     }
 
+    public function sendWakaSummaryNow(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
+    {
+        $type = in_array($request->input('type'), ['masuk', 'pulang']) ? $request->input('type') : 'masuk';
+        try {
+            $exitCode = \Illuminate\Support\Facades\Artisan::call('attendance:send-waka-summary', ['--type' => $type]);
+            $output   = \Illuminate\Support\Facades\Artisan::output();
+            return response()->json([
+                'success' => $exitCode === 0,
+                'message' => $exitCode === 0
+                    ? 'Ringkasan ' . ($type === 'pulang' ? 'pulang' : 'masuk') . ' berhasil dikirim ke Waka Kesiswaan!'
+                    : 'Ada masalah saat pengiriman.',
+                'output'  => $output,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function sendKepsekSummaryNow(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
+    {
+        $type = in_array($request->input('type'), ['masuk', 'pulang']) ? $request->input('type') : 'masuk';
+        try {
+            $exitCode = \Illuminate\Support\Facades\Artisan::call('attendance:send-kepsek-summary', ['--type' => $type]);
+            $output   = \Illuminate\Support\Facades\Artisan::output();
+            return response()->json([
+                'success' => $exitCode === 0,
+                'message' => $exitCode === 0
+                    ? 'Laporan ' . ($type === 'pulang' ? 'pulang' : 'masuk') . ' berhasil dikirim ke Kepala Sekolah!'
+                    : 'Ada masalah saat pengiriman.',
+                'output'  => $output,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()], 500);
+        }
+    }
+
     /**
      * Get photo storage stats (JSON)
      */

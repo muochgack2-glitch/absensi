@@ -510,7 +510,203 @@
                 </div>
             </x-card>
 
-            {{-- Late Warning Settings --}}
+            {{-- Ringkasan Waka Kesiswaan --}}
+            <x-card>
+                <div class="flex items-center mb-6">
+                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-user-tie text-blue-600 dark:text-blue-400"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Ringkasan ke Waka Kesiswaan</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Laporan kehadiran seluruh sekolah + detail alpha & belum pulang</p>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    {{-- Toggle aktif --}}
+                    <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                            <label class="text-sm font-medium text-gray-900 dark:text-white">Aktifkan Ringkasan Otomatis ke Waka Kesiswaan</label>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Waka menerima laporan harian (masuk & pulang) secara otomatis</p>
+                        </div>
+                        <div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox"
+                                       name="settings[waka_summary_enabled]"
+                                       value="1"
+                                       id="wakaSummaryEnabled"
+                                       @if(old('settings.waka_summary_enabled', $settings['notification']['waka_summary_enabled'] ?? '0') == '1') checked @endif
+                                       onchange="toggleWakaFields()"
+                                       class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                            </label>
+                        </div>
+                    </div>
+
+                    {{-- Sub-settings --}}
+                    <div id="wakaFields" class="space-y-4 {{ old('settings.waka_summary_enabled', $settings['notification']['waka_summary_enabled'] ?? '0') == '1' ? '' : 'opacity-40 pointer-events-none' }}">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <x-input
+                                type="time"
+                                name="settings[waka_summary_masuk_time]"
+                                label="🌅 Jam Kirim Masuk"
+                                :value="old('settings.waka_summary_masuk_time', $settings['notification']['waka_summary_masuk_time'] ?? '08:00')"
+                                helper="Laporan kehadiran masuk dikirim pada jam ini"
+                            />
+                            <x-input
+                                type="time"
+                                name="settings[waka_summary_pulang_time]"
+                                label="🌆 Jam Kirim Pulang"
+                                :value="old('settings.waka_summary_pulang_time', $settings['notification']['waka_summary_pulang_time'] ?? '15:00')"
+                                helper="Laporan kepulangan dikirim pada jam ini"
+                            />
+                        </div>
+
+                        {{-- Hari aktif --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">📅 Hari Pengiriman</label>
+                            @php
+                                $wakaDays    = old('settings.waka_summary_send_days', $settings['notification']['waka_summary_send_days'] ?? '1,2,3,4,5');
+                                $wakaDaysArr = explode(',', $wakaDays);
+                            @endphp
+                            <input type="hidden" name="settings[waka_summary_send_days]" value="" id="wakaDaysHidden">
+                            <div class="flex flex-wrap gap-2">
+                                @foreach(['1'=>'Senin','2'=>'Selasa','3'=>'Rabu','4'=>'Kamis','5'=>'Jumat','6'=>'Sabtu'] as $num => $name)
+                                    <label class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 cursor-pointer transition-all
+                                        {{ in_array($num, $wakaDaysArr) ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400' }}"
+                                        id="wakaDayLabel{{ $num }}">
+                                        <input type="checkbox" name="waka_days[]" value="{{ $num }}"
+                                               {{ in_array($num, $wakaDaysArr) ? 'checked' : '' }}
+                                               onchange="updateWakaDayStyle(this, '{{ $num }}')"
+                                               class="accent-blue-500">
+                                        {{ $name }}
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded">
+                            <h4 class="font-semibold text-blue-900 dark:text-blue-300 mb-2">📋 Persyaratan:</h4>
+                            <ul class="text-xs text-blue-800 dark:text-blue-400 space-y-1 list-disc list-inside">
+                                <li>User dengan role <strong>waka_kesiswaan</strong> harus terdaftar</li>
+                                <li>Nomor HP waka harus diisi di profil pengguna</li>
+                                <li>WhatsApp Gateway harus aktif</li>
+                            </ul>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-3">
+                            <button type="button" onclick="sendWakaNow('masuk')"
+                                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-all duration-200">
+                                <i class="fas fa-paper-plane mr-2"></i> Kirim Masuk Sekarang
+                            </button>
+                            <button type="button" onclick="sendWakaNow('pulang')"
+                                    class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-all duration-200">
+                                <i class="fas fa-paper-plane mr-2"></i> Kirim Pulang Sekarang
+                            </button>
+                        </div>
+                        <div id="wakaResult" class="hidden"></div>
+                    </div>
+                </div>
+            </x-card>
+
+            {{-- Ringkasan Kepala Sekolah --}}
+            <x-card>
+                <div class="flex items-center mb-6">
+                    <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-crown text-purple-600 dark:text-purple-400"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Ringkasan ke Kepala Sekolah</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Laporan executive harian: total + detail alpha & belum pulang per kelas</p>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    {{-- Toggle aktif --}}
+                    <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                            <label class="text-sm font-medium text-gray-900 dark:text-white">Aktifkan Ringkasan Otomatis ke Kepala Sekolah</label>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Kepala sekolah menerima laporan harian (masuk & pulang) secara otomatis</p>
+                        </div>
+                        <div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox"
+                                       name="settings[kepsek_summary_enabled]"
+                                       value="1"
+                                       id="kepsekSummaryEnabled"
+                                       @if(old('settings.kepsek_summary_enabled', $settings['notification']['kepsek_summary_enabled'] ?? '0') == '1') checked @endif
+                                       onchange="toggleKepsekFields()"
+                                       class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
+                            </label>
+                        </div>
+                    </div>
+
+                    {{-- Sub-settings --}}
+                    <div id="kepsekFields" class="space-y-4 {{ old('settings.kepsek_summary_enabled', $settings['notification']['kepsek_summary_enabled'] ?? '0') == '1' ? '' : 'opacity-40 pointer-events-none' }}">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <x-input
+                                type="time"
+                                name="settings[kepsek_summary_time]"
+                                label="🌅 Jam Kirim Masuk"
+                                :value="old('settings.kepsek_summary_time', $settings['notification']['kepsek_summary_time'] ?? '08:30')"
+                                helper="Laporan kehadiran masuk dikirim pada jam ini"
+                            />
+                            <x-input
+                                type="time"
+                                name="settings[kepsek_summary_pulang_time]"
+                                label="🌆 Jam Kirim Pulang"
+                                :value="old('settings.kepsek_summary_pulang_time', $settings['notification']['kepsek_summary_pulang_time'] ?? '15:30')"
+                                helper="Laporan kepulangan dikirim pada jam ini"
+                            />
+                        </div>
+
+                        {{-- Hari aktif --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">📅 Hari Pengiriman</label>
+                            @php
+                                $kepsekDays    = old('settings.kepsek_summary_send_days', $settings['notification']['kepsek_summary_send_days'] ?? '1,2,3,4,5');
+                                $kepsekDaysArr = explode(',', $kepsekDays);
+                            @endphp
+                            <input type="hidden" name="settings[kepsek_summary_send_days]" value="" id="kepsekDaysHidden">
+                            <div class="flex flex-wrap gap-2">
+                                @foreach(['1'=>'Senin','2'=>'Selasa','3'=>'Rabu','4'=>'Kamis','5'=>'Jumat','6'=>'Sabtu'] as $num => $name)
+                                    <label class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 cursor-pointer transition-all
+                                        {{ in_array($num, $kepsekDaysArr) ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300' : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400' }}"
+                                        id="kepsekDayLabel{{ $num }}">
+                                        <input type="checkbox" name="kepsek_days[]" value="{{ $num }}"
+                                               {{ in_array($num, $kepsekDaysArr) ? 'checked' : '' }}
+                                               onchange="updateKepsekDayStyle(this, '{{ $num }}')"
+                                               class="accent-purple-500">
+                                        {{ $name }}
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-500 rounded">
+                            <h4 class="font-semibold text-purple-900 dark:text-purple-300 mb-2">📋 Persyaratan:</h4>
+                            <ul class="text-xs text-purple-800 dark:text-purple-400 space-y-1 list-disc list-inside">
+                                <li>User dengan role <strong>kepala_sekolah</strong> harus terdaftar</li>
+                                <li>Nomor HP kepala sekolah harus diisi di profil pengguna</li>
+                                <li>WhatsApp Gateway harus aktif</li>
+                            </ul>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-3">
+                            <button type="button" onclick="sendKepsekNow('masuk')"
+                                    class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-all duration-200">
+                                <i class="fas fa-paper-plane mr-2"></i> Kirim Masuk Sekarang
+                            </button>
+                            <button type="button" onclick="sendKepsekNow('pulang')"
+                                    class="inline-flex items-center px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-lg transition-all duration-200">
+                                <i class="fas fa-paper-plane mr-2"></i> Kirim Pulang Sekarang
+                            </button>
+                        </div>
+                        <div id="kepsekResult" class="hidden"></div>
+                    </div>
+                </div>
+            </x-card>
+
+
             <x-card>
                 <div class="flex items-center mb-6">
                     <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-2xl mr-4">
@@ -1377,6 +1573,107 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
             btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Kirim Ringkasan Sekarang';
         }
 
+        // ===== Waka Kesiswaan =====
+        function toggleWakaFields() {
+            const cb = document.getElementById('wakaSummaryEnabled');
+            const f  = document.getElementById('wakaFields');
+            cb.checked ? f.classList.remove('opacity-40','pointer-events-none')
+                       : f.classList.add('opacity-40','pointer-events-none');
+        }
+
+        function updateWakaDayStyle(checkbox, num) {
+            const label = document.getElementById('wakaDayLabel' + num);
+            if (checkbox.checked) {
+                label.classList.remove('border-gray-300','dark:border-gray-600','text-gray-600','dark:text-gray-400');
+                label.classList.add('border-blue-500','bg-blue-50','dark:bg-blue-900/20','text-blue-700','dark:text-blue-300');
+            } else {
+                label.classList.remove('border-blue-500','bg-blue-50','dark:bg-blue-900/20','text-blue-700','dark:text-blue-300');
+                label.classList.add('border-gray-300','dark:border-gray-600','text-gray-600','dark:text-gray-400');
+            }
+        }
+
+        async function sendWakaNow(type) {
+            const btn    = event.currentTarget;
+            const result = document.getElementById('wakaResult');
+            const label  = type === 'pulang' ? 'Laporan Pulang Waka' : 'Laporan Masuk Waka';
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mengirim...';
+            result.className = 'mt-3 p-3 rounded-lg text-sm bg-blue-50 text-blue-700';
+            result.textContent = 'Sedang mengirim ' + label + '...';
+            result.classList.remove('hidden');
+            try {
+                const res  = await fetch('{{ route("attendance.settings.send-waka-summary") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ type })
+                });
+                const data = await res.json();
+                result.className = 'mt-3 p-3 rounded-lg text-sm ' +
+                    (data.success ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700');
+                result.innerHTML = '<strong>' + data.message + '</strong>' +
+                    (data.output ? '<pre class="mt-2 text-xs whitespace-pre-wrap">' + data.output + '</pre>' : '');
+            } catch (e) {
+                result.className = 'mt-3 p-3 rounded-lg text-sm bg-red-50 text-red-700';
+                result.textContent = 'Gagal terhubung ke server.';
+            }
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Kirim ' + (type === 'pulang' ? 'Pulang' : 'Masuk') + ' Sekarang';
+        }
+
+        // ===== Kepala Sekolah =====
+        function toggleKepsekFields() {
+            const cb = document.getElementById('kepsekSummaryEnabled');
+            const f  = document.getElementById('kepsekFields');
+            cb.checked ? f.classList.remove('opacity-40','pointer-events-none')
+                       : f.classList.add('opacity-40','pointer-events-none');
+        }
+
+        function updateKepsekDayStyle(checkbox, num) {
+            const label = document.getElementById('kepsekDayLabel' + num);
+            if (checkbox.checked) {
+                label.classList.remove('border-gray-300','dark:border-gray-600','text-gray-600','dark:text-gray-400');
+                label.classList.add('border-purple-500','bg-purple-50','dark:bg-purple-900/20','text-purple-700','dark:text-purple-300');
+            } else {
+                label.classList.remove('border-purple-500','bg-purple-50','dark:bg-purple-900/20','text-purple-700','dark:text-purple-300');
+                label.classList.add('border-gray-300','dark:border-gray-600','text-gray-600','dark:text-gray-400');
+            }
+        }
+
+        async function sendKepsekNow(type) {
+            const btn    = event.currentTarget;
+            const result = document.getElementById('kepsekResult');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mengirim...';
+            result.className = 'mt-3 p-3 rounded-lg text-sm bg-purple-50 text-purple-700';
+            result.textContent = 'Sedang mengirim laporan ke kepala sekolah...';
+            result.classList.remove('hidden');
+            try {
+                const res  = await fetch('{{ route("attendance.settings.send-kepsek-summary") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ type })
+                });
+                const data = await res.json();
+                result.className = 'mt-3 p-3 rounded-lg text-sm ' +
+                    (data.success ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700');
+                result.innerHTML = '<strong>' + data.message + '</strong>' +
+                    (data.output ? '<pre class="mt-2 text-xs whitespace-pre-wrap">' + data.output + '</pre>' : '');
+            } catch (e) {
+                result.className = 'mt-3 p-3 rounded-lg text-sm bg-red-50 text-red-700';
+                result.textContent = 'Gagal terhubung ke server.';
+            }
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Kirim ' + (type === 'pulang' ? 'Pulang' : 'Masuk') + ' Sekarang';
+        }
+
         // ===== Toggle late warning fields =====
         function toggleLateWarningFields() {
             const checkbox = document.getElementById('lateWarningEnabled');
@@ -1410,9 +1707,16 @@ Keterlambatan berulang dapat mempengaruhi prestasi belajar.
                 document.querySelector('input[name="settings[absent_notify_days]"]').value = checked.join(',');
 
                 // Kumpulkan hari ringkasan ke settings[summary_send_days]
-                const summaryChecked = [...document.querySelectorAll('input[name="summary_days[]"]:checked')]
-                    .map(el => el.value);
+                const summaryChecked = [...document.querySelectorAll('input[name="summary_days[]"]:checked')].map(el => el.value);
                 document.getElementById('summaryDaysHidden').value = summaryChecked.join(',');
+
+                // Kumpulkan hari waka
+                const wakaChecked = [...document.querySelectorAll('input[name="waka_days[]"]:checked')].map(el => el.value);
+                document.getElementById('wakaDaysHidden').value = wakaChecked.join(',');
+
+                // Kumpulkan hari kepsek
+                const kepsekChecked = [...document.querySelectorAll('input[name="kepsek_days[]"]:checked')].map(el => el.value);
+                document.getElementById('kepsekDaysHidden').value = kepsekChecked.join(',');
             });
 
         // ===== Copy command ke clipboard =====

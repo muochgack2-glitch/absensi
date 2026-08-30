@@ -253,6 +253,11 @@ Route::middleware(['auth'])->group(function () {
             ->name('attendance.settings.restore');
         Route::post('/attendance/settings/send-summary', [AttendanceSettingController::class, 'sendSummaryNow'])
             ->name('attendance.settings.send-summary');
+        Route::post('/attendance/settings/send-waka-summary', [AttendanceSettingController::class, 'sendWakaSummaryNow'])
+            ->name('attendance.settings.send-waka-summary');
+        Route::post('/attendance/settings/send-kepsek-summary', [AttendanceSettingController::class, 'sendKepsekSummaryNow'])
+            ->name('attendance.settings.send-kepsek-summary');
+
         Route::get('/attendance/settings/photos/stats', [AttendanceSettingController::class, 'photoStats'])
             ->name('attendance.settings.photos.stats');
         Route::get('/attendance/settings/photos/download', [AttendanceSettingController::class, 'photoDownload'])
