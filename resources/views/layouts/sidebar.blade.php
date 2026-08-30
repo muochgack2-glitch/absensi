@@ -986,20 +986,6 @@
             {{-- Settings: bukan kepala sekolah --}}
             @if(!auth()->user()?->isKepalaSekolah())
 
-            {{-- Setting Waktu --}}
-            @if(auth()->user()?->isAdmin())
-            <a
-                href="{{ route('attendance.setting-waktu.index') }}"
-                class="sidebar-menu-item {{ request()->routeIs('attendance.setting-waktu.*') ? 'active' : '' }}"
-                data-bs-toggle="tooltip"
-                data-bs-placement="right"
-                title="Setting Waktu"
-            >
-                <i class="fas fa-clock text-lg"></i>
-                <span class="nav-text font-medium">Setting Waktu</span>
-            </a>
-            @endif
-
             {{-- Kamera --}}
             <a
                 href="{{ route('attendance.kamera.index') }}"
@@ -1023,6 +1009,20 @@
                 <i class="fas fa-bell text-lg"></i>
                 <span class="nav-text font-medium">Notifikasi</span>
             </a>
+
+            {{-- Setting Waktu --}}
+            @if(auth()->user()?->isAdmin())
+            <a
+                href="{{ route('attendance.setting-waktu.index') }}"
+                class="sidebar-menu-item {{ request()->routeIs('attendance.setting-waktu.*') ? 'active' : '' }}"
+                data-bs-toggle="tooltip"
+                data-bs-placement="right"
+                title="Setting Waktu"
+            >
+                <i class="fas fa-clock text-lg"></i>
+                <span class="nav-text font-medium">Setting Waktu</span>
+            </a>
+            @endif
 
             {{-- Ringkasan --}}
             <a
@@ -1048,6 +1048,7 @@
                 <span class="nav-text font-medium">Settings</span>
             </a>
             @endif
+
 
 
         </nav>
