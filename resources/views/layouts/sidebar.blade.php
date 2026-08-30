@@ -835,7 +835,8 @@
                 @endif
             </a>
 
-            <!-- Rekap Semester -->
+            {{-- Rekap Semester: admin & waka only --}}
+            @if(auth()->user()?->isAdmin() || auth()->user()?->isWakaKesiswaan())
             <a 
                 href="{{ route('attendance.reports.semester') }}"
                 class="sidebar-menu-item {{ request()->routeIs('attendance.reports.semester*') ? 'active' : '' }}"
@@ -846,6 +847,7 @@
                 <i class="fas fa-graduation-cap text-lg"></i>
                 <span class="nav-text font-medium">Rekap Semester</span>
             </a>
+            @endif
 
             {{-- Izin Online: petugas, waka, admin --}}
             @if(auth()->user()?->isPetugas() || auth()->user()?->isWakaKesiswaan() || auth()->user()?->isAdmin())
