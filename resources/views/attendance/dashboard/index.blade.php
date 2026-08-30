@@ -3,6 +3,30 @@
     <x-slot name="pageTitle">Dashboard</x-slot>
 
     <div class="space-y-6" id="dashboard-content">
+
+        {{-- Page Header --}}
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xl shadow-lg flex-shrink-0">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Dashboard Absensi</h1>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mt-0.5">
+                        {{ \Carbon\Carbon::parse($selectedDate)->translatedFormat('l, d F Y') }}
+                        @if($selectedClass)
+                            &bull; {{ $classes->firstWhere('id', $selectedClass)?->nama_kelas ?? '' }}
+                        @endif
+                    </p>
+                </div>
+            </div>
+            <button onclick="refreshDashboard()"
+                class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-sm active:scale-95">
+                <i class="fas fa-sync-alt"></i>
+                Refresh
+            </button>
+        </div>
+
         {{-- Filters Section --}}
         <x-card>
             <form method="GET" action="{{ route('attendance.dashboard') }}" id="filterForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -374,15 +398,11 @@
 
         {{-- Attendance Records Table --}}
         <x-card>
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+            <div class="flex items-center gap-2 mb-6">
                 <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
                     <i class="fas fa-clipboard-list mr-2 text-primary-600"></i>
                     Data Absensi
                 </h3>
-                <button onclick="refreshDashboard()" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-sm">
-                    <i class="fas fa-sync-alt mr-2"></i>
-                    Refresh
-                </button>
             </div>
 
             <div class="overflow-x-auto">
