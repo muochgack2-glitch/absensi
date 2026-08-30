@@ -87,8 +87,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/attendance/dashboard/chart-data', [AttendanceDashboardController::class, 'chartApi'])
         ->name('attendance.dashboard.chart-data');
 
-    // Input Absensi Manual — Petugas, Waka, Admin (bukan Kepala Sekolah)
-    Route::middleware('role:petugas')->group(function () {
+    // Input Absensi Manual — Admin Only
+    Route::middleware('role:admin')->group(function () {
         Route::get('/attendance/manual', [AttendanceManualController::class, 'index'])
             ->name('attendance.manual.index');
         Route::post('/attendance/manual', [AttendanceManualController::class, 'store'])
