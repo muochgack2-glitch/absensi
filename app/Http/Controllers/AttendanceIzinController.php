@@ -6,9 +6,12 @@ use App\Models\AttendanceIzin;
 use App\Models\AttendanceRecord;
 use App\Models\AttendanceSetting;
 use App\Models\AttendanceStudent;
+use App\Models\WhatsAppTemplate;
+use App\Services\AttendanceWhatsAppService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class AttendanceIzinController extends Controller
@@ -135,7 +138,83 @@ class AttendanceIzinController extends Controller
             $d->addDay();
         }
 
+        // Kirim notifikasi WA ke orang tua
+        $this->sendIzinNotification($izin, 'disetujui');
+
         return back()->with('success', "✅ Izin disetujui. Absensi {$izin->student->nama} otomatis diperbarui.");
+    }
+
+    /**
+     * Kirim notifikasi WA ke orang tua saat izin disetujui atau ditolak.
+     */
+    private function sendIzinNotification(AttendanceIzin $izin, string $jenisPesan): void
+    {
+        try {
+            $student = $izin->student->load('kelas');
+            $phones  = array_filter([
+                $student->no_hp_ortu ?? null,
+                $student->no_hp_ayah ?? null,
+                $student->no_hp_ibu  ?? null,
+            ]);
+            if (empty($phones)) return;
+
+            $schoolName  = AttendanceSetting::get('school_name', 'Sekolah');
+            $mulai       = Carbon::parse($izin->tanggal_mulai)->locale('id')->translatedFormat('l, d/m/Y');
+            $selesai     = Carbon::parse($izin->tanggal_selesai)->locale('id')->translatedFormat('l, d/m/Y');
+            $rentang     = $mulai === $selesai ? $mulai : "{$mulai} s/d {$selesai}";
+            $jenisLabel  = $izin->jenis === 'sakit' ? '🤒 Sakit' : '📝 Izin';
+
+            if ($jenisPesan === 'disetujui') {
+                $templateName = 'check_in_izin';
+                $data = [
+                    'sekolah'      => $schoolName,
+                    'nama'         => $student->nama,
+                    'kelas'        => $student->kelas->nama_kelas,
+                    'hari_tanggal' => $rentang,
+                    'waktu'        => now()->format('H:i'),
+                    'status'       => $jenisLabel,
+                ];
+
+                // Coba pakai template DB
+                $template = WhatsAppTemplate::where('name', $templateName)
+                    ->where('is_active', true)->where('auto_send', true)->first();
+
+                if ($template) {
+                    $msg = $template->message;
+                    foreach ($data as $k => $v) {
+                        $msg = str_replace('{' . $k . '}', $v, $msg);
+                    }
+                    $template->incrementUsage();
+                } else {
+                    // Fallback hardcode
+                    $msg  = "🏫 *{$schoolName}*\n";
+                    $msg .= "📝 *Notifikasi Izin Disetujui*\n";
+                    $msg .= "📅 {$rentang}\n\n";
+                    $msg .= "Siswa: *{$student->nama}*\n";
+                    $msg .= "Kelas: {$student->kelas->nama_kelas}\n";
+                    $msg .= "Status: {$jenisLabel} — ✅ Disetujui\n";
+                    $msg .= "\n_Pesan otomatis dari sistem absensi_";
+                }
+            } else {
+                // Ditolak — tidak ada template khusus, hardcode
+                $alasan = $izin->catatan_admin ?: '-';
+                $msg  = "🏫 *{$schoolName}*\n";
+                $msg .= "❌ *Notifikasi Izin Ditolak*\n";
+                $msg .= "📅 {$rentang}\n\n";
+                $msg .= "Siswa: *{$student->nama}*\n";
+                $msg .= "Kelas: {$student->kelas->nama_kelas}\n";
+                $msg .= "Status: {$jenisLabel} — ❌ Ditolak\n";
+                $msg .= "Alasan: {$alasan}\n";
+                $msg .= "\n_Pesan otomatis dari sistem absensi_";
+            }
+
+            $wa = app(AttendanceWhatsAppService::class);
+            foreach ($phones as $phone) {
+                $wa->sendParentNotification($phone, $msg);
+            }
+        } catch (\Exception $e) {
+            Log::error('Gagal kirim notif izin: ' . $e->getMessage());
+        }
     }
 
     public function reject(Request $request, AttendanceIzin $izin)
@@ -152,6 +231,9 @@ class AttendanceIzinController extends Controller
             'approved_by'   => Auth::id(),
             'approved_at'   => now(),
         ]);
+
+        // Kirim notifikasi WA ke orang tua
+        $this->sendIzinNotification($izin, 'ditolak');
 
         return back()->with('success', "Pengajuan izin {$izin->student->nama} ditolak.");
     }
