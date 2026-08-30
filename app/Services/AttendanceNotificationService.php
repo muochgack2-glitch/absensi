@@ -6,6 +6,7 @@ use App\Models\AttendanceStudent;
 use App\Models\AttendanceRecord;
 use App\Models\AttendanceSetting;
 use App\Models\AttendanceLog;
+use App\Models\WhatsAppTemplate;
 use Illuminate\Support\Facades\Log;
 
 class AttendanceNotificationService
@@ -300,21 +301,48 @@ class AttendanceNotificationService
     private function formatCheckInMessage(AttendanceStudent $student, AttendanceRecord $record, string $schoolName): string
     {
         $statusLabel = match ($record->status) {
-            'hadir' => '✅ Hadir',
+            'hadir'     => '✅ Hadir',
             'terlambat' => '⚠️ Terlambat',
-            'alpha' => '❌ Alpha',
-            'izin' => '📝 Izin',
-            default => ucfirst($record->status),
+            'alpha'     => '❌ Alpha',
+            'izin'      => '📝 Izin',
+            default     => ucfirst($record->status),
         };
 
-        $time    = \Carbon\Carbon::parse($record->check_in_time)->format('H:i');
-        $tanggal = \Carbon\Carbon::parse($record->date)->locale('id')->translatedFormat('l, d/m/Y');
+        $time        = \Carbon\Carbon::parse($record->check_in_time)->format('H:i');
+        $tanggal     = \Carbon\Carbon::parse($record->date)->format('d/m/Y');
+        $hariTanggal = \Carbon\Carbon::parse($record->date)->locale('id')->translatedFormat('l, d/m/Y');
 
-        $message = "🏫 *{$schoolName}*\n";
+        // Hitung menit terlambat (jika terlambat)
+        $terlambatMenit = 0;
+        if ($record->status === 'terlambat') {
+            $checkInTime = \Carbon\Carbon::parse($record->check_in_time);
+            $targetTime  = \Carbon\Carbon::parse(AttendanceSetting::get('check_in_time', '07:00:00'));
+            $terlambatMenit = max(0, $checkInTime->diffInMinutes($targetTime, false));
+        }
+
+        $data = [
+            'sekolah'      => $schoolName,
+            'nama'         => $student->nama,
+            'kelas'        => $student->kelas->nama_kelas,
+            'waktu'        => $time,
+            'status'       => $statusLabel,
+            'tanggal'      => $tanggal,
+            'hari_tanggal' => $hariTanggal,
+            'terlambat'    => $terlambatMenit,
+        ];
+
+        // Coba pakai template dari DB
+        $message = $this->resolveTemplate('check_in', $data);
+        if ($message) {
+            return $message;
+        }
+
+        // Fallback ke format hardcode
+        $message  = "🏫 *{$schoolName}*\n";
         $message .= "📍 Notifikasi Absensi\n\n";
         $message .= "Siswa: *{$student->nama}*\n";
         $message .= "Kelas: {$student->kelas->nama_kelas}\n";
-        $message .= "Hari/Tgl: {$tanggal}\n";
+        $message .= "Hari/Tgl: {$hariTanggal}\n";
         $message .= "Waktu Masuk: *{$time}*\n";
         $message .= "Status: {$statusLabel}\n";
         $message .= "\n_Pesan otomatis dari sistem absensi_";
@@ -328,10 +356,28 @@ class AttendanceNotificationService
     private function formatCheckOutMessage(AttendanceStudent $student, AttendanceRecord $record, string $schoolName): string
     {
         $time          = \Carbon\Carbon::parse($record->check_out_time)->format('H:i');
-        $tanggal       = \Carbon\Carbon::parse($record->date)->locale('id')->translatedFormat('l, d/m/Y');
+        $tanggal       = \Carbon\Carbon::parse($record->date)->format('d/m/Y');
+        $hariTanggal   = \Carbon\Carbon::parse($record->date)->locale('id')->translatedFormat('l, d/m/Y');
         $isPulangCepat = $record->check_out_status === 'pulang_cepat';
+        $statusLabel   = $isPulangCepat ? '⚠️ Pulang Lebih Awal' : '✅ Pulang Normal';
 
-        // Icon & judul berbeda untuk pulang cepat vs pulang normal
+        $data = [
+            'sekolah'      => $schoolName,
+            'nama'         => $student->nama,
+            'kelas'        => $student->kelas->nama_kelas,
+            'waktu'        => $time,
+            'status'       => $statusLabel,
+            'tanggal'      => $tanggal,
+            'hari_tanggal' => $hariTanggal,
+        ];
+
+        // Coba pakai template dari DB
+        $message = $this->resolveTemplate('check_out', $data);
+        if ($message) {
+            return $message;
+        }
+
+        // Fallback ke format hardcode
         $icon  = $isPulangCepat ? '⚠️' : '🏫';
         $label = $isPulangCepat ? 'Notifikasi Pulang Lebih Awal' : 'Notifikasi Pulang';
 
@@ -339,10 +385,9 @@ class AttendanceNotificationService
         $message .= "📍 {$label}\n\n";
         $message .= "Siswa: *{$student->nama}*\n";
         $message .= "Kelas: {$student->kelas->nama_kelas}\n";
-        $message .= "Hari/Tgl: {$tanggal}\n";
+        $message .= "Hari/Tgl: {$hariTanggal}\n";
         $message .= "Waktu Pulang: *{$time}*\n";
 
-        // Tambah peringatan jika pulang lebih awal
         if ($isPulangCepat) {
             $officialCheckOutTime = \App\Models\AttendanceSetting::get('check_out_time', '15:00');
             $message .= "⚠️ _Siswa meninggalkan sekolah sebelum jam pulang ({$officialCheckOutTime})_\n";
@@ -397,16 +442,30 @@ class AttendanceNotificationService
         $schoolName = AttendanceSetting::get('school_name', 'Sekolah');
 
         // Format message
-        $tanggal = \Carbon\Carbon::parse($record->date)->locale('id')->translatedFormat('l, d/m/Y');
+        $tanggal     = \Carbon\Carbon::parse($record->date)->format('d/m/Y');
+        $hariTanggal = \Carbon\Carbon::parse($record->date)->locale('id')->translatedFormat('l, d/m/Y');
 
-        $message = "🏫 *{$schoolName}*\n";
-        $message .= "⚠️ *Notifikasi Ketidakhadiran*\n\n";
-        $message .= "Siswa: *{$student->nama}*\n";
-        $message .= "Kelas: {$student->kelas->nama_kelas}\n";
-        $message .= "Hari/Tgl: {$tanggal}\n";
-        $message .= "Status: ❌ *Alpha (Tidak Hadir)*\n\n";
-        $message .= "Mohon segera menghubungi pihak sekolah.\n";
-        $message .= "\n_Pesan otomatis dari sistem absensi_";
+        $data = [
+            'sekolah'      => $schoolName,
+            'nama'         => $student->nama,
+            'kelas'        => $student->kelas->nama_kelas,
+            'tanggal'      => $tanggal,
+            'hari_tanggal' => $hariTanggal,
+        ];
+
+        // Coba pakai template dari DB
+        $message = $this->resolveTemplate('absent', $data);
+        if (!$message) {
+            // Fallback ke format hardcode
+            $message  = "🏫 *{$schoolName}*\n";
+            $message .= "⚠️ *Notifikasi Ketidakhadiran*\n\n";
+            $message .= "Siswa: *{$student->nama}*\n";
+            $message .= "Kelas: {$student->kelas->nama_kelas}\n";
+            $message .= "Hari/Tgl: {$hariTanggal}\n";
+            $message .= "Status: ❌ *Alpha (Tidak Hadir)*\n\n";
+            $message .= "Mohon segera menghubungi pihak sekolah.\n";
+            $message .= "\n_Pesan otomatis dari sistem absensi_";
+        }
 
         // Send notification ke semua nomor
         $result = ['success' => false];
@@ -416,5 +475,22 @@ class AttendanceNotificationService
 
         // Log notification attempt
         $this->logNotification($student->id, 'absent', $result);
+    }
+
+    /**
+     * Resolve message from active DB template, fallback to empty string.
+     */
+    private function resolveTemplate(string $type, array $data): string
+    {
+        try {
+            $template = WhatsAppTemplate::active()->autoSend()->type($type)->first();
+            if ($template) {
+                $template->incrementUsage();
+                return $template->parse($data);
+            }
+        } catch (\Exception $e) {
+            Log::warning("WhatsAppTemplate resolve failed for type={$type}: " . $e->getMessage());
+        }
+        return '';
     }
 }
