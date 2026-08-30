@@ -581,6 +581,11 @@ body.sidebar-collapsed .main-content {
     .mobile-topbar-avatar:hover {
         border-color: rgba(255,255,255,0.7);
     }
+
+    /* When sidebar is open: topbar slides behind the overlay */
+    body.sidebar-menu-open .mobile-topbar {
+        z-index: 1030; /* below overlay (1040) — gets covered by backdrop */
+    }
 }
 
 
