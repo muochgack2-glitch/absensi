@@ -93,9 +93,16 @@ class SendAttendanceSummary extends Command
                 $pulangIds       = $records->whereNotNull('check_out_time')->pluck('student_id')->toArray();
                 $pulangCepatIds  = $records->where('check_out_status', 'pulang_cepat')->pluck('student_id')->toArray();
                 $pulangTepatIds  = array_diff($pulangIds, $pulangCepatIds);
-                $belumPulang     = count($hadirIds) - count(array_intersect($hadirIds, $pulangIds));
-                $belumPulang     = max(0, $belumPulang);
-                $message = AttendanceSummaryMessageService::buildWaliPulang($kelas->nama_kelas, $dayName, $totalSiswa, $hadir, $izin, $alfa, count($pulangTepatIds), count($pulangCepatIds), $belumPulang);
+                $belumPulangIds  = array_diff($hadirIds, $pulangIds);
+                $belumPulang     = max(0, count($belumPulangIds));
+
+                // Kumpulkan nama siswa yang belum pulang
+                $belumPulangStudents = AttendanceStudent::where('kelas_id', $kelas->id)
+                    ->where('is_active', true)
+                    ->whereIn('id', $belumPulangIds)
+                    ->pluck('nama')->toArray();
+
+                $message = AttendanceSummaryMessageService::buildWaliPulang($kelas->nama_kelas, $dayName, $totalSiswa, $hadir, $izin, $alfa, count($pulangTepatIds), count($pulangCepatIds), $belumPulang, $belumPulangStudents);
                 $this->line("  {$kelas->nama_kelas} | Hadir:{$hadir} PulangTepat:".count($pulangTepatIds)." PulangCepat:".count($pulangCepatIds)." Belum:{$belumPulang}");
             } else {
                 // Hitung terlambat untuk summary masuk

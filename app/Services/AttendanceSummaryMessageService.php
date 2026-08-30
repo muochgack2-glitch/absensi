@@ -53,7 +53,8 @@ class AttendanceSummaryMessageService
     public static function buildWaliPulang(
         string $namaKelas, string $tanggal, int $total,
         int $hadir, int $izin, int $alfa,
-        int $pulangTepat, int $pulangCepat, int $belumPulang
+        int $pulangTepat, int $pulangCepat, int $belumPulang,
+        array $belumPulangStudents = []
     ): string {
         $lines = [
             "🌆 *RINGKASAN KEPULANGAN*",
@@ -68,6 +69,14 @@ class AttendanceSummaryMessageService
             "📝 Izin               : {$izin} siswa",
             "❌ Alfa               : {$alfa} siswa",
         ];
+
+        if (!empty($belumPulangStudents)) {
+            $lines[] = "";
+            $lines[] = "*Siswa belum pulang:*";
+            foreach ($belumPulangStudents as $i => $nama) {
+                $lines[] = ($i + 1) . ". {$nama}";
+            }
+        }
 
         $lines[] = "";
         $lines[] = "_Sistem Absensi SMK PGRI Blora_";
@@ -178,7 +187,9 @@ class AttendanceSummaryMessageService
     public static function previewWaliPulang(): string
     {
         return self::buildWaliPulang('[Nama Kelas]', '[Hari, DD Bulan YYYY]',
-            30, 27, 1, 2, 20, 3, 4);
+            30, 27, 1, 2, 20, 3, 4,
+            ['Budi Santoso', 'Ani Rahayu', 'Doni Pratama']
+        );
     }
 
     public static function previewWakaMasuk(): string
