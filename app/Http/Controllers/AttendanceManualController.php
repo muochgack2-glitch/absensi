@@ -111,6 +111,18 @@ class AttendanceManualController extends Controller
                     $date
                 );
             }
+
+            // Kirim notif first-entry jika: tidak ada record sebelumnya & status bukan alpha/skip
+            if ($statusLama === null && !in_array($entry['status'], ['alpha', 'skip'])) {
+                $student ??= AttendanceStudent::with('kelas')->find($entry['student_id']);
+                $this->notificationService->notifyManualFirstEntry(
+                    $student,
+                    $record->fresh(),
+                    $entry['status'],
+                    $entry['notes'] ?? null,
+                    $date
+                );
+            }
         }
 
         return redirect()

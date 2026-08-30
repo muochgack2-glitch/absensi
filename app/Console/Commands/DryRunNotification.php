@@ -100,6 +100,32 @@ class DryRunNotification extends Command
                 "waktu_masuk"     => "-",
                 "keterangan"      => "Surat izin terlambat disampaikan wali kelas",
             ]],
+            ["MANUAL FIRST: Hadir tepat waktu (lupa kartu)", "manual_hadir", [
+                "sekolah"     => $schoolName, "nama" => $nama, "kelas" => $kelas,
+                "hari_tanggal"=> $hariTanggal, "waktu" => "06:58",
+                "keterangan"  => "Tidak bawa kartu QR",
+            ]],
+            ["MANUAL FIRST: Hadir dalam toleransi (07:10)", "manual_toleransi", [
+                "sekolah"         => $schoolName, "nama" => $nama, "kelas" => $kelas,
+                "hari_tanggal"    => $hariTanggal, "waktu" => "07:10",
+                "terlambat"       => 10, "toleransi" => 15, "jam_resmi_masuk" => "07:00",
+                "keterangan"      => "Tidak bawa kartu, masuk toleransi",
+            ]],
+            ["MANUAL FIRST: Terlambat", "manual_terlambat", [
+                "sekolah"     => $schoolName, "nama" => $nama, "kelas" => $kelas,
+                "hari_tanggal"=> $hariTanggal, "waktu" => "09:30",
+                "keterangan"  => "Ban sepeda bocor",
+            ]],
+            ["MANUAL FIRST: Izin (SOP tepat waktu)", "manual_izin", [
+                "sekolah"     => $schoolName, "nama" => $nama, "kelas" => $kelas,
+                "hari_tanggal"=> $hariTanggal,
+                "keterangan"  => "Izin keperluan keluarga",
+            ]],
+            ["MANUAL FIRST: Sakit", "manual_sakit", [
+                "sekolah"     => $schoolName, "nama" => $nama, "kelas" => $kelas,
+                "hari_tanggal"=> $hariTanggal,
+                "keterangan"  => "Demam tinggi sejak kemarin",
+            ]],
         ];
 
         foreach ($cases as [$judul, $templateName, $data]) {

@@ -610,5 +610,100 @@ class AttendanceNotificationService
             'date'        => $date,
         ]);
     }
+
+    /**
+     * Kirim WA ke orang tua saat admin menginput absensi PERTAMA KALI via Input Manual
+     * (bukan koreksi — record sebelumnya tidak ada).
+     * Menggantikan fungsi WA QR scan yang tidak bisa dilakukan siswa.
+     *
+     * @param AttendanceStudent $student
+     * @param AttendanceRecord  $record
+     * @param string            $statusBaru  hadir|terlambat|izin|sakit
+     * @param string|null       $keterangan  Kolom keterangan dari form
+     * @param string            $date        Tanggal absensi (Y-m-d)
+     */
+    public function notifyManualFirstEntry(
+        AttendanceStudent $student,
+        AttendanceRecord  $record,
+        string            $statusBaru,
+        ?string           $keterangan,
+        string            $date
+    ): void {
+        // Skip alpha & skip — tidak ada WA
+        if (in_array($statusBaru, ['alpha', 'skip'])) return;
+
+        $phones = $student->getParentPhones();
+        if (empty($phones)) {
+            Log::debug("Manual first entry notif skipped — no parent phone", ['nis' => $student->nis]);
+            return;
+        }
+
+        $jamResmi   = AttendanceSetting::get('jam_masuk', '07:00');
+        $toleransi  = (int) AttendanceSetting::get('toleransi_menit', '15');
+        $hariTanggal = \Carbon\Carbon::parse($date)->locale('id')->translatedFormat('l, d F Y');
+        $schoolName  = AttendanceSetting::get('school_name', 'Sekolah');
+
+        $waktuMasuk = $record->check_in_time
+            ? \Carbon\Carbon::parse($record->check_in_time)->format('H:i') : '-';
+
+        $selisihMenit = ($record->check_in_time && $jamResmi)
+            ? (int) \Carbon\Carbon::parse($jamResmi)
+                ->diffInMinutes(\Carbon\Carbon::parse($record->check_in_time), false)
+            : 0;
+
+        // Pilih template berdasarkan status & waktu
+        $templateName = match($statusBaru) {
+            'terlambat' => 'manual_terlambat',
+            'izin'      => 'manual_izin',
+            'sakit'     => 'manual_sakit',
+            'hadir'     => $this->resolveManualHadirTemplate($selisihMenit, $toleransi),
+            default     => null,
+        };
+
+        if (!$templateName) return;
+
+        $data = [
+            'sekolah'         => $schoolName,
+            'nama'            => $student->nama,
+            'kelas'           => $student->kelas->nama_kelas ?? '-',
+            'hari_tanggal'    => $hariTanggal,
+            'tanggal'         => $date,
+            'waktu'           => $waktuMasuk,
+            'terlambat'       => max(0, $selisihMenit),
+            'toleransi'       => $toleransi,
+            'jam_resmi_masuk' => $jamResmi,
+            'keterangan'      => $keterangan ?: '-',
+        ];
+
+        $message = $this->resolveTemplateByName($templateName, $data);
+        if (!$message) {
+            Log::debug("Manual first entry template not found or inactive", ['template' => $templateName]);
+            return;
+        }
+
+        $result = ['success' => false];
+        foreach ($phones as $phone) {
+            $result = $this->whatsAppService->sendParentNotification($phone, $message);
+        }
+
+        $this->logNotification($student->id, 'manual_first_entry', $result);
+
+        Log::info("Manual first entry notif sent", [
+            'student_id' => $student->id,
+            'status'     => $statusBaru,
+            'template'   => $templateName,
+            'date'       => $date,
+        ]);
+    }
+
+    /**
+     * Tentukan template hadir berdasarkan selisih waktu masuk vs jam resmi.
+     */
+    private function resolveManualHadirTemplate(int $selisihMenit, int $toleransi): string
+    {
+        return ($selisihMenit > 0 && $selisihMenit <= $toleransi)
+            ? 'manual_toleransi'
+            : 'manual_hadir';
+    }
 }
 
