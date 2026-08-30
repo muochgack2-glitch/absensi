@@ -89,6 +89,56 @@
                 </div>
             </x-card>
 
+            {{-- Notifikasi Check-In Real-time --}}
+            <x-card class="mb-6">
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-white text-2xl mr-4">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">⚡ Notifikasi Check-In (Real-time)</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">WA dikirim <strong>langsung saat siswa scan QR</strong> — bukan terjadwal</p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    {{-- Toggle Kirim Semua Check-in --}}
+                    <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                            <label class="text-sm font-medium text-gray-900 dark:text-white">Kirim Notif Semua Check-In</label>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">WA dikirim ke ortu untuk semua siswa yang scan — hadir, toleransi, maupun terlambat</p>
+                        </div>
+                        <div>
+                            <input type="hidden" name="settings[notify_all_checkin]" value="false">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="settings[notify_all_checkin]" value="true" id="notifyAllCheckin"
+                                       @if(old('settings.notify_all_checkin', $settings['notification']['notify_all_checkin'] ?? $settings['general']['notify_all_checkin'] ?? 'false') === 'true') checked @endif
+                                       class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                            </label>
+                        </div>
+                    </div>
+                    {{-- Toggle Terlambat --}}
+                    <div class="flex items-center justify-between p-4 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg border border-yellow-200 dark:border-yellow-700">
+                        <div>
+                            <label class="text-sm font-medium text-gray-900 dark:text-white">⚡ Notifikasi Terlambat Saja</label>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">WA dikirim <strong>hanya jika</strong> siswa scan dengan status Terlambat — yang hadir tepat waktu tidak dapat notif</p>
+                        </div>
+                        <div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="settings[late_notify_enabled]" value="true" id="lateNotifyEnabled"
+                                       @if(old('settings.late_notify_enabled', $settings['notification']['late_notify_enabled'] ?? $settings['general']['late_notify_enabled'] ?? 'false') === 'true') checked @endif
+                                       class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 dark:peer-focus:ring-yellow-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
+                            </label>
+                        </div>
+                    </div>
+                    {{-- Info box --}}
+                    <div class="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg text-xs text-blue-800 dark:text-blue-200">
+                        💡 <strong>Tips:</strong> Aktifkan <em>Kirim Semua</em> jika ingin ortu selalu tahu saat anak scan. Aktifkan <em>Terlambat Saja</em> untuk hemat kuota WA — hanya kirim jika ada masalah.
+                    </div>
+                </div>
+            </x-card>
+
             {{-- Notifikasi Alpha Otomatis --}}
             <x-card class="mb-6">
                 <div class="flex items-center mb-6">
@@ -97,7 +147,7 @@
                     </div>
                     <div>
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white">Notifikasi Ketidakhadiran Otomatis</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Kirim WA ke orang tua secara otomatis saat siswa alpha</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Kirim WA ke orang tua secara otomatis saat siswa alpha — <strong>terjadwal via cron</strong></p>
                     </div>
                 </div>
                 <div class="space-y-5">
@@ -112,22 +162,6 @@
                                        @if(old('settings.auto_absent_notify', $settings['notification']['auto_absent_notify'] ?? $settings['general']['auto_absent_notify'] ?? '0') == '1') checked @endif
                                        onchange="toggleAbsentNotifyFields()" class="sr-only peer">
                                 <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 dark:peer-focus:ring-red-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
-                            </label>
-                        </div>
-                    </div>
-
-                    {{-- Toggle Terlambat --}}
-                    <div class="flex items-center justify-between p-4 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg border border-yellow-200 dark:border-yellow-700">
-                        <div>
-                            <label class="text-sm font-medium text-gray-900 dark:text-white">⚡ Aktifkan Notifikasi Terlambat (Real-time)</label>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">WA langsung terkirim ke ortu saat siswa scan QR dan statusnya <strong>Terlambat</strong></p>
-                        </div>
-                        <div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" name="settings[late_notify_enabled]" value="true" id="lateNotifyEnabled"
-                                       @if(old('settings.late_notify_enabled', $settings['notification']['late_notify_enabled'] ?? $settings['general']['late_notify_enabled'] ?? 'false') === 'true') checked @endif
-                                       class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 dark:peer-focus:ring-yellow-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
                             </label>
                         </div>
                     </div>
