@@ -248,6 +248,14 @@ Route::middleware(['auth'])->group(function () {
         ->name('attendance.kamera.index');
     Route::put('/attendance/kamera', [AttendanceSettingController::class, 'updateKamera'])
         ->name('attendance.kamera.update');
+    Route::get('/attendance/notifikasi', [AttendanceSettingController::class, 'notifikasi'])
+        ->name('attendance.notifikasi.index');
+    Route::put('/attendance/notifikasi', [AttendanceSettingController::class, 'updateNotifikasi'])
+        ->name('attendance.notifikasi.update');
+    Route::get('/attendance/ringkasan', [AttendanceSettingController::class, 'ringkasan'])
+        ->name('attendance.ringkasan.index');
+    Route::put('/attendance/ringkasan', [AttendanceSettingController::class, 'updateRingkasan'])
+        ->name('attendance.ringkasan.update');
 
 
     // Settings admin-only

@@ -1012,6 +1012,30 @@
                 <span class="nav-text font-medium">Kamera</span>
             </a>
 
+            {{-- Notifikasi --}}
+            <a
+                href="{{ route('attendance.notifikasi.index') }}"
+                class="sidebar-menu-item {{ request()->routeIs('attendance.notifikasi.*') ? 'active' : '' }}"
+                data-bs-toggle="tooltip"
+                data-bs-placement="right"
+                title="Notifikasi"
+            >
+                <i class="fas fa-bell text-lg"></i>
+                <span class="nav-text font-medium">Notifikasi</span>
+            </a>
+
+            {{-- Ringkasan --}}
+            <a
+                href="{{ route('attendance.ringkasan.index') }}"
+                class="sidebar-menu-item {{ request()->routeIs('attendance.ringkasan.*') ? 'active' : '' }}"
+                data-bs-toggle="tooltip"
+                data-bs-placement="right"
+                title="Ringkasan"
+            >
+                <i class="fas fa-chart-bar text-lg"></i>
+                <span class="nav-text font-medium">Ringkasan</span>
+            </a>
+
             <!-- Settings -->
             <a
                 href="{{ route('attendance.settings.index') }}"

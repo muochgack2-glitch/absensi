@@ -81,8 +81,76 @@ class AttendanceSettingController extends Controller
     }
 
     /**
+     * Setting Notifikasi page
+     */
+    public function notifikasi()
+    {
+        $settings = AttendanceSetting::getGrouped();
+        return view('attendance.settings.notifikasi', compact('settings'));
+    }
+
+    public function updateNotifikasi(Request $request)
+    {
+        // Checkbox toggles
+        foreach (['enable_parent_notification', 'include_photo_in_notification', 'auto_absent_notify'] as $key) {
+            AttendanceSetting::set($key,
+                $request->input("settings.{$key}", '0') == '1' ? '1' : '0', 'notification');
+        }
+        // late_notify_enabled pakai 'true'/'false'
+        AttendanceSetting::set('late_notify_enabled',
+            $request->input('settings.late_notify_enabled') === 'true' ? 'true' : 'false', 'notification');
+
+        // Waktu & hari alpha
+        if ($request->has('settings.absent_notify_time')) {
+            AttendanceSetting::set('absent_notify_time', $request->settings['absent_notify_time'], 'notification');
+        }
+        // Hari: dikumpulkan dari array absent_days[]
+        $days = collect($request->input('absent_days', []))->filter()->implode(',');
+        AttendanceSetting::set('absent_notify_days', $days ?: '', 'notification');
+
+        AttendanceSetting::clearCache();
+        return redirect()->route('attendance.notifikasi.index')->with('success', 'Setting notifikasi berhasil disimpan.');
+    }
+
+    /**
+     * Setting Ringkasan page
+     */
+    public function ringkasan()
+    {
+        $settings = AttendanceSetting::getGrouped();
+        return view('attendance.settings.ringkasan', compact('settings'));
+    }
+
+    public function updateRingkasan(Request $request)
+    {
+        // Toggles
+        foreach (['summary_wali_kelas_enabled', 'waka_summary_enabled', 'kepsek_summary_enabled'] as $key) {
+            AttendanceSetting::set($key,
+                $request->input("settings.{$key}", '0') == '1' ? '1' : '0', 'notification');
+        }
+
+        // Jam & hari wali kelas
+        $timeKeys = ['summary_send_time', 'summary_pulang_send_time', 'waka_summary_masuk_time', 'waka_summary_pulang_time', 'kepsek_summary_time', 'kepsek_summary_pulang_time'];
+        foreach ($timeKeys as $key) {
+            if (isset($request->settings[$key])) {
+                AttendanceSetting::set($key, $request->settings[$key], 'notification');
+            }
+        }
+
+        // Hari-hari (dikumpulkan dari checkbox[] sebelum submit via JS ke hidden input)
+        foreach (['summary_send_days' => 'summary_days', 'waka_summary_send_days' => 'waka_days', 'kepsek_summary_send_days' => 'kepsek_days'] as $settingKey => $inputName) {
+            $days = collect($request->input($inputName, []))->filter()->implode(',');
+            AttendanceSetting::set($settingKey, $days ?: '', 'notification');
+        }
+
+        AttendanceSetting::clearCache();
+        return redirect()->route('attendance.ringkasan.index')->with('success', 'Setting ringkasan berhasil disimpan.');
+    }
+
+    /**
      * Update settings
      */
+
     public function update(Request $request)
 
     {
