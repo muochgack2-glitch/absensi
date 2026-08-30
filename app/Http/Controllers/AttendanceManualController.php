@@ -5,11 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\AttendanceClass;
 use App\Models\AttendanceRecord;
 use App\Models\AttendanceStudent;
+use App\Services\AttendanceNotificationService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class AttendanceManualController extends Controller
 {
+    public function __construct(
+        private AttendanceNotificationService $notificationService
+    ) {}
+
     /**
      * Form input absensi manual — tampilkan daftar siswa berdasarkan kelas & tanggal.
      */
@@ -45,14 +50,15 @@ class AttendanceManualController extends Controller
 
     /**
      * Simpan atau update absensi manual untuk banyak siswa sekaligus.
+     * Kirim notif koreksi WA ke ortu jika status berubah dari alpha ke status lain.
      */
     public function store(Request $request)
     {
         $request->validate([
-            'date'              => 'required|date',
-            'entries'           => 'required|array',
+            'date'                 => 'required|date',
+            'entries'              => 'required|array',
             'entries.*.student_id' => 'required|exists:attendance_students,id',
-            'entries.*.status'  => 'required|in:hadir,terlambat,izin,sakit,alpha,skip',
+            'entries.*.status'     => 'required|in:hadir,terlambat,izin,sakit,alpha,skip',
         ]);
 
         $date    = $request->input('date');
@@ -67,13 +73,19 @@ class AttendanceManualController extends Controller
                 continue;
             }
 
+            // Ambil status lama sebelum diubah (untuk deteksi koreksi alpha)
+            $existingRecord = AttendanceRecord::where('student_id', $entry['student_id'])
+                ->whereDate('date', $date)
+                ->first();
+            $statusLama = $existingRecord?->status;
+
             $checkInTime = !empty($entry['check_in_time'])
                 ? $entry['check_in_time']
                 : ($entry['status'] === 'hadir' || $entry['status'] === 'terlambat'
                     ? Carbon::parse($date)->setTimeFromTimeString('07:00')->format('H:i:s')
                     : null);
 
-            AttendanceRecord::updateOrCreate(
+            $record = AttendanceRecord::updateOrCreate(
                 [
                     'student_id' => $entry['student_id'],
                     'date'       => $date,
@@ -86,6 +98,19 @@ class AttendanceManualController extends Controller
             );
 
             $saved++;
+
+            // Kirim notif koreksi jika: status lama = alpha dan status baru ≠ alpha
+            if ($statusLama === 'alpha' && $entry['status'] !== 'alpha') {
+                $student = AttendanceStudent::with('kelas')->find($entry['student_id']);
+                $this->notificationService->notifyManualCorrection(
+                    $student,
+                    $record->fresh(),
+                    $statusLama,
+                    $entry['status'],
+                    $entry['notes'] ?? null,
+                    $date
+                );
+            }
         }
 
         return redirect()
@@ -95,6 +120,7 @@ class AttendanceManualController extends Controller
             ])
             ->with('success', "✅ {$saved} absensi disimpan." . ($skipped ? " {$skipped} dilewati." : ''));
     }
+
 
     /**
      * Hapus satu record absensi (untuk koreksi).

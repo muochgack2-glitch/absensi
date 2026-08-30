@@ -78,6 +78,28 @@ class DryRunNotification extends Command
                 "sekolah" => $schoolName, "nama" => $nama, "kelas" => $kelas,
                 "tanggal" => $today, "hari_tanggal" => $hariTanggal,
             ]],
+            ["KOREKSI: Alpha → Hadir (tidak bawa kartu)", "manual_correction", [
+                "sekolah"         => $schoolName,
+                "nama"            => $nama,
+                "kelas"           => $kelas,
+                "tanggal_absensi" => $hariTanggal,
+                "tanggal_koreksi" => now()->format('d/m/Y'),
+                "status_lama"     => "❌ Alpha",
+                "status_baru"     => "✅ Hadir",
+                "waktu_masuk"     => "06:58",
+                "keterangan"      => "Tidak bawa kartu, sudah divalidasi guru piket",
+            ]],
+            ["KOREKSI: Alpha → Izin (surat terlambat)", "manual_correction", [
+                "sekolah"         => $schoolName,
+                "nama"            => $nama,
+                "kelas"           => $kelas,
+                "tanggal_absensi" => $hariTanggal,
+                "tanggal_koreksi" => now()->format('d/m/Y'),
+                "status_lama"     => "❌ Alpha",
+                "status_baru"     => "📝 Izin",
+                "waktu_masuk"     => "-",
+                "keterangan"      => "Surat izin terlambat disampaikan wali kelas",
+            ]],
         ];
 
         foreach ($cases as [$judul, $templateName, $data]) {

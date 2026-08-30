@@ -176,8 +176,10 @@
                                             <input type="text"
                                                    name="entries[{{ $i }}][notes]"
                                                    value="{{ $existing?->notes ?? '' }}"
+                                                   data-prev-status="{{ $existing?->status ?? '' }}"
+                                                   data-student-id="{{ $student->id }}"
                                                    placeholder="Keterangan opsional..."
-                                                   class="w-full text-xs px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-primary-400">
+                                                   class="notes-input w-full text-xs px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-primary-400 transition-all">
                                         </td>
 
                                         {{-- Hapus record (jika ada) --}}
@@ -281,6 +283,21 @@
                     badge.classList.remove('ring-2', 'ring-offset-1', 'ring-gray-700', 'dark:ring-gray-200', 'scale-110');
                 }
             });
+
+            // Dynamic placeholder keterangan — reminder jika koreksi dari alpha
+            const notesInput = document.querySelector(`.notes-input[data-student-id="${studentId}"]`);
+            if (!notesInput) return;
+            const prevStatus = notesInput.dataset.prevStatus;
+
+            if (prevStatus === 'alpha' && selectedStatus !== 'alpha') {
+                notesInput.placeholder = '⚠️ Alasan koreksi — contoh: tidak bawa kartu, surat izin terlambat...';
+                notesInput.classList.add('border-orange-400', 'dark:border-orange-500', 'ring-1', 'ring-orange-300');
+                notesInput.classList.remove('border-gray-300', 'dark:border-gray-600');
+            } else {
+                notesInput.placeholder = 'Keterangan opsional...';
+                notesInput.classList.remove('border-orange-400', 'dark:border-orange-500', 'ring-1', 'ring-orange-300');
+                notesInput.classList.add('border-gray-300', 'dark:border-gray-600');
+            }
         }
 
         // ===== Isi semua baris dengan satu status =====

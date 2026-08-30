@@ -538,4 +538,77 @@ class AttendanceNotificationService
         }
         return '';
     }
+
+    /**
+     * Kirim notifikasi koreksi ke orang tua saat admin mengubah status
+     * absensi dari alpha ke status lain via Input Manual.
+     *
+     * @param AttendanceStudent $student
+     * @param AttendanceRecord  $record
+     * @param string            $statusLama  Status sebelum diubah (harus 'alpha')
+     * @param string            $statusBaru  Status setelah diubah
+     * @param string|null       $keterangan  Notes dari kolom keterangan input manual
+     * @param string            $date        Tanggal absensi yang dikoreksi (Y-m-d)
+     */
+    public function notifyManualCorrection(
+        AttendanceStudent $student,
+        AttendanceRecord  $record,
+        string            $statusLama,
+        string            $statusBaru,
+        ?string           $keterangan,
+        string            $date
+    ): void {
+        // Skip jika tidak ada nomor HP ortu
+        $phones = $student->getParentPhones();
+        if (empty($phones)) {
+            Log::debug("Manual correction notif skipped — no parent phone", ['nis' => $student->nis]);
+            return;
+        }
+
+        // Label emoji per status
+        $statusLabel = [
+            'hadir'     => '✅ Hadir',
+            'terlambat' => '⚠️ Terlambat',
+            'izin'      => '📝 Izin',
+            'sakit'     => '🤒 Sakit',
+            'alpha'     => '❌ Alpha',
+        ];
+
+        $waktuMasuk = $record->check_in_time
+            ? \Carbon\Carbon::parse($record->check_in_time)->format('H:i')
+            : '-';
+
+        $data = [
+            'sekolah'         => AttendanceSetting::get('school_name', 'Sekolah'),
+            'nama'            => $student->nama,
+            'kelas'           => $student->kelas->nama_kelas ?? '-',
+            'tanggal_absensi' => \Carbon\Carbon::parse($date)->locale('id')->translatedFormat('l, d/m/Y'),
+            'tanggal_koreksi' => \Carbon\Carbon::today()->format('d/m/Y'),
+            'status_lama'     => $statusLabel[$statusLama] ?? ucfirst($statusLama),
+            'status_baru'     => $statusLabel[$statusBaru] ?? ucfirst($statusBaru),
+            'waktu_masuk'     => $waktuMasuk,
+            'keterangan'      => $keterangan ?: 'Koreksi oleh admin',
+        ];
+
+        $message = $this->resolveTemplateByName('manual_correction', $data);
+        if (!$message) {
+            Log::debug("Manual correction template not found or inactive");
+            return;
+        }
+
+        $result = ['success' => false];
+        foreach ($phones as $phone) {
+            $result = $this->whatsAppService->sendParentNotification($phone, $message);
+        }
+
+        $this->logNotification($student->id, 'manual_correction', $result);
+
+        Log::info("Manual correction notif sent", [
+            'student_id'  => $student->id,
+            'status_lama' => $statusLama,
+            'status_baru' => $statusBaru,
+            'date'        => $date,
+        ]);
+    }
 }
+

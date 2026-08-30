@@ -94,6 +94,18 @@ class WhatsAppTemplateSeeder extends Seeder
                 "variables"   => json_encode(["sekolah", "nama", "kelas", "hari_tanggal", "waktu", "terlambat", "toleransi", "jam_resmi_masuk"]),
                 "usage_count" => 0,
             ],
+            // ── 8. Koreksi Absensi Manual ─────────────────────────────
+            [
+                "name"        => "manual_correction",
+                "label"       => "Koreksi Absensi Manual",
+                "message"     => "🏫 *{sekolah}*\n🔄 *Koreksi Data Absensi*\n📅 {tanggal_absensi}\n\nSiswa: *{nama}*\nKelas: {kelas}\n\nStatus diperbarui:\n{status_lama}  →  {status_baru}\n⏰ Waktu Masuk: {waktu_masuk}\n📝 Keterangan: {keterangan}\n\n_Dikoreksi pada {tanggal_koreksi}. Mohon abaikan notifikasi sebelumnya._\n_Pesan otomatis dari sistem absensi_",
+                "description" => "Template WA koreksi saat admin mengubah status absensi alpha ke status lain melalui Input Manual. Variabel {keterangan} diisi admin, jika kosong default 'Koreksi oleh admin'.",
+                "type"        => "custom",
+                "is_active"   => true,
+                "auto_send"   => true,
+                "variables"   => json_encode(["sekolah","nama","kelas","tanggal_absensi","tanggal_koreksi","status_lama","status_baru","waktu_masuk","keterangan"]),
+                "usage_count" => 0,
+            ],
             // ── Broadcast Umum (manual, untuk admin) ──────────────────
             [
                 "name"        => "broadcast_general",
