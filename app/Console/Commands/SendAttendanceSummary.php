@@ -105,7 +105,14 @@ class SendAttendanceSummary extends Command
                 $this->line("  {$kelas->nama_kelas} | HadirTepat:{$hadirTepat} Terlambat:{$terlambat} Izin:{$izin} Alfa:{$alfa} Total:{$totalSiswa}");
             }
 
-            if ($dryRun) { $sent++; continue; }
+            if ($dryRun) {
+                $this->line("  ┌─ Pesan ke {$wali->name} ({$wali->phone}):");
+                foreach (explode("\n", $message) as $l) {
+                    $this->line("  │ " . $l);
+                }
+                $this->line("  └─────────────────────────────");
+                $sent++; continue;
+            }
 
             try {
                 $result = $this->waService->send($wali->phone, $message, ['type' => 'summary', 'sent_by' => null]);
