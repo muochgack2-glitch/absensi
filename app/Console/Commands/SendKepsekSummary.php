@@ -92,7 +92,35 @@ class SendKepsekSummary extends Command
                 $persen >= 85 => '🟡 PERLU PERHATIAN',
                 default       => '🔴 RENDAH',
             };
-            $message = $this->buildMasukMessage($dayName, $totalSiswa, $hadir, $terlambat, $alpha, $izin, $sakit, $persen, $status);
+
+            // Ambil siswa alpha per kelas + wali kelas
+            $recordsToday   = AttendanceRecord::withoutGlobalScope('tahun_ajaran')->whereDate('date', $date);
+            $hadirIds2      = (clone $recordsToday)->whereNotNull('check_in_time')->pluck('student_id')->toArray();
+            $izinSakitIds   = (clone $recordsToday)->whereIn('status', ['izin', 'sakit'])->pluck('student_id')->toArray();
+            $tidakHadirIds  = array_diff(
+                AttendanceStudent::where('is_active', true)->pluck('id')->toArray(),
+                array_unique(array_merge($hadirIds2, $izinSakitIds))
+            );
+
+            $alphaPerKelas = [];
+            if (!empty($tidakHadirIds)) {
+                $siswaAlpha = AttendanceStudent::with(['kelas.waliKelas'])
+                    ->whereIn('id', $tidakHadirIds)
+                    ->orderBy('kelas_id')
+                    ->orderBy('nama')
+                    ->get();
+
+                foreach ($siswaAlpha as $s) {
+                    $namaKelas = $s->kelas->nama_kelas ?? '-';
+                    $wali      = $s->kelas->waliKelas->name ?? '-';
+                    if (!isset($alphaPerKelas[$namaKelas])) {
+                        $alphaPerKelas[$namaKelas] = ['wali' => $wali, 'siswa' => []];
+                    }
+                    $alphaPerKelas[$namaKelas]['siswa'][] = $s->nama;
+                }
+            }
+
+            $message = $this->buildMasukMessage($dayName, $totalSiswa, $hadir, $terlambat, $alpha, $izin, $sakit, $persen, $status, $alphaPerKelas);
         }
 
         $this->line('');
@@ -138,22 +166,45 @@ class SendKepsekSummary extends Command
 
     protected function buildMasukMessage(
         string $dayName, int $totalSiswa, int $hadir, int $terlambat,
-        int $alpha, int $izin, int $sakit, float $persen, string $status
+        int $alpha, int $izin, int $sakit, float $persen, string $status,
+        array $alphaPerKelas = []
     ): string {
         $schoolName = AttendanceSetting::get('school_name', 'SMK');
-        return implode("\n", [
+        $hadirTepat = $hadir - $terlambat;
+
+        $lines = [
             "📊 *LAPORAN KEHADIRAN HARIAN*",
-            "*{$schoolName}*", $dayName, "",
+            "*{$schoolName}*",
+            $dayName,
+            "",
             "👥 Total Siswa   : {$totalSiswa} orang",
             "✅ Hadir         : {$hadir} ({$persen}%)",
-            "   ↳ Tepat waktu : " . ($hadir - $terlambat) . " siswa",
+            "   ↳ Tepat waktu : {$hadirTepat} siswa",
             "   ↳ Terlambat   : {$terlambat} siswa",
             "❌ Alpha         : {$alpha} siswa",
             "📋 Izin          : {$izin} siswa",
             "🤒 Sakit         : {$sakit} siswa",
-            "", "Status: {$status}", "",
-            "_Sistem Absensi Otomatis_",
-        ]);
+            "",
+            "Status: {$status}",
+        ];
+
+        if (!empty($alphaPerKelas)) {
+            $lines[] = "";
+            $lines[] = "*Detail Siswa Alpha:*";
+            foreach ($alphaPerKelas as $namaKelas => $data) {
+                $lines[] = "";
+                $lines[] = "📚 *{$namaKelas}*";
+                $lines[] = "   Wali Kelas: {$data['wali']}";
+                foreach ($data['siswa'] as $i => $nama) {
+                    $lines[] = "   " . ($i + 1) . ". {$nama}";
+                }
+            }
+        }
+
+        $lines[] = "";
+        $lines[] = "_Sistem Absensi Otomatis_";
+
+        return implode("\n", $lines);
     }
 
     protected function buildPulangMessage(
