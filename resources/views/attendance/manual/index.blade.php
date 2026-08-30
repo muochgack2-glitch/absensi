@@ -272,6 +272,7 @@
         };
 
         function updateRowStyle(studentId, selectedStatus) {
+            // ── Badge highlight ──────────────────────────────────────
             allStatuses.forEach(s => {
                 const badge = document.getElementById('badge_' + studentId + '_' + s);
                 if (!badge) return;
@@ -284,28 +285,54 @@
                 }
             });
 
-            // Dynamic placeholder keterangan — reminder jika koreksi dari alpha
+            // ── Keterangan wajib / opsional ──────────────────────────
             const notesInput = document.querySelector(`.notes-input[data-student-id="${studentId}"]`);
             if (!notesInput) return;
-            const prevStatus = notesInput.dataset.prevStatus;
+            const prevStatus = notesInput.dataset.prevStatus || '';
 
-            if (prevStatus === 'alpha' && selectedStatus !== 'alpha') {
-                // Kosongkan nilai auto-marked dan ubah ke placeholder warning
-                if (notesInput.value.startsWith('Auto-marked')) {
+            const hadirGroup = ['hadir', 'terlambat'];
+            const absenGroup = ['izin', 'sakit'];
+
+            // Kondisi wajib keterangan:
+            const isKoreksiAlpha   = prevStatus === 'alpha' && selectedStatus !== 'alpha' && selectedStatus !== 'skip';
+            const isFirstWajib     = prevStatus === '' && ['terlambat','izin','sakit'].includes(selectedStatus);
+            const isStatusChange   = prevStatus !== '' && prevStatus !== 'alpha' && (
+                (hadirGroup.includes(prevStatus) && absenGroup.includes(selectedStatus)) ||
+                (absenGroup.includes(prevStatus) && hadirGroup.includes(selectedStatus))
+            );
+
+            const wajib = isKoreksiAlpha || isFirstWajib || isStatusChange;
+
+            if (wajib) {
+                // Auto-clear teks auto-marked jika koreksi alpha
+                if (isKoreksiAlpha && notesInput.value.startsWith('Auto-marked')) {
                     notesInput.value = '';
                 }
-                notesInput.placeholder = '⚠️ Isi alasan koreksi...';
-                notesInput.style.outline = '2px solid #f97316';
-                notesInput.style.outlineOffset = '1px';
-                notesInput.style.backgroundColor = '#fff7ed'; // orange-50
-                notesInput.focus();
-            } else if (prevStatus !== 'alpha' || selectedStatus === 'alpha') {
-                notesInput.placeholder = 'Keterangan opsional...';
-                notesInput.style.outline = '';
-                notesInput.style.outlineOffset = '';
+
+                // Tentukan placeholder sesuai skenario
+                if (isKoreksiAlpha) {
+                    notesInput.placeholder = '⚠️ Wajib: alasan koreksi dari alpha...';
+                } else if (isStatusChange) {
+                    notesInput.placeholder = '⚠️ Wajib: alasan perubahan status...';
+                } else {
+                    notesInput.placeholder = '⚠️ Wajib: alasan ketidakhadiran...';
+                }
+
+                notesInput.required = true;
+                notesInput.style.outline         = '2px solid #f97316';
+                notesInput.style.outlineOffset   = '1px';
+                notesInput.style.backgroundColor = '#fff7ed';
+                if (!notesInput.value) notesInput.focus();
+
+            } else {
+                notesInput.placeholder           = 'Keterangan opsional...';
+                notesInput.required              = false;
+                notesInput.style.outline         = '';
+                notesInput.style.outlineOffset   = '';
                 notesInput.style.backgroundColor = '';
             }
         }
+
 
         // ===== Isi semua baris dengan satu status =====
         function fillAll(status) {
