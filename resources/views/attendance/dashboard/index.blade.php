@@ -806,8 +806,8 @@
                     const text  = type === 'weekend' ? '🏖️ Sabtu' : '🎌 Libur Nasional';
                     const color = type === 'weekend' ? '#ef4444' : '#f97316';
                     const bgCol = type === 'weekend'
-                        ? 'rgba(239,68,68,0.09)'
-                        : 'rgba(249,115,22,0.08)';
+                        ? 'rgba(239,68,68,0.13)'
+                        : 'rgba(249,115,22,0.12)';
 
                     // Lebar kolom (estimasi)
                     const colW = xScale.getPixelForValue(1) - xScale.getPixelForValue(0);
