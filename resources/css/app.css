@@ -445,65 +445,141 @@ body.sidebar-collapsed .main-content {
 
 
 /* ============================================ */
-/* MOBILE MENU BUTTON (SPMB Style) */
 /* ============================================ */
-.mobile-menu-btn {
+/* MOBILE TOP APP BAR                           */
+/* ============================================ */
+
+/* Hidden on desktop */
+.mobile-topbar {
     display: none;
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    z-index: 1060;
-    padding: 10px 14px;
-    border: 2px solid #cbd5e1;
-    border-radius: 8px;
-    background: #f1f5f9;
-    color: #1e293b;
-    font-size: 22px;
-    font-weight: 700;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    cursor: pointer;
-    pointer-events: auto;
 }
 
-.mobile-menu-btn:hover {
-    background: #e2e8f0;
-    border-color: #94a3b8;
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-}
-
-.mobile-menu-btn:active {
-    transform: scale(0.98);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
-}
-
-/* Dark mode styles */
-.dark .mobile-menu-btn {
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-}
-
-.dark .mobile-menu-btn:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.5);
-}
-
-/* Show button only on mobile/tablet (<1024px) */
 @media (max-width: 1023px) {
-    .mobile-menu-btn {
-        display: inline-flex;
+    /* Show top bar on mobile */
+    .mobile-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 56px;
+        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+        z-index: 1055;
+        padding: 0 0.75rem;
+    }
+
+    /* Push page content below the bar */
+    .main-content {
+        padding-top: 56px;
+    }
+
+    /* Hamburger button */
+    .mobile-topbar-btn {
+        display: flex;
         align-items: center;
         justify-content: center;
-        transition: opacity 0.3s ease, visibility 0.3s ease;
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.12);
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        flex-shrink: 0;
     }
-    
-    /* Hide button when sidebar is open */
-    body.sidebar-menu-open .mobile-menu-btn {
+
+    .mobile-topbar-btn:active {
+        background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Animated hamburger lines */
+    .hamburger-icon {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 20px;
+        height: 16px;
+        gap: 0;
+        position: relative;
+    }
+
+    .hamburger-icon span {
+        display: block;
+        width: 20px;
+        height: 2px;
+        background: white;
+        border-radius: 2px;
+        position: absolute;
+        transition: transform 0.3s ease, opacity 0.3s ease, top 0.3s ease;
+    }
+
+    .hamburger-icon span:nth-child(1) { top: 0; }
+    .hamburger-icon span:nth-child(2) { top: 7px; }
+    .hamburger-icon span:nth-child(3) { top: 14px; }
+
+    /* Animate to X when sidebar is open */
+    body.sidebar-menu-open .hamburger-icon span:nth-child(1) {
+        top: 7px;
+        transform: rotate(45deg);
+    }
+    body.sidebar-menu-open .hamburger-icon span:nth-child(2) {
         opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
+        transform: scaleX(0);
+    }
+    body.sidebar-menu-open .hamburger-icon span:nth-child(3) {
+        top: 7px;
+        transform: rotate(-45deg);
+    }
+
+    /* Brand / center area */
+    .mobile-topbar-brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+    }
+
+    .mobile-topbar-logo {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        object-fit: contain;
+    }
+
+    .mobile-topbar-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: white;
+        letter-spacing: 0.01em;
+    }
+
+    /* User avatar */
+    .mobile-topbar-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #60a5fa, #3b82f6);
+        color: white;
+        font-weight: 700;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        border: 2px solid rgba(255,255,255,0.3);
+        flex-shrink: 0;
+        transition: border-color 0.2s ease;
+    }
+
+    .mobile-topbar-avatar:hover {
+        border-color: rgba(255,255,255,0.7);
     }
 }
 

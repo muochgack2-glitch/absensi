@@ -63,14 +63,36 @@
         <!-- Main Content Area -->
         <div id="mainContent" class="main-content transition-all duration-300">
             
-            <!-- Mobile Menu Button (SPMB Style) - Only visible on mobile -->
-            <button 
-                onclick="toggleMobileMenu()" 
-                class="mobile-menu-btn"
-                aria-label="Toggle menu"
-            >
-                <i class="fas fa-bars"></i>
-            </button>
+            <!-- Mobile Top App Bar — only on mobile (<1024px) -->
+            <header class="mobile-topbar" id="mobileTopbar">
+                <!-- Hamburger toggle -->
+                <button 
+                    id="mobileMenuBtn"
+                    onclick="toggleMobileMenu()" 
+                    class="mobile-topbar-btn"
+                    aria-label="Toggle menu"
+                >
+                    <span class="hamburger-icon">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                </button>
+
+                <!-- Brand -->
+                <div class="mobile-topbar-brand">
+                    <img src="{{ asset('images/logo.png') }}" 
+                         alt="Logo" 
+                         class="mobile-topbar-logo"
+                         onerror="this.style.display='none'">
+                    <span class="mobile-topbar-title">{{ config('app.name', 'Absensi QR') }}</span>
+                </div>
+
+                <!-- User Avatar -->
+                <a href="{{ route('profile.edit') }}" class="mobile-topbar-avatar">
+                    {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+                </a>
+            </header>
             
             
             <!-- Page Content -->
