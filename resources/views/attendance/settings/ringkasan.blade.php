@@ -221,6 +221,11 @@ _Sistem Absensi SMK PGRI Blora_</div>
 
 Status: [Baik/Perhatian]
 
+*Detail Siswa Terlambat:*
+📚 *[Kelas]*
+   Wali Kelas: [Nama]
+   1. [Nama Siswa]
+
 *Detail Siswa Alpha:*
 📚 *[Kelas]*
    Wali Kelas: [Nama]
@@ -241,6 +246,11 @@ _Sistem Absensi Otomatis_</div>
    ↳ Tepat waktu  : [N] siswa
    ↳ Pulang cepat : [N] siswa
 ⏳ Belum pulang   : [N] siswa
+
+*Detail Pulang Cepat:*
+📚 *[Kelas]*
+   Wali Kelas: [Nama]
+   1. [Nama Siswa]
 
 *Detail Belum Pulang:*
 📚 *[Kelas]*
