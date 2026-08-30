@@ -172,6 +172,35 @@ class AttendanceSettingController extends Controller
             AttendanceSetting::set('summary_pulang_send_time', $request->settings['summary_pulang_send_time'], 'notification');
         }
 
+        // ── Waka Kesiswaan ──────────────────────────────────────────────────────
+        AttendanceSetting::set('waka_summary_enabled',
+            isset($request->settings['waka_summary_enabled']) ? '1' : '0', 'notification');
+
+        if (isset($request->settings['waka_summary_masuk_time'])) {
+            AttendanceSetting::set('waka_summary_masuk_time', $request->settings['waka_summary_masuk_time'], 'notification');
+        }
+        if (isset($request->settings['waka_summary_pulang_time'])) {
+            AttendanceSetting::set('waka_summary_pulang_time', $request->settings['waka_summary_pulang_time'], 'notification');
+        }
+        if (isset($request->settings['waka_summary_send_days'])) {
+            AttendanceSetting::set('waka_summary_send_days', $request->settings['waka_summary_send_days'], 'notification');
+        }
+
+        // ── Kepala Sekolah ───────────────────────────────────────────────────────
+        AttendanceSetting::set('kepsek_summary_enabled',
+            isset($request->settings['kepsek_summary_enabled']) ? '1' : '0', 'notification');
+
+        if (isset($request->settings['kepsek_summary_time'])) {
+            AttendanceSetting::set('kepsek_summary_time', $request->settings['kepsek_summary_time'], 'notification');
+        }
+        if (isset($request->settings['kepsek_summary_pulang_time'])) {
+            AttendanceSetting::set('kepsek_summary_pulang_time', $request->settings['kepsek_summary_pulang_time'], 'notification');
+        }
+        if (isset($request->settings['kepsek_summary_send_days'])) {
+            AttendanceSetting::set('kepsek_summary_send_days', $request->settings['kepsek_summary_send_days'], 'notification');
+        }
+
+
         // Handle logo upload
         if ($request->hasFile('school_logo')) {
             $logo = $request->file('school_logo');
