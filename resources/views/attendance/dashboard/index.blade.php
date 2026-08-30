@@ -97,9 +97,9 @@
             {{-- Bar Chart: 7 Hari Terakhir --}}
             <div class="lg:col-span-2">
                 <x-card>
-                    <div class="flex items-center justify-between mb-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white flex-shrink-0">
                                 <i class="fas fa-chart-bar"></i>
                             </div>
                             <div>
@@ -110,7 +110,7 @@
                         {{-- Filter Kelas --}}
                         <select id="chartClassFilter"
                                 onchange="loadChartByClass(this.value)"
-                                class="text-xs px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-400">
+                                class="text-xs px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-400 w-full sm:w-auto">
                             <option value="">Semua Kelas</option>
                             @foreach($classes as $cls)
                                 <option value="{{ $cls->id }}">{{ $cls->nama_kelas }}</option>
@@ -160,24 +160,24 @@
 
         {{-- 🏆 Top 5 Paling Awal Masuk --}}
         <x-card class="mt-2">
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600 dark:text-yellow-400 text-lg">
+                    <div class="w-10 h-10 rounded-xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600 dark:text-yellow-400 text-lg flex-shrink-0">
                         <i class="fas fa-trophy"></i>
                     </div>
                     <div>
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">🏆 Top 5 Paling Awal Masuk</h3>
+                        <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">🏆 Top 5 Paling Awal Masuk</h3>
                         <p class="text-xs text-gray-500 dark:text-gray-400">Berdasarkan rata-rata jam check-in</p>
                     </div>
                 </div>
                 {{-- Tab Toggle --}}
-                <div class="flex bg-gray-100 dark:bg-gray-700 rounded-xl p-1 gap-1">
+                <div class="flex bg-gray-100 dark:bg-gray-700 rounded-xl p-1 gap-1 self-start sm:self-auto">
                     <button onclick="switchEarlyTab('week')" id="tab-early-week"
-                        class="px-4 py-1.5 text-sm font-semibold rounded-lg transition-all bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm">
+                        class="px-3 sm:px-4 py-1.5 text-sm font-semibold rounded-lg transition-all bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm">
                         Minggu Ini
                     </button>
                     <button onclick="switchEarlyTab('month')" id="tab-early-month"
-                        class="px-4 py-1.5 text-sm font-semibold rounded-lg transition-all text-gray-500 dark:text-gray-400 hover:text-gray-700">
+                        class="px-3 sm:px-4 py-1.5 text-sm font-semibold rounded-lg transition-all text-gray-500 dark:text-gray-400 hover:text-gray-700">
                         Bulan Ini
                     </button>
                 </div>
@@ -280,24 +280,24 @@
 
         {{-- 🚨 Top 5 Paling Sering Alpha --}}
         <x-card class="mt-2">
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400 text-lg">
+                    <div class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400 text-lg flex-shrink-0">
                         <i class="fas fa-user-times"></i>
                     </div>
                     <div>
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">🚨 Top 5 Paling Sering Alpha</h3>
+                        <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">🚨 Top 5 Paling Sering Alpha</h3>
                         <p class="text-xs text-gray-500 dark:text-gray-400">Siswa dengan absen alpha terbanyak</p>
                     </div>
                 </div>
                 {{-- Tab Toggle --}}
-                <div class="flex bg-gray-100 dark:bg-gray-700 rounded-xl p-1 gap-1">
+                <div class="flex bg-gray-100 dark:bg-gray-700 rounded-xl p-1 gap-1 self-start sm:self-auto">
                     <button onclick="switchAlphaTab('week')" id="tab-alpha-week"
-                        class="px-4 py-1.5 text-sm font-semibold rounded-lg transition-all bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm">
+                        class="px-3 sm:px-4 py-1.5 text-sm font-semibold rounded-lg transition-all bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm">
                         Minggu Ini
                     </button>
                     <button onclick="switchAlphaTab('month')" id="tab-alpha-month"
-                        class="px-4 py-1.5 text-sm font-semibold rounded-lg transition-all text-gray-500 dark:text-gray-400 hover:text-gray-700">
+                        class="px-3 sm:px-4 py-1.5 text-sm font-semibold rounded-lg transition-all text-gray-500 dark:text-gray-400 hover:text-gray-700">
                         Bulan Ini
                     </button>
                 </div>
@@ -409,25 +409,25 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-800">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">
+                            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">
                                 NIS
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                 Nama
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">
+                            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">
                                 Kelas
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                 Check In
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">
+                            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">
                                 Check Out
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                 Status
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">
+                            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">
                                 Foto
                             </th>
                         </tr>
@@ -435,22 +435,22 @@
                     <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                         @forelse($attendanceRecords as $record)
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white hidden sm:table-cell">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white hidden sm:table-cell">
                                     {{ $record->student->nis }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                                     {{ $record->student->nama }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
                                     {{ $record->student->kelas->nama_kelas ?? '-' }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                     {{ $record->check_in_time ? \Carbon\Carbon::parse($record->check_in_time)->format('H:i') : '-' }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
                                     {{ $record->check_out_time ? \Carbon\Carbon::parse($record->check_out_time)->format('H:i') : '-' }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                                     @if($record->status === 'hadir')
                                         <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
                                             ✅ Hadir
