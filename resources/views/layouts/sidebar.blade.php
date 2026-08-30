@@ -768,8 +768,8 @@
                 <span class="nav-text font-medium">QR Scanner</span>
             </a>
 
-            {{-- Input Manual: admin only --}}
-            @if(auth()->user()?->isAdmin())
+            {{-- Input Manual: petugas, waka, admin --}}
+            @if(auth()->user()?->isPetugas() || auth()->user()?->isWakaKesiswaan() || auth()->user()?->isAdmin())
             <!-- Input Absensi Manual -->
             <a 
                 href="{{ route('attendance.manual.index') }}"
