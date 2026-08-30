@@ -9,6 +9,7 @@ use App\Models\AttendanceSetting;
 use App\Models\Holiday;
 use App\Models\User;
 use App\Services\AttendanceWhatsAppService;
+use App\Services\AttendanceSummaryMessageService;
 use Carbon\Carbon;
 
 class SendKepsekSummary extends Command
