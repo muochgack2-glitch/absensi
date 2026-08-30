@@ -575,12 +575,174 @@ body.sidebar-collapsed .main-content {
         text-decoration: none;
         border: 2px solid rgba(255,255,255,0.3);
         flex-shrink: 0;
-        transition: border-color 0.2s ease;
+        cursor: pointer;
+        transition: border-color 0.2s ease, transform 0.2s ease;
     }
 
-    .mobile-topbar-avatar:hover {
-        border-color: rgba(255,255,255,0.7);
+    .mobile-topbar-avatar:active {
+        transform: scale(0.93);
     }
+
+    /* Avatar wrapper — anchor for dropdown */
+    .mobile-avatar-wrapper {
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    /* === AVATAR DROPDOWN (MAD) === */
+    .mobile-avatar-dropdown {
+        display: none;
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        width: 230px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10);
+        overflow: hidden;
+        z-index: 2000;
+        animation: madSlideIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        transform-origin: top right;
+    }
+
+    .dark .mobile-avatar-dropdown {
+        background: #1e293b;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+
+    .mobile-avatar-dropdown.open {
+        display: block;
+    }
+
+    @keyframes madSlideIn {
+        from { opacity: 0; transform: scale(0.85) translateY(-8px); }
+        to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* Header: avatar + name + email */
+    .mad-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 14px 12px;
+    }
+
+    .mad-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1e40af, #3b82f6);
+        color: white;
+        font-weight: 700;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .mad-info { flex: 1; min-width: 0; }
+
+    .mad-name {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #1e293b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .dark .mad-name { color: #f1f5f9; }
+
+    .mad-email {
+        font-size: 0.7rem;
+        color: #64748b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .dark .mad-email { color: #94a3b8; }
+
+    /* Divider */
+    .mad-divider {
+        height: 1px;
+        background: #e2e8f0;
+        margin: 0;
+    }
+
+    .dark .mad-divider { background: #334155; }
+
+    /* Menu item */
+    .mad-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 12px 14px;
+        border: none;
+        background: none;
+        color: #374151;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background 0.15s ease;
+        text-align: left;
+    }
+
+    .dark .mad-item { color: #e2e8f0; }
+
+    .mad-item:hover { background: #f1f5f9; }
+    .dark .mad-item:hover { background: #334155; }
+
+    .mad-item-icon {
+        width: 16px;
+        color: #6366f1;
+        font-size: 0.875rem;
+        flex-shrink: 0;
+    }
+
+    /* Dark mode toggle pill */
+    .mad-toggle {
+        margin-left: auto;
+        width: 36px;
+        height: 20px;
+        border-radius: 10px;
+        background: #cbd5e1;
+        position: relative;
+        flex-shrink: 0;
+        transition: background 0.25s ease;
+    }
+
+    .mad-toggle::after {
+        content: '';
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: white;
+        top: 3px;
+        left: 3px;
+        transition: transform 0.25s ease;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    body.dark-mode-on .mad-toggle,
+    .dark .mad-toggle {
+        background: #6366f1;
+    }
+
+    body.dark-mode-on .mad-toggle::after,
+    .dark .mad-toggle::after {
+        transform: translateX(16px);
+    }
+
+    /* Logout item */
+    .mad-logout { color: #dc2626 !important; }
+    .mad-logout .mad-item-icon { color: #dc2626 !important; }
+    .mad-logout:hover { background: #fef2f2 !important; }
+    .dark .mad-logout:hover { background: rgba(220,38,38,0.15) !important; }
 
     /* When sidebar is open: topbar slides behind the overlay */
     body.sidebar-menu-open .mobile-topbar {

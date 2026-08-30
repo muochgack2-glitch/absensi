@@ -52,6 +52,42 @@
                 updateDarkModeIcons(!isDark);
             }
         }
+
+        // ─── Mobile Avatar Dropdown ─────────────────────────
+        function toggleAvatarDropdown() {
+            const dropdown = document.getElementById('mobileAvatarDropdown');
+            if (!dropdown) return;
+            dropdown.classList.toggle('open');
+            syncDropdownDarkState();
+        }
+
+        function closeAvatarDropdown() {
+            const dropdown = document.getElementById('mobileAvatarDropdown');
+            if (dropdown) dropdown.classList.remove('open');
+        }
+
+        function toggleDarkModeFromDropdown() {
+            // Reuse sidebar's toggleDarkMode
+            toggleDarkMode();
+            syncDropdownDarkState();
+        }
+
+        function syncDropdownDarkState() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const icon  = document.getElementById('madDarkIcon');
+            const label = document.getElementById('madDarkLabel');
+            if (icon)  { icon.className  = isDark ? 'fas fa-sun mad-item-icon'  : 'fas fa-moon mad-item-icon'; }
+            if (label) { label.textContent = isDark ? 'Light Mode' : 'Dark Mode'; }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const wrapper  = document.getElementById('mobileAvatarWrapper');
+            const dropdown = document.getElementById('mobileAvatarDropdown');
+            if (wrapper && dropdown && dropdown.classList.contains('open')) {
+                if (!wrapper.contains(e.target)) closeAvatarDropdown();
+            }
+        });
     </script>
 </head>
 <body class="font-sans antialiased bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
@@ -93,10 +129,50 @@
                     <span class="mobile-topbar-title">{{ config('app.name', 'Absensi QR') }}</span>
                 </div>
 
-                <!-- User Avatar -->
-                <a href="{{ route('profile.edit') }}" class="mobile-topbar-avatar">
-                    {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
-                </a>
+                <!-- User Avatar + Dropdown -->
+                <div class="mobile-avatar-wrapper" id="mobileAvatarWrapper">
+                    <button 
+                        class="mobile-topbar-avatar" 
+                        id="mobileAvatarBtn"
+                        onclick="toggleAvatarDropdown()"
+                        aria-label="User menu"
+                    >
+                        {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div class="mobile-avatar-dropdown" id="mobileAvatarDropdown">
+                        {{-- User info --}}
+                        <div class="mad-header">
+                            <div class="mad-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}</div>
+                            <div class="mad-info">
+                                <div class="mad-name">{{ auth()->user()->name }}</div>
+                                <div class="mad-email">{{ auth()->user()->email }}</div>
+                            </div>
+                        </div>
+                        <div class="mad-divider"></div>
+                        {{-- Dark mode toggle --}}
+                        <button class="mad-item" onclick="toggleDarkModeFromDropdown()">
+                            <i class="fas fa-moon mad-item-icon" id="madDarkIcon"></i>
+                            <span id="madDarkLabel">Dark Mode</span>
+                            <span class="mad-toggle" id="madToggle"></span>
+                        </button>
+                        <div class="mad-divider"></div>
+                        {{-- Profile --}}
+                        <a href="{{ route('profile.edit') }}" class="mad-item">
+                            <i class="fas fa-user mad-item-icon"></i>
+                            <span>Profile</span>
+                        </a>
+                        {{-- Logout --}}
+                        <form method="POST" action="{{ route('logout') }}" id="mobileLogoutForm">
+                            @csrf
+                            <button type="submit" class="mad-item mad-logout">
+                                <i class="fas fa-sign-out-alt mad-item-icon"></i>
+                                <span>Logout</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </header>
             
             
