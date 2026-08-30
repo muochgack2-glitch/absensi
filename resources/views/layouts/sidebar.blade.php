@@ -1001,7 +1001,8 @@
                 <span class="nav-text font-medium">Kamera</span>
             </a>
 
-            {{-- Notifikasi --}}
+            {{-- Notifikasi: admin & waka only --}}
+            @if(auth()->user()?->isAdmin() || auth()->user()?->isWakaKesiswaan())
             <a
                 href="{{ route('attendance.notifikasi.index') }}"
                 class="sidebar-menu-item {{ request()->routeIs('attendance.notifikasi.*') ? 'active' : '' }}"
@@ -1012,6 +1013,7 @@
                 <i class="fas fa-bell text-lg"></i>
                 <span class="nav-text font-medium">Notifikasi</span>
             </a>
+            @endif
 
             {{-- Setting Waktu --}}
             @if(auth()->user()?->isAdmin())
@@ -1027,7 +1029,8 @@
             </a>
             @endif
 
-            {{-- Ringkasan --}}
+            {{-- Ringkasan: admin & waka only --}}
+            @if(auth()->user()?->isAdmin() || auth()->user()?->isWakaKesiswaan())
             <a
                 href="{{ route('attendance.ringkasan.index') }}"
                 class="sidebar-menu-item {{ request()->routeIs('attendance.ringkasan.*') ? 'active' : '' }}"
@@ -1038,6 +1041,7 @@
                 <i class="fas fa-chart-bar text-lg"></i>
                 <span class="nav-text font-medium">Ringkasan</span>
             </a>
+            @endif
 
             {{-- Settings: admin & waka only --}}
             @if(auth()->user()?->isAdmin() || auth()->user()?->isWakaKesiswaan())
