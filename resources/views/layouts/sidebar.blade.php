@@ -1039,6 +1039,8 @@
                 <span class="nav-text font-medium">Ringkasan</span>
             </a>
 
+            {{-- Settings: admin & waka only --}}
+            @if(auth()->user()?->isAdmin() || auth()->user()?->isWakaKesiswaan())
             <!-- Settings -->
             <a
                 href="{{ route('attendance.settings.index') }}"
@@ -1050,6 +1052,7 @@
                 <i class="fas fa-cog text-lg"></i>
                 <span class="nav-text font-medium">Settings</span>
             </a>
+            @endif
             @endif
 
 
