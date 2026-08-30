@@ -28,7 +28,10 @@
         }
     } else if (sidebar) {
         // Mobile: always full-width, use transform for show/hide
+        // Ensure collapsed class (from desktop localStorage) doesn't bleed into mobile
         sidebar.style.width = '16rem';
+        sidebar.classList.remove('collapsed');
+        document.body.classList.remove('sidebar-collapsed');
     }
     
     // ============================================

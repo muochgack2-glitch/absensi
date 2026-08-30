@@ -29,7 +29,7 @@
     
     /* Enable transitions after page load (added by JS after 50ms) */
     .sidebar.transitions-enabled {
-        transition: width 0.3s ease !important;
+        transition: width 0.3s ease, transform 0.3s ease !important;
     }
     
     /* Collapsed State */
@@ -405,14 +405,22 @@
     /* MOBILE MENU STATE (SPMB Approach - Clean) */
     /* ============================================ */
     @media (max-width: 1023px) {
-        .sidebar {
+        /* Override ALL sidebar states — collapsed included */
+        .sidebar,
+        .sidebar.collapsed {
             transform: translateX(-100%);
             transition: transform 0.3s ease;
             width: 16rem !important;
             z-index: 1050 !important;
         }
+
+        /* Hover expand: disabled on mobile */
+        .sidebar.collapsed:hover {
+            width: 16rem !important;
+        }
         
-        .sidebar.mobile-show {
+        .sidebar.mobile-show,
+        .sidebar.collapsed.mobile-show {
             transform: translateX(0);
         }
         
