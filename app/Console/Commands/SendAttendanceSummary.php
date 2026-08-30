@@ -7,6 +7,7 @@ use App\Models\AttendanceClass;
 use App\Models\AttendanceRecord;
 use App\Models\AttendanceStudent;
 use App\Services\AttendanceWhatsAppService;
+use App\Services\AttendanceSummaryMessageService;
 use Carbon\Carbon;
 
 class SendAttendanceSummary extends Command
@@ -94,13 +95,13 @@ class SendAttendanceSummary extends Command
                 $pulangTepatIds  = array_diff($pulangIds, $pulangCepatIds);
                 $belumPulang     = count($hadirIds) - count(array_intersect($hadirIds, $pulangIds));
                 $belumPulang     = max(0, $belumPulang);
-                $message = $this->buildPulangMessage($kelas->nama_kelas, $dayName, $totalSiswa, $hadir, $izin, $alfa, count($pulangTepatIds), count($pulangCepatIds), $belumPulang);
+                $message = AttendanceSummaryMessageService::buildWaliPulang($kelas->nama_kelas, $dayName, $totalSiswa, $hadir, $izin, $alfa, count($pulangTepatIds), count($pulangCepatIds), $belumPulang);
                 $this->line("  {$kelas->nama_kelas} | Hadir:{$hadir} PulangTepat:".count($pulangTepatIds)." PulangCepat:".count($pulangCepatIds)." Belum:{$belumPulang}");
             } else {
                 // Hitung terlambat untuk summary masuk
                 $terlambat = $records->where('status', 'terlambat')->count();
                 $hadirTepat = max(0, $hadir - $terlambat);
-                $message = $this->buildMasukMessage($kelas->nama_kelas, $dayName, $totalSiswa, $hadirTepat, $terlambat, $izin, $alfa, $alfaStudents);
+                $message = AttendanceSummaryMessageService::buildWaliMasuk($kelas->nama_kelas, $dayName, $totalSiswa, $hadirTepat, $terlambat, $izin, $alfa, $alfaStudents);
                 $this->line("  {$kelas->nama_kelas} | HadirTepat:{$hadirTepat} Terlambat:{$terlambat} Izin:{$izin} Alfa:{$alfa} Total:{$totalSiswa}");
             }
 
@@ -124,59 +125,5 @@ class SendAttendanceSummary extends Command
         $this->newLine();
         $this->info("Selesai. Terkirim:{$sent} Dilewati:{$skipped} Gagal:{$failed}");
         return Command::SUCCESS;
-    }
-
-    protected function buildMasukMessage(string $namaKelas, string $tanggal, int $total, int $hadirTepat, int $terlambat, int $izin, int $alfa, array $alfaStudents): string
-    {
-        $hadir  = $hadirTepat + $terlambat;
-        $persen = $total > 0 ? round(($hadir / $total) * 100) : 0;
-
-        $lines = [
-            "📋 *RINGKASAN KEHADIRAN MASUK*",
-            "📚 Kelas  : *{$namaKelas}*",
-            "📅 Tanggal: {$tanggal}",
-            "",
-            "👥 Total             : {$total} siswa",
-            "✅ Hadir tepat waktu : {$hadirTepat} siswa",
-            "⏰ Terlambat         : {$terlambat} siswa",
-            "📝 Izin              : {$izin} siswa",
-            "❌ Alfa              : {$alfa} siswa",
-            "📊 Kehadiran         : {$persen}%",
-        ];
-
-        if (!empty($alfaStudents)) {
-            $lines[] = "";
-            $lines[] = "*Siswa tidak hadir (alfa):*";
-            foreach ($alfaStudents as $i => $nama) {
-                $lines[] = ($i + 1) . ". {$nama}";
-            }
-        }
-
-        $lines[] = "";
-        $lines[] = "_Sistem Absensi SMK PGRI Blora_";
-
-        return implode("\n", $lines);
-    }
-
-    protected function buildPulangMessage(string $namaKelas, string $tanggal, int $total, int $hadir, int $izin, int $alfa, int $pulangTepat, int $pulangCepat, int $belumPulang): string
-    {
-        $lines = [
-            "🌆 *RINGKASAN KEPULANGAN*",
-            "📚 Kelas  : *{$namaKelas}*",
-            "📅 Tanggal: {$tanggal}",
-            "",
-            "👥 Total              : {$total} siswa",
-            "🏫 Hadir hari ini     : {$hadir} siswa",
-            "✅ Pulang tepat waktu : {$pulangTepat} siswa",
-            "⚡ Pulang lebih awal  : {$pulangCepat} siswa",
-            "⏳ Belum pulang       : {$belumPulang} siswa",
-            "📝 Izin               : {$izin} siswa",
-            "❌ Alfa               : {$alfa} siswa",
-        ];
-
-        $lines[] = "";
-        $lines[] = "_Sistem Absensi SMK PGRI Blora_";
-
-        return implode("\n", $lines);
     }
 }

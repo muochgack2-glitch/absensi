@@ -98,7 +98,7 @@ class SendKepsekSummary extends Command
                 }
             }
 
-            $message = $this->buildPulangMessage($dayName, $totalSiswa, $hadir, $sudahPulang, $pulangCepat, $belumPulang, $belumPulangPerKelas, $pulangCepatPerKelas);
+            $message = AttendanceSummaryMessageService::buildWakaPulang($dayName, $totalSiswa, $hadir, $sudahPulang, $pulangCepat, $belumPulang, $belumPulangPerKelas, $pulangCepatPerKelas);
         } else {
             $persen  = $totalSiswa > 0 ? round(($hadir / $totalSiswa) * 100, 1) : 0;
             $status  = match(true) {
@@ -151,7 +151,7 @@ class SendKepsekSummary extends Command
                 }
             }
 
-            $message = $this->buildMasukMessage($dayName, $totalSiswa, $hadir, $terlambat, $alpha, $izin, $sakit, $persen, $status, $alphaPerKelas, $terlambatPerKelas);
+            $message = AttendanceSummaryMessageService::buildWakaMasuk($dayName, $totalSiswa, $hadir, $terlambat, $alpha, $izin, $sakit, $persen, $status, $alphaPerKelas, $terlambatPerKelas);
         }
 
         $this->line('');
@@ -194,115 +194,5 @@ class SendKepsekSummary extends Command
         $this->info("Selesai. Terkirim:{$sent} Gagal:{$failed}");
         return Command::SUCCESS;
     }
-
-    protected function buildMasukMessage(
-        string $dayName, int $totalSiswa, int $hadir, int $terlambat,
-        int $alpha, int $izin, int $sakit, float $persen, string $status,
-        array $alphaPerKelas = [],
-        array $terlambatPerKelas = []
-    ): string {
-        $schoolName = AttendanceSetting::get('school_name', 'SMK');
-        $hadirTepat = $hadir - $terlambat;
-
-        $lines = [
-            "📊 *LAPORAN KEHADIRAN HARIAN*",
-            "*{$schoolName}*",
-            $dayName,
-            "",
-            "👥 Total Siswa   : {$totalSiswa} orang",
-            "✅ Hadir         : {$hadir} ({$persen}%)",
-            "   ↳ Tepat waktu : {$hadirTepat} siswa",
-            "   ↳ Terlambat   : {$terlambat} siswa",
-            "❌ Alpha         : {$alpha} siswa",
-            "📋 Izin          : {$izin} siswa",
-            "🤒 Sakit         : {$sakit} siswa",
-            "",
-            "Status: {$status}",
-        ];
-
-        if (!empty($terlambatPerKelas)) {
-            $lines[] = "";
-            $lines[] = "*Detail Siswa Terlambat:*";
-            foreach ($terlambatPerKelas as $namaKelas => $data) {
-                $lines[] = "";
-                $lines[] = "📚 *{$namaKelas}*";
-                $lines[] = "   Wali Kelas: {$data['wali']}";
-                foreach ($data['siswa'] as $i => $nama) {
-                    $lines[] = "   " . ($i + 1) . ". {$nama}";
-                }
-            }
-        }
-
-        if (!empty($alphaPerKelas)) {
-            $lines[] = "";
-            $lines[] = "*Detail Siswa Alpha:*";
-            foreach ($alphaPerKelas as $namaKelas => $data) {
-                $lines[] = "";
-                $lines[] = "📚 *{$namaKelas}*";
-                $lines[] = "   Wali Kelas: {$data['wali']}";
-                foreach ($data['siswa'] as $i => $nama) {
-                    $lines[] = "   " . ($i + 1) . ". {$nama}";
-                }
-            }
-        }
-
-        $lines[] = "";
-        $lines[] = "_Sistem Absensi Otomatis_";
-
-        return implode("\n", $lines);
-    }
-
-    protected function buildPulangMessage(
-        string $dayName, int $totalSiswa, int $hadir,
-        int $sudahPulang, int $pulangCepat, int $belumPulang,
-        array $belumPulangPerKelas = [],
-        array $pulangCepatPerKelas = []
-    ): string {
-        $schoolName  = AttendanceSetting::get('school_name', 'SMK');
-        $pulangTepat = $sudahPulang - $pulangCepat;
-
-        $lines = [
-            "🌆 *LAPORAN KEPULANGAN HARIAN*",
-            "*{$schoolName}*",
-            $dayName,
-            "",
-            "👥 Total Siswa     : {$totalSiswa} orang",
-            "🏫 Hadir hari ini  : {$hadir} siswa",
-            "✅ Sudah pulang    : {$sudahPulang} siswa",
-            "   ↳ Tepat waktu  : {$pulangTepat} siswa",
-            "   ↳ Pulang cepat : {$pulangCepat} siswa",
-            "⏳ Belum pulang   : {$belumPulang} siswa",
-        ];
-
-        if (!empty($pulangCepatPerKelas)) {
-            $lines[] = "";
-            $lines[] = "*Detail Pulang Cepat:*";
-            foreach ($pulangCepatPerKelas as $namaKelas => $data) {
-                $lines[] = "";
-                $lines[] = "📚 *{$namaKelas}*";
-                $lines[] = "   Wali Kelas: {$data['wali']}";
-                foreach ($data['siswa'] as $i => $nama) {
-                    $lines[] = "   " . ($i + 1) . ". {$nama}";
-                }
-            }
-        }
-
-        if (!empty($belumPulangPerKelas)) {
-            $lines[] = "";
-            $lines[] = "*Detail Belum Pulang:*";
-            foreach ($belumPulangPerKelas as $namaKelas => $data) {
-                $lines[] = "";
-                $lines[] = "📚 *{$namaKelas}*";
-                $lines[] = "   Wali Kelas: {$data['wali']}";
-                foreach ($data['siswa'] as $i => $nama) {
-                    $lines[] = "   " . ($i + 1) . ". {$nama}";
-                }
-            }
-        }
-
-        $lines[] = "";
-        $lines[] = "_Sistem Absensi Otomatis_";
-
-        return implode("\n", $lines);
-    }
 }
+

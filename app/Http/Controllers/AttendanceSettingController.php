@@ -124,7 +124,13 @@ class AttendanceSettingController extends Controller
     public function ringkasan()
     {
         $settings = AttendanceSetting::getGrouped();
-        return view('attendance.settings.ringkasan', compact('settings'));
+        $previews = [
+            'wali_masuk'  => \App\Services\AttendanceSummaryMessageService::previewWaliMasuk(),
+            'wali_pulang' => \App\Services\AttendanceSummaryMessageService::previewWaliPulang(),
+            'waka_masuk'  => \App\Services\AttendanceSummaryMessageService::previewWakaMasuk(),
+            'waka_pulang' => \App\Services\AttendanceSummaryMessageService::previewWakaPulang(),
+        ];
+        return view('attendance.settings.ringkasan', compact('settings', 'previews'));
     }
 
     public function updateRingkasan(Request $request)
