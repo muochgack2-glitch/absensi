@@ -8,11 +8,7 @@
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">⚙️ Pengaturan Sistem</h1>
-                @if(auth()->user()?->isAdmin())
-                <p class="text-gray-600 dark:text-gray-400 mt-1">Konfigurasi waktu absensi dan notifikasi</p>
-                @else
-                <p class="text-gray-600 dark:text-gray-400 mt-1">Pengaturan kamera scanner</p>
-                @endif
+                <p class="text-gray-600 dark:text-gray-400 mt-1">Informasi sekolah dan konfigurasi sistem</p>
             </div>
             @if(auth()->user()?->isAdmin())
             <div class="flex items-center gap-2">
@@ -49,109 +45,6 @@
                 <span class="text-xs text-gray-400 dark:text-gray-500 italic">Berlaku di semua perangkat</span>
             </div>
 
-            {{-- [Setting Waktu dipindah ke /attendance/setting-waktu] --}}
-
-
-
-
-            <x-card>
-                <div class="flex items-center mb-6">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-2xl mr-4">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">⚠️ Peringatan Keterlambatan</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Kirim peringatan khusus untuk siswa yang sering terlambat</p>
-                    </div>
-                </div>
-
-                <div class="space-y-5">
-                    {{-- Toggle Enable Late Warning --}}
-                    <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                            <label class="text-sm font-medium text-gray-900 dark:text-white">
-                                Aktifkan Peringatan Keterlambatan
-                            </label>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Kirim peringatan otomatis ke orang tua saat siswa sering terlambat</p>
-                        </div>
-                        <div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox"
-                                       name="settings[late_warning_enabled]"
-                                       value="1"
-                                       id="lateWarningEnabled"
-                                       @if(old('settings.late_warning_enabled', $settings['notification']['late_warning_enabled'] ?? '0') == '1') checked @endif
-                                       onchange="toggleLateWarningFields()"
-                                       class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
-                            </label>
-                        </div>
-                    </div>
-
-                    {{-- Sub-settings --}}
-                    <div id="lateWarningFields" class="space-y-4 @if(old('settings.late_warning_enabled', $settings['notification']['late_warning_enabled'] ?? '0') != '1') opacity-40 pointer-events-none @endif">
-                        
-                        {{-- Threshold Settings --}}
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <x-input
-                                type="number"
-                                name="settings[late_warning_threshold_minutes]"
-                                label="⏱️ Batas Keterlambatan (menit)"
-                                :value="old('settings.late_warning_threshold_minutes', $settings['notification']['late_warning_threshold_minutes'] ?? '30')"
-                                min="1"
-                                max="120"
-                                helper="Peringatan dikirim jika siswa terlambat minimal X menit"
-                            />
-
-                            <x-input
-                                type="number"
-                                name="settings[late_warning_min_count]"
-                                label="🔢 Jumlah Minimal Keterlambatan"
-                                :value="old('settings.late_warning_min_count', $settings['notification']['late_warning_min_count'] ?? '3')"
-                                min="1"
-                                max="20"
-                                helper="Peringatan dikirim setelah terlambat X kali dalam sebulan"
-                            />
-                        </div>
-
-                        {{-- Info Box --}}
-                        <div class="p-4 bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 rounded">
-                            <h4 class="font-semibold text-amber-900 dark:text-amber-300 mb-3">📊 Cara Kerja Peringatan Keterlambatan:</h4>
-                            <div class="space-y-2 text-sm text-amber-800 dark:text-amber-200">
-                                <p>• <strong>Real-time:</strong> Peringatan dikirim saat siswa check-in dengan status terlambat</p>
-                                <p>• <strong>Kondisi:</strong> Hanya dikirim jika siswa sudah terlambat minimal <strong class="text-amber-900 dark:text-amber-100">{{ old('settings.late_warning_min_count', $settings['notification']['late_warning_min_count'] ?? '3') }}x</strong> dalam bulan ini</p>
-                                <p>• <strong>Threshold:</strong> Terlambat minimal <strong class="text-amber-900 dark:text-amber-100">{{ old('settings.late_warning_threshold_minutes', $settings['notification']['late_warning_threshold_minutes'] ?? '30') }} menit</strong> dari jam masuk</p>
-                                <p>• <strong>Statistik:</strong> Pesan berisi total keterlambatan, akumulasi menit, dan trend</p>
-                            </div>
-                        </div>
-
-                        {{-- Preview Message --}}
-                        <div class="p-4 bg-white dark:bg-gray-900 border-2 border-amber-200 dark:border-amber-800 rounded-lg">
-                            <h4 class="font-semibold text-amber-900 dark:text-amber-300 mb-3 flex items-center gap-2">
-                                <i class="fab fa-whatsapp text-green-500"></i>
-                                Contoh Pesan Peringatan:
-                            </h4>
-                            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
-                                <div class="font-mono text-xs text-gray-800 dark:text-gray-200 whitespace-pre-line">🏫 <strong>{{ $settings['general']['school_name'] ?? 'SMK Negeri 1' }}</strong>
-⚠️ <strong>PERINGATAN KETERLAMBATAN</strong>
-
-Siswa: <strong>Ahmad Rizki</strong>
-Kelas: X Busana
-
-📊 <strong>Statistik Bulan Ini:</strong>
-• Total Terlambat: <strong>3x</strong>
-• Akumulasi Waktu: <strong>95 menit</strong>
-• Trend: 📈 <strong>Meningkat</strong>
-
-⚠️ Mohon perhatian lebih untuk kedisiplinan waktu.
-Keterlambatan berulang dapat mempengaruhi prestasi belajar.
-
-<em>Pesan otomatis dari sistem absensi</em></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </x-card>
 
             {{-- General Settings --}}
             <x-card>

@@ -92,7 +92,7 @@ class AttendanceSettingController extends Controller
     public function updateNotifikasi(Request $request)
     {
         // Checkbox toggles
-        foreach (['enable_parent_notification', 'include_photo_in_notification', 'auto_absent_notify'] as $key) {
+        foreach (['enable_parent_notification', 'include_photo_in_notification', 'auto_absent_notify', 'late_warning_enabled'] as $key) {
             AttendanceSetting::set($key,
                 $request->input("settings.{$key}", '0') == '1' ? '1' : '0', 'notification');
         }
@@ -101,8 +101,14 @@ class AttendanceSettingController extends Controller
             $request->input('settings.late_notify_enabled') === 'true' ? 'true' : 'false', 'notification');
 
         // Waktu & hari alpha
-        if ($request->has('settings.absent_notify_time')) {
+        if (isset($request->settings['absent_notify_time'])) {
             AttendanceSetting::set('absent_notify_time', $request->settings['absent_notify_time'], 'notification');
+        }
+        // Late warning thresholds
+        foreach (['late_warning_threshold_minutes', 'late_warning_min_count'] as $key) {
+            if (isset($request->settings[$key])) {
+                AttendanceSetting::set($key, $request->settings[$key], 'notification');
+            }
         }
         // Hari: dikumpulkan dari array absent_days[]
         $days = collect($request->input('absent_days', []))->filter()->implode(',');
