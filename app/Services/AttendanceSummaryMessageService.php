@@ -54,7 +54,8 @@ class AttendanceSummaryMessageService
         string $namaKelas, string $tanggal, int $total,
         int $hadir, int $izin, int $alfa,
         int $pulangTepat, int $pulangCepat, int $belumPulang,
-        array $belumPulangStudents = []
+        array $belumPulangStudents = [],
+        array $pulangCepatStudents = []
     ): string {
         $lines = [
             "🌆 *RINGKASAN KEPULANGAN*",
@@ -69,6 +70,14 @@ class AttendanceSummaryMessageService
             "📝 Izin               : {$izin} siswa",
             "❌ Alfa               : {$alfa} siswa",
         ];
+
+        if (!empty($pulangCepatStudents)) {
+            $lines[] = "";
+            $lines[] = "*Siswa pulang lebih awal:*";
+            foreach ($pulangCepatStudents as $i => $nama) {
+                $lines[] = ($i + 1) . ". {$nama}";
+            }
+        }
 
         if (!empty($belumPulangStudents)) {
             $lines[] = "";
@@ -188,7 +197,8 @@ class AttendanceSummaryMessageService
     {
         return self::buildWaliPulang('[Nama Kelas]', '[Hari, DD Bulan YYYY]',
             30, 27, 1, 2, 20, 3, 4,
-            ['Budi Santoso', 'Ani Rahayu', 'Doni Pratama']
+            ['Budi Santoso', 'Ani Rahayu', 'Doni Pratama'],
+            ['Siti Nurbaya']
         );
     }
 
