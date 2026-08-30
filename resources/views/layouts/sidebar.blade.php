@@ -999,11 +999,6 @@
             {{-- Settings: bukan kepala sekolah --}}
             @if(!auth()->user()?->isKepalaSekolah())
 
-            {{-- Section Label: Setting --}}
-            <p class="sidebar-section-label px-4 pt-3 pb-1 text-xs font-semibold uppercase tracking-widest text-blue-200/60 nav-text">
-                Setting
-            </p>
-
             {{-- Kamera --}}
             <a
                 href="{{ route('attendance.kamera.index') }}"
