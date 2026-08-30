@@ -331,8 +331,15 @@ class AttendanceNotificationService
             'terlambat'    => $terlambatMenit,
         ];
 
+        // Pilih template berdasarkan status
+        $templateName = match ($record->status) {
+            'terlambat' => 'check_in_terlambat',
+            'izin'      => 'check_in_izin',
+            default     => 'check_in_hadir',
+        };
+
         // Coba pakai template dari DB
-        $message = $this->resolveTemplate('check_in', $data);
+        $message = $this->resolveTemplateByName($templateName, $data);
         if ($message) {
             return $message;
         }
@@ -377,8 +384,11 @@ class AttendanceNotificationService
             'peringatan'   => $peringatan,
         ];
 
+        // Pilih template berdasarkan kondisi pulang
+        $templateName = $isPulangCepat ? 'check_out_cepat' : 'check_out_normal';
+
         // Coba pakai template dari DB
-        $message = $this->resolveTemplate('check_out', $data);
+        $message = $this->resolveTemplateByName($templateName, $data);
         if ($message) {
             return $message;
         }
@@ -459,7 +469,7 @@ class AttendanceNotificationService
         ];
 
         // Coba pakai template dari DB
-        $message = $this->resolveTemplate('absent', $data);
+        $message = $this->resolveTemplateByName('absent_notification', $data);
         if (!$message) {
             // Fallback ke format hardcode
             $message  = "🏫 *{$schoolName}*\n";
@@ -483,7 +493,27 @@ class AttendanceNotificationService
     }
 
     /**
-     * Resolve message from active DB template, fallback to empty string.
+     * Resolve message from active DB template by exact name, fallback to empty string.
+     */
+    private function resolveTemplateByName(string $name, array $data): string
+    {
+        try {
+            $template = WhatsAppTemplate::where('name', $name)
+                ->where('is_active', true)
+                ->where('auto_send', true)
+                ->first();
+            if ($template) {
+                $template->incrementUsage();
+                return $template->parse($data);
+            }
+        } catch (\Exception $e) {
+            Log::warning("WhatsAppTemplate resolve failed for name={$name}: " . $e->getMessage());
+        }
+        return '';
+    }
+
+    /**
+     * Resolve message by type (legacy fallback, kept for compatibility).
      */
     private function resolveTemplate(string $type, array $data): string
     {

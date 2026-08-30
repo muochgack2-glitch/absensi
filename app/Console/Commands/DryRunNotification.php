@@ -43,46 +43,44 @@ class DryRunNotification extends Command
         $this->info("Sekolah : {$schoolName}");
         $this->info("Hari/Tgl: {$hariTanggal}");
 
+        // 1 kondisi = 1 template name
+        $peringatanCepat = "Siswa meninggalkan sekolah sebelum jam pulang ({$jamResmi})";
         $cases = [
-            ["CHECK-IN: Hadir", "check_in", [
+            ["CHECK-IN: Hadir", "check_in_hadir", [
                 "sekolah" => $schoolName, "nama" => $nama, "kelas" => $kelas,
-                "waktu" => "07:00", "status" => "Hadir", "tanggal" => $today,
-                "hari_tanggal" => $hariTanggal, "terlambat" => 0,
+                "waktu" => "07:00", "tanggal" => $today, "hari_tanggal" => $hariTanggal, "terlambat" => 0,
             ]],
-            ["CHECK-IN: Terlambat 35 Menit", "check_in", [
+            ["CHECK-IN: Terlambat 35 Menit", "check_in_terlambat", [
                 "sekolah" => $schoolName, "nama" => $nama, "kelas" => $kelas,
-                "waktu" => "07:35", "status" => "Terlambat", "tanggal" => $today,
-                "hari_tanggal" => $hariTanggal, "terlambat" => 35,
+                "waktu" => "07:35", "tanggal" => $today, "hari_tanggal" => $hariTanggal, "terlambat" => 35,
             ]],
-            ["CHECK-IN: Izin", "check_in", [
+            ["CHECK-IN: Izin", "check_in_izin", [
                 "sekolah" => $schoolName, "nama" => $nama, "kelas" => $kelas,
-                "waktu" => "07:00", "status" => "Izin", "tanggal" => $today,
-                "hari_tanggal" => $hariTanggal, "terlambat" => 0,
+                "waktu" => "07:00", "tanggal" => $today, "hari_tanggal" => $hariTanggal, "terlambat" => 0,
             ]],
-            ["CHECK-OUT: Pulang Normal", "check_out", [
+            ["CHECK-OUT: Pulang Normal", "check_out_normal", [
                 "sekolah" => $schoolName, "nama" => $nama, "kelas" => $kelas,
-                "waktu" => $jamResmi, "status" => "Pulang Normal", "tanggal" => $today,
-                "hari_tanggal" => $hariTanggal, "jam_resmi" => $jamResmi, "peringatan" => "",
+                "waktu" => $jamResmi, "tanggal" => $today, "hari_tanggal" => $hariTanggal,
+                "jam_resmi" => $jamResmi, "peringatan" => "",
             ]],
-            ["CHECK-OUT: Pulang Lebih Awal (13:10)", "check_out", [
+            ["CHECK-OUT: Pulang Lebih Awal (13:10)", "check_out_cepat", [
                 "sekolah" => $schoolName, "nama" => $nama, "kelas" => $kelas,
-                "waktu" => "13:10", "status" => "Pulang Lebih Awal", "tanggal" => $today,
-                "hari_tanggal" => $hariTanggal, "jam_resmi" => $jamResmi,
-                "peringatan" => "Siswa meninggalkan sekolah sebelum jam pulang ({$jamResmi})",
+                "waktu" => "13:10", "tanggal" => $today, "hari_tanggal" => $hariTanggal,
+                "jam_resmi" => $jamResmi, "peringatan" => $peringatanCepat,
             ]],
-            ["TIDAK HADIR: Alpha", "absent", [
+            ["TIDAK HADIR: Alpha", "absent_notification", [
                 "sekolah" => $schoolName, "nama" => $nama, "kelas" => $kelas,
                 "tanggal" => $today, "hari_tanggal" => $hariTanggal,
             ]],
         ];
 
-        foreach ($cases as [$judul, $type, $data]) {
+        foreach ($cases as [$judul, $templateName, $data]) {
             $this->newLine();
             $this->line(str_repeat("-", 60));
             $this->comment("TEST: {$judul}");
             $this->line(str_repeat("-", 60));
-            $template = WhatsAppTemplate::where("is_active", true)
-                ->where("auto_send", true)->where("type", $type)->first();
+            $template = WhatsAppTemplate::where("name", $templateName)
+                ->where("is_active", true)->where("auto_send", true)->first();
             if ($template) {
                 $this->line("[TEMPLATE: {$template->name}]");
                 $msg = $template->message;
@@ -95,25 +93,20 @@ class DryRunNotification extends Command
                     $this->warn("Var belum terganti: {" . implode("}, {", $unreplaced[1]) . "}");
                 }
             } else {
-                $this->warn("[FALLBACK HARDCODE untuk type=" . $type . "]");
+                $this->warn("[FALLBACK HARDCODE -- template '{$templateName}' tidak aktif atau tidak ada]");
             }
         }
 
         $this->newLine();
         $this->line(str_repeat("=", 60));
-        $this->comment("FALLBACK TEST");
-        WhatsAppTemplate::where("type", "check_in")->update(["auto_send" => false]);
-        $t = WhatsAppTemplate::where("is_active", true)->where("auto_send", true)->where("type", "check_in")->first();
-        $t ? $this->error("FALLBACK GAGAL") : $this->info("Fallback berjalan benar");
-        WhatsAppTemplate::where("type", "check_in")->update(["auto_send" => true]);
-        $this->info("Template dikembalikan");
-
-        $this->newLine();
-        $this->line(str_repeat("=", 60));
         $this->comment("TEMPLATE STATUS DI DB");
-        $rows = WhatsAppTemplate::select("name", "type", "auto_send", "is_active")->get()
-            ->map(fn($t) => [$t->name, $t->type, $t->is_active ? "aktif" : "nonaktif", $t->auto_send ? "auto" : "manual"])
-            ->toArray();
+        $rows = WhatsAppTemplate::select("name", "type", "is_active", "auto_send")->get()
+            ->map(fn($t) => [
+                $t->name,
+                $t->type,
+                $t->is_active ? "aktif" : "nonaktif",
+                $t->auto_send ? "AUTO" : "manual",
+            ])->toArray();
         $this->table(["Name", "Type", "Status", "Auto Send"], $rows);
     }
 }
