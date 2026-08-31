@@ -645,8 +645,8 @@ class AttendanceNotificationService
             return;
         }
 
-        $jamResmi   = AttendanceSetting::get('jam_masuk', '07:00');
-        $toleransi  = (int) AttendanceSetting::get('toleransi_menit', '15');
+        $jamResmi   = AttendanceSetting::get('check_in_time', '07:00');
+        $toleransi  = (int) AttendanceSetting::get('tolerance_minutes', 15);
         $hariTanggal = \Carbon\Carbon::parse($date)->locale('id')->translatedFormat('l, d F Y');
         $schoolName  = AttendanceSetting::get('school_name', 'Sekolah');
 
