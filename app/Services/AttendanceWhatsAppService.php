@@ -712,6 +712,11 @@ class AttendanceWhatsAppService
             $phone = '62' . $phone;
         }
 
+        // Hapus double country code: 6262xxx → 62xxx
+        while (str_starts_with($phone, '6262')) {
+            $phone = '62' . substr($phone, 4);
+        }
+
         return $phone;
     }
 }
