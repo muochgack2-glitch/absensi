@@ -41,8 +41,10 @@ class WaliKelasController extends Controller
             'kelas_id.exists' => 'Kelas tidak ditemukan.',
         ]);
 
-        // Normalize phone: add 62 prefix if provided
-        $phone = $request->phone ? '62' . $request->phone : null;
+        // Normalize phone ke format 62xxx (handle 08xxx, 628xxx, +62xxx)
+        $phone = $request->phone
+            ? app(\App\Services\AttendanceWhatsAppService::class)->normalizePhone($request->phone)
+            : null;
 
         // Kalau nomor WA belum diisi manual & role wali_kelas, generate kode
         // verifikasi 6 digit supaya wali kelas bisa daftar sendiri via chatbot
@@ -78,8 +80,10 @@ class WaliKelasController extends Controller
             'phone.unique' => 'Nomor WhatsApp sudah terdaftar.',
         ]);
 
-        // Normalize phone: add 62 prefix if provided
-        $phone = $request->phone ? '62' . $request->phone : null;
+        // Normalize phone ke format 62xxx (handle 08xxx, 628xxx, +62xxx)
+        $phone = $request->phone
+            ? app(\App\Services\AttendanceWhatsAppService::class)->normalizePhone($request->phone)
+            : null;
 
         $data = [
             'name'     => $request->name,
