@@ -111,16 +111,35 @@
                         <i class="fas fa-qrcode mr-2 text-primary-500"></i>
                         QR Code Absensi
                     </h3>
-                    <div class="text-center">
+                    <div class="text-center space-y-3">
                         <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 p-4 rounded-lg inline-block">
-                            <img src="{{ Storage::url($student->qr_code_path) }}" 
+                            <img src="{{ Storage::url($student->qr_code_path) }}"
                                  alt="QR Code {{ $student->nis }}"
+                                 id="qrCodeImg"
+                                 crossorigin="anonymous"
                                  class="w-48 h-48 mx-auto border-2 border-primary-500 rounded">
                         </div>
-                        <a href="{{ route('attendance.qr.download', $student->nis) }}" 
-                           class="mt-4 inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm transition-all duration-200 shadow hover:shadow-md">
-                            <i class="fas fa-download mr-2"></i> Download QR
-                        </a>
+
+                        {{-- Hidden canvas untuk generate kartu --}}
+                        <canvas id="qrCardCanvas" style="display:none;"></canvas>
+
+                        <div class="flex flex-col gap-2">
+                            {{-- Download QR saja --}}
+                            <a href="{{ route('attendance.qr.download', $student->nis) }}"
+                               class="inline-flex items-center justify-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm transition-all duration-200 shadow">
+                                <i class="fas fa-download mr-2"></i> Download QR (PNG)
+                            </a>
+
+                            {{-- Download Kartu QR dengan identitas --}}
+                            <button onclick="downloadQRCard('png')"
+                                class="inline-flex items-center justify-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm transition-all duration-200 shadow">
+                                <i class="fas fa-id-card mr-2"></i> Download Kartu QR (PNG)
+                            </button>
+                            <button onclick="downloadQRCard('jpg')"
+                                class="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm transition-all duration-200 shadow">
+                                <i class="fas fa-image mr-2"></i> Download Kartu QR (JPG)
+                            </button>
+                        </div>
                     </div>
                 </x-card>
                 @endif
@@ -376,6 +395,146 @@
                 document.getElementById('photoModal')?.classList.add('hidden');
             }
         });
+
+        // ───────────────────────────────────────────────────
+        // Download Kartu QR: QR + Identitas via Canvas API
+        // ───────────────────────────────────────────────────
+        async function downloadQRCard(format) {
+            const canvas  = document.getElementById('qrCardCanvas');
+            const qrImg   = document.getElementById('qrCodeImg');
+            const W = 480, H = 640;
+            canvas.width  = W;
+            canvas.height = H;
+            const ctx = canvas.getContext('2d');
+
+            // ── Background putih ──
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, W, H);
+
+            // ── Header gradient ──
+            const grad = ctx.createLinearGradient(0, 0, W, 80);
+            grad.addColorStop(0, '#4F46E5');
+            grad.addColorStop(1, '#7C3AED');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, W, 90);
+
+            // ── Nama sekolah ──
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 18px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('{{ $schoolName ?? "SMK PGRI Blora" }}', W / 2, 38);
+            ctx.font = '13px sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.85)';
+            ctx.fillText('Kartu Absensi Siswa', W / 2, 62);
+            ctx.fillText('{{ now()->format("Y") }}', W / 2, 80);
+
+            // ── Foto profil siswa (jika ada) ──
+            @if($student->foto_profil)
+            try {
+                const foto = await loadImg('{{ Storage::url($student->foto_profil) }}');
+                const fSize = 100;
+                const fx = W / 2 - fSize / 2;
+                const fy = 100;
+                // Lingkaran clip
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(W / 2, fy + fSize / 2, fSize / 2, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.clip();
+                ctx.drawImage(foto, fx, fy, fSize, fSize);
+                ctx.restore();
+                // Border lingkaran
+                ctx.beginPath();
+                ctx.arc(W / 2, fy + fSize / 2, fSize / 2 + 2, 0, Math.PI * 2);
+                ctx.strokeStyle = '#4F46E5';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            } catch(e) {}
+            @endif
+
+            // ── QR Code ──
+            const qrSize = 220;
+            const qrX    = W / 2 - qrSize / 2;
+            const qrY    = {{ $student->foto_profil ? 220 : 110 }};
+            try {
+                await new Promise((res) => {
+                    if (qrImg.complete) { res(); return; }
+                    qrImg.onload = res;
+                });
+                // Border kotak QR
+                ctx.fillStyle = '#F3F4F6';
+                roundRect(ctx, qrX - 10, qrY - 10, qrSize + 20, qrSize + 20, 12);
+                ctx.fill();
+                ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
+            } catch(e) {}
+
+            // ── Identitas siswa ──
+            const textY = qrY + qrSize + 30;
+            ctx.textAlign = 'center';
+
+            // Nama
+            ctx.fillStyle = '#111827';
+            ctx.font = 'bold 22px sans-serif';
+            ctx.fillText('{{ $student->nama }}', W / 2, textY);
+
+            // NIS
+            ctx.font = '15px sans-serif';
+            ctx.fillStyle = '#6B7280';
+            ctx.fillText('NIS: {{ $student->nis }}', W / 2, textY + 28);
+
+            // Kelas
+            ctx.fillStyle = '#4F46E5';
+            ctx.font = 'bold 16px sans-serif';
+            ctx.fillText('{{ $student->kelas->nama_kelas ?? "-" }}', W / 2, textY + 54);
+
+            // ── Garis bawah / footer ──
+            ctx.fillStyle = '#F9FAFB';
+            ctx.fillRect(0, H - 44, W, 44);
+            ctx.fillStyle = '#9CA3AF';
+            ctx.font = '11px sans-serif';
+            ctx.fillText('Scan QR Code ini untuk absensi harian', W / 2, H - 22);
+            ctx.fillText('{{ config("app.url") }}', W / 2, H - 8);
+
+            // ── Border kartu keseluruhan ──
+            ctx.strokeStyle = '#E5E7EB';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(1, 1, W - 2, H - 2);
+
+            // ── Download ──
+            const link = document.createElement('a');
+            if (format === 'jpg') {
+                link.href     = canvas.toDataURL('image/jpeg', 0.95);
+                link.download = 'kartu_qr_{{ $student->nis }}.jpg';
+            } else {
+                link.href     = canvas.toDataURL('image/png');
+                link.download = 'kartu_qr_{{ $student->nis }}.png';
+            }
+            link.click();
+        }
+
+        function loadImg(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload  = () => resolve(img);
+                img.onerror = reject;
+                img.src = src;
+            });
+        }
+
+        function roundRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.arcTo(x + w, y, x + w, y + r, r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+            ctx.lineTo(x + r, y + h);
+            ctx.arcTo(x, y + h, x, y + h - r, r);
+            ctx.lineTo(x, y + r);
+            ctx.arcTo(x, y, x + r, y, r);
+            ctx.closePath();
+        }
     </script>
     @endpush
 </x-app-layout>

@@ -137,7 +137,9 @@ class AttendanceStudentController extends Controller
             $query->orderBy('date', 'desc')->limit(10);
         }]);
 
-        return view('attendance.students.show', compact('student'));
+        $schoolName = \App\Models\AttendanceSetting::get('school_name', 'SMK PGRI Blora');
+
+        return view('attendance.students.show', compact('student', 'schoolName'));
     }
 
     /**
