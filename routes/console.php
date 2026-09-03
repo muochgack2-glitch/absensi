@@ -212,7 +212,7 @@ Schedule::call(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Laporan Ringkas ke Kepala Sekolah (08:30 — setelah waka dapat detail)
+| Laporan Ringkas Masuk ke Kepala Sekolah
 |--------------------------------------------------------------------------
 */
 Schedule::call(function () {
@@ -231,10 +231,39 @@ Schedule::call(function () {
     if (Holiday::isHoliday($today)) return;
 
     AttendanceSetting::set('kepsek_summary_last_sent', $today);
-    Artisan::call('attendance:send-kepsek-summary');
+    Artisan::call('attendance:send-kepsek-summary', ['--type' => 'masuk']);
 })
   ->everyMinute()
-  ->name('kepsek-summary')
+  ->name('kepsek-summary-masuk')
+  ->timezone('Asia/Jakarta')
+  ->withoutOverlapping()
+  ->appendOutputTo(storage_path('logs/kepsek-summary.log'));
+
+/*
+|--------------------------------------------------------------------------
+| Laporan Ringkas Pulang ke Kepala Sekolah
+|--------------------------------------------------------------------------
+*/
+Schedule::call(function () {
+    $sendTime = AttendanceSetting::get('kepsek_summary_pulang_time', '15:30');
+    $sendDays = AttendanceSetting::get('kepsek_summary_send_days', '1,2,3,4,5');
+
+    $todayDow   = now()->timezone('Asia/Jakarta')->dayOfWeekIso;
+    $activeDays = array_filter(explode(',', $sendDays));
+    if (!in_array((string) $todayDow, $activeDays)) return;
+
+    $now = now()->timezone('Asia/Jakarta')->format('H:i');
+    if ($now < $sendTime) return;
+
+    $today = now()->timezone('Asia/Jakarta')->toDateString();
+    if (AttendanceSetting::get('kepsek_summary_pulang_last_sent', '') === $today) return;
+    if (Holiday::isHoliday($today)) return;
+
+    AttendanceSetting::set('kepsek_summary_pulang_last_sent', $today);
+    Artisan::call('attendance:send-kepsek-summary', ['--type' => 'pulang']);
+})
+  ->everyMinute()
+  ->name('kepsek-summary-pulang')
   ->timezone('Asia/Jakarta')
   ->withoutOverlapping()
   ->appendOutputTo(storage_path('logs/kepsek-summary.log'));
