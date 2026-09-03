@@ -505,10 +505,11 @@ class AttendanceService
         $records = $query->get();
         
         // Count by status
-        $hadir = $records->where('status', 'hadir')->count();
+        $hadir     = $records->where('status', 'hadir')->count();
         $terlambat = $records->where('status', 'terlambat')->count();
-        $alpha = $records->where('status', 'alpha')->count();
-        $izin = $records->where('status', 'izin')->count();
+        $alpha     = $records->where('status', 'alpha')->count();
+        $izin      = $records->where('status', 'izin')->count();
+        $sakit     = $records->where('status', 'sakit')->count();
         
         // Total students
         $totalStudentsQuery = AttendanceStudent::where('is_active', true);
@@ -518,18 +519,19 @@ class AttendanceService
         $totalStudents = $totalStudentsQuery->count();
         
         // Not yet recorded
-        $belum = $totalStudents - $records->count();
+        $belum = max(0, $totalStudents - $records->count());
         
         return [
-            'date' => $date,
-            'class_id' => $classId,
-            'total_students' => $totalStudents,
-            'hadir' => $hadir,
-            'terlambat' => $terlambat,
-            'alpha' => $alpha,
-            'izin' => $izin,
-            'belum' => $belum,
-            'percentage_hadir' => $totalStudents > 0 ? round(($hadir / $totalStudents) * 100, 1) : 0,
+            'date'                 => $date,
+            'class_id'             => $classId,
+            'total_students'       => $totalStudents,
+            'hadir'                => $hadir,
+            'terlambat'            => $terlambat,
+            'alpha'                => $alpha,
+            'izin'                 => $izin,
+            'sakit'                => $sakit,
+            'belum'                => $belum,
+            'percentage_hadir'     => $totalStudents > 0 ? round(($hadir / $totalStudents) * 100, 1) : 0,
             'percentage_terlambat' => $totalStudents > 0 ? round(($terlambat / $totalStudents) * 100, 1) : 0,
         ];
     }
