@@ -341,6 +341,19 @@ class AttendanceSettingController extends Controller
             AttendanceSetting::set('kepsek_summary_send_days', $request->settings['kepsek_summary_send_days'], 'notification');
         }
 
+        // ── Guru BK ──────────────────────────────────────────────────────────────
+        // Toggle: simpan 1 jika checkbox ada (hidden input kirim 0 jika unchecked)
+        foreach (['bk_notify_enabled','bk_notify_terlambat','bk_notify_alpha',
+                  'bk_notify_pulang_cepat','bk_notify_belum_checkout'] as $bkKey) {
+            AttendanceSetting::set($bkKey,
+                $request->input("settings.{$bkKey}", '0') == '1' ? '1' : '0', 'notification');
+        }
+        if (isset($request->settings['bk_alpha_notify_time'])) {
+            AttendanceSetting::set('bk_alpha_notify_time', $request->settings['bk_alpha_notify_time'], 'notification');
+        }
+        if (isset($request->settings['bk_checkout_notify_time'])) {
+            AttendanceSetting::set('bk_checkout_notify_time', $request->settings['bk_checkout_notify_time'], 'notification');
+        }
 
         // Handle logo upload
         if ($request->hasFile('school_logo')) {
