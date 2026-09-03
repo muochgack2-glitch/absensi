@@ -81,7 +81,10 @@ class SendWakaSummary extends Command
                 }
             }
 
-            $pulangCepatIds = (clone $records)->where('check_out_status', 'pulang_cepat')->pluck('student_id')->toArray();
+            // Ambil record pulang cepat beserta jam check_out
+            $pulangCepatRecords = (clone $records)->where('check_out_status', 'pulang_cepat')
+                ->get(['student_id', 'check_out_time'])->keyBy('student_id');
+            $pulangCepatIds = $pulangCepatRecords->keys()->toArray();
             $pulangCepatPerKelas = [];
             if (!empty($pulangCepatIds)) {
                 $siswaCepat = AttendanceStudent::with(['kelas.waliKelas'])
@@ -93,7 +96,10 @@ class SendWakaSummary extends Command
                     if (!isset($pulangCepatPerKelas[$namaKelas])) {
                         $pulangCepatPerKelas[$namaKelas] = ['wali' => $wali, 'siswa' => []];
                     }
-                    $pulangCepatPerKelas[$namaKelas]['siswa'][] = $s->nama;
+                    $rec = $pulangCepatRecords->get($s->id);
+                    $jam = $rec && $rec->check_out_time
+                        ? Carbon::parse($rec->check_out_time)->format('H:i') : '';
+                    $pulangCepatPerKelas[$namaKelas]['siswa'][] = $jam ? "{$s->nama} ({$jam})" : $s->nama;
                 }
             }
 

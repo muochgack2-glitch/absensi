@@ -102,11 +102,19 @@ class SendAttendanceSummary extends Command
                     ->whereIn('id', $belumPulangIds)
                     ->pluck('nama')->toArray();
 
-                // Nama siswa pulang lebih awal
+                // Nama siswa pulang lebih awal + jam pulang
+                $pulangCepatRecords = $records->where('check_out_status', 'pulang_cepat')
+                    ->keyBy('student_id');
                 $pulangCepatStudents = AttendanceStudent::where('kelas_id', $kelas->id)
                     ->where('is_active', true)
                     ->whereIn('id', $pulangCepatIds)
-                    ->pluck('nama')->toArray();
+                    ->orderBy('nama')->get()
+                    ->map(function ($s) use ($pulangCepatRecords) {
+                        $rec = $pulangCepatRecords->get($s->id);
+                        $jam = $rec && $rec->check_out_time
+                            ? \Carbon\Carbon::parse($rec->check_out_time)->format('H:i') : '';
+                        return $jam ? "{$s->nama} ({$jam})" : $s->nama;
+                    })->toArray();
 
                 $message = AttendanceSummaryMessageService::buildWaliPulang($kelas->nama_kelas, $dayName, $totalSiswa, $hadir, $izin, $alfa, count($pulangTepatIds), count($pulangCepatIds), $belumPulang, $belumPulangStudents, $pulangCepatStudents);
                 $this->line("  {$kelas->nama_kelas} | Hadir:{$hadir} PulangTepat:".count($pulangTepatIds)." PulangCepat:".count($pulangCepatIds)." Belum:{$belumPulang}");
