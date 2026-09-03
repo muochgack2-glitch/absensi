@@ -114,6 +114,19 @@ class AttendanceSettingController extends Controller
         $days = collect($request->input('absent_days', []))->filter()->implode(',');
         AttendanceSetting::set('absent_notify_days', $days ?: '', 'notification');
 
+        // ── Guru BK ──────────────────────────────────────────────────────────────
+        foreach (['bk_notify_enabled','bk_notify_terlambat','bk_notify_alpha',
+                  'bk_notify_pulang_cepat','bk_notify_belum_checkout'] as $bkKey) {
+            AttendanceSetting::set($bkKey,
+                $request->input("settings.{$bkKey}", '0') == '1' ? '1' : '0', 'notification');
+        }
+        if (isset($request->settings['bk_alpha_notify_time'])) {
+            AttendanceSetting::set('bk_alpha_notify_time', $request->settings['bk_alpha_notify_time'], 'notification');
+        }
+        if (isset($request->settings['bk_checkout_notify_time'])) {
+            AttendanceSetting::set('bk_checkout_notify_time', $request->settings['bk_checkout_notify_time'], 'notification');
+        }
+
         AttendanceSetting::clearCache();
         return redirect()->route('attendance.notifikasi.index')->with('success', 'Setting notifikasi berhasil disimpan.');
     }
@@ -339,20 +352,6 @@ class AttendanceSettingController extends Controller
         }
         if (isset($request->settings['kepsek_summary_send_days'])) {
             AttendanceSetting::set('kepsek_summary_send_days', $request->settings['kepsek_summary_send_days'], 'notification');
-        }
-
-        // ── Guru BK ──────────────────────────────────────────────────────────────
-        // Toggle: simpan 1 jika checkbox ada (hidden input kirim 0 jika unchecked)
-        foreach (['bk_notify_enabled','bk_notify_terlambat','bk_notify_alpha',
-                  'bk_notify_pulang_cepat','bk_notify_belum_checkout'] as $bkKey) {
-            AttendanceSetting::set($bkKey,
-                $request->input("settings.{$bkKey}", '0') == '1' ? '1' : '0', 'notification');
-        }
-        if (isset($request->settings['bk_alpha_notify_time'])) {
-            AttendanceSetting::set('bk_alpha_notify_time', $request->settings['bk_alpha_notify_time'], 'notification');
-        }
-        if (isset($request->settings['bk_checkout_notify_time'])) {
-            AttendanceSetting::set('bk_checkout_notify_time', $request->settings['bk_checkout_notify_time'], 'notification');
         }
 
         // Handle logo upload
