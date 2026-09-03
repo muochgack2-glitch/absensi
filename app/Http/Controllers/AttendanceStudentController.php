@@ -506,19 +506,30 @@ class AttendanceStudentController extends Controller
             }
         }
 
-        // QR Code
-        $qrPath = storage_path('app/public/' . $student->qr_code_path);
-        if (file_exists($qrPath)) {
-            $qrSrc = @imagecreatefrompng($qrPath);
+        // QR Code — generate PNG via chillerlan/php-qrcode v6 (GD, tanpa Imagick)
+        try {
+            $qrService  = app(\App\Services\QRCodeService::class);
+            $qrContent  = $qrService->buildQRToken($student->nis);
+
+            $qrOptions = new \chillerlan\QRCode\QROptions([
+                'outputType'  => \chillerlan\QRCode\Output\QRGdImagePNG::class,
+                'imageBase64' => false,
+                'scale'       => 10,
+            ]);
+
+            $qrPng = (new \chillerlan\QRCode\QRCode($qrOptions))->render($qrContent);
+            $qrSrc = @imagecreatefromstring($qrPng);
+
             if ($qrSrc) {
                 $qrSize = 220;
                 $qrX    = (int)(($W - $qrSize) / 2);
-                // Background abu untuk QR
                 imagefilledrectangle($img, $qrX - 10, $qrY - 10, $qrX + $qrSize + 10, $qrY + $qrSize + 10, $lightbg);
                 imagecopyresampled($img, $qrSrc, $qrX, $qrY, 0, 0,
                     $qrSize, $qrSize, imagesx($qrSrc), imagesy($qrSrc));
                 imagedestroy($qrSrc);
             }
+        } catch (\Throwable $e) {
+            // QR gagal di-render — lanjut tanpa QR (kartu tetap tergenerate)
         }
 
         // Identitas teks
