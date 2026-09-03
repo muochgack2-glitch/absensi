@@ -121,6 +121,8 @@ Route::middleware(['auth'])->group(function () {
             ->name('attendance.students.import.form');
         Route::post('/attendance/students/import', [AttendanceStudentController::class, 'import'])
             ->name('attendance.students.import');
+        Route::post('/attendance/students/bulk-foto', [AttendanceStudentController::class, 'bulkFoto'])
+            ->name('attendance.students.bulk-foto');
         Route::get('/attendance/students/create', [AttendanceStudentController::class, 'create'])
             ->name('attendance.students.create');
         Route::post('/attendance/students', [AttendanceStudentController::class, 'store'])

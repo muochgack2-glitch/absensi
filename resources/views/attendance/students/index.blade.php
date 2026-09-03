@@ -71,7 +71,7 @@
                     </a>
                 </div>
 
-                {{-- Baris 2: Generate QR Massal + Tambah Siswa (admin only) --}}
+                {{-- Baris 2: Generate QR Massal + Upload Foto + Tambah Siswa (admin only) --}}
                 @if(auth()->user()?->isAdmin())
                 <div class="flex flex-wrap gap-2">
                     <button
@@ -81,6 +81,15 @@
                     >
                         <i class="fas fa-qrcode mr-2"></i>
                         Generate QR Massal
+                    </button>
+
+                    <button
+                        type="button"
+                        onclick="document.getElementById('modalBulkFoto').classList.remove('hidden')"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 bg-pink-600 hover:bg-pink-700 text-white shadow-sm"
+                    >
+                        <i class="fas fa-images mr-2"></i>
+                        Upload Foto Massal
                     </button>
 
                     <a
@@ -844,6 +853,134 @@
             </form>
         </div>
     </div>
+
+{{-- ============================================================
+     MODAL: Upload Foto Massal
+     ============================================================ --}}
+@if(auth()->user()?->isAdmin())
+<div id="modalBulkFoto" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60" onclick="closeBulkFoto(event)">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg" onclick="event.stopPropagation()">
+        {{-- Header --}}
+        <div class="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-pink-700 flex items-center justify-center text-white">
+                    <i class="fas fa-images"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Upload Foto Massal</h3>
+                    <p class="text-xs text-gray-500">Nama file harus = NIS siswa (contoh: <code>12345.jpg</code>)</p>
+                </div>
+            </div>
+            <button onclick="document.getElementById('modalBulkFoto').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        {{-- Form --}}
+        <form action="{{ route('attendance.students.bulk-foto') }}" method="POST" enctype="multipart/form-data" class="p-5 space-y-4">
+            @csrf
+
+            {{-- Info --}}
+            <div class="p-3 bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-700 rounded-lg text-sm text-pink-800 dark:text-pink-200 space-y-1">
+                <p>📌 <strong>Konvensi nama file:</strong> nama file = NIS siswa</p>
+                <p>📎 Format: JPG, PNG, GIF &bull; Max 3MB per foto &bull; Max 200 foto</p>
+                <p>🔄 Foto lama akan otomatis diganti</p>
+            </div>
+
+            {{-- Drop zone --}}
+            <div
+                id="bulkFotoDrop"
+                class="border-2 border-dashed border-pink-300 dark:border-pink-600 rounded-xl p-8 text-center cursor-pointer hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all"
+                onclick="document.getElementById('bulkFotoInput').click()"
+                ondragover="event.preventDefault(); this.classList.add('border-pink-500','bg-pink-50')"
+                ondragleave="this.classList.remove('border-pink-500','bg-pink-50')"
+                ondrop="handleBulkFotoDrop(event)"
+            >
+                <i class="fas fa-cloud-upload-alt text-4xl text-pink-400 mb-3"></i>
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">Klik atau seret foto ke sini</p>
+                <p class="text-xs text-gray-400 mt-1" id="bulkFotoCount">Belum ada foto dipilih</p>
+            </div>
+            <input type="file" id="bulkFotoInput" name="fotos[]" multiple accept="image/*" class="hidden"
+                onchange="updateBulkFotoCount(this.files)">
+
+            {{-- Actions --}}
+            <div class="flex justify-end gap-3">
+                <button type="button"
+                    onclick="document.getElementById('modalBulkFoto').classList.add('hidden')"
+                    class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 transition">
+                    Batal
+                </button>
+                <button type="submit" id="bulkFotoSubmit" disabled
+                    class="px-4 py-2 text-sm font-semibold text-white bg-pink-600 hover:bg-pink-700 rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed">
+                    <i class="fas fa-upload mr-1"></i> Upload Foto
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Hasil Bulk Foto --}}
+@if(session('bulk_foto_result'))
+    @php $bfr = session('bulk_foto_result'); @endphp
+    <div id="bulkFotoResult" class="fixed bottom-4 right-4 z-50 w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-3 bg-gradient-to-r from-pink-500 to-pink-700 text-white">
+            <span class="font-bold">📸 Hasil Upload Foto Massal</span>
+            <button onclick="document.getElementById('bulkFotoResult').remove()" class="text-white/80 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="p-4 space-y-3 max-h-80 overflow-y-auto">
+            <div class="flex gap-4 text-sm font-semibold">
+                <span class="text-green-600">✅ Berhasil: {{ count($bfr['berhasil']) }}</span>
+                <span class="text-red-500">❌ Gagal: {{ count($bfr['gagal']) }}</span>
+                <span class="text-gray-500">Total: {{ $bfr['total'] }}</span>
+            </div>
+            @if(!empty($bfr['berhasil']))
+                <div>
+                    <p class="text-xs font-semibold text-green-700 dark:text-green-400 mb-1">Berhasil:</p>
+                    @foreach($bfr['berhasil'] as $ok)
+                        <p class="text-xs text-gray-600 dark:text-gray-300">✅ {{ $ok['nis'] }} — {{ $ok['nama'] }}</p>
+                    @endforeach
+                </div>
+            @endif
+            @if(!empty($bfr['gagal']))
+                <div>
+                    <p class="text-xs font-semibold text-red-600 dark:text-red-400 mb-1">Gagal:</p>
+                    @foreach($bfr['gagal'] as $err)
+                        <p class="text-xs text-red-500">❌ {{ $err['file'] }} — {{ $err['reason'] }}</p>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+    </div>
+@endif
+@endif
+
+@push('scripts')
+<script>
+function closeBulkFoto(e) {
+    if (e.target === document.getElementById('modalBulkFoto')) {
+        document.getElementById('modalBulkFoto').classList.add('hidden');
+    }
+}
+function updateBulkFotoCount(files) {
+    const count = files.length;
+    document.getElementById('bulkFotoCount').textContent = count > 0 ? count + ' foto dipilih' : 'Belum ada foto dipilih';
+    document.getElementById('bulkFotoSubmit').disabled = count === 0;
+    // Sync input
+    const dt = new DataTransfer();
+    Array.from(files).forEach(f => dt.items.add(f));
+    document.getElementById('bulkFotoInput').files = dt.files;
+}
+function handleBulkFotoDrop(e) {
+    e.preventDefault();
+    const drop = document.getElementById('bulkFotoDrop');
+    drop.classList.remove('border-pink-500', 'bg-pink-50');
+    const files = e.dataTransfer.files;
+    updateBulkFotoCount(files);
+}
+</script>
+@endpush
 
 </x-app-layout>
 

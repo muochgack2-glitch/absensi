@@ -324,4 +324,61 @@ class AttendanceStudentController extends Controller
 
         return redirect()->route('attendance.students.index')->with('success', $msg ?? 'Aksi berhasil.');
     }
+
+    /**
+     * Bulk upload foto profil siswa.
+     * Nama file harus = NIS siswa (contoh: 12345.jpg)
+     *
+     * POST /attendance/students/bulk-foto
+     */
+    public function bulkFoto(Request $request)
+    {
+        $request->validate([
+            'fotos'   => 'required|array|min:1|max:200',
+            'fotos.*' => 'required|image|max:3072', // max 3MB per file
+        ], [
+            'fotos.required'   => 'Pilih minimal 1 foto.',
+            'fotos.*.image'    => 'Semua file harus berupa gambar (JPG, PNG, GIF).',
+            'fotos.*.max'      => 'Ukuran setiap foto maksimal 3MB.',
+        ]);
+
+        $berhasil = [];
+        $gagal    = [];
+
+        foreach ($request->file('fotos') as $file) {
+            // Ambil NIS dari nama file (tanpa ekstensi)
+            $nis = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
+            $student = AttendanceStudent::where('nis', $nis)->first();
+
+            if (!$student) {
+                $gagal[] = ['file' => $file->getClientOriginalName(), 'reason' => 'NIS tidak ditemukan'];
+                continue;
+            }
+
+            try {
+                // Hapus foto lama jika ada
+                if ($student->foto_profil && \Storage::disk('public')->exists($student->foto_profil)) {
+                    \Storage::disk('public')->delete($student->foto_profil);
+                }
+
+                // Simpan foto baru
+                $path = $file->store('students/foto', 'public');
+                $student->update(['foto_profil' => $path]);
+
+                $berhasil[] = ['nama' => $student->nama, 'nis' => $nis, 'file' => $file->getClientOriginalName()];
+            } catch (\Exception $e) {
+                $gagal[] = ['file' => $file->getClientOriginalName(), 'reason' => 'Error: ' . $e->getMessage()];
+            }
+        }
+
+        $total = count($berhasil) + count($gagal);
+        return redirect()
+            ->route('attendance.students.index')
+            ->with('bulk_foto_result', [
+                'total'    => $total,
+                'berhasil' => $berhasil,
+                'gagal'    => $gagal,
+            ]);
+    }
 }
