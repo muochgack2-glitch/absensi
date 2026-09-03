@@ -113,6 +113,8 @@ Route::middleware(['auth'])->group(function () {
             ->name('attendance.students.export.excel');
         Route::post('/attendance/students/bulk-action', [AttendanceStudentController::class, 'bulkAction'])
             ->name('attendance.students.bulk-action');
+        Route::get('/attendance/students/bulk-qr-cards', [AttendanceStudentController::class, 'bulkQrCards'])
+            ->name('attendance.students.bulk-qr-cards');
     });
 
     // 2. Admin Only: tambah, hapus, import siswa (spesifik — HARUS sebelum {student})

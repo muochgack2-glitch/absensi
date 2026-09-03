@@ -71,7 +71,7 @@
                     </a>
                 </div>
 
-                {{-- Baris 2: Generate QR Massal + Upload Foto + Tambah Siswa (admin only) --}}
+                {{-- Baris 2: Generate QR Massal + Upload Foto + Download Kartu + Tambah Siswa (admin only) --}}
                 @if(auth()->user()?->isAdmin())
                 <div class="flex flex-wrap gap-2">
                     <button
@@ -90,6 +90,15 @@
                     >
                         <i class="fas fa-images mr-2"></i>
                         Upload Foto Massal
+                    </button>
+
+                    <button
+                        type="button"
+                        onclick="document.getElementById('modalBulkKartuQR').classList.remove('hidden')"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 bg-orange-600 hover:bg-orange-700 text-white shadow-sm"
+                    >
+                        <i class="fas fa-id-card mr-2"></i>
+                        Download Kartu QR
                     </button>
 
                     <a
@@ -981,6 +990,64 @@ function handleBulkFotoDrop(e) {
 }
 </script>
 @endpush
+{{-- ============================================================
+     MODAL: Download Kartu QR Massal (PHP GD + ZIP)
+     ============================================================ --}}
+@if(auth()->user()?->isAdmin())
+<div id="modalBulkKartuQR" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60" onclick="if(event.target===this)this.classList.add('hidden')">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md" onclick="event.stopPropagation()">
+        {{-- Header --}}
+        <div class="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center text-white">
+                    <i class="fas fa-id-card"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Download Kartu QR Massal</h3>
+                    <p class="text-xs text-gray-500">Semua kartu dikemas dalam 1 file ZIP</p>
+                </div>
+            </div>
+            <button onclick="document.getElementById('modalBulkKartuQR').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        {{-- Form --}}
+        <form action="{{ route('attendance.students.bulk-qr-cards') }}" method="GET" class="p-5 space-y-4">
+            {{-- Info --}}
+            <div class="p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg text-sm text-orange-800 dark:text-orange-200 space-y-1">
+                <p>🖼️ Setiap kartu berisi: <strong>QR Code + Nama + NIS + Kelas + Foto</strong></p>
+                <p>📦 Output: file <strong>.ZIP</strong> berisi PNG per siswa</p>
+                <p>⏱️ Proses mungkin memakan waktu untuk kelas besar</p>
+            </div>
+
+            {{-- Filter Kelas --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Filter Kelas</label>
+                <select name="class_id" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500">
+                    <option value="">— Semua Kelas —</option>
+                    @foreach(\App\Models\AttendanceClass::where('is_active', true)->orderBy('tingkat')->orderBy('nama_kelas')->get() as $cls)
+                        <option value="{{ $cls->id }}">{{ $cls->nama_kelas }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Actions --}}
+            <div class="flex justify-end gap-3">
+                <button type="button"
+                    onclick="document.getElementById('modalBulkKartuQR').classList.add('hidden')"
+                    class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 transition">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="px-4 py-2 text-sm font-semibold text-white bg-orange-600 hover:bg-orange-700 rounded-lg transition">
+                    <i class="fas fa-download mr-1"></i> Download ZIP
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
 
 </x-app-layout>
 

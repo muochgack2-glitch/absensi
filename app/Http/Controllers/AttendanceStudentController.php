@@ -383,4 +383,171 @@ class AttendanceStudentController extends Controller
                 'gagal'    => $gagal,
             ]);
     }
+
+    /**
+     * Bulk download kartu QR siswa sebagai ZIP (PHP GD).
+     * GET /attendance/students/bulk-qr-cards?class_id=&format=png
+     */
+    public function bulkQrCards(Request $request)
+    {
+        set_time_limit(300); // 5 menit untuk proses banyak siswa
+
+        $classId    = $request->input('class_id');
+        $schoolName = \App\Models\AttendanceSetting::get('school_name', 'SMK PGRI Blora');
+
+        $query = AttendanceStudent::with('kelas')
+            ->where('is_active', true)
+            ->whereNotNull('qr_code_path');
+
+        if ($classId) {
+            $query->where('kelas_id', $classId);
+        }
+
+        $students = $query->orderBy('nama')->get();
+
+        if ($students->isEmpty()) {
+            return back()->with('error', 'Tidak ada siswa dengan QR code untuk kelas yang dipilih.');
+        }
+
+        // Nama file ZIP
+        $className = $classId
+            ? (AttendanceClass::find($classId)?->nama_kelas ?? 'kelas')
+            : 'semua';
+        $zipName   = 'kartu_qr_' . \Str::slug($className) . '_' . now()->format('Ymd') . '.zip';
+        $zipPath   = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $zipName;
+
+        $zip = new \ZipArchive();
+        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            return back()->with('error', 'Gagal membuat file ZIP.');
+        }
+
+        foreach ($students as $student) {
+            $card = $this->generateQrCard($student, $schoolName);
+            if (!$card) continue;
+
+            ob_start();
+            imagepng($card);
+            $imgData = ob_get_clean();
+            imagedestroy($card);
+
+            $filename = $student->nis . '_' . \Str::slug($student->nama) . '.png';
+            $zip->addFromString($filename, $imgData);
+        }
+
+        $zip->close();
+
+        return response()->download($zipPath, $zipName, [
+            'Content-Type' => 'application/zip',
+        ])->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Generate satu kartu QR siswa menggunakan PHP GD.
+     */
+    private function generateQrCard(AttendanceStudent $student, string $schoolName): ?\GdImage
+    {
+        $W = 480; $H = 640;
+        $img = imagecreatetruecolor($W, $H);
+        if (!$img) return null;
+
+        // Warna
+        $white   = imagecolorallocate($img, 255, 255, 255);
+        $purple  = imagecolorallocate($img, 79, 70, 229);
+        $purple2 = imagecolorallocate($img, 124, 58, 237);
+        $gray    = imagecolorallocate($img, 107, 114, 128);
+        $dark    = imagecolorallocate($img, 17, 24, 39);
+        $lightbg = imagecolorallocate($img, 249, 250, 251);
+        $border  = imagecolorallocate($img, 229, 231, 235);
+
+        // Background putih
+        imagefill($img, 0, 0, $white);
+
+        // Header solid purple (GD tidak support gradient murni)
+        imagefilledrectangle($img, 0, 0, $W, 90, $purple);
+
+        // Nama sekolah di header
+        // GD default font: 1-5 (built-in bitmap fonts)
+        $font = 5; // ukuran terbesar built-in
+        $tw   = imagefontwidth($font) * strlen($schoolName);
+        $tx   = max(0, ($W - $tw) / 2);
+        imagestring($img, $font, (int)$tx, 20, $schoolName, $white);
+        $sub  = 'Kartu Absensi Siswa';
+        $tw2  = imagefontwidth(3) * strlen($sub);
+        imagestring($img, 3, (int)(($W - $tw2) / 2), 50, $sub, $white);
+        $yr   = date('Y');
+        $tw3  = imagefontwidth(2) * strlen($yr);
+        imagestring($img, 2, (int)(($W - $tw3) / 2), 72, $yr, $white);
+
+        // Foto profil (lingkaran simulasi — GD tidak mendukung arc filled dgn foto, pakai kotak rounded)
+        $qrY = 110;
+        if ($student->foto_profil && \Storage::disk('public')->exists($student->foto_profil)) {
+            $fotoPath = storage_path('app/public/' . $student->foto_profil);
+            $ext      = strtolower(pathinfo($fotoPath, PATHINFO_EXTENSION));
+            $fotoSrc  = match($ext) {
+                'jpg','jpeg' => @imagecreatefromjpeg($fotoPath),
+                'png'        => @imagecreatefrompng($fotoPath),
+                'gif'        => @imagecreatefromgif($fotoPath),
+                default      => false,
+            };
+            if ($fotoSrc) {
+                $fSize = 90;
+                $fx    = (int)(($W - $fSize) / 2);
+                $fy    = 100;
+                // Resize foto ke $fSize x $fSize
+                $resized = imagecreatetruecolor($fSize, $fSize);
+                imagecopyresampled($resized, $fotoSrc, 0, 0, 0, 0,
+                    $fSize, $fSize, imagesx($fotoSrc), imagesy($fotoSrc));
+                // Border kotak foto
+                imagefilledrectangle($img, $fx - 3, $fy - 3, $fx + $fSize + 2, $fy + $fSize + 2, $purple);
+                imagecopy($img, $resized, $fx, $fy, 0, 0, $fSize, $fSize);
+                imagedestroy($resized);
+                imagedestroy($fotoSrc);
+                $qrY = 210;
+            }
+        }
+
+        // QR Code
+        $qrPath = storage_path('app/public/' . $student->qr_code_path);
+        if (file_exists($qrPath)) {
+            $qrSrc = @imagecreatefrompng($qrPath);
+            if ($qrSrc) {
+                $qrSize = 220;
+                $qrX    = (int)(($W - $qrSize) / 2);
+                // Background abu untuk QR
+                imagefilledrectangle($img, $qrX - 10, $qrY - 10, $qrX + $qrSize + 10, $qrY + $qrSize + 10, $lightbg);
+                imagecopyresampled($img, $qrSrc, $qrX, $qrY, 0, 0,
+                    $qrSize, $qrSize, imagesx($qrSrc), imagesy($qrSrc));
+                imagedestroy($qrSrc);
+            }
+        }
+
+        // Identitas teks
+        $textY = $qrY + 230 + 10;
+
+        // Nama (potong jika terlalu panjang)
+        $nama  = mb_strlen($student->nama) > 28 ? mb_substr($student->nama, 0, 26) . '..' : $student->nama;
+        $tw    = imagefontwidth(5) * strlen($nama);
+        imagestring($img, 5, (int)(($W - $tw) / 2), $textY, $nama, $dark);
+
+        // NIS
+        $nis   = 'NIS: ' . $student->nis;
+        $tw2   = imagefontwidth(3) * strlen($nis);
+        imagestring($img, 3, (int)(($W - $tw2) / 2), $textY + 28, $nis, $gray);
+
+        // Kelas
+        $kelas = $student->kelas?->nama_kelas ?? '-';
+        $tw3   = imagefontwidth(4) * strlen($kelas);
+        imagestring($img, 4, (int)(($W - $tw3) / 2), $textY + 50, $kelas, $purple);
+
+        // Footer
+        imagefilledrectangle($img, 0, $H - 44, $W, $H, $lightbg);
+        $foot  = 'Scan QR Code ini untuk absensi harian';
+        $tw4   = imagefontwidth(2) * strlen($foot);
+        imagestring($img, 2, (int)(($W - $tw4) / 2), $H - 36, $foot, $gray);
+
+        // Border kartu
+        imagerectangle($img, 0, 0, $W - 1, $H - 1, $border);
+
+        return $img;
+    }
 }
