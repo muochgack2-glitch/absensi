@@ -61,7 +61,7 @@
             {{-- Total Students --}}
             <x-stat-card
                 title="Total Siswa"
-                :value="$stats['total'] ?? 0"
+                :value="$stats['total_students'] ?? 0"
                 icon="fa-users"
                 color="blue"
             />
@@ -69,7 +69,7 @@
             {{-- Present --}}
             <x-stat-card
                 title="Hadir"
-                :value="$stats['present'] ?? 0"
+                :value="($stats['hadir'] ?? 0) + ($stats['terlambat'] ?? 0)"
                 icon="fa-check-circle"
                 color="green"
             />
@@ -77,7 +77,7 @@
             {{-- Late --}}
             <x-stat-card
                 title="Terlambat"
-                :value="$stats['late'] ?? 0"
+                :value="$stats['terlambat'] ?? 0"
                 icon="fa-clock"
                 color="yellow"
             />
