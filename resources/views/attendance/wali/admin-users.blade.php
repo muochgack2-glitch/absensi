@@ -9,6 +9,7 @@
             'petugas'        => ['label'=>'Petugas',        'icon'=>'fa-id-card',             'bg'=>'bg-green-100 dark:bg-green-900/40', 'text'=>'text-green-600 dark:text-green-300', 'stat'=>'text-green-700 dark:text-green-300', 'count'=>$users->where('role','petugas')->count()],
             'kepala_sekolah' => ['label'=>'Kepala Sekolah', 'icon'=>'fa-user-tie',            'bg'=>'bg-yellow-100 dark:bg-yellow-900/40','text'=>'text-yellow-700 dark:text-yellow-300','stat'=>'text-yellow-700 dark:text-yellow-300','count'=>$users->where('role','kepala_sekolah')->count()],
             'waka_kesiswaan' => ['label'=>'Waka Kesiswaan', 'icon'=>'fa-briefcase',           'bg'=>'bg-orange-100 dark:bg-orange-900/40','text'=>'text-orange-600 dark:text-orange-300','stat'=>'text-orange-700 dark:text-orange-300','count'=>$users->where('role','waka_kesiswaan')->count()],
+            'guru_bk'        => ['label'=>'Guru BK',        'icon'=>'fa-heart',               'bg'=>'bg-pink-100 dark:bg-pink-900/40',   'text'=>'text-pink-600 dark:text-pink-300',   'stat'=>'text-pink-700 dark:text-pink-300',   'count'=>$users->where('role','guru_bk')->count()],
         ];
         $roleColors = [
             'admin'          => 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
@@ -16,10 +17,11 @@
             'petugas'        => 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
             'kepala_sekolah' => 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300',
             'waka_kesiswaan' => 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
+            'guru_bk'        => 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300',
         ];
         $roleLabels = [
             'admin'=>'Admin','wali_kelas'=>'Wali Kelas','petugas'=>'Petugas',
-            'kepala_sekolah'=>'Kepala Sekolah','waka_kesiswaan'=>'Waka Kesiswaan',
+            'kepala_sekolah'=>'Kepala Sekolah','waka_kesiswaan'=>'Waka Kesiswaan','guru_bk'=>'Guru BK',
         ];
         $avatarColors = [
             'admin'          => 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
@@ -27,6 +29,7 @@
             'petugas'        => 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
             'kepala_sekolah' => 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300',
             'waka_kesiswaan' => 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
+            'guru_bk'        => 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300',
         ];
     @endphp
 
@@ -352,6 +355,7 @@
                         <option value="petugas">🪪 Petugas — Operasional & Kamera</option>
                         <option value="kepala_sekolah">👔 Kepala Sekolah — Dashboard & Laporan</option>
                         <option value="wali_kelas">📋 Wali Kelas — Data kelas sendiri</option>
+                        <option value="guru_bk">🎓 Guru BK — Monitoring siswa bermasalah</option>
                     </select>
                 </div>
 

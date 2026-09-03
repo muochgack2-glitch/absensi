@@ -283,6 +283,116 @@
                 </div>
             </x-card>
 
+            {{-- Notifikasi Guru BK --}}
+            <x-card class="mb-6">
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-2xl mr-4">
+                        🎓
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Notifikasi Guru BK</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Notifikasi per siswa ke Guru Bimbingan Konseling (terlambat, alpha, pulang cepat, belum check-out)</p>
+                    </div>
+                </div>
+
+                <div class="space-y-5">
+                    {{-- Toggle aktif --}}
+                    <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                            <label class="text-sm font-medium text-gray-900 dark:text-white">Aktifkan Notifikasi ke Guru BK</label>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Nomor HP diambil otomatis dari akun dengan role <strong>Guru BK</strong></p>
+                        </div>
+                        <div>
+                            <input type="hidden" name="settings[bk_notify_enabled]" value="0">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="settings[bk_notify_enabled]" value="1" id="bkNotifyEnabled"
+                                    onchange="toggleBkFields()"
+                                    @if(old('settings.bk_notify_enabled', $settings['notification']['bk_notify_enabled'] ?? '0') == '1') checked @endif
+                                    class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="bkFields" class="space-y-4 {{ old('settings.bk_notify_enabled', $settings['notification']['bk_notify_enabled'] ?? '0') == '1' ? '' : 'opacity-40 pointer-events-none' }}">
+                        {{-- Kondisi notifikasi --}}
+                        <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-3">
+                            <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">📩 Kirim Notifikasi Saat:</p>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {{-- Terlambat --}}
+                                <label class="flex items-center gap-3 p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer hover:border-purple-400 transition">
+                                    <input type="hidden" name="settings[bk_notify_terlambat]" value="0">
+                                    <input type="checkbox" name="settings[bk_notify_terlambat]" value="1"
+                                        @if(old('settings.bk_notify_terlambat', $settings['notification']['bk_notify_terlambat'] ?? '1') == '1') checked @endif
+                                        class="w-4 h-4 text-purple-600 rounded">
+                                    <div>
+                                        <span class="text-sm font-medium text-gray-900 dark:text-white">⏰ Terlambat</span>
+                                        <p class="text-xs text-gray-500">Real-time saat scan masuk + foto</p>
+                                    </div>
+                                </label>
+
+                                {{-- Pulang Cepat --}}
+                                <label class="flex items-center gap-3 p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer hover:border-purple-400 transition">
+                                    <input type="hidden" name="settings[bk_notify_pulang_cepat]" value="0">
+                                    <input type="checkbox" name="settings[bk_notify_pulang_cepat]" value="1"
+                                        @if(old('settings.bk_notify_pulang_cepat', $settings['notification']['bk_notify_pulang_cepat'] ?? '1') == '1') checked @endif
+                                        class="w-4 h-4 text-purple-600 rounded">
+                                    <div>
+                                        <span class="text-sm font-medium text-gray-900 dark:text-white">⚡ Pulang Cepat</span>
+                                        <p class="text-xs text-gray-500">Real-time saat scan pulang + foto + jam</p>
+                                    </div>
+                                </label>
+
+                                {{-- Alpha --}}
+                                <label class="flex items-center gap-3 p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer hover:border-purple-400 transition">
+                                    <input type="hidden" name="settings[bk_notify_alpha]" value="0">
+                                    <input type="checkbox" name="settings[bk_notify_alpha]" value="1"
+                                        @if(old('settings.bk_notify_alpha', $settings['notification']['bk_notify_alpha'] ?? '1') == '1') checked @endif
+                                        class="w-4 h-4 text-purple-600 rounded">
+                                    <div>
+                                        <span class="text-sm font-medium text-gray-900 dark:text-white">❌ Alpha</span>
+                                        <p class="text-xs text-gray-500">Terjadwal per siswa + foto profil</p>
+                                    </div>
+                                </label>
+
+                                {{-- Belum Check-out --}}
+                                <label class="flex items-center gap-3 p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer hover:border-purple-400 transition">
+                                    <input type="hidden" name="settings[bk_notify_belum_checkout]" value="0">
+                                    <input type="checkbox" name="settings[bk_notify_belum_checkout]" value="1"
+                                        @if(old('settings.bk_notify_belum_checkout', $settings['notification']['bk_notify_belum_checkout'] ?? '1') == '1') checked @endif
+                                        class="w-4 h-4 text-purple-600 rounded">
+                                    <div>
+                                        <span class="text-sm font-medium text-gray-900 dark:text-white">🚪 Belum Check-out</span>
+                                        <p class="text-xs text-gray-500">Terjadwal, teks saja</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        {{-- Jam terjadwal --}}
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <x-input type="time" name="settings[bk_alpha_notify_time]" label="❌ Jam Kirim Alpha"
+                                :value="old('settings.bk_alpha_notify_time', $settings['notification']['bk_alpha_notify_time'] ?? '09:30')"
+                                helper="Jam notifikasi alpha dikirim ke BK (setelah siswa ditandai alpha)" />
+                            <x-input type="time" name="settings[bk_checkout_notify_time]" label="🚪 Jam Kirim Belum Check-out"
+                                :value="old('settings.bk_checkout_notify_time', $settings['notification']['bk_checkout_notify_time'] ?? '15:30')"
+                                helper="Jam notifikasi belum check-out dikirim ke BK" />
+                        </div>
+
+                        <div class="p-4 bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-500 rounded">
+                            <h4 class="font-semibold text-purple-900 dark:text-purple-300 mb-2">📋 Cara Kerja:</h4>
+                            <div class="space-y-1 text-sm text-purple-800 dark:text-purple-200">
+                                <p>• <strong>Terlambat & Pulang Cepat:</strong> Dikirim real-time saat scan, dengan foto scan</p>
+                                <p>• <strong>Alpha:</strong> Dikirim terjadwal, satu pesan per siswa, dengan foto profil</p>
+                                <p>• <strong>Belum Check-out:</strong> Dikirim terjadwal, teks saja</p>
+                                <p>• Nomor HP BK diambil dari akun dengan role <strong>Guru BK</strong> di manajemen akun</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </x-card>
+
             {{-- Action Button --}}
             <div class="flex justify-end">
                 <button type="submit" class="inline-flex items-center px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg transition-all duration-200 shadow">
@@ -350,9 +460,17 @@
                          : fields.classList.add('opacity-40','pointer-events-none');
     }
 
+    function toggleBkFields() {
+        const checkbox = document.getElementById('bkNotifyEnabled');
+        const fields   = document.getElementById('bkFields');
+        checkbox.checked ? fields.classList.remove('opacity-40','pointer-events-none')
+                         : fields.classList.add('opacity-40','pointer-events-none');
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         toggleAbsentNotifyFields();
         toggleLateWarningFields();
+        toggleBkFields();
     });
     </script>
     @endpush

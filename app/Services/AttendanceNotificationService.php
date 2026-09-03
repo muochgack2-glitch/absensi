@@ -6,6 +6,7 @@ use App\Models\AttendanceStudent;
 use App\Models\AttendanceRecord;
 use App\Models\AttendanceSetting;
 use App\Models\AttendanceLog;
+use App\Models\User;
 use App\Models\WhatsAppTemplate;
 use Illuminate\Support\Facades\Log;
 
@@ -57,6 +58,11 @@ class AttendanceNotificationService
 
         // Log notification attempt
         $this->logNotification($student->id, 'check_in', $result);
+
+        // Notifikasi BK: terlambat
+        if ($record->status === 'terlambat') {
+            $this->notifyBkTerlambat($student, $record);
+        }
 
         // Check if late warning should be sent
         if ($record->status === 'terlambat') {
@@ -298,6 +304,116 @@ class AttendanceNotificationService
 
         // Log notification attempt
         $this->logNotification($student->id, 'check_out', $result);
+
+        // Notifikasi BK: pulang cepat
+        if ($record->check_out_status === 'pulang_cepat') {
+            $this->notifyBkPulangCepat($student, $record);
+        }
+    }
+
+    /**
+     * Kirim notifikasi ke semua Guru BK saat siswa terlambat.
+     */
+    private function notifyBkTerlambat(AttendanceStudent $student, AttendanceRecord $record): void
+    {
+        if (AttendanceSetting::get('bk_notify_enabled', '0') !== '1') return;
+        if (AttendanceSetting::get('bk_notify_terlambat', '1') !== '1') return;
+
+        $bkUsers = User::where('role', 'guru_bk')
+            ->whereNotNull('phone')->where('phone', '!=', '')->get();
+        if ($bkUsers->isEmpty()) return;
+
+        $schoolName  = AttendanceSetting::get('school_name', 'Sekolah');
+        $kelas       = $student->kelas->nama_kelas ?? '-';
+        $jamMasuk    = \Carbon\Carbon::parse($record->check_in_time)->format('H:i');
+        $jamResmi    = AttendanceSetting::get('check_in_time', '07:00');
+        $terlambat   = \Carbon\Carbon::parse($jamResmi)->diffInMinutes(\Carbon\Carbon::parse($record->check_in_time));
+        $tanggal     = \Carbon\Carbon::parse($record->date)->locale('id')->translatedFormat('l, d F Y');
+
+        // Coba template BK, fallback ke hardcode
+        $template = WhatsAppTemplate::where('name', 'bk_terlambat')->where('is_active', true)->first();
+        if ($template) {
+            $message = $template->parse([
+                'nama'           => $student->nama,
+                'nis'            => $student->nis,
+                'kelas'          => $kelas,
+                'jam_masuk'      => $jamMasuk,
+                'terlambat_menit'=> $terlambat,
+                'tanggal'        => $tanggal,
+                'sekolah'        => $schoolName,
+            ]);
+        } else {
+            $message = implode("\n", [
+                "⏰ *SISWA TERLAMBAT*",
+                "Nama  : *{$student->nama}*",
+                "NIS   : {$student->nis}",
+                "Kelas : {$kelas}",
+                "Jam   : {$jamMasuk} WIB",
+                "Telat : {$terlambat} menit",
+                "Tgl   : {$tanggal}",
+                "",
+                "_{$schoolName}_",
+            ]);
+        }
+
+        $includePhoto = AttendanceSetting::get('include_photo_in_notification', 'true');
+        $photoPath    = in_array($includePhoto, ['true', '1', 1, true], true) ? $record->check_in_photo : null;
+
+        foreach ($bkUsers as $bk) {
+            $this->whatsAppService->sendParentNotification($bk->phone, $message, $photoPath);
+        }
+
+        Log::debug('BK terlambat notif sent', ['student' => $student->nis, 'bk_count' => $bkUsers->count()]);
+    }
+
+    /**
+     * Kirim notifikasi ke semua Guru BK saat siswa pulang cepat.
+     */
+    private function notifyBkPulangCepat(AttendanceStudent $student, AttendanceRecord $record): void
+    {
+        if (AttendanceSetting::get('bk_notify_enabled', '0') !== '1') return;
+        if (AttendanceSetting::get('bk_notify_pulang_cepat', '1') !== '1') return;
+
+        $bkUsers = User::where('role', 'guru_bk')
+            ->whereNotNull('phone')->where('phone', '!=', '')->get();
+        if ($bkUsers->isEmpty()) return;
+
+        $schoolName = AttendanceSetting::get('school_name', 'Sekolah');
+        $kelas      = $student->kelas->nama_kelas ?? '-';
+        $jamPulang  = \Carbon\Carbon::parse($record->check_out_time)->format('H:i');
+        $tanggal    = \Carbon\Carbon::parse($record->date)->locale('id')->translatedFormat('l, d F Y');
+
+        $template = WhatsAppTemplate::where('name', 'bk_pulang_cepat')->where('is_active', true)->first();
+        if ($template) {
+            $message = $template->parse([
+                'nama'       => $student->nama,
+                'nis'        => $student->nis,
+                'kelas'      => $kelas,
+                'jam_pulang' => $jamPulang,
+                'tanggal'    => $tanggal,
+                'sekolah'    => $schoolName,
+            ]);
+        } else {
+            $message = implode("\n", [
+                "⚡ *SISWA PULANG LEBIH AWAL*",
+                "Nama  : *{$student->nama}*",
+                "NIS   : {$student->nis}",
+                "Kelas : {$kelas}",
+                "Jam   : {$jamPulang} WIB",
+                "Tgl   : {$tanggal}",
+                "",
+                "_{$schoolName}_",
+            ]);
+        }
+
+        $includePhoto = AttendanceSetting::get('include_photo_in_notification', 'true');
+        $photoPath    = in_array($includePhoto, ['true', '1', 1, true], true) ? $record->check_out_photo : null;
+
+        foreach ($bkUsers as $bk) {
+            $this->whatsAppService->sendParentNotification($bk->phone, $message, $photoPath);
+        }
+
+        Log::debug('BK pulang cepat notif sent', ['student' => $student->nis, 'bk_count' => $bkUsers->count()]);
     }
 
     /**

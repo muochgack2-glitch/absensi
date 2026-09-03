@@ -267,3 +267,61 @@ Schedule::call(function () {
   ->timezone('Asia/Jakarta')
   ->withoutOverlapping()
   ->appendOutputTo(storage_path('logs/kepsek-summary.log'));
+
+/*
+|--------------------------------------------------------------------------
+| Notifikasi Alpha ke Guru BK (per siswa dengan foto profil)
+|--------------------------------------------------------------------------
+*/
+Schedule::call(function () {
+    $sendTime = AttendanceSetting::get('bk_alpha_notify_time', '09:30');
+    $sendDays = AttendanceSetting::get('kepsek_summary_send_days', '1,2,3,4,5');
+
+    $todayDow   = now()->timezone('Asia/Jakarta')->dayOfWeekIso;
+    $activeDays = array_filter(explode(',', $sendDays));
+    if (!in_array((string) $todayDow, $activeDays)) return;
+
+    $now = now()->timezone('Asia/Jakarta')->format('H:i');
+    if ($now < $sendTime) return;
+
+    $today = now()->timezone('Asia/Jakarta')->toDateString();
+    if (AttendanceSetting::get('bk_alpha_last_sent', '') === $today) return;
+    if (Holiday::isHoliday($today)) return;
+
+    AttendanceSetting::set('bk_alpha_last_sent', $today);
+    Artisan::call('attendance:send-bk-notification', ['--type' => 'alpha']);
+})
+  ->everyMinute()
+  ->name('bk-alpha')
+  ->timezone('Asia/Jakarta')
+  ->withoutOverlapping()
+  ->appendOutputTo(storage_path('logs/bk-notification.log'));
+
+/*
+|--------------------------------------------------------------------------
+| Notifikasi Belum Check-out ke Guru BK (teks per siswa)
+|--------------------------------------------------------------------------
+*/
+Schedule::call(function () {
+    $sendTime = AttendanceSetting::get('bk_checkout_notify_time', '15:30');
+    $sendDays = AttendanceSetting::get('kepsek_summary_send_days', '1,2,3,4,5');
+
+    $todayDow   = now()->timezone('Asia/Jakarta')->dayOfWeekIso;
+    $activeDays = array_filter(explode(',', $sendDays));
+    if (!in_array((string) $todayDow, $activeDays)) return;
+
+    $now = now()->timezone('Asia/Jakarta')->format('H:i');
+    if ($now < $sendTime) return;
+
+    $today = now()->timezone('Asia/Jakarta')->toDateString();
+    if (AttendanceSetting::get('bk_checkout_last_sent', '') === $today) return;
+    if (Holiday::isHoliday($today)) return;
+
+    AttendanceSetting::set('bk_checkout_last_sent', $today);
+    Artisan::call('attendance:send-bk-notification', ['--type' => 'checkout']);
+})
+  ->everyMinute()
+  ->name('bk-checkout')
+  ->timezone('Asia/Jakarta')
+  ->withoutOverlapping()
+  ->appendOutputTo(storage_path('logs/bk-notification.log'));
