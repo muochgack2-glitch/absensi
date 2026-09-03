@@ -506,30 +506,40 @@ class AttendanceStudentController extends Controller
             }
         }
 
-        // QR Code — generate PNG via chillerlan/php-qrcode v6 (GD, tanpa Imagick)
+        // QR Code — generate via BaconQrCode matrix + GD manual draw (tanpa Imagick/chillerlan)
         try {
-            $qrService  = app(\App\Services\QRCodeService::class);
-            $qrContent  = $qrService->buildQRToken($student->nis);
+            $qrService = app(\App\Services\QRCodeService::class);
+            $qrContent = $qrService->buildQRToken($student->nis);
 
-            $qrOptions = new \chillerlan\QRCode\QROptions([
-                'outputType'  => \chillerlan\QRCode\Output\QRGdImagePNG::class,
-                'imageBase64' => false,
-                'scale'       => 10,
-            ]);
+            $matrix = \BaconQrCode\Encoder\Encoder::encode(
+                $qrContent,
+                \BaconQrCode\Common\ErrorCorrectionLevel::L(),
+                'ISO-8859-1'
+            )->getMatrix();
 
-            $qrPng = (new \chillerlan\QRCode\QRCode($qrOptions))->render($qrContent);
-            $qrSrc = @imagecreatefromstring($qrPng);
+            $mWidth  = $matrix->getWidth();
+            $margin  = 4;
+            $total   = $mWidth + ($margin * 2);
+            $qrSize  = 220;
+            $scale   = max(1, (int) floor($qrSize / $total));
+            $imgSize = $total * $scale;
+            $qrX     = (int)(($W - $imgSize) / 2);
 
-            if ($qrSrc) {
-                $qrSize = 220;
-                $qrX    = (int)(($W - $qrSize) / 2);
-                imagefilledrectangle($img, $qrX - 10, $qrY - 10, $qrX + $qrSize + 10, $qrY + $qrSize + 10, $lightbg);
-                imagecopyresampled($img, $qrSrc, $qrX, $qrY, 0, 0,
-                    $qrSize, $qrSize, imagesx($qrSrc), imagesy($qrSrc));
-                imagedestroy($qrSrc);
+            // Background putih QR
+            imagefilledrectangle($img, $qrX - 8, $qrY - 8, $qrX + $imgSize + 8, $qrY + $imgSize + 8, $lightbg);
+
+            $black = imagecolorallocate($img, 0, 0, 0);
+            for ($y = 0; $y < $mWidth; $y++) {
+                for ($x = 0; $x < $mWidth; $x++) {
+                    if ($matrix->get($x, $y) === 1) {
+                        $px = $qrX + ($x + $margin) * $scale;
+                        $py = $qrY + ($y + $margin) * $scale;
+                        imagefilledrectangle($img, $px, $py, $px + $scale - 1, $py + $scale - 1, $black);
+                    }
+                }
             }
         } catch (\Throwable $e) {
-            // QR gagal di-render — lanjut tanpa QR (kartu tetap tergenerate)
+            // QR gagal di-render — lanjut tanpa QR
         }
 
         // Identitas teks
