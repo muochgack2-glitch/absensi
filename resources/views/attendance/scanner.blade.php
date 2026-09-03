@@ -539,34 +539,26 @@
             const Html5Qrcode = window.Html5Qrcode;
             html5QrCode = new Html5Qrcode("reader");
 
-            // iOS Safari sangat strict — tolak SEMUA jika ada 1 constraint tidak dikenal.
-            // focusMode & advanced tidak didukung iOS, hapus agar kamera bisa start.
             const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent)
                        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-            const videoConstraints = isIOS
-                ? { facingMode: "environment" }  // minimal, paling kompatibel di iOS Safari
+            // Config iOS: minimal, tanpa aspectRatio (sering bug di Safari), qrbox lebih kecil
+            const config = isIOS
+                ? { fps: 10, qrbox: { width: 250, height: 250 } }
                 : {
-                    facingMode: "environment",
-                    width:  { ideal: 1280 },
-                    height: { ideal: 720 },
-                    focusMode: "continuous",
-                    advanced: [{ focusMode: "continuous" }]
+                    fps: 30,
+                    qrbox: { width: 280, height: 280 },
+                    aspectRatio: 1.0,
+                    disableFlip: false,
+                    rememberLastUsedCamera: true,
+                    videoConstraints: {
+                        facingMode: "environment",
+                        width:  { ideal: 1280 },
+                        height: { ideal: 720 },
+                        focusMode: "continuous",
+                        advanced: [{ focusMode: "continuous" }]
+                    }
                 };
-
-            const config = {
-                fps: isIOS ? 10 : 30,  // iOS: fps rendah agar tidak overheat
-                qrbox: { width: 280, height: 280 },
-                aspectRatio: 1.0,
-                disableFlip: false,
-                rememberLastUsedCamera: !isIOS, // iOS: jangan simpan, bisa confuse
-                videoConstraints,
-            };
-
-            // Pilih kamera QR berdasarkan index jika dual mode aktif
-            const startConstraint = DUAL_CAMERA
-                ? { deviceId: undefined } // akan di-resolve setelah enumerate
-                : { facingMode: "environment" };
 
             const doStart = (constraint) => {
                 html5QrCode.start(
@@ -575,27 +567,36 @@
                     onScanSuccess,
                     onScanFailure
                 ).then(() => {
-                    // Setelah QR kamera jalan, init kamera wajah
                     initDualCamera();
                 }).catch(err => {
-                    console.error('Failed to start scanner:', err);
-                    // iOS: coba fallback dengan constraint minimal
-                    if (isIOS && constraint !== 'environment') {
-                        console.warn('iOS fallback: coba facingMode environment string...');
-                        html5QrCode.start(
-                            'environment',
-                            { fps: 10, qrbox: { width: 250, height: 250 } },
-                            onScanSuccess,
-                            onScanFailure
-                        ).catch(() => showError('Gagal membuka kamera. Pastikan izin kamera sudah diberikan di Settings > Safari.'));
-                    } else {
-                        showError('Gagal membuka kamera. Pastikan browser memiliki akses ke kamera.');
-                    }
+                    console.error('Scanner start error:', err);
+                    showError(isIOS
+                        ? 'Gagal membuka kamera. Pastikan: ① Akses via HTTPS ② Izin kamera di Settings > Safari > Camera'
+                        : 'Gagal membuka kamera. Pastikan browser memiliki akses ke kamera.');
                 });
             };
 
-            if (DUAL_CAMERA) {
-                // Enumerate dulu untuk dapat deviceId kamera QR
+            if (isIOS) {
+                // iOS: pakai getCameras() untuk dapat ID kamera belakang secara langsung
+                // Ini cara paling reliable di iOS Safari — hindari facingMode constraint
+                Html5Qrcode.getCameras().then(cameras => {
+                    if (!cameras || cameras.length === 0) {
+                        showError('Tidak ada kamera terdeteksi. Pastikan izin kamera sudah diberikan.');
+                        return;
+                    }
+                    // Pilih kamera belakang: biasanya index terakhir di iOS
+                    // Label kamera belakang biasanya mengandung "back" atau "rear"
+                    const backCam = cameras.find(c => /back|rear|environment/i.test(c.label))
+                                 || cameras[cameras.length - 1];
+                    console.log('iOS camera selected:', backCam.label, backCam.id);
+                    doStart(backCam.id);
+                }).catch(err => {
+                    console.warn('getCameras failed, fallback facingMode:', err);
+                    // Fallback: gunakan facingMode jika getCameras gagal
+                    doStart({ facingMode: 'environment' });
+                });
+            } else if (DUAL_CAMERA) {
+                // Android/PC dual camera: enumerate berdasarkan index
                 navigator.mediaDevices.enumerateDevices().then(devices => {
                     const cameras = devices.filter(d => d.kind === 'videoinput');
                     if (cameras.length >= 1 && cameras[QR_CAM_IDX]) {
