@@ -539,19 +539,28 @@
             const Html5Qrcode = window.Html5Qrcode;
             html5QrCode = new Html5Qrcode("reader");
 
-            const config = {
-                fps: 30,
-                qrbox: { width: 280, height: 280 },
-                aspectRatio: 1.0,
-                disableFlip: false,
-                rememberLastUsedCamera: true,
-                videoConstraints: {
+            // iOS Safari sangat strict — tolak SEMUA jika ada 1 constraint tidak dikenal.
+            // focusMode & advanced tidak didukung iOS, hapus agar kamera bisa start.
+            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent)
+                       || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+            const videoConstraints = isIOS
+                ? { facingMode: "environment" }  // minimal, paling kompatibel di iOS Safari
+                : {
                     facingMode: "environment",
-                    width: { ideal: 1280 },
+                    width:  { ideal: 1280 },
                     height: { ideal: 720 },
                     focusMode: "continuous",
                     advanced: [{ focusMode: "continuous" }]
-                }
+                };
+
+            const config = {
+                fps: isIOS ? 10 : 30,  // iOS: fps rendah agar tidak overheat
+                qrbox: { width: 280, height: 280 },
+                aspectRatio: 1.0,
+                disableFlip: false,
+                rememberLastUsedCamera: !isIOS, // iOS: jangan simpan, bisa confuse
+                videoConstraints,
             };
 
             // Pilih kamera QR berdasarkan index jika dual mode aktif
@@ -570,7 +579,18 @@
                     initDualCamera();
                 }).catch(err => {
                     console.error('Failed to start scanner:', err);
-                    showError('Gagal membuka kamera. Pastikan browser memiliki akses ke kamera.');
+                    // iOS: coba fallback dengan constraint minimal
+                    if (isIOS && constraint !== 'environment') {
+                        console.warn('iOS fallback: coba facingMode environment string...');
+                        html5QrCode.start(
+                            'environment',
+                            { fps: 10, qrbox: { width: 250, height: 250 } },
+                            onScanSuccess,
+                            onScanFailure
+                        ).catch(() => showError('Gagal membuka kamera. Pastikan izin kamera sudah diberikan di Settings > Safari.'));
+                    } else {
+                        showError('Gagal membuka kamera. Pastikan browser memiliki akses ke kamera.');
+                    }
                 });
             };
 
