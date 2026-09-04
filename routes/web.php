@@ -129,6 +129,10 @@ Route::middleware(['auth'])->group(function () {
             ->name('attendance.students.create');
         Route::post('/attendance/students', [AttendanceStudentController::class, 'store'])
             ->name('attendance.students.store');
+        Route::get('/attendance/students/phones', [AttendanceStudentController::class, 'phonesForm'])
+            ->name('attendance.students.phones');
+        Route::post('/attendance/students/phones', [AttendanceStudentController::class, 'phonesSave'])
+            ->name('attendance.students.phones.save');
 
         // Classes Management (edit/create/delete: admin only)
         Route::get('/attendance/classes/create', [AttendanceClassController::class, 'create'])

@@ -571,4 +571,48 @@ class AttendanceStudentController extends Controller
 
         return $img;
     }
+
+    /**
+     * Tampilkan form bulk edit nomor HP orang tua siswa.
+     * GET /attendance/students/phones
+     */
+    public function phonesForm(Request $request)
+    {
+        $classes  = AttendanceClass::orderBy('nama_kelas')->get();
+        $kelasId  = $request->input('kelas_id');
+        $students = collect();
+
+        if ($kelasId) {
+            $students = AttendanceStudent::where('kelas_id', $kelasId)
+                ->where('is_active', true)
+                ->orderBy('nama')
+                ->get();
+        }
+
+        return view('attendance.students.phones', compact('classes', 'students', 'kelasId'));
+    }
+
+    /**
+     * Simpan bulk update nomor HP orang tua siswa.
+     * POST /attendance/students/phones
+     */
+    public function phonesSave(Request $request)
+    {
+        $phones = $request->input('phones', []);
+        $count  = 0;
+
+        foreach ($phones as $id => $data) {
+            $student = AttendanceStudent::find((int)$id);
+            if (!$student) continue;
+
+            $student->no_hp_ortu  = $data['no_hp_ortu']  ?? $student->no_hp_ortu;
+            $student->no_hp_ortu2 = $data['no_hp_ortu2'] ?? $student->no_hp_ortu2;
+            $student->save();
+            $count++;
+        }
+
+        return redirect()
+            ->route('attendance.students.phones', ['kelas_id' => $request->input('kelas_id')])
+            ->with('success', "✅ {$count} nomor HP berhasil disimpan.");
+    }
 }
