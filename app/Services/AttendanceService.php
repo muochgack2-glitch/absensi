@@ -387,66 +387,79 @@ class AttendanceService
         }
 
         $cutoffTime = AttendanceSetting::get('cutoff_time', '09:00');
-        
+        $todayStr   = $today->toDateString();
+
+        // Pre-load semua izin/sakit yang disetujui/pending untuk hari ini
+        // agar tidak N+1 query di dalam loop
+        $approvedIzinStudentIds = \App\Models\AttendanceIzin::whereDate('tanggal_mulai', '<=', $todayStr)
+            ->whereDate('tanggal_selesai', '>=', $todayStr)
+            ->whereIn('status', ['disetujui', 'pending'])
+            ->pluck('student_id')
+            ->flip(); // jadikan map untuk O(1) lookup
+
+        // Status yang dianggap sudah "ditangani" — tidak perlu di-alpha
+        $protectedStatuses = ['izin', 'sakit', 'hadir', 'terlambat'];
+
         // Get all active students
         $students = AttendanceStudent::with('kelas')->where('is_active', true)->get();
-        
-        $markedCount = 0;
+
+        $markedCount     = 0;
         $alreadyRecorded = 0;
         $inactiveSkipped = AttendanceStudent::where('is_active', false)->count();
-        $markedStudents = [];
-        
+        $markedStudents  = [];
+
         foreach ($students as $student) {
             // Check if student has attendance record for today
             $record = AttendanceRecord::where('student_id', $student->id)
                 ->where('date', $today)
                 ->first();
             
-            // If no record or no check-in, mark as alpha
+            // ── Skip jika sudah ada izin/sakit dari AttendanceIzin ────────────────
+            if (isset($approvedIzinStudentIds[$student->id])) {
+                $alreadyRecorded++;
+                continue;
+            }
+
+            // ── Tidak ada AttendanceRecord sama sekali → alpha ────────────────────
             if (!$record) {
                 AttendanceRecord::create([
                     'student_id' => $student->id,
-                    'date' => $today,
-                    'status' => 'alpha',
-                    'notes' => "Auto-marked absent at {$cutoffTime}",
+                    'date'       => $today,
+                    'status'     => 'alpha',
+                    'notes'      => "Auto-marked absent at {$cutoffTime}",
                 ]);
-                
-                $this->logAction(
-                    $student->id,
-                    'auto_alpha',
-                    "Auto-marked absent (no record)",
-                    null,
-                    'success'
-                );
-                
+
+                $this->logAction($student->id, 'auto_alpha', "Auto-marked absent (no record)", null, 'success');
+
                 $markedCount++;
                 $markedStudents[] = [
-                    'nis' => $student->nis,
-                    'nama' => $student->nama,
+                    'nis'   => $student->nis,
+                    'nama'  => $student->nama,
                     'kelas' => $student->kelas->nama_kelas ?? '-',
                 ];
+
+            // ── Ada record tapi status manual izin/sakit → SKIP ──────────────────
+            } elseif (in_array($record->status, $protectedStatuses) && $record->check_in_time === null) {
+                // Status izin/sakit dari input manual — jangan di-overwrite
+                $alreadyRecorded++;
+
+            // ── Ada record, tidak ada check_in_time, bukan alpha → jadikan alpha ─
             } elseif ($record->check_in_time === null && $record->status !== 'alpha') {
                 $record->update([
                     'status' => 'alpha',
-                    'notes' => "Auto-marked absent at {$cutoffTime}",
+                    'notes'  => "Auto-marked absent at {$cutoffTime}",
                 ]);
-                
-                $this->logAction(
-                    $student->id,
-                    'auto_alpha',
-                    "Auto-marked absent (no check-in)",
-                    null,
-                    'success'
-                );
-                
+
+                $this->logAction($student->id, 'auto_alpha', "Auto-marked absent (no check-in)", null, 'success');
+
                 $markedCount++;
                 $markedStudents[] = [
-                    'nis' => $student->nis,
-                    'nama' => $student->nama,
+                    'nis'   => $student->nis,
+                    'nama'  => $student->nama,
                     'kelas' => $student->kelas->nama_kelas ?? '-',
                 ];
             } else {
-                // Student already has check-in or manually marked
+                // Sudah ada check-in / sudah di-mark sebelumnya
                 $alreadyRecorded++;
             }
         }

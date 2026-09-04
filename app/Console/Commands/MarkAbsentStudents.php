@@ -157,13 +157,29 @@ class MarkAbsentStudents extends Command
     protected function runDryRun(): int
     {
         $today    = Carbon::today();
+        $todayStr = $today->toDateString();
         $students = AttendanceStudent::with('kelas')->where('is_active', true)->get();
         $wouldMark = [];
 
+        // Pre-load siswa yang punya izin/sakit disetujui hari ini
+        $approvedIzinIds = \App\Models\AttendanceIzin::whereDate('tanggal_mulai', '<=', $todayStr)
+            ->whereDate('tanggal_selesai', '>=', $todayStr)
+            ->whereIn('status', ['disetujui', 'pending'])
+            ->pluck('student_id')
+            ->flip();
+
+        $protectedStatuses = ['izin', 'sakit', 'hadir', 'terlambat'];
+
         foreach ($students as $student) {
+            // Skip: sudah ada surat izin/sakit
+            if (isset($approvedIzinIds[$student->id])) continue;
+
             $record = AttendanceRecord::where('student_id', $student->id)
                 ->whereDate('date', $today)
                 ->first();
+
+            // Skip: record manual izin/sakit (tanpa check_in_time)
+            if ($record && in_array($record->status, $protectedStatuses) && $record->check_in_time === null) continue;
 
             if (!$record || ($record->check_in_time === null && $record->status !== 'alpha')) {
                 $wouldMark[] = $student;
