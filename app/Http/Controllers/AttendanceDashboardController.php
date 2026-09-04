@@ -244,9 +244,11 @@ class AttendanceDashboardController extends Controller
         return response()->json([
             'success' => true,
             'present' => $stats['present'] ?? 0,
-            'late' => $stats['late'] ?? 0,
-            'absent' => $stats['absent'] ?? 0,
-            'total' => $stats['total_students'] ?? 0,
+            'late'    => $stats['late']    ?? 0,
+            'absent'  => $stats['absent']  ?? 0,
+            'izin'    => $stats['izin']    ?? 0,
+            'sakit'   => $stats['sakit']   ?? 0,
+            'total'   => $stats['total_students'] ?? 0,
         ]);
     }
 

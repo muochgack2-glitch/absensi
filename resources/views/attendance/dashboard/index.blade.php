@@ -57,7 +57,7 @@
         </x-card>
 
         {{-- Statistics Cards --}}
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {{-- Total Students --}}
             <x-stat-card
                 title="Total Siswa"
@@ -80,6 +80,22 @@
                 :value="$stats['terlambat'] ?? 0"
                 icon="fa-clock"
                 color="yellow"
+            />
+
+            {{-- Izin --}}
+            <x-stat-card
+                title="Izin"
+                :value="$stats['izin'] ?? 0"
+                icon="fa-file-alt"
+                color="purple"
+            />
+
+            {{-- Sakit --}}
+            <x-stat-card
+                title="Sakit"
+                :value="$stats['sakit'] ?? 0"
+                icon="fa-procedures"
+                color="orange"
             />
 
             {{-- Alpha --}}

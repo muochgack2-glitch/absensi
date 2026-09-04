@@ -10,11 +10,17 @@
 @php
     $colorClasses = [
         'primary' => 'from-primary-500 to-primary-600 shadow-blue-glow',
+        'blue'    => 'from-blue-500 to-blue-600',
+        'green'   => 'from-green-500 to-green-600',
+        'yellow'  => 'from-yellow-500 to-yellow-600',
+        'orange'  => 'from-orange-500 to-orange-600',
+        'red'     => 'from-red-500 to-red-600',
+        'purple'  => 'from-purple-500 to-purple-600',
+        'pink'    => 'from-pink-500 to-pink-600',
         'success' => 'from-green-500 to-green-600',
         'warning' => 'from-yellow-500 to-yellow-600',
-        'danger' => 'from-red-500 to-red-600',
-        'info' => 'from-blue-500 to-blue-600',
-        'purple' => 'from-purple-500 to-purple-600',
+        'danger'  => 'from-red-500 to-red-600',
+        'info'    => 'from-blue-500 to-blue-600',
     ];
     
     $gradientClass = $colorClasses[$color] ?? $colorClasses['primary'];
