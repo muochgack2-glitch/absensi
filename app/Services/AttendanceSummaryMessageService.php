@@ -18,7 +18,7 @@ class AttendanceSummaryMessageService
     public static function buildWaliMasuk(
         string $namaKelas, string $tanggal, int $total,
         int $hadirTepat, int $terlambat, int $izin, int $sakit, int $alfa,
-        array $alfaStudents = []
+        array $alfaStudents = [], array $izinStudents = [], array $sakitStudents = []
     ): string {
         $hadir  = $hadirTepat + $terlambat;
         $persen = $total > 0 ? round(($hadir / $total) * 100) : 0;
@@ -37,9 +37,25 @@ class AttendanceSummaryMessageService
             "📊 Kehadiran         : {$persen}%",
         ];
 
+        if (!empty($sakitStudents)) {
+            $lines[] = "";
+            $lines[] = "*🤒 Siswa sakit:*";
+            foreach ($sakitStudents as $i => $nama) {
+                $lines[] = ($i + 1) . ". {$nama}";
+            }
+        }
+
+        if (!empty($izinStudents)) {
+            $lines[] = "";
+            $lines[] = "*📝 Siswa izin:*";
+            foreach ($izinStudents as $i => $nama) {
+                $lines[] = ($i + 1) . ". {$nama}";
+            }
+        }
+
         if (!empty($alfaStudents)) {
             $lines[] = "";
-            $lines[] = "*Siswa tidak hadir (alfa):*";
+            $lines[] = "*❌ Siswa tidak hadir (alfa):*";
             foreach ($alfaStudents as $i => $nama) {
                 $lines[] = ($i + 1) . ". {$nama}";
             }
@@ -55,8 +71,8 @@ class AttendanceSummaryMessageService
         string $namaKelas, string $tanggal, int $total,
         int $hadir, int $izin, int $sakit, int $alfa,
         int $pulangTepat, int $pulangCepat, int $belumPulang,
-        array $belumPulangStudents = [],
-        array $pulangCepatStudents = []
+        array $belumPulangStudents = [], array $pulangCepatStudents = [],
+        array $izinStudents = [], array $sakitStudents = []
     ): string {
         $lines = [
             "🌆 *RINGKASAN KEPULANGAN*",
@@ -73,9 +89,25 @@ class AttendanceSummaryMessageService
             "❌ Alfa               : {$alfa} siswa",
         ];
 
+        if (!empty($sakitStudents)) {
+            $lines[] = "";
+            $lines[] = "*🤒 Siswa sakit:*";
+            foreach ($sakitStudents as $i => $nama) {
+                $lines[] = ($i + 1) . ". {$nama}";
+            }
+        }
+
+        if (!empty($izinStudents)) {
+            $lines[] = "";
+            $lines[] = "*📝 Siswa izin:*";
+            foreach ($izinStudents as $i => $nama) {
+                $lines[] = ($i + 1) . ". {$nama}";
+            }
+        }
+
         if (!empty($pulangCepatStudents)) {
             $lines[] = "";
-            $lines[] = "*Siswa pulang lebih awal:*";
+            $lines[] = "*⚡ Siswa pulang lebih awal:*";
             foreach ($pulangCepatStudents as $i => $nama) {
                 $lines[] = ($i + 1) . ". {$nama}";
             }
@@ -83,7 +115,7 @@ class AttendanceSummaryMessageService
 
         if (!empty($belumPulangStudents)) {
             $lines[] = "";
-            $lines[] = "*Siswa belum pulang:*";
+            $lines[] = "*⏳ Siswa belum pulang:*";
             foreach ($belumPulangStudents as $i => $nama) {
                 $lines[] = ($i + 1) . ". {$nama}";
             }
@@ -102,7 +134,8 @@ class AttendanceSummaryMessageService
     public static function buildWakaMasuk(
         string $dayName, int $totalSiswa, int $hadir, int $terlambat,
         int $alpha, int $izin, int $sakit, float $persen, string $status,
-        array $alphaPerKelas = [], array $terlambatPerKelas = []
+        array $alphaPerKelas = [], array $terlambatPerKelas = [],
+        array $izinPerKelas = [], array $sakitPerKelas = []
     ): string {
         $schoolName = AttendanceSetting::get('school_name', 'SMK');
         $hadirTepat = $hadir - $terlambat;
@@ -116,13 +149,31 @@ class AttendanceSummaryMessageService
             "   ↳ Tepat waktu : {$hadirTepat} siswa",
             "   ↳ Terlambat   : {$terlambat} siswa",
             "❌ Alpha         : {$alpha} siswa",
-            "📋 Izin          : {$izin} siswa",
+            "📝 Izin          : {$izin} siswa",
             "🤒 Sakit         : {$sakit} siswa",
             "", "Status: {$status}",
         ];
 
+        if (!empty($sakitPerKelas)) {
+            $lines[] = ""; $lines[] = "*🤒 Detail Siswa Sakit:*";
+            foreach ($sakitPerKelas as $kelas => $data) {
+                $lines[] = ""; $lines[] = "📚 *{$kelas}*";
+                $lines[] = "   Wali Kelas: {$data['wali']}";
+                foreach ($data['siswa'] as $i => $n) { $lines[] = "   ".($i+1).". {$n}"; }
+            }
+        }
+
+        if (!empty($izinPerKelas)) {
+            $lines[] = ""; $lines[] = "*📝 Detail Siswa Izin:*";
+            foreach ($izinPerKelas as $kelas => $data) {
+                $lines[] = ""; $lines[] = "📚 *{$kelas}*";
+                $lines[] = "   Wali Kelas: {$data['wali']}";
+                foreach ($data['siswa'] as $i => $n) { $lines[] = "   ".($i+1).". {$n}"; }
+            }
+        }
+
         if (!empty($terlambatPerKelas)) {
-            $lines[] = ""; $lines[] = "*Detail Siswa Terlambat:*";
+            $lines[] = ""; $lines[] = "*⏰ Detail Siswa Terlambat:*";
             foreach ($terlambatPerKelas as $kelas => $data) {
                 $lines[] = ""; $lines[] = "📚 *{$kelas}*";
                 $lines[] = "   Wali Kelas: {$data['wali']}";
@@ -131,7 +182,7 @@ class AttendanceSummaryMessageService
         }
 
         if (!empty($alphaPerKelas)) {
-            $lines[] = ""; $lines[] = "*Detail Siswa Alpha:*";
+            $lines[] = ""; $lines[] = "*❌ Detail Siswa Alpha:*";
             foreach ($alphaPerKelas as $kelas => $data) {
                 $lines[] = ""; $lines[] = "📚 *{$kelas}*";
                 $lines[] = "   Wali Kelas: {$data['wali']}";
@@ -192,7 +243,11 @@ class AttendanceSummaryMessageService
     public static function previewWaliMasuk(): string
     {
         return self::buildWaliMasuk('[Nama Kelas]', '[Hari, DD Bulan YYYY]',
-            30, 25, 2, 1, 1, 1, ['Budi Santoso', 'Ani Rahayu']);
+            30, 25, 2, 1, 1, 1,
+            ['Budi Santoso', 'Ani Rahayu'],
+            ['Dewi Rahmawati'],
+            ['Joko Susilo']
+        );
     }
 
     public static function previewWaliPulang(): string
@@ -200,7 +255,9 @@ class AttendanceSummaryMessageService
         return self::buildWaliPulang('[Nama Kelas]', '[Hari, DD Bulan YYYY]',
             30, 27, 1, 1, 1, 20, 3, 4,
             ['Budi Santoso', 'Ani Rahayu', 'Doni Pratama'],
-            ['Siti Nurbaya']
+            ['Siti Nurbaya'],
+            ['Dewi Rahmawati'],
+            ['Joko Susilo']
         );
     }
 
@@ -209,7 +266,9 @@ class AttendanceSummaryMessageService
         return self::buildWakaMasuk('[Hari, DD Bulan YYYY]',
             400, 380, 10, 8, 7, 5, 95.0, '🟢 Baik',
             ['X AKL' => ['wali' => 'Pak Budi', 'siswa' => ['Budi Santoso', 'Ani Rahayu']]],
-            ['X AKL' => ['wali' => 'Pak Budi', 'siswa' => ['Doni Pratama']]]
+            ['X AKL' => ['wali' => 'Pak Budi', 'siswa' => ['Doni Pratama']]],
+            ['XI TKJ' => ['wali' => 'Bu Sari',  'siswa' => ['Dewi Rahmawati']]],
+            ['X AKL' => ['wali' => 'Pak Budi', 'siswa' => ['Joko Susilo']]]
         );
     }
 

@@ -116,20 +116,20 @@ class SendKepsekSummary extends Command
             // Ambil siswa alpha per kelas + wali kelas
             $recordsToday   = AttendanceRecord::withoutGlobalScope('tahun_ajaran')->whereDate('date', $date);
             $hadirIds2      = (clone $recordsToday)->whereNotNull('check_in_time')->pluck('student_id')->toArray();
-            $izinSakitIds   = (clone $recordsToday)->whereIn('status', ['izin', 'sakit'])->pluck('student_id')->toArray();
+            $izinIds2       = (clone $recordsToday)->where('status', 'izin')->pluck('student_id')->toArray();
+            $sakitIds2      = (clone $recordsToday)->where('status', 'sakit')->pluck('student_id')->toArray();
+            $izinSakitIds   = array_unique(array_merge($izinIds2, $sakitIds2));
             $tidakHadirIds  = array_diff(
                 AttendanceStudent::where('is_active', true)->pluck('id')->toArray(),
                 array_unique(array_merge($hadirIds2, $izinSakitIds))
             );
 
+            // Alpha per kelas
             $alphaPerKelas = [];
             if (!empty($tidakHadirIds)) {
                 $siswaAlpha = AttendanceStudent::with(['kelas.waliKelas'])
                     ->whereIn('id', $tidakHadirIds)
-                    ->orderBy('kelas_id')
-                    ->orderBy('nama')
-                    ->get();
-
+                    ->orderBy('kelas_id')->orderBy('nama')->get();
                 foreach ($siswaAlpha as $s) {
                     $namaKelas = $s->kelas->nama_kelas ?? '-';
                     $wali      = $s->kelas->waliKelas->name ?? '-';
@@ -140,7 +140,39 @@ class SendKepsekSummary extends Command
                 }
             }
 
-            // Siswa terlambat per kelas
+            // Izin per kelas
+            $izinPerKelas = [];
+            if (!empty($izinIds2)) {
+                $siswaIzin = AttendanceStudent::with(['kelas.waliKelas'])
+                    ->whereIn('id', $izinIds2)
+                    ->orderBy('kelas_id')->orderBy('nama')->get();
+                foreach ($siswaIzin as $s) {
+                    $namaKelas = $s->kelas->nama_kelas ?? '-';
+                    $wali      = $s->kelas->waliKelas->name ?? '-';
+                    if (!isset($izinPerKelas[$namaKelas])) {
+                        $izinPerKelas[$namaKelas] = ['wali' => $wali, 'siswa' => []];
+                    }
+                    $izinPerKelas[$namaKelas]['siswa'][] = $s->nama;
+                }
+            }
+
+            // Sakit per kelas
+            $sakitPerKelas = [];
+            if (!empty($sakitIds2)) {
+                $siswaSakit = AttendanceStudent::with(['kelas.waliKelas'])
+                    ->whereIn('id', $sakitIds2)
+                    ->orderBy('kelas_id')->orderBy('nama')->get();
+                foreach ($siswaSakit as $s) {
+                    $namaKelas = $s->kelas->nama_kelas ?? '-';
+                    $wali      = $s->kelas->waliKelas->name ?? '-';
+                    if (!isset($sakitPerKelas[$namaKelas])) {
+                        $sakitPerKelas[$namaKelas] = ['wali' => $wali, 'siswa' => []];
+                    }
+                    $sakitPerKelas[$namaKelas]['siswa'][] = $s->nama;
+                }
+            }
+
+            // Terlambat per kelas
             $terlambatIds = (clone $recordsToday)->where('status', 'terlambat')->pluck('student_id')->toArray();
             $terlambatPerKelas = [];
             if (!empty($terlambatIds)) {
@@ -157,7 +189,7 @@ class SendKepsekSummary extends Command
                 }
             }
 
-            $message = AttendanceSummaryMessageService::buildWakaMasuk($dayName, $totalSiswa, $hadir, $terlambat, $alpha, $izin, $sakit, $persen, $status, $alphaPerKelas, $terlambatPerKelas);
+            $message = AttendanceSummaryMessageService::buildWakaMasuk($dayName, $totalSiswa, $hadir, $terlambat, $alpha, $izin, $sakit, $persen, $status, $alphaPerKelas, $terlambatPerKelas, $izinPerKelas, $sakitPerKelas);
         }
 
         $this->line('');

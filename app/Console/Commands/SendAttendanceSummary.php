@@ -92,6 +92,10 @@ class SendAttendanceSummary extends Command
             $alfa  = count($alfaStudents);
             $hadir = max(0, $totalSiswa - $alfa - $izin - $sakit);
 
+            // Nama siswa izin dan sakit
+            $izinStudents  = AttendanceStudent::where('kelas_id', $kelas->id)->whereIn('id', array_unique($izinIds))->orderBy('nama')->pluck('nama')->toArray();
+            $sakitStudents = AttendanceStudent::where('kelas_id', $kelas->id)->whereIn('id', array_unique($sakitIds))->orderBy('nama')->pluck('nama')->toArray();
+
             if ($type === 'pulang') {
                 // Hitung yang sudah check-out
                 $pulangIds       = $records->whereNotNull('check_out_time')->pluck('student_id')->toArray();
@@ -120,13 +124,13 @@ class SendAttendanceSummary extends Command
                         return $jam ? "{$s->nama} ({$jam})" : $s->nama;
                     })->toArray();
 
-                $message = AttendanceSummaryMessageService::buildWaliPulang($kelas->nama_kelas, $dayName, $totalSiswa, $hadir, $izin, $sakit, $alfa, count($pulangTepatIds), count($pulangCepatIds), $belumPulang, $belumPulangStudents, $pulangCepatStudents);
+                $message = AttendanceSummaryMessageService::buildWaliPulang($kelas->nama_kelas, $dayName, $totalSiswa, $hadir, $izin, $sakit, $alfa, count($pulangTepatIds), count($pulangCepatIds), $belumPulang, $belumPulangStudents, $pulangCepatStudents, $izinStudents, $sakitStudents);
                 $this->line("  {$kelas->nama_kelas} | Hadir:{$hadir} Izin:{$izin} Sakit:{$sakit} Alfa:{$alfa} PulangTepat:".count($pulangTepatIds)." PulangCepat:".count($pulangCepatIds)." Belum:{$belumPulang}");
             } else {
                 // Hitung terlambat untuk summary masuk
                 $terlambat  = $records->where('status', 'terlambat')->count();
                 $hadirTepat = max(0, $hadir - $terlambat);
-                $message = AttendanceSummaryMessageService::buildWaliMasuk($kelas->nama_kelas, $dayName, $totalSiswa, $hadirTepat, $terlambat, $izin, $sakit, $alfa, $alfaStudents);
+                $message = AttendanceSummaryMessageService::buildWaliMasuk($kelas->nama_kelas, $dayName, $totalSiswa, $hadirTepat, $terlambat, $izin, $sakit, $alfa, $alfaStudents, $izinStudents, $sakitStudents);
                 $this->line("  {$kelas->nama_kelas} | HadirTepat:{$hadirTepat} Terlambat:{$terlambat} Izin:{$izin} Sakit:{$sakit} Alfa:{$alfa} Total:{$totalSiswa}");
             }
 
