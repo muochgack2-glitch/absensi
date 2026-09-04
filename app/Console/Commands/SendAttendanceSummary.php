@@ -78,15 +78,19 @@ class SendAttendanceSummary extends Command
 
             $hadirIds = $records->whereNotNull('check_in_time')->pluck('student_id')->toArray();
             $izinIds  = $records->where('status', 'izin')->pluck('student_id')->toArray();
+            $sakitIds = $records->where('status', 'sakit')->pluck('student_id')->toArray();
             $izin     = count(array_unique($izinIds));
+            $sakit    = count(array_unique($sakitIds));
 
+            // Alpha = siswa yang tidak hadir (scan), bukan izin, dan bukan sakit
+            $notAlphaIds = array_unique(array_merge($hadirIds, $izinIds, $sakitIds));
             $alfaStudents = AttendanceStudent::where('kelas_id', $kelas->id)
                 ->where('is_active', true)
-                ->whereNotIn('id', array_unique(array_merge($hadirIds, $izinIds)))
+                ->whereNotIn('id', $notAlphaIds)
                 ->pluck('nama')->toArray();
 
             $alfa  = count($alfaStudents);
-            $hadir = max(0, $totalSiswa - $alfa - $izin);
+            $hadir = max(0, $totalSiswa - $alfa - $izin - $sakit);
 
             if ($type === 'pulang') {
                 // Hitung yang sudah check-out
@@ -116,14 +120,14 @@ class SendAttendanceSummary extends Command
                         return $jam ? "{$s->nama} ({$jam})" : $s->nama;
                     })->toArray();
 
-                $message = AttendanceSummaryMessageService::buildWaliPulang($kelas->nama_kelas, $dayName, $totalSiswa, $hadir, $izin, $alfa, count($pulangTepatIds), count($pulangCepatIds), $belumPulang, $belumPulangStudents, $pulangCepatStudents);
-                $this->line("  {$kelas->nama_kelas} | Hadir:{$hadir} PulangTepat:".count($pulangTepatIds)." PulangCepat:".count($pulangCepatIds)." Belum:{$belumPulang}");
+                $message = AttendanceSummaryMessageService::buildWaliPulang($kelas->nama_kelas, $dayName, $totalSiswa, $hadir, $izin, $sakit, $alfa, count($pulangTepatIds), count($pulangCepatIds), $belumPulang, $belumPulangStudents, $pulangCepatStudents);
+                $this->line("  {$kelas->nama_kelas} | Hadir:{$hadir} Izin:{$izin} Sakit:{$sakit} Alfa:{$alfa} PulangTepat:".count($pulangTepatIds)." PulangCepat:".count($pulangCepatIds)." Belum:{$belumPulang}");
             } else {
                 // Hitung terlambat untuk summary masuk
-                $terlambat = $records->where('status', 'terlambat')->count();
+                $terlambat  = $records->where('status', 'terlambat')->count();
                 $hadirTepat = max(0, $hadir - $terlambat);
-                $message = AttendanceSummaryMessageService::buildWaliMasuk($kelas->nama_kelas, $dayName, $totalSiswa, $hadirTepat, $terlambat, $izin, $alfa, $alfaStudents);
-                $this->line("  {$kelas->nama_kelas} | HadirTepat:{$hadirTepat} Terlambat:{$terlambat} Izin:{$izin} Alfa:{$alfa} Total:{$totalSiswa}");
+                $message = AttendanceSummaryMessageService::buildWaliMasuk($kelas->nama_kelas, $dayName, $totalSiswa, $hadirTepat, $terlambat, $izin, $sakit, $alfa, $alfaStudents);
+                $this->line("  {$kelas->nama_kelas} | HadirTepat:{$hadirTepat} Terlambat:{$terlambat} Izin:{$izin} Sakit:{$sakit} Alfa:{$alfa} Total:{$totalSiswa}");
             }
 
             if ($dryRun) {

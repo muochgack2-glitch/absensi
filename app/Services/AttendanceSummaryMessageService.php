@@ -17,7 +17,7 @@ class AttendanceSummaryMessageService
 
     public static function buildWaliMasuk(
         string $namaKelas, string $tanggal, int $total,
-        int $hadirTepat, int $terlambat, int $izin, int $alfa,
+        int $hadirTepat, int $terlambat, int $izin, int $sakit, int $alfa,
         array $alfaStudents = []
     ): string {
         $hadir  = $hadirTepat + $terlambat;
@@ -32,6 +32,7 @@ class AttendanceSummaryMessageService
             "✅ Hadir tepat waktu : {$hadirTepat} siswa",
             "⏰ Terlambat         : {$terlambat} siswa",
             "📝 Izin              : {$izin} siswa",
+            "🤒 Sakit             : {$sakit} siswa",
             "❌ Alfa              : {$alfa} siswa",
             "📊 Kehadiran         : {$persen}%",
         ];
@@ -52,7 +53,7 @@ class AttendanceSummaryMessageService
 
     public static function buildWaliPulang(
         string $namaKelas, string $tanggal, int $total,
-        int $hadir, int $izin, int $alfa,
+        int $hadir, int $izin, int $sakit, int $alfa,
         int $pulangTepat, int $pulangCepat, int $belumPulang,
         array $belumPulangStudents = [],
         array $pulangCepatStudents = []
@@ -68,6 +69,7 @@ class AttendanceSummaryMessageService
             "⚡ Pulang lebih awal  : {$pulangCepat} siswa",
             "⏳ Belum pulang       : {$belumPulang} siswa",
             "📝 Izin               : {$izin} siswa",
+            "🤒 Sakit              : {$sakit} siswa",
             "❌ Alfa               : {$alfa} siswa",
         ];
 
@@ -190,13 +192,13 @@ class AttendanceSummaryMessageService
     public static function previewWaliMasuk(): string
     {
         return self::buildWaliMasuk('[Nama Kelas]', '[Hari, DD Bulan YYYY]',
-            30, 25, 2, 1, 2, ['Budi Santoso', 'Ani Rahayu']);
+            30, 25, 2, 1, 1, 1, ['Budi Santoso', 'Ani Rahayu']);
     }
 
     public static function previewWaliPulang(): string
     {
         return self::buildWaliPulang('[Nama Kelas]', '[Hari, DD Bulan YYYY]',
-            30, 27, 1, 2, 20, 3, 4,
+            30, 27, 1, 1, 1, 20, 3, 4,
             ['Budi Santoso', 'Ani Rahayu', 'Doni Pratama'],
             ['Siti Nurbaya']
         );
