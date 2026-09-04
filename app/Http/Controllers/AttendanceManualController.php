@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AttendanceClass;
+use App\Models\AttendanceIzin;
 use App\Models\AttendanceRecord;
 use App\Models\AttendanceStudent;
 use App\Services\AttendanceNotificationService;
@@ -60,9 +61,20 @@ class AttendanceManualController extends Controller
         $holidayRecord = \App\Models\Holiday::getForDate($date);
         $isHoliday     = !is_null($holidayRecord);
 
+        // Ambil izin/sakit dari AttendanceIzin yang mencakup tanggal ini
+        // Digunakan untuk pre-fill form bila siswa belum punya AttendanceRecord
+        $studentIds    = $students->pluck('id');
+        $izinRecords   = AttendanceIzin::whereIn('student_id', $studentIds)
+            ->whereDate('tanggal_mulai', '<=', $date)
+            ->whereDate('tanggal_selesai', '>=', $date)
+            ->whereIn('status', ['disetujui', 'pending'])
+            ->orderByRaw("CASE WHEN status = 'disetujui' THEN 0 ELSE 1 END")
+            ->get()
+            ->keyBy('student_id');
+
         return view('attendance.manual.index', compact(
             'date', 'classId', 'classes', 'students', 'records',
-            'isWeekend', 'isHoliday', 'holidayRecord'
+            'isWeekend', 'isHoliday', 'holidayRecord', 'izinRecords'
         ));
     }
 

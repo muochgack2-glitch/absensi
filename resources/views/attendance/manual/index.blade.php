@@ -129,10 +129,15 @@
                             <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                                 @foreach($students as $i => $student)
                                     @php
-                                        $existing = $records->get($student->id);
-                                        $hasRecord = !is_null($existing);
+                                        $existing    = $records->get($student->id);
+                                        $hasRecord   = !is_null($existing);
+                                        // Pre-fill dari AttendanceIzin jika belum ada AttendanceRecord
+                                        $izinRecord  = !$hasRecord ? ($izinRecords->get($student->id) ?? null) : null;
+                                        $hasIzin     = !is_null($izinRecord);
                                     @endphp
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors {{ $hasRecord ? 'bg-blue-50/30 dark:bg-blue-900/10' : '' }}"
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors
+                                        {{ $hasRecord ? 'bg-blue-50/30 dark:bg-blue-900/10' : '' }}
+                                        {{ $hasIzin && !$hasRecord ? 'bg-purple-50/30 dark:bg-purple-900/10' : '' }}"
                                         id="row_{{ $student->id }}">
                                         <td class="px-4 py-3 text-gray-400 dark:text-gray-500 text-xs">{{ $i + 1 }}</td>
 
@@ -154,7 +159,11 @@
                                             <input type="hidden" name="entries[{{ $i }}][student_id]" value="{{ $student->id }}">
                                             <div class="flex gap-1 justify-center flex-wrap">
                                                 @php
-                                                    $currentStatus = $existing?->status ?? 'skip';
+                                                    // Prioritas: record scan/manual → izin surat → skip
+                                                    $currentStatus = $existing?->status
+                                                        ?? ($izinRecord ? $izinRecord->jenis : 'skip');
+                                                    $currentNotes  = $existing?->notes
+                                                        ?? ($izinRecord ? $izinRecord->alasan : '');
                                                     $statusOpts = [
                                                         'hadir'     => ['bg-green-500', 'H'],
                                                         'terlambat' => ['bg-yellow-500', 'T'],
@@ -164,6 +173,16 @@
                                                         'skip'      => ['bg-gray-300 dark:bg-gray-600', '—'],
                                                     ];
                                                 @endphp
+                                                {{-- Badge sumber izin surat --}}
+                                                @if($hasIzin && !$hasRecord)
+                                                    <div class="w-full text-center mb-1">
+                                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium
+                                                            {{ $izinRecord->status === 'disetujui' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' }}">
+                                                            <i class="fas fa-file-alt text-[10px]"></i>
+                                                            Surat {{ $izinRecord->status === 'disetujui' ? '✓' : '⏳' }}
+                                                        </span>
+                                                    </div>
+                                                @endif
                                                 @foreach($statusOpts as $val => [$bg, $lbl])
                                                     <label class="relative cursor-pointer" title="{{ ucfirst($val) }}">
                                                         <input type="radio"
@@ -195,7 +214,7 @@
                                         <td class="px-4 py-3">
                                             <input type="text"
                                                    name="entries[{{ $i }}][notes]"
-                                                   value="{{ $existing?->notes ?? '' }}"
+                                                   value="{{ $currentNotes }}"
                                                    data-prev-status="{{ $existing?->status ?? '' }}"
                                                    data-student-id="{{ $student->id }}"
                                                    placeholder="Keterangan opsional..."
