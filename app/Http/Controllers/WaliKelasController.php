@@ -166,7 +166,8 @@ class WaliKelasController extends Controller
             'terlambat' => $todayRecords->where('status', 'terlambat')->count(),
             'izin'      => $todayRecords->where('status', 'izin')->count(),
             'sakit'     => $todayRecords->where('status', 'sakit')->count(),
-            'alpha'     => $students - $todayRecords->count(),
+            'alpha'     => $todayRecords->where('status', 'alpha')->count()
+                         + ($students - $todayRecords->count()), // siswa tanpa record = belum hadir
         ];
 
         // Rekap 7 hari terakhir per hari
@@ -192,6 +193,8 @@ class WaliKelasController extends Controller
                     ->whereBetween('date', [$startDate, $endDate])->get();
                 $s->hadir     = $recs->where('status', 'hadir')->count();
                 $s->terlambat = $recs->where('status', 'terlambat')->count();
+                $s->izin      = $recs->where('status', 'izin')->count();   // ← fix: include izin manual
+                $s->sakit     = $recs->where('status', 'sakit')->count();  // ← fix: include sakit manual
                 $s->alpha     = $recs->where('status', 'alpha')->count();
                 return $s;
             });
