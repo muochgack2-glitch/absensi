@@ -37,24 +37,29 @@ class EkaldikController extends Controller
         $nisArray = $validated['nis'];
 
         // ── 1. QR scan records ─────────────────────────────────────────────
-        $scanRecords = AttendanceRecord::with('student')
+        $attendanceRecords = AttendanceRecord::with('student')
             ->whereDate('date', $date)
             ->whereHas('student', fn($q) => $q->whereIn('nis', $nisArray))
             ->get();
 
         $data = [];
-        foreach ($scanRecords as $record) {
+        foreach ($attendanceRecords as $record) {
             if ($record->student) {
+                // Scan QR = ada foto check_in; manual input = tidak ada foto
+                $isManual = empty($record->check_in_photo);
+                $isScanStatus = in_array($record->status, ['hadir', 'terlambat']);
+
                 $data[$record->student->nis] = [
                     'status'         => $record->status,
                     'check_in_time'  => $record->check_in_time,
                     'check_out_time' => $record->check_out_time,
-                    'source'         => 'scan',
+                    'notes'          => $record->notes,
+                    'source'         => (!$isManual && $isScanStatus) ? 'scan' : 'manual',
                 ];
             }
         }
 
-        // ── 2. Izin / Sakit — hanya untuk NIS yang belum ada scan ─────────
+        // ── 2. Izin / Sakit dari AttendanceIzin — hanya NIS tanpa record manual/scan ──
         $missingNis = array_values(array_diff($nisArray, array_keys($data)));
 
         if (!empty($missingNis)) {
@@ -90,9 +95,10 @@ class EkaldikController extends Controller
             'queried'   => count($nisArray),
             'found'     => count($data),
             'breakdown' => [
-                'scan'  => collect($data)->where('source', 'scan')->count(),
-                'izin'  => collect($data)->filter(fn($d) => str_starts_with($d['source'] ?? '', 'izin_'))->count(),
-                'alpha' => count($nisArray) - count($data),
+                'scan'       => collect($data)->where('source', 'scan')->count(),
+                'manual'     => collect($data)->where('source', 'manual')->count(),
+                'izin_surat' => collect($data)->filter(fn($d) => str_starts_with($d['source'] ?? '', 'izin_'))->count(),
+                'alpha'      => count($nisArray) - count($data),
             ],
         ]);
     }
