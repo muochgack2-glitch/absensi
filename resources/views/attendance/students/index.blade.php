@@ -108,6 +108,14 @@
                         <i class="fas fa-plus mr-2"></i>
                         Tambah Siswa
                     </a>
+
+                    <a
+                        href="{{ route('attendance.students.phones') }}"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 bg-cyan-600 hover:bg-cyan-700 text-white shadow-sm"
+                    >
+                        <i class="fas fa-phone-alt mr-2"></i>
+                        Update No HP
+                    </a>
                 </div>
                 @endif
             </div>
