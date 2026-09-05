@@ -60,12 +60,17 @@ class SendKepsekSummary extends Command
             $records        = AttendanceRecord::withoutGlobalScope('tahun_ajaran')->whereDate('date', $date);
             $sudahPulang    = (clone $records)->whereNotNull('check_out_time')->count();
             $pulangCepat    = (clone $records)->where('check_out_status', 'pulang_cepat')->count();
-            $belumPulang    = max(0, $hadir - $sudahPulang);
+            $belumPulang    = 0; // dihitung ulang setelah exclude izin/sakit/alfa
 
             // Belum pulang per kelas
             $hadirIds       = (clone $records)->whereNotNull('check_in_time')->pluck('student_id')->toArray();
             $sudahPulangIds = (clone $records)->whereNotNull('check_out_time')->pluck('student_id')->toArray();
-            $belumPulangIds = array_diff($hadirIds, $sudahPulangIds);
+            // Exclude izin/sakit/alfa — mereka tidak perlu pulang
+            $izinPulangIds  = (clone $records)->where('status', 'izin')->pluck('student_id')->toArray();
+            $sakitPulangIds = (clone $records)->where('status', 'sakit')->pluck('student_id')->toArray();
+            $alfaPulangIds  = (clone $records)->where('status', 'alpha')->pluck('student_id')->toArray();
+            $belumPulangIds = array_diff($hadirIds, $sudahPulangIds, array_unique(array_merge($izinPulangIds, $sakitPulangIds, $alfaPulangIds)));
+            $belumPulang    = max(0, count($belumPulangIds));
 
             $belumPulangPerKelas = [];
             if (!empty($belumPulangIds)) {

@@ -101,8 +101,11 @@ class SendAttendanceSummary extends Command
                 $pulangIds       = $records->whereNotNull('check_out_time')->pluck('student_id')->toArray();
                 $pulangCepatIds  = $records->where('check_out_status', 'pulang_cepat')->pluck('student_id')->toArray();
                 $pulangTepatIds  = array_diff($pulangIds, $pulangCepatIds);
-                $belumPulangIds  = array_diff($hadirIds, $pulangIds);
+                // Exclude izin/sakit/alfa — mereka tidak perlu pulang
+                $alfaRecordIds   = $records->where('status', 'alpha')->pluck('student_id')->toArray();
+                $belumPulangIds  = array_diff($hadirIds, $pulangIds, array_unique(array_merge($izinIds, $sakitIds, $alfaRecordIds)));
                 $belumPulang     = max(0, count($belumPulangIds));
+
 
                 // Nama siswa belum pulang
                 $belumPulangStudents = AttendanceStudent::where('kelas_id', $kelas->id)
