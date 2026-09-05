@@ -52,11 +52,12 @@
 
         {{-- Filter Kelas --}}
         <x-card>
-            <form method="GET" action="{{ route('attendance.students.phones') }}" class="flex flex-col sm:flex-row gap-3 items-end">
+            <form method="GET" action="{{ route('attendance.students.phones') }}" class="flex flex-col sm:flex-row gap-3 items-end" id="filterForm">
                 <div class="flex-1">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pilih Kelas</label>
                     <select name="kelas_id" id="kelas_id"
-                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                            onchange="document.getElementById('filterForm').submit()">
                         <option value="">-- Pilih Kelas --</option>
                         @foreach($classes as $kelas)
                             <option value="{{ $kelas->id }}" {{ $kelasId == $kelas->id ? 'selected' : '' }}>
@@ -65,9 +66,10 @@
                         @endforeach
                     </select>
                 </div>
-                <button type="submit"
+                <button type="submit" id="btnTampilkan"
                         class="w-full sm:w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
-                    <i class="fas fa-filter"></i> Tampilkan
+                    <i class="fas fa-filter" id="btnIcon"></i>
+                    <span id="btnText">Tampilkan</span>
                 </button>
             </form>
         </x-card>
