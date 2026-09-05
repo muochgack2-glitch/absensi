@@ -46,9 +46,17 @@ return [
         // API key untuk endpoint /api/ekaldik/* (dipanggil E-Kaldik/SIM Kurikulum).
         // Kalau kosong/tidak di-set, endpoint tetap terbuka tanpa auth.
         // Isi EKALDIK_API_KEY di .env & set key yang sama di E-Kaldik.
-        'api_key' => env('EKALDIK_API_KEY'),
+        'api_key'  => env('EKALDIK_API_KEY'),
         // Base URL E-Kaldik untuk sync hari libur
         'base_url' => env('EKALDIK_BASE_URL', ''),
+    ],
+
+    'phone_api' => [
+        // API key untuk endpoint /api/phone/* (form update HP ortu dari domain lain).
+        // Wajib diisi di .env production: PHONE_API_KEY=isi_token_rahasia_panjang
+        'api_key'         => env('PHONE_API_KEY'),
+        // Domain yang diizinkan akses CORS (domain form update HP)
+        'allowed_origin'  => env('PHONE_API_ALLOWED_ORIGIN', 'https://wa.dmcenter.my.id'),
     ],
 
 ];

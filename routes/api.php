@@ -7,6 +7,7 @@ use App\Http\Controllers\AttendanceSSEController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\Api\EkaldikController;
+use App\Http\Controllers\Api\StudentPhoneController;
 
 // AJAX Login API (dengan session middleware untuk auth)
 Route::middleware(['web'])->post('/auth/login', [AuthenticatedSessionController::class, 'store']);
@@ -38,4 +39,12 @@ Route::prefix('chatbot')->group(function () {
 // E-Kaldik Integration API - untuk auto-fill absensi di jurnal mengajar
 Route::middleware(['ekaldik.api'])->prefix('ekaldik')->group(function () {
     Route::get('/attendance', [EkaldikController::class, 'getAttendance']);
+});
+
+// Phone Update API - untuk form update HP ortu dari domain wa.dmcenter.my.id
+// OPTIONS preflight (CORS) — tanpa middleware auth
+Route::options('/phone/{any}', [StudentPhoneController::class, 'options'])->where('any', '.*');
+Route::middleware(['phone.api'])->prefix('phone')->group(function () {
+    Route::get('/lookup',  [StudentPhoneController::class, 'lookup']);   // cari siswa by NIS
+    Route::post('/update', [StudentPhoneController::class, 'update']);   // update HP
 });
