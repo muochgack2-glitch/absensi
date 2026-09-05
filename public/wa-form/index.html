@@ -280,6 +280,14 @@
         .hp-input.empty-warn { border-color: #fca5a5; background: #fef2f2; }
         .hp-input.changed    { border-color: #fde68a; background: #fffbeb; }
 
+        .hp-input[readonly] {
+            background: #f1f5f9 !important;
+            color: var(--muted);
+            cursor: not-allowed;
+            border-color: var(--border) !important;
+            box-shadow: none !important;
+        }
+
         /* ===== DESKTOP TABLE (≥640px) ===== */
         @media (min-width: 640px) {
             .student-list { display: none; }
@@ -613,12 +621,12 @@
                             oninput="onHpInput(this,'${s.id}','c')">
                     </div>
                     <div class="field-group">
-                        <label>No HP Ortu 2 (Opsional)</label>
-                        <input type="tel" inputmode="numeric" class="hp-input ${s.no_hp_ortu2 ? 'has-value' : ''}"
+                        <label>No HP Ortu 2 <span style="font-size:.7rem;color:#94a3b8;font-weight:400;">(hanya tampil)</span></label>
+                        <input type="tel" inputmode="numeric" class="hp-input"
                             id="c_hp2_${s.id}"
                             value="${esc(s.no_hp_ortu2)}"
-                            placeholder="Opsional"
-                            oninput="onHpInput(this,'${s.id}','c')">
+                            placeholder="—"
+                            readonly tabindex="-1">
                     </div>
                 </div>
             </div>
@@ -643,9 +651,9 @@
                         oninput="onHpInput(this,'${s.id}','t')">
                 </td>
                 <td>
-                    <input type="tel" inputmode="numeric" class="hp-input ${s.no_hp_ortu2 ? 'has-value' : ''}"
-                        id="t_hp2_${s.id}" value="${esc(s.no_hp_ortu2)}" placeholder="Opsional"
-                        oninput="onHpInput(this,'${s.id}','t')">
+                    <input type="tel" inputmode="numeric" class="hp-input"
+                        id="t_hp2_${s.id}" value="${esc(s.no_hp_ortu2)}" placeholder="—"
+                        readonly tabindex="-1">
                 </td>
             </tr>
         `).join('');
@@ -699,9 +707,9 @@
         clearAlert('alertSimpan');
 
         const payload = siswaData.map(s => ({
-            id:          s.id,
-            no_hp_ortu:  getVal(s.id, 'hp1'),
-            no_hp_ortu2: getVal(s.id, 'hp2'),
+            id:         s.id,
+            no_hp_ortu: getVal(s.id, 'hp1'),
+            // hp2 dikunci — tidak dikirim
         }));
 
         const btn = document.getElementById('btnSimpan');
