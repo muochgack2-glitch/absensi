@@ -2,9 +2,10 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Nomor HP Orang Tua — SMK PGRI Blora</title>
-    <meta name="description" content="Update nomor HP orang tua/wali siswa SMK PGRI Blora per kelas">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="theme-color" content="#2563eb">
+    <title>Update HP Orang Tua — SMK PGRI Blora</title>
+    <meta name="description" content="Update nomor HP orang tua/wali siswa SMK PGRI Blora">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <style>
@@ -15,293 +16,434 @@
             --primary-h: #1d4ed8;
             --purple:    #7c3aed;
             --green:     #16a34a;
-            --green-h:   #15803d;
             --danger:    #dc2626;
-            --warn-bg:   #eff6ff;
-            --warn-bd:   #bfdbfe;
-            --warn-txt:  #1e40af;
-            --bg:        #f8fafc;
+            --orange:    #ea580c;
+            --bg:        #f1f5f9;
             --card:      #ffffff;
             --border:    #e2e8f0;
             --text:      #1e293b;
             --muted:     #64748b;
-            --th-bg:     #f1f5f9;
-            --radius:    12px;
+            --radius:    14px;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
 
+        html { -webkit-text-size-adjust: 100%; }
+
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg);
             min-height: 100vh;
             color: var(--text);
-            padding: 0;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Top bar */
+        /* ===== TOP BAR ===== */
         .topbar {
-            background: var(--card);
-            border-bottom: 1px solid var(--border);
-            padding: 14px 24px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        .topbar .icon { font-size: 22px; }
-        .topbar-title h1 { font-size: 1.1rem; font-weight: 700; }
-        .topbar-title p  { font-size: 0.8rem; color: var(--muted); margin-top: 1px; }
-        .topbar-back {
-            margin-left: auto;
-            padding: 8px 16px;
-            border: 1.5px solid var(--border);
-            border-radius: 8px;
-            background: transparent;
-            font-size: 0.85rem;
-            font-weight: 500;
-            font-family: inherit;
-            cursor: pointer;
-            color: var(--text);
-            text-decoration: none;
-            display: flex; align-items: center; gap: 6px;
-        }
-        .topbar-back:hover { border-color: var(--primary); color: var(--primary); }
-
-        /* Content */
-        .content { max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
-
-        /* Card */
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 20px 24px;
-            margin-bottom: 20px;
-        }
-
-        /* Filter row */
-        .filter-row {
+            background: var(--primary);
+            padding: 14px 16px;
             display: flex;
             align-items: center;
             gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            box-shadow: 0 2px 12px rgba(37,99,235,.3);
         }
-        .filter-row label {
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--muted);
-            white-space: nowrap;
-        }
-        select {
-            flex: 1;
-            padding: 10px 14px;
-            border: 1.5px solid var(--border);
-            border-radius: 8px;
+        .topbar-icon { font-size: 20px; flex-shrink: 0; }
+        .topbar-title { flex: 1; min-width: 0; }
+        .topbar-title h1 {
             font-size: 0.95rem;
+            font-weight: 700;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .topbar-title p {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,.75);
+            margin-top: 1px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ===== CONTENT ===== */
+        .content {
+            padding: 16px;
+            padding-bottom: calc(90px + var(--safe-bottom));
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        /* ===== FILTER CARD ===== */
+        .filter-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+            margin-bottom: 14px;
+        }
+        .filter-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            margin-bottom: 8px;
+        }
+        .filter-row {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+        select#selectKelas {
+            flex: 1;
+            min-width: 0;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.9rem;
             font-family: inherit;
             color: var(--text);
             background: #f8fafc;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
             cursor: pointer;
             outline: none;
             transition: border-color .2s;
         }
-        select:focus { border-color: var(--primary); }
+        select#selectKelas:focus { border-color: var(--primary); }
 
-        /* Buttons */
-        .btn {
-            padding: 10px 20px;
+        .btn-tampilkan {
+            padding: 12px 18px;
+            background: var(--primary);
+            color: #fff;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 0.88rem;
             font-weight: 600;
             font-family: inherit;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            transition: .2s;
             white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background .2s;
+            flex-shrink: 0;
         }
-        .btn:disabled { opacity: .6; cursor: not-allowed; }
-        .btn-primary { background: var(--primary); color: #fff; }
-        .btn-primary:hover:not(:disabled) { background: var(--primary-h); }
-        .btn-purple { background: var(--purple); color: #fff; }
-        .btn-purple:hover:not(:disabled) { background: #6d28d9; }
-        .btn-green  { background: var(--green);  color: #fff; }
-        .btn-green:hover:not(:disabled)  { background: var(--green-h); }
+        .btn-tampilkan:hover { background: var(--primary-h); }
+        .btn-tampilkan:disabled { background: #93c5fd; cursor: not-allowed; }
 
-        /* Section header */
+        /* ===== SECTION HEADER ===== */
         .section-header {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+        }
+        .section-header-top {
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 16px;
+            gap: 10px;
+            margin-bottom: 12px;
         }
-        .section-header-left h2 { font-size: 1rem; font-weight: 700; }
-        .section-header-left p  { font-size: 0.82rem; color: var(--muted); margin-top: 3px; }
-        .section-header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-
-        /* Info box */
-        .info-box {
-            background: var(--warn-bg);
-            border: 1px solid var(--warn-bd);
+        .section-header-top h2 { font-size: 1rem; font-weight: 700; }
+        .section-header-top p  { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+        .btn-format {
+            padding: 8px 14px;
+            background: var(--purple);
+            color: #fff;
+            border: none;
             border-radius: 8px;
-            padding: 12px 16px;
-            font-size: 0.83rem;
-            color: var(--warn-txt);
-            margin-bottom: 16px;
-            line-height: 1.6;
+            font-size: 0.82rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: .2s;
+            flex-shrink: 0;
+        }
+        .btn-format:hover { background: #6d28d9; }
+
+        .info-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 0.78rem;
+            color: #1e40af;
+            line-height: 1.5;
         }
         .info-box strong { font-weight: 600; }
         .info-box code {
             background: #dbeafe;
-            padding: 1px 6px;
+            padding: 1px 5px;
             border-radius: 4px;
             font-family: monospace;
-            font-size: 0.88em;
-            color: #1e40af;
         }
 
-        /* Table */
-        .table-wrap { overflow-x: auto; }
+        /* ===== STUDENT CARDS (mobile) ===== */
+        .student-list { display: flex; flex-direction: column; gap: 10px; }
+
+        .student-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 14px 16px;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+            border-left: 4px solid var(--border);
+            transition: border-color .2s;
+        }
+        .student-card.has-hp  { border-left-color: #86efac; }
+        .student-card.no-hp   { border-left-color: #fca5a5; }
+        .student-card.dirty   { border-left-color: #fde68a; }
+
+        .student-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .student-avatar {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #7c3aed);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .student-info-text { flex: 1; min-width: 0; }
+        .student-nama {
+            font-weight: 700;
+            font-size: 0.92rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .student-nis {
+            font-size: 0.75rem;
+            color: var(--muted);
+            font-family: monospace;
+            margin-top: 1px;
+        }
+        .student-num {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--muted);
+            background: var(--bg);
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+
+        .student-fields { display: flex; flex-direction: column; gap: 8px; }
+        .field-group label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            margin-bottom: 5px;
+        }
+        .hp-input {
+            width: 100%;
+            padding: 11px 13px;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            font-size: 0.92rem;
+            font-family: 'Inter', monospace;
+            color: var(--text);
+            background: #f8fafc;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+            -webkit-appearance: none;
+        }
+        .hp-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+            background: #fff;
+        }
+        .hp-input.has-value { border-color: #86efac; background: #f0fdf4; }
+        .hp-input.empty-warn { border-color: #fca5a5; background: #fef2f2; }
+        .hp-input.changed    { border-color: #fde68a; background: #fffbeb; }
+
+        /* ===== DESKTOP TABLE (≥640px) ===== */
+        @media (min-width: 640px) {
+            .student-list { display: none; }
+            .desktop-table-wrap { display: block; }
+        }
+        @media (max-width: 639px) {
+            .desktop-table-wrap { display: none; }
+        }
+
+        .desktop-table-wrap { overflow-x: auto; }
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.88rem;
         }
         thead th {
-            background: var(--th-bg);
+            background: #f8fafc;
             padding: 10px 14px;
             text-align: left;
-            font-size: 0.78rem;
+            font-size: 0.75rem;
             font-weight: 600;
             color: var(--muted);
-            letter-spacing: .03em;
             text-transform: uppercase;
-            border-bottom: 1px solid var(--border);
+            letter-spacing: .04em;
+            border-bottom: 2px solid var(--border);
         }
-        tbody tr { border-bottom: 1px solid var(--border); }
-        tbody tr:last-child { border-bottom: none; }
+        tbody tr { border-bottom: 1px solid #f1f5f9; }
         tbody tr:hover { background: #fafbfd; }
-        tbody td {
-            padding: 11px 14px;
-            vertical-align: middle;
-        }
-        .td-num   { color: var(--muted); font-size: 0.8rem; width: 40px; }
-        .td-nama  { font-weight: 600; }
-        .td-nis   { color: var(--muted); font-size: 0.82rem; }
+        tbody td { padding: 10px 14px; vertical-align: middle; }
+        .td-num  { color: var(--muted); font-size: 0.78rem; width: 36px; }
+        .td-nama { font-weight: 600; font-size: 0.88rem; }
+        .td-nis  { color: var(--muted); font-size: 0.8rem; font-family: monospace; }
+        table .hp-input { min-width: 155px; padding: 8px 11px; font-size: 0.85rem; }
 
-        input[type="text"].hp-input {
-            width: 100%;
-            min-width: 160px;
-            padding: 8px 12px;
-            border: 1.5px solid var(--border);
-            border-radius: 7px;
-            font-size: 0.88rem;
+        /* ===== STICKY BOTTOM BAR ===== */
+        .sticky-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0; right: 0;
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            padding: 14px 16px;
+            padding-bottom: calc(14px + var(--safe-bottom));
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            z-index: 30;
+            box-shadow: 0 -4px 20px rgba(0,0,0,.08);
+        }
+        .sticky-bar.visible { display: flex; }
+        .sticky-bar-info {
+            font-size: 0.78rem;
+            color: var(--muted);
+            flex: 1;
+            min-width: 0;
+        }
+        .sticky-bar-info strong { color: var(--text); display: block; font-size: 0.88rem; }
+        .btn-simpan {
+            padding: 13px 24px;
+            background: var(--green);
+            color: #fff;
+            border: none;
+            border-radius: 11px;
+            font-size: 0.92rem;
+            font-weight: 700;
             font-family: inherit;
-            color: var(--text);
-            background: #fff;
-            outline: none;
-            transition: border-color .2s, box-shadow .2s;
-        }
-        input[type="text"].hp-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37,99,235,.1);
-        }
-        input[type="text"].hp-input.empty { border-color: #fbbf24; background: #fffbeb; }
-
-        /* Alert */
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 0.87rem;
-            margin-bottom: 16px;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 7px;
+            transition: background .2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .btn-simpan:hover:not(:disabled) { background: #15803d; }
+        .btn-simpan:disabled { background: #86efac; cursor: not-allowed; }
+
+        /* ===== ALERTS ===== */
+        .alert {
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            line-height: 1.5;
         }
         .alert-danger  { background:#fef2f2; border:1px solid #fecaca; color:#991b1b; }
         .alert-success { background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; }
 
-        /* Empty state */
+        /* ===== EMPTY STATES ===== */
         .empty-state {
             text-align: center;
             padding: 48px 20px;
             color: var(--muted);
         }
-        .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+        .empty-state .icon { font-size: 44px; margin-bottom: 14px; opacity: .6; }
         .empty-state p { font-size: 0.9rem; }
 
-        /* Spinner */
+        /* ===== SPINNER ===== */
         .spinner {
             width: 16px; height: 16px;
-            border: 2px solid rgba(255,255,255,.4);
+            border: 2.5px solid rgba(255,255,255,.4);
             border-top-color: #fff;
             border-radius: 50%;
             animation: spin .7s linear infinite;
             display: inline-block;
+            flex-shrink: 0;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Toast */
+        /* ===== TOAST ===== */
         #toast {
             position: fixed;
-            bottom: 24px; right: 24px;
+            bottom: 80px; left: 16px; right: 16px;
             background: #1e293b;
             color: #fff;
-            padding: 12px 20px;
-            border-radius: 10px;
+            padding: 13px 18px;
+            border-radius: 12px;
             font-size: 0.88rem;
             font-weight: 500;
             box-shadow: 0 8px 24px rgba(0,0,0,.2);
             z-index: 100;
-            transform: translateY(80px);
+            transform: translateY(20px);
             opacity: 0;
-            transition: .3s ease;
-            max-width: 320px;
+            transition: .25s ease;
+            text-align: center;
         }
         #toast.show { transform: translateY(0); opacity: 1; }
-        #toast.success { background: var(--green); }
-        #toast.error   { background: var(--danger); }
+        #toast.ok  { background: var(--green); }
+        #toast.err { background: var(--danger); }
+
+        @media (min-width: 480px) {
+            #toast { left: auto; right: 20px; width: 320px; text-align: left; bottom: 90px; }
+        }
 
         #tableSection { display: none; }
-
-        @media (max-width: 640px) {
-            .topbar { padding: 12px 16px; }
-            .content { padding: 16px; }
-            .filter-row { flex-direction: column; align-items: stretch; }
-            .section-header { flex-direction: column; }
-            .section-header-actions { width: 100%; }
-            .btn { flex: 1; justify-content: center; }
-        }
     </style>
 </head>
 <body>
 
 <!-- Top Bar -->
 <div class="topbar">
-    <div class="icon">📋</div>
+    <div class="topbar-icon">📋</div>
     <div class="topbar-title">
-        <h1>Update Nomor HP Orang Tua</h1>
-        <p>Edit nomor HP ortu/wali siswa per kelas secara cepat</p>
+        <h1>Update HP Orang Tua</h1>
+        <p>SMK PGRI Blora — Per Kelas</p>
     </div>
-    <a href="javascript:history.back()" class="topbar-back">← Kembali</a>
 </div>
 
 <!-- Content -->
 <div class="content">
 
-    <!-- Pilih Kelas -->
-    <div class="card">
+    <!-- Filter Kelas -->
+    <div class="filter-card">
+        <div class="filter-label">Pilih Kelas</div>
         <div class="filter-row">
-            <label for="selectKelas">Pilih Kelas</label>
             <select id="selectKelas">
-                <option value="">— Loading kelas... —</option>
+                <option value="">⏳ Memuat daftar kelas…</option>
             </select>
-            <button class="btn btn-primary" id="btnTampilkan" onclick="tampilkan()">
-                ▼ Tampilkan
+            <button class="btn-tampilkan" id="btnTampilkan" onclick="tampilkan()">
+                Tampilkan
             </button>
         </div>
     </div>
@@ -309,237 +451,325 @@
     <!-- Alert global -->
     <div id="alertGlobal"></div>
 
-    <!-- Tabel Siswa -->
-    <div class="card" id="tableSection">
+    <!-- Tabel / Cards Siswa -->
+    <div id="tableSection">
+
         <!-- Section header -->
         <div class="section-header">
-            <div class="section-header-left">
-                <h2 id="titleKelas">—</h2>
-                <p id="subtitleKelas">—</p>
-            </div>
-            <div class="section-header-actions">
-                <button class="btn btn-purple" id="btnFormat" onclick="formatOtomatis()">
-                    ✏️ Format Otomatis
-                </button>
-                <button class="btn btn-green" id="btnSimpan" onclick="simpanSemua()">
-                    💾 Simpan Semua
+            <div class="section-header-top">
+                <div>
+                    <h2 id="titleKelas">—</h2>
+                    <p id="subtitleKelas">—</p>
+                </div>
+                <button class="btn-format" id="btnFormat" onclick="formatOtomatis()">
+                    ✏️ Format
                 </button>
             </div>
-        </div>
-
-        <!-- Info box -->
-        <div class="info-box">
-            ℹ️ Format nomor: <strong>628XXXXXXXXX</strong> (tanpa tanda + atau spasi).
-            Contoh: <code>6281234567890</code>
-            &nbsp;|&nbsp; No HP 2 opsional (jika ada 2 nomor ortu/wali).
+            <div class="info-box">
+                ℹ️ Format: <strong>628XXXXXXXXX</strong>.
+                Contoh: <code>6281234567890</code>
+                — tanpa tanda + atau spasi.
+            </div>
         </div>
 
         <!-- Alert simpan -->
         <div id="alertSimpan"></div>
 
-        <!-- Table -->
-        <div class="table-wrap">
+        <!-- Mobile: Cards -->
+        <div class="student-list" id="studentCards"></div>
+
+        <!-- Desktop: Table -->
+        <div class="desktop-table-wrap" style="background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
             <table id="tabelSiswa">
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>NAMA SISWA</th>
+                        <th>Nama Siswa</th>
                         <th>NIS</th>
-                        <th>NO HP ORTU (UTAMA)</th>
-                        <th>NO HP ORTU 2 (ALTERNATIF)</th>
+                        <th>No HP Ortu (Utama)</th>
+                        <th>No HP Ortu 2 (Alternatif)</th>
                     </tr>
                 </thead>
-                <tbody id="tbodySiswa">
-                    <tr>
-                        <td colspan="5">
-                            <div class="empty-state">
-                                <div class="icon">🏫</div>
-                                <p>Pilih kelas lalu klik Tampilkan</p>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
+                <tbody id="tbodySiswa"></tbody>
             </table>
+        </div>
+
+    </div>
+
+    <!-- Empty prompt -->
+    <div id="promptSection">
+        <div class="empty-state">
+            <div class="icon">🏫</div>
+            <p>Pilih kelas di atas<br>lalu ketuk <strong>Tampilkan</strong></p>
         </div>
     </div>
 
 </div>
 
-<!-- Toast notification -->
+<!-- Sticky Bottom Bar -->
+<div class="sticky-bar" id="stickyBar">
+    <div class="sticky-bar-info">
+        <strong id="stickyTitle">—</strong>
+        <span id="stickyCount">—</span>
+    </div>
+    <button class="btn-simpan" id="btnSimpan" onclick="simpanSemua()">
+        💾 Simpan
+    </button>
+</div>
+
 <div id="toast"></div>
 
 <script>
     // =============================
     // KONFIGURASI
     // =============================
-    const API_BASE = 'https://absensi.dmcenter.my.id/api/phone';
-    const API_KEY  = 'ISI_TOKEN_RAHASIA_DISINI';
+    const API_BASE = 'https://absensi.smkpgriblora.sch.id/api/phone';
+    const API_KEY  = 'K0e6k4HW4cJnVuCSdFF5HHZCRmKYjzxR4mDFl9DDn-Q';
     // =============================
 
-    const headers = { 'X-API-Key': API_KEY, 'Content-Type': 'application/json' };
+    const H = { 'X-API-Key': API_KEY, 'Content-Type': 'application/json' };
     let siswaData = [];
 
-    // Load daftar kelas saat halaman dibuka
+    // ── Load kelas ──────────────────────────────
     async function loadKelas() {
         try {
-            const res  = await fetch(`${API_BASE}/classes`, { headers });
+            const res  = await fetch(`${API_BASE}/classes`, { headers: H });
             const data = await res.json();
             if (!data.success) throw new Error(data.message);
-
             const sel = document.getElementById('selectKelas');
             sel.innerHTML = '<option value="">— Pilih Kelas —</option>';
             data.data.forEach(k => {
-                const opt = document.createElement('option');
-                opt.value       = k.id;
-                opt.textContent = `${k.nama_kelas} (${k.jumlah} siswa)`;
-                sel.appendChild(opt);
+                const o = document.createElement('option');
+                o.value = k.id;
+                o.textContent = `${k.nama_kelas}  (${k.jumlah} siswa)`;
+                sel.appendChild(o);
             });
-        } catch (e) {
+        } catch {
             document.getElementById('selectKelas').innerHTML =
-                '<option value="">⚠️ Gagal memuat kelas</option>';
-            showAlert('alertGlobal', 'danger', 'Gagal terhubung ke server. Pastikan API sudah aktif.');
+                '<option value="">⚠️ Gagal memuat — coba refresh</option>';
+            showAlert('alertGlobal', 'danger', 'Gagal terhubung ke server.');
         }
     }
 
-    // Tampilkan siswa per kelas
+    // ── Tampilkan siswa ─────────────────────────
     async function tampilkan() {
         const kelasId = document.getElementById('selectKelas').value;
-        if (!kelasId) { toast('Pilih kelas terlebih dahulu.', 'error'); return; }
+        if (!kelasId) { toast('Pilih kelas terlebih dahulu.', 'err'); return; }
 
         const btn = document.getElementById('btnTampilkan');
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span> Loading...';
-        clearAlert('alertGlobal');
-        clearAlert('alertSimpan');
+        btn.innerHTML = '<span class="spinner"></span>';
+        clearAlert('alertGlobal'); clearAlert('alertSimpan');
 
         try {
-            const res  = await fetch(`${API_BASE}/students?kelas_id=${kelasId}`, { headers });
+            const res  = await fetch(`${API_BASE}/students?kelas_id=${kelasId}`, { headers: H });
             const data = await res.json();
             if (!data.success) throw new Error(data.message);
 
             siswaData = data.data;
-
-            // Update header
             document.getElementById('titleKelas').textContent    = data.kelas;
             document.getElementById('subtitleKelas').textContent = `${data.jumlah} siswa aktif`;
-            document.getElementById('tableSection').style.display = 'block';
+            document.getElementById('stickyTitle').textContent   = data.kelas;
+            document.getElementById('stickyCount').textContent   = `${data.jumlah} siswa`;
 
-            // Render tabel
-            renderTabel(data.data);
+            document.getElementById('tableSection').style.display  = 'block';
+            document.getElementById('promptSection').style.display = 'none';
+            document.getElementById('stickyBar').classList.add('visible');
 
+            renderCards(data.data);
+            renderTable(data.data);
         } catch (e) {
             showAlert('alertGlobal', 'danger', e.message || 'Gagal memuat data siswa.');
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '▼ Tampilkan';
+            btn.innerHTML = 'Tampilkan';
         }
     }
 
-    function renderTabel(data) {
-        const tbody = document.getElementById('tbodySiswa');
+    // ── Render mobile cards ──────────────────────
+    function renderCards(data) {
+        const wrap = document.getElementById('studentCards');
         if (!data.length) {
-            tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="icon">👤</div><p>Tidak ada siswa aktif di kelas ini.</p></div></td></tr>`;
+            wrap.innerHTML = `<div class="empty-state"><div class="icon">👤</div><p>Tidak ada siswa aktif.</p></div>`;
             return;
         }
+        wrap.innerHTML = data.map((s, i) => `
+            <div class="student-card ${s.no_hp_ortu ? 'has-hp' : 'no-hp'}" id="card_${s.id}">
+                <div class="student-card-header">
+                    <div class="student-avatar">${s.nama.charAt(0).toUpperCase()}</div>
+                    <div class="student-info-text">
+                        <div class="student-nama">${esc(s.nama)}</div>
+                        <div class="student-nis">NIS: ${esc(s.nis)}</div>
+                    </div>
+                    <div class="student-num">${i + 1}</div>
+                </div>
+                <div class="student-fields">
+                    <div class="field-group">
+                        <label>No HP Ortu (Utama) *</label>
+                        <input type="tel" inputmode="numeric" class="hp-input ${s.no_hp_ortu ? 'has-value' : 'empty-warn'}"
+                            id="c_hp1_${s.id}"
+                            value="${esc(s.no_hp_ortu)}"
+                            placeholder="628xxxxxxxxx"
+                            oninput="onHpInput(this,'${s.id}','c')">
+                    </div>
+                    <div class="field-group">
+                        <label>No HP Ortu 2 (Opsional)</label>
+                        <input type="tel" inputmode="numeric" class="hp-input ${s.no_hp_ortu2 ? 'has-value' : ''}"
+                            id="c_hp2_${s.id}"
+                            value="${esc(s.no_hp_ortu2)}"
+                            placeholder="Opsional"
+                            oninput="onHpInput(this,'${s.id}','c')">
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
 
+    // ── Render desktop table ─────────────────────
+    function renderTable(data) {
+        const tbody = document.getElementById('tbodySiswa');
+        if (!data.length) {
+            tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><p>Tidak ada siswa.</p></div></td></tr>`;
+            return;
+        }
         tbody.innerHTML = data.map((s, i) => `
             <tr>
                 <td class="td-num">${i + 1}</td>
-                <td class="td-nama">${escHtml(s.nama)}</td>
-                <td class="td-nis">${escHtml(s.nis)}</td>
+                <td class="td-nama">${esc(s.nama)}</td>
+                <td class="td-nis">${esc(s.nis)}</td>
                 <td>
-                    <input type="text" class="hp-input ${!s.no_hp_ortu ? 'empty' : ''}"
-                        id="hp1_${s.id}"
-                        value="${escHtml(s.no_hp_ortu)}"
-                        placeholder="628xxxxxxxxx"
-                        oninput="this.classList.toggle('empty', !this.value)">
+                    <input type="tel" inputmode="numeric" class="hp-input ${s.no_hp_ortu ? 'has-value' : 'empty-warn'}"
+                        id="t_hp1_${s.id}" value="${esc(s.no_hp_ortu)}" placeholder="628..."
+                        oninput="onHpInput(this,'${s.id}','t')">
                 </td>
                 <td>
-                    <input type="text" class="hp-input"
-                        id="hp2_${s.id}"
-                        value="${escHtml(s.no_hp_ortu2)}"
-                        placeholder="opsional">
+                    <input type="tel" inputmode="numeric" class="hp-input ${s.no_hp_ortu2 ? 'has-value' : ''}"
+                        id="t_hp2_${s.id}" value="${esc(s.no_hp_ortu2)}" placeholder="Opsional"
+                        oninput="onHpInput(this,'${s.id}','t')">
                 </td>
             </tr>
         `).join('');
     }
 
-    // Format otomatis semua nomor HP
-    function formatOtomatis() {
-        siswaData.forEach(s => {
-            ['hp1', 'hp2'].forEach(prefix => {
-                const input = document.getElementById(`${prefix}_${s.id}`);
-                if (!input) return;
-                let val = input.value.replace(/\D/g, '');
-                if (val.startsWith('0'))     val = '62' + val.slice(1);
-                else if (val.startsWith('8')) val = '62' + val;
-                input.value = val;
-                input.classList.toggle('empty', !val && prefix === 'hp1');
-            });
+    // Sync card ↔ table input values
+    function onHpInput(input, id, src) {
+        const field = input.id.includes('hp1') ? 'hp1' : 'hp2';
+        const otherPrefix = src === 'c' ? 't' : 'c';
+        const other = document.getElementById(`${otherPrefix}_${field}_${id}`);
+        if (other) other.value = input.value;
+
+        // Styling
+        [input, other].forEach(el => {
+            if (!el) return;
+            el.classList.remove('has-value','empty-warn','changed');
+            if (el.value) el.classList.add(field === 'hp1' ? 'changed' : 'has-value');
+            else if (field === 'hp1') el.classList.add('empty-warn');
         });
-        toast('Format nomor HP berhasil dirapikan.', 'success');
+
+        // Card border
+        const card = document.getElementById(`card_${id}`);
+        if (card) {
+            const hp1 = document.getElementById(`c_hp1_${id}`)?.value || '';
+            card.classList.remove('has-hp','no-hp','dirty');
+            card.classList.add(hp1 ? 'dirty' : 'no-hp');
+        }
     }
 
-    // Simpan semua
+    // ── Format Otomatis ──────────────────────────
+    function formatOtomatis() {
+        siswaData.forEach(s => {
+            ['hp1','hp2'].forEach(field => {
+                ['c','t'].forEach(prefix => {
+                    const el = document.getElementById(`${prefix}_${field}_${s.id}`);
+                    if (!el || !el.value) return;
+                    let v = el.value.replace(/\D/g,'');
+                    if (v.startsWith('0'))     v = '62' + v.slice(1);
+                    else if (v.startsWith('8')) v = '62' + v;
+                    el.value = v;
+                    el.classList.remove('has-value','empty-warn','changed');
+                    el.classList.add(v ? (field === 'hp1' ? 'has-value' : 'has-value') : (field === 'hp1' ? 'empty-warn' : ''));
+                });
+            });
+        });
+        toast('Format nomor HP berhasil dirapikan ✓', 'ok');
+    }
+
+    // ── Simpan Semua ─────────────────────────────
     async function simpanSemua() {
         clearAlert('alertSimpan');
 
         const payload = siswaData.map(s => ({
             id:          s.id,
-            no_hp_ortu:  document.getElementById(`hp1_${s.id}`)?.value || '',
-            no_hp_ortu2: document.getElementById(`hp2_${s.id}`)?.value || '',
+            no_hp_ortu:  getVal(s.id, 'hp1'),
+            no_hp_ortu2: getVal(s.id, 'hp2'),
         }));
 
         const btn = document.getElementById('btnSimpan');
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span> Menyimpan...';
+        btn.innerHTML = '<span class="spinner"></span>';
 
         try {
             const res  = await fetch(`${API_BASE}/bulk-update`, {
-                method: 'POST',
-                headers,
+                method: 'POST', headers: H,
                 body: JSON.stringify({ students: payload }),
             });
             const data = await res.json();
-
             if (!data.success) throw new Error(data.message);
-            toast(data.message, 'success');
-            showAlert('alertSimpan', 'success', `✅ ${data.message}`);
 
+            toast(data.message + ' — menunggu sinkronisasi admin', 'ok');
+            showAlert('alertSimpan', 'success',
+                `✅ ${data.message}.<br><small>Data akan aktif setelah admin melakukan sinkronisasi.</small>`);
+
+            // Update card border ke hijau
+            siswaData.forEach(s => {
+                const card = document.getElementById(`card_${s.id}`);
+                if (card) { card.classList.remove('dirty','no-hp'); card.classList.add('has-hp'); }
+                ['c','t'].forEach(p => {
+                    const el = document.getElementById(`${p}_hp1_${s.id}`);
+                    if (el?.value) { el.classList.remove('changed'); el.classList.add('has-value'); }
+                });
+            });
         } catch (e) {
-            showAlert('alertSimpan', 'danger', e.message || 'Gagal menyimpan data.');
-            toast('Gagal menyimpan.', 'error');
+            showAlert('alertSimpan', 'danger', e.message || 'Gagal menyimpan. Coba lagi.');
+            toast('Gagal menyimpan!', 'err');
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '💾 Simpan Semua';
+            btn.innerHTML = '💾 Simpan';
         }
     }
 
-    // Utilities
+    // ── Helpers ──────────────────────────────────
+    function getVal(id, field) {
+        // Ambil dari card (mobile) atau table (desktop)
+        return document.getElementById(`c_${field}_${id}`)?.value
+            || document.getElementById(`t_${field}_${id}`)?.value
+            || '';
+    }
+
     function showAlert(id, type, msg) {
         document.getElementById(id).innerHTML =
             `<div class="alert alert-${type}">${msg}</div>`;
     }
     function clearAlert(id) { document.getElementById(id).innerHTML = ''; }
 
-    function escHtml(s) {
+    function esc(s) {
         return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    let toastTimer;
-    function toast(msg, type = 'default') {
+    let toastT;
+    function toast(msg, type = '') {
         const el = document.getElementById('toast');
         el.textContent = msg;
         el.className = `show ${type}`;
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => { el.className = ''; }, 3500);
+        clearTimeout(toastT);
+        toastT = setTimeout(() => el.className = '', 3500);
     }
 
-    // Enter key on select
+    // ── Enter / submit ───────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
         loadKelas();
-        document.getElementById('selectKelas').addEventListener('keydown', e => {
-            if (e.key === 'Enter') tampilkan();
+        document.getElementById('selectKelas').addEventListener('change', () => {
+            if (document.getElementById('selectKelas').value) tampilkan();
         });
     });
 </script>
