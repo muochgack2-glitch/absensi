@@ -15,10 +15,30 @@
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">📱 Update Nomor HP Orang Tua</h1>
                 <p class="text-gray-600 dark:text-gray-400 mt-1">Edit nomor HP ortu/wali siswa per kelas secara cepat</p>
             </div>
-            <a href="{{ route('attendance.students.index') }}"
-               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition text-sm">
-                <i class="fas fa-arrow-left"></i> Kembali
-            </a>
+            <div class="flex items-center gap-2">
+                {{-- Tombol Sinkron dari wa.dmcenter.my.id --}}
+                @if($pendingCount > 0)
+                <form method="POST" action="{{ route('attendance.students.phones.sync') }}" onsubmit="return confirm('Terapkan {{ $pendingCount }} update HP dari wa.dmcenter.my.id ke data siswa?')">
+                    @csrf
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold transition shadow-sm">
+                        <i class="fas fa-sync-alt"></i>
+                        Sinkron
+                        <span class="bg-white text-orange-600 text-xs font-bold px-2 py-0.5 rounded-full ml-1">
+                            {{ $pendingCount }}
+                        </span>
+                    </button>
+                </form>
+                @else
+                <span class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs">
+                    <i class="fas fa-check-circle text-green-500"></i> Tidak ada update pending
+                </span>
+                @endif
+                <a href="{{ route('attendance.students.index') }}"
+                   class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition text-sm">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+            </div>
         </div>
 
         {{-- Success Flash --}}

@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\AttendanceStudent;
 use App\Models\AttendanceClass;
 use App\Models\AttendanceSetting;
+use App\Models\PhonePendingUpdate;
 use App\Services\QRCodeService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -578,9 +580,10 @@ class AttendanceStudentController extends Controller
      */
     public function phonesForm(Request $request)
     {
-        $classes  = AttendanceClass::orderBy('nama_kelas')->get();
-        $kelasId  = $request->input('kelas_id');
-        $students = collect();
+        $classes      = AttendanceClass::orderBy('nama_kelas')->get();
+        $kelasId      = $request->input('kelas_id');
+        $students     = collect();
+        $pendingCount = PhonePendingUpdate::where('is_applied', false)->count();
 
         if ($kelasId) {
             $students = AttendanceStudent::where('kelas_id', $kelasId)
@@ -589,7 +592,45 @@ class AttendanceStudentController extends Controller
                 ->get();
         }
 
-        return view('attendance.students.phones', compact('classes', 'students', 'kelasId'));
+        return view('attendance.students.phones', compact('classes', 'students', 'kelasId', 'pendingCount'));
+    }
+
+    /**
+     * Terapkan semua pending phone updates dari wa.dmcenter.my.id ke data siswa.
+     * POST /attendance/students/phones/sync
+     */
+    public function syncPending()
+    {
+        $pending = PhonePendingUpdate::where('is_applied', false)
+            ->with('student')
+            ->get();
+
+        if ($pending->isEmpty()) {
+            return redirect()
+                ->route('attendance.students.phones')
+                ->with('success', 'Tidak ada data pending yang perlu disinkronkan.');
+        }
+
+        $count = 0;
+        $now   = Carbon::now();
+
+        foreach ($pending as $item) {
+            if (!$item->student) continue;
+
+            $item->student->no_hp_ortu  = $item->no_hp_ortu;
+            $item->student->no_hp_ortu2 = $item->no_hp_ortu2;
+            $item->student->save();
+
+            $item->is_applied = true;
+            $item->applied_at = $now;
+            $item->save();
+
+            $count++;
+        }
+
+        return redirect()
+            ->route('attendance.students.phones')
+            ->with('success', "✅ {$count} nomor HP berhasil disinkronkan dari wa.dmcenter.my.id.");
     }
 
     /**

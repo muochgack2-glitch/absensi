@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\AttendanceClass;
 use App\Models\AttendanceStudent;
+use App\Models\PhonePendingUpdate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class StudentPhoneController extends Controller
 {
@@ -68,16 +70,17 @@ class StudentPhoneController extends Controller
     }
 
     /**
-     * Bulk update HP seluruh siswa dalam satu kelas.
+     * Bulk update HP — simpan ke staging (pending) dulu.
+     * Admin harus klik Sinkron di halaman phones untuk menerapkan.
      * POST /api/phone/bulk-update
      */
     public function bulkUpdate(Request $request)
     {
         $request->validate([
-            'students'              => 'required|array|min:1',
-            'students.*.id'         => 'required|integer',
-            'students.*.no_hp_ortu' => 'nullable|string|max:20',
-            'students.*.no_hp_ortu2'=> 'nullable|string|max:20',
+            'students'               => 'required|array|min:1',
+            'students.*.id'          => 'required|integer',
+            'students.*.no_hp_ortu'  => 'nullable|string|max:20',
+            'students.*.no_hp_ortu2' => 'nullable|string|max:20',
         ]);
 
         $normalize = function (?string $no): ?string {
@@ -88,21 +91,33 @@ class StudentPhoneController extends Controller
             return $no ?: null;
         };
 
-        $updated = 0;
+        $now     = Carbon::now();
+        $queued  = 0;
+
         foreach ($request->students as $item) {
-            $rows = AttendanceStudent::where('id', $item['id'])
-                ->where('is_active', true)
-                ->update([
-                    'no_hp_ortu'  => $normalize($item['no_hp_ortu']  ?? null),
-                    'no_hp_ortu2' => $normalize($item['no_hp_ortu2'] ?? null),
-                ]);
-            $updated += $rows;
+            $studentId = (int) $item['id'];
+
+            // Cek siswa valid
+            if (!AttendanceStudent::where('id', $studentId)->where('is_active', true)->exists()) {
+                continue;
+            }
+
+            // Upsert: satu baris pending per siswa (timpa jika sudah ada pending lama)
+            PhonePendingUpdate::updateOrCreate(
+                ['student_id' => $studentId, 'is_applied' => false],
+                [
+                    'no_hp_ortu'   => $normalize($item['no_hp_ortu']  ?? null),
+                    'no_hp_ortu2'  => $normalize($item['no_hp_ortu2'] ?? null),
+                    'submitted_at' => $now,
+                ]
+            );
+            $queued++;
         }
 
         return response()->json([
             'success' => true,
-            'message' => "{$updated} data siswa berhasil disimpan",
-            'updated' => $updated,
+            'message' => "{$queued} data diantrekan — menunggu sinkronisasi admin",
+            'queued'  => $queued,
         ]);
     }
 
