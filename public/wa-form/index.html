@@ -1082,26 +1082,47 @@
             const data = await res.json();
             if (!data.success) throw new Error(data.message);
 
-            // Generate Excel (.xlsx) dengan SheetJS
-            const rows = [
-                ['NIS', 'Nama', 'Kelas', 'No HP Ortu (Utama)', 'No HP Ortu 2 (Opsional)'],
-                ...data.data.map(s => [s.nis, s.nama, s.kelas, s.no_hp_ortu || '', s.no_hp_ortu2 || '']),
-            ];
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            // Set lebar kolom
-            ws['!cols'] = [
-                { wch: 12 }, // NIS
-                { wch: 30 }, // Nama
-                { wch: 14 }, // Kelas
-                { wch: 22 }, // HP Utama
-                { wch: 22 }, // HP Opsional
-            ];
-            XLSX.utils.book_append_sheet(wb, ws, 'Template HP Ortu');
-            XLSX.writeFile(wb, 'template_hp_ortu.xlsx');
+            // Kelompokkan per kelas, urutkan kelas → nama
+            const byKelas = {};
+            data.data.forEach(s => {
+                if (!byKelas[s.kelas]) byKelas[s.kelas] = [];
+                byKelas[s.kelas].push(s);
+            });
+            // Sort kelas abjad, lalu siswa abjad di tiap kelas
+            const kelasSorted = Object.keys(byKelas).sort((a, b) => a.localeCompare(b, 'id'));
+            kelasSorted.forEach(k => byKelas[k].sort((a, b) => a.nama.localeCompare(b.nama, 'id')));
 
+            const HEADER = ['NIS', 'Nama', 'Kelas', 'No HP Ortu (Utama)', 'No HP Ortu 2 (Opsional)'];
+            const COL_W  = [{ wch: 12 }, { wch: 32 }, { wch: 14 }, { wch: 24 }, { wch: 24 }];
+
+            const wb = XLSX.utils.book_new();
+
+            // ── Sheet 1: Semua Kelas (sorted kelas → nama) ──
+            const allRows = [HEADER];
+            kelasSorted.forEach(k => {
+                byKelas[k].forEach(s => {
+                    allRows.push([s.nis, s.nama, s.kelas, s.no_hp_ortu || '', s.no_hp_ortu2 || '']);
+                });
+            });
+            const wsAll = XLSX.utils.aoa_to_sheet(allRows);
+            wsAll['!cols'] = COL_W;
+            XLSX.utils.book_append_sheet(wb, wsAll, 'Semua Kelas');
+
+            // ── Sheet per kelas ─────────────────────────────
+            kelasSorted.forEach(k => {
+                const rows = [HEADER, ...byKelas[k].map((s, i) => [
+                    s.nis, s.nama, s.kelas, s.no_hp_ortu || '', s.no_hp_ortu2 || ''
+                ])];
+                const ws = XLSX.utils.aoa_to_sheet(rows);
+                ws['!cols'] = COL_W;
+                // Nama sheet max 31 karakter (batas Excel)
+                const sheetName = k.substring(0, 31);
+                XLSX.utils.book_append_sheet(wb, ws, sheetName);
+            });
+
+            XLSX.writeFile(wb, 'template_hp_ortu.xlsx');
             document.getElementById('badge1').classList.add('done');
-            toast('Template Excel berhasil diunduh ✓', 'ok');
+            toast(`Template Excel ${kelasSorted.length} kelas berhasil diunduh ✓`, 'ok');
         } catch (e) {
             toast('Gagal: ' + (e.message || 'Error'), 'err');
         } finally {
@@ -1109,6 +1130,7 @@
             btn.innerHTML = '📥 Download Template Excel';
         }
     }
+
 
     // ── IMPORT: Handle File Upload ────────────────
     function handleFileUpload(input) {
