@@ -1257,12 +1257,13 @@
                 // Tampilkan nilai staging jika ada, jika tidak tampilkan live
                 const displayHp1 = s.has_pending ? (s.pending_hp1 ?? '') : (s.no_hp_ortu ?? '');
                 const displayHp2 = s.has_pending ? (s.pending_hp2 ?? '') : (s.no_hp_ortu2 ?? '');
-                // Warna border: kuning=staging, hijau=live, merah=kosong
-                const cls1 = s.has_pending
+                // Benar-benar pending hanya jika nilai staging BERBEDA dari live
+                const reallyPending = s.has_pending && (s.pending_hp1 ?? '') !== (s.no_hp_ortu ?? '');
+                const cls1 = reallyPending
                     ? (displayHp1 ? 'pending' : 'empty-warn')
                     : (displayHp1 ? 'has-value' : 'empty-warn');
-                const cardCls = s.has_pending ? 'pending' : (displayHp1 ? 'has-hp' : 'no-hp');
-                const pendingLabel = s.has_pending
+                const cardCls = reallyPending ? 'pending' : (displayHp1 ? 'has-hp' : 'no-hp');
+                const pendingLabel = reallyPending
                     ? `<span style="font-size:.68rem;background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:8px;margin-left:6px;">⏳ Staging</span>`
                     : '';
                 return `
@@ -1309,8 +1310,9 @@
                 // Sama seperti renderCards: tampilkan staging jika ada, bukan data live
                 const displayHp1 = s.has_pending ? (s.pending_hp1 ?? '') : (s.no_hp_ortu ?? '');
                 const displayHp2 = s.has_pending ? (s.pending_hp2 ?? '') : (s.no_hp_ortu2 ?? '');
-                // Kuning=staging, hijau=live, merah=kosong
-                const cls1 = s.has_pending
+                // Kuning hanya jika pending BERBEDA dari live
+                const reallyPending = s.has_pending && (s.pending_hp1 ?? '') !== (s.no_hp_ortu ?? '');
+                const cls1 = reallyPending
                     ? (displayHp1 ? 'pending' : 'empty-warn')
                     : (displayHp1 ? 'has-value' : 'empty-warn');
                 return `
