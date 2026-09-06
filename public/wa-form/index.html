@@ -915,6 +915,7 @@
         <div class="tab-nav">
             <button class="tab-btn active" id="tabBtnEdit" onclick="switchTab('edit')">✏️ Edit per Kelas</button>
             <button class="tab-btn" id="tabBtnImport" onclick="switchTab('import')">📥 Import File</button>
+            <button class="tab-btn" id="tabBtnLive" onclick="switchTab('live')">👁️ Data Live</button>
         </div>
     </div>
 
@@ -1070,6 +1071,30 @@
 
         </div>
     </div><!-- /tabImport -->
+
+<!-- TAB: Data Live (read-only) -->
+<div id="tabLive" style="display:none;">
+<div class="content">
+
+    <div class="filter-card">
+        <div class="filter-label">Pilih Kelas</div>
+        <div class="filter-row">
+            <select class="filter-select" id="liveKelasSelect">
+                <option value="">— Pilih kelas —</option>
+            </select>
+            <button class="btn-tampilkan" onclick="loadLiveData()">Tampilkan</button>
+        </div>
+    </div>
+
+    <div id="liveSection">
+        <div class="empty-state">
+            <div class="icon">🏫</div>
+            <p>Pilih kelas di atas<br>lalu ketuk <strong>Tampilkan</strong></p>
+        </div>
+    </div>
+
+</div>
+</div><!-- /tabLive -->
 
     <!-- Sticky Bottom Bar -->
     <div class="sticky-bar" id="stickyBar">
@@ -1352,12 +1377,98 @@
 
         // ── Tab Switching ─────────────────────────────
         function switchTab(tab) {
-            const isEdit = tab === 'edit';
-            document.getElementById('tabEdit').style.display = isEdit ? 'block' : 'none';
-            document.getElementById('tabImport').style.display = isEdit ? 'none' : 'block';
-            document.getElementById('stickyBar').style.display = isEdit ? '' : 'none';
+            const isEdit   = tab === 'edit';
+            const isImport = tab === 'import';
+            const isLive   = tab === 'live';
+            document.getElementById('tabEdit').style.display   = isEdit   ? 'block' : 'none';
+            document.getElementById('tabImport').style.display = isImport ? 'block' : 'none';
+            document.getElementById('tabLive').style.display   = isLive   ? 'block' : 'none';
+            document.getElementById('stickyBar').style.display = isEdit   ? '' : 'none';
             document.getElementById('tabBtnEdit').classList.toggle('active', isEdit);
-            document.getElementById('tabBtnImport').classList.toggle('active', !isEdit);
+            document.getElementById('tabBtnImport').classList.toggle('active', isImport);
+            document.getElementById('tabBtnLive').classList.toggle('active', isLive);
+            if (isLive) syncLiveDropdown();
+        }
+
+        // ── Tab Live: sync dropdown kelas ────────────
+        function syncLiveDropdown() {
+            const editSel = document.getElementById('selectKelas');
+            const liveSel = document.getElementById('liveKelasSelect');
+            if (!editSel || !liveSel) return;
+            if (liveSel.options.length <= 1 && editSel.options.length > 1) {
+                liveSel.innerHTML = '<option value="">— Pilih kelas —</option>';
+                Array.from(editSel.options).slice(1).forEach(o => {
+                    const opt = document.createElement('option');
+                    opt.value = o.value;
+                    opt.textContent = o.textContent;
+                    liveSel.appendChild(opt);
+                });
+            }
+            if (editSel.value) liveSel.value = editSel.value;
+        }
+
+        // ── Tab Live: load data live (read-only) ─────
+        async function loadLiveData() {
+            const kelasId = document.getElementById('liveKelasSelect').value;
+            if (!kelasId) { toast('Pilih kelas terlebih dahulu.', 'err'); return; }
+            const sec = document.getElementById('liveSection');
+            sec.innerHTML = `<div class="empty-state"><span class="spinner"></span><p>Memuat data...</p></div>`;
+            try {
+                const res  = await fetch(`${API_BASE}/students?kelas_id=${kelasId}`, { headers: H });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message);
+                renderLiveTable(data);
+            } catch (e) {
+                sec.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p>${esc(e.message || 'Gagal memuat data.')}</p></div>`;
+            }
+        }
+
+        // ── Tab Live: render tabel read-only ─────────
+        function renderLiveTable(data) {
+            const sec = document.getElementById('liveSection');
+            const pendingCount = data.data.filter(s => s.has_pending).length;
+            const pendingInfo  = pendingCount > 0
+                ? `<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 14px;font-size:.8rem;color:#92400e;margin-bottom:12px;">
+                    ⏳ <strong>${pendingCount} siswa</strong> punya update HP yang belum disinkron admin.
+                   </div>`
+                : '';
+            const rows = data.data.map((s, i) => {
+                const liveHp1   = esc(s.no_hp_ortu  || '—');
+                const liveHp2   = esc(s.no_hp_ortu2 || '—');
+                const pendBadge = s.has_pending
+                    ? `<div style="font-size:.7rem;color:#f59e0b;margin-top:2px;">⏳ Pending: ${esc(s.pending_hp1 || '—')}</div>`
+                    : '';
+                return `
+                <tr>
+                    <td class="td-num">${i + 1}</td>
+                    <td class="td-nama">${esc(s.nama)}</td>
+                    <td class="td-nis">${esc(s.nis)}</td>
+                    <td>
+                        <div style="font-size:.85rem;font-weight:600;color:${s.no_hp_ortu ? '#1e293b' : '#94a3b8'}">${liveHp1}</div>
+                        ${pendBadge}
+                    </td>
+                    <td style="font-size:.85rem;color:${s.no_hp_ortu2 ? '#475569' : '#94a3b8'}">${liveHp2}</td>
+                </tr>`;
+            }).join('');
+            sec.innerHTML = `
+                ${pendingInfo}
+                <div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08);">
+                    <div style="padding:12px 16px;border-bottom:1px solid #f1f5f9;">
+                        <strong style="font-size:.95rem;">${esc(data.kelas)}</strong>
+                        <span style="font-size:.8rem;color:#64748b;margin-left:8px;">${data.jumlah} siswa aktif</span>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="preview-table" style="width:100%;">
+                            <thead>
+                                <tr>
+                                    <th>#</th><th>Nama</th><th>NIS</th>
+                                    <th>HP Aktif (Live)</th><th>HP Alternatif</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>
+                </div>`;
         }
 
         // ── IMPORT: Download Template ─────────────────
