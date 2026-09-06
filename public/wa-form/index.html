@@ -899,7 +899,8 @@
         wrap.innerHTML = data.map((s, i) => {
             // Jika ada pending, tampilkan nomor pending (kuning) bukan live
             const displayHp1    = s.has_pending ? (s.pending_hp1 || '') : (s.no_hp_ortu  || '');
-            const displayHp2    = s.has_pending ? (s.pending_hp2 || '') : (s.no_hp_ortu2 || '');
+            // hp2: fallback ke live jika pending_hp2 kosong (hp2 tidak selalu diimport)
+            const displayHp2    = s.has_pending ? (s.pending_hp2 || s.no_hp_ortu2 || '') : (s.no_hp_ortu2 || '');
             const pendingBadge  = s.has_pending ? `<span style="font-size:.65rem;background:#f59e0b;color:#fff;padding:2px 7px;border-radius:99px;font-weight:700;margin-left:6px;">⏳ Pending</span>` : '';
             const inputClass    = s.has_pending ? 'hp-input pending-input' : `hp-input ${displayHp1 ? 'has-value' : 'empty-warn'}`;
             return `
@@ -943,7 +944,8 @@
         }
         tbody.innerHTML = data.map((s, i) => {
             const displayHp1 = s.has_pending ? (s.pending_hp1 || '') : (s.no_hp_ortu  || '');
-            const displayHp2 = s.has_pending ? (s.pending_hp2 || '') : (s.no_hp_ortu2 || '');
+            // hp2: fallback ke live jika pending_hp2 kosong
+            const displayHp2 = s.has_pending ? (s.pending_hp2 || s.no_hp_ortu2 || '') : (s.no_hp_ortu2 || '');
             const badge      = s.has_pending ? `<span style="font-size:.6rem;background:#f59e0b;color:#fff;padding:1px 6px;border-radius:99px;font-weight:700;margin-left:4px;">⏳</span>` : '';
             const cls        = s.has_pending ? 'hp-input pending-input' : `hp-input ${displayHp1 ? 'has-value' : 'empty-warn'}`;
             return `
