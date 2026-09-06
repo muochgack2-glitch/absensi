@@ -1065,8 +1065,8 @@
     // ── Tab Switching ─────────────────────────────
     function switchTab(tab) {
         const isEdit = tab === 'edit';
-        document.getElementById('tabEdit').style.display   = isEdit ? '' : 'none';
-        document.getElementById('tabImport').style.display = isEdit ? 'none' : '';
+        document.getElementById('tabEdit').style.display   = isEdit ? 'block' : 'none';
+        document.getElementById('tabImport').style.display = isEdit ? 'none' : 'block';
         document.getElementById('stickyBar').style.display = isEdit ? '' : 'none';
         document.getElementById('tabBtnEdit').classList.toggle('active', isEdit);
         document.getElementById('tabBtnImport').classList.toggle('active', !isEdit);
