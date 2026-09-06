@@ -1132,56 +1132,147 @@
 
     let importRows = []; // matched rows siap kirim
 
+    // Normalize nama untuk matching
+    function normName(s) {
+        return String(s || '').toLowerCase()
+            .replace(/[^a-z0-9\s]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    // Deteksi kolom HP dari berbagai nama header
+    function detectHpCol(row) {
+        const HP_KEYS = [
+            'no hp ortu (utama)', 'no_hp_ortu', 'nomor orangtua',
+            'nomor orang tua', 'no orangtua', 'hp utama', 'hp1',
+            'no hp', 'nomor hp', 'phone', 'handphone', 'telepon',
+            'no telp', 'no. hp', 'nomor telepon', 'no handphone',
+            'no. handphone', 'nomer hp', 'nomer orangtua',
+        ];
+        for (const k of HP_KEYS) {
+            if (row[k] !== undefined && String(row[k]).trim()) return String(row[k]).trim();
+        }
+        // Fallback: cari kolom yang nilainya angka panjang 10-15 digit
+        for (const v of Object.values(row)) {
+            const s = String(v).replace(/\D/g,'');
+            if (s.length >= 10 && s.length <= 15) return String(v).trim();
+        }
+        return '';
+    }
+
+    function detectHp2Col(row) {
+        const HP2_KEYS = [
+            'no hp ortu 2 (opsional)', 'no_hp_ortu2', 'hp2',
+            'hp alternatif', 'nomor orangtua 2', 'no hp 2', 'hp 2',
+        ];
+        for (const k of HP2_KEYS) {
+            if (row[k] !== undefined) return String(row[k]).trim();
+        }
+        return '';
+    }
+
     async function parseAndPreview(content, type) {
         const zone = document.getElementById('uploadZone');
         try {
-            // Parse file
             let rawRows = [];
+
             if (type === 'csv') {
                 rawRows = parseCSV(content);
             } else {
+                // Baca SEMUA sheet dari Excel
                 const wb = XLSX.read(content, { type: 'array' });
-                rawRows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
+                wb.SheetNames.forEach(sheetName => {
+                    const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], {
+                        defval: '', header: 1
+                    });
+                    if (!rows.length) return;
+
+                    // Cari baris header (baris yang mengandung kata 'nama' atau 'nis')
+                    let headerIdx = -1;
+                    for (let i = 0; i < Math.min(rows.length, 10); i++) {
+                        const rowStr = rows[i].join(' ').toLowerCase();
+                        if (rowStr.includes('nama') || rowStr.includes('nis') || rowStr.includes('siswa')) {
+                            headerIdx = i;
+                            break;
+                        }
+                    }
+                    if (headerIdx === -1) return;
+
+                    const headers = rows[headerIdx].map(h => String(h || '').toLowerCase().trim());
+                    rows.slice(headerIdx + 1).forEach(r => {
+                        if (!r.some(v => v !== '' && v !== null && v !== undefined)) return;
+                        const obj = {};
+                        headers.forEach((h, i) => obj[h] = r[i] ?? '');
+                        rawRows.push(obj);
+                    });
+                });
             }
 
-            if (!rawRows.length) throw new Error('File kosong atau tidak ada data.');
+            if (!rawRows.length) throw new Error('File kosong atau tidak ada data yang bisa dibaca.');
 
-            // Load semua siswa untuk matching NIS
-            zone.innerHTML = `<div class="icon">🔍</div><p>Mencocokkan NIS siswa…</p>`;
-            const res  = await fetch(`${API_BASE}/students/all`, { headers: H });
+            // Load semua siswa
+            zone.innerHTML = `<div class="icon">🔍</div><p>Mencocokkan data siswa…</p>`;
+            const res   = await fetch(`${API_BASE}/students/all`, { headers: H });
             const sData = await res.json();
             if (!sData.success) throw new Error('Gagal load data siswa dari server.');
 
-            // Build NIS → student map
-            const nisMap = {};
-            sData.data.forEach(s => nisMap[String(s.nis).trim()] = s);
+            // Build NIS map + Nama map + Partial map
+            const nisMap = {}, namaMap = {}, partialMap = {};
+            sData.data.forEach(s => {
+                nisMap[String(s.nis).trim()] = s;
+                namaMap[normName(s.nama)] = s;
+                const partial = normName(s.nama).split(' ').slice(0, 3).join(' ');
+                if (!partialMap[partial]) partialMap[partial] = s;
+            });
 
-            // Normalize header keys (case-insensitive)
-            const norm = obj => {
-                const out = {};
-                Object.keys(obj).forEach(k => out[k.toLowerCase().trim()] = String(obj[k]).trim());
-                return out;
-            };
-
-            // Match rows
+            // Match setiap baris
             const matched = [], unmatched = [];
             rawRows.forEach(rawRow => {
-                const row = norm(rawRow);
-                const nis = row['nis'] || '';
-                const hp1 = row['no hp ortu (utama)'] || row['no_hp_ortu'] || row['hp utama'] || row['hp1'] || '';
-                const hp2 = row['no hp ortu 2 (opsional)'] || row['no_hp_ortu2'] || row['hp2'] || '';
-                if (!nis) return;
-                const student = nisMap[nis];
+                const row = {};
+                Object.keys(rawRow).forEach(k => row[k.toLowerCase().trim()] = String(rawRow[k] ?? '').trim());
+
+                const nis  = row['nis'] || '';
+                const nama = row['nama siswa'] || row['nama'] || row['name'] || row['siswa'] || '';
+                const hp1  = detectHpCol(row);
+                const hp2  = detectHp2Col(row);
+
+                // Skip baris kosong atau baris header
+                if (!nama && !nis && !hp1) return;
+                if (['nama siswa','nama','name','siswa','no','no.'].includes(normName(nama))) return;
+
+                let student = null, matchMethod = '';
+
+                // 1. Match by NIS (paling akurat)
+                if (nis && nisMap[nis]) { student = nisMap[nis]; matchMethod = 'NIS'; }
+
+                // 2. Match by Nama exact
+                if (!student && nama) {
+                    const nk = normName(nama);
+                    if (namaMap[nk]) { student = namaMap[nk]; matchMethod = 'Nama'; }
+                }
+                // 3. Match by 3 kata pertama
+                if (!student && nama) {
+                    const pk = normName(nama).split(' ').slice(0, 3).join(' ');
+                    if (partialMap[pk]) { student = partialMap[pk]; matchMethod = 'Nama (~)'; }
+                }
+                // 4. Match contains
+                if (!student && nama) {
+                    const nk = normName(nama);
+                    for (const [k, s] of Object.entries(namaMap)) {
+                        if (k.includes(nk) || nk.includes(k)) { student = s; matchMethod = 'Nama (≈)'; break; }
+                    }
+                }
+
                 if (student && hp1) {
-                    matched.push({ ...student, new_hp1: hp1, new_hp2: hp2 });
+                    matched.push({ ...student, new_hp1: hp1, new_hp2: hp2, matchMethod });
                 } else {
-                    unmatched.push({ nis, hp1, reason: !student ? 'NIS tidak ditemukan' : 'HP Utama kosong' });
+                    unmatched.push({ nis, nama, hp1, reason: !student ? 'Nama/NIS tidak cocok' : 'No HP kosong' });
                 }
             });
 
             importRows = matched;
             renderPreview(matched, unmatched);
-            zone.innerHTML = `<div class="icon">✅</div><p><strong>File berhasil dibaca</strong></p><span>${rawRows.length} baris ditemukan</span>`;
+            zone.innerHTML = `<div class="icon">✅</div><p><strong>File berhasil dibaca</strong></p><span>${rawRows.length} baris, ${matched.length} cocok</span>`;
             document.getElementById('badge2').classList.add('done');
 
         } catch (e) {
@@ -1229,32 +1320,31 @@
             ${unmatched.length ? `<div class="stat-chip chip-red">⚠️ ${unmatched.length} tidak cocok</div>` : ''}
         `;
 
-        // Preview rows — tampilkan max 50 untuk performa
-        const displayRows = [...matched.slice(0, 50), ...unmatched.slice(0, 10)];
         bodyEl.innerHTML = [
-            ...matched.slice(0, 50).map(r => `
+            ...matched.slice(0, 100).map(r => `
                 <tr class="matched">
-                    <td><span class="badge-ok">✓ Cocok</span></td>
+                    <td><span class="badge-ok">✓ ${esc(r.matchMethod || 'Cocok')}</span></td>
                     <td>${esc(r.nis)}</td>
                     <td>${esc(r.nama)}</td>
                     <td>${esc(r.kelas)}</td>
                     <td>${esc(r.new_hp1)}</td>
                 </tr>
             `),
-            ...unmatched.slice(0, 10).map(r => `
+            ...unmatched.slice(0, 20).map(r => `
                 <tr class="no-match">
                     <td><span class="badge-warn">✗ ${esc(r.reason)}</span></td>
-                    <td>${esc(r.nis)}</td>
-                    <td>—</td>
+                    <td>${esc(r.nis) || '—'}</td>
+                    <td>${esc(r.nama) || '—'}</td>
                     <td>—</td>
                     <td>${esc(r.hp1) || '—'}</td>
                 </tr>
             `),
         ].join('');
 
-        document.getElementById('previewCard').style.display = '';
+        document.getElementById('previewCard').style.display = 'block';
         document.getElementById('btnSubmitImport').disabled = matched.length === 0;
     }
+
 
     // ── IMPORT: Submit ────────────────────────────
     async function submitImport() {
