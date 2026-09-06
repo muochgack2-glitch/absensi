@@ -1220,23 +1220,28 @@
                 tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><p>Tidak ada siswa.</p></div></td></tr>`;
                 return;
             }
-            tbody.innerHTML = data.map((s, i) => `
+            tbody.innerHTML = data.map((s, i) => {
+                // Sama seperti renderCards: tampilkan staging jika ada, bukan data live
+                const displayHp1 = s.has_pending ? (s.pending_hp1 ?? '') : (s.no_hp_ortu ?? '');
+                const displayHp2 = s.has_pending ? (s.pending_hp2 ?? '') : (s.no_hp_ortu2 ?? '');
+                const cls1 = displayHp1 ? 'has-value' : 'empty-warn';
+                return `
             <tr>
                 <td class="td-num">${i + 1}</td>
                 <td class="td-nama">${esc(s.nama)}</td>
                 <td class="td-nis">${esc(s.nis)}</td>
                 <td>
-                    <input type="tel" inputmode="numeric" class="hp-input ${s.no_hp_ortu ? 'has-value' : 'empty-warn'}"
-                        id="t_hp1_${s.id}" value="${esc(s.no_hp_ortu)}" placeholder="628..."
+                    <input type="tel" inputmode="numeric" class="hp-input ${cls1}"
+                        id="t_hp1_${s.id}" value="${esc(displayHp1)}" placeholder="628..."
                         oninput="onHpInput(this,'${s.id}','t')">
                 </td>
                 <td>
                     <input type="tel" inputmode="numeric" class="hp-input"
-                        id="t_hp2_${s.id}" value="${esc(s.no_hp_ortu2)}" placeholder="—"
+                        id="t_hp2_${s.id}" value="${esc(displayHp2)}" placeholder="—"
                         readonly tabindex="-1">
                 </td>
-            </tr>
-        `).join('');
+            </tr>`;
+            }).join('');
         }
 
         // Sync card ↔ table input values
