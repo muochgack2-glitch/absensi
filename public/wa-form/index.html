@@ -717,11 +717,11 @@
             <div class="step-badge" id="badge1">1</div>
             <div>
                 <div class="step-title">Download Template</div>
-                <div class="step-desc">File CSV berisi semua siswa aktif — isi kolom No HP</div>
+                <div class="step-desc">File Excel berisi semua siswa aktif — isi kolom No HP</div>
             </div>
         </div>
         <button class="btn-download" id="btnDownloadTemplate" onclick="downloadTemplate()">
-            📥 Download Template CSV
+            📥 Download Template Excel
         </button>
     </div>
 
@@ -1082,24 +1082,31 @@
             const data = await res.json();
             if (!data.success) throw new Error(data.message);
 
-            // Generate CSV
+            // Generate Excel (.xlsx) dengan SheetJS
             const rows = [
                 ['NIS', 'Nama', 'Kelas', 'No HP Ortu (Utama)', 'No HP Ortu 2 (Opsional)'],
                 ...data.data.map(s => [s.nis, s.nama, s.kelas, s.no_hp_ortu || '', s.no_hp_ortu2 || '']),
             ];
-            const csv  = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\r\n');
-            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-            const url  = URL.createObjectURL(blob);
-            const a    = document.createElement('a');
-            a.href = url; a.download = 'template_hp_ortu.csv'; a.click();
-            URL.revokeObjectURL(url);
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(rows);
+            // Set lebar kolom
+            ws['!cols'] = [
+                { wch: 12 }, // NIS
+                { wch: 30 }, // Nama
+                { wch: 14 }, // Kelas
+                { wch: 22 }, // HP Utama
+                { wch: 22 }, // HP Opsional
+            ];
+            XLSX.utils.book_append_sheet(wb, ws, 'Template HP Ortu');
+            XLSX.writeFile(wb, 'template_hp_ortu.xlsx');
+
             document.getElementById('badge1').classList.add('done');
-            toast('Template berhasil diunduh ✓', 'ok');
+            toast('Template Excel berhasil diunduh ✓', 'ok');
         } catch (e) {
             toast('Gagal: ' + (e.message || 'Error'), 'err');
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '📥 Download Template CSV';
+            btn.innerHTML = '📥 Download Template Excel';
         }
     }
 
