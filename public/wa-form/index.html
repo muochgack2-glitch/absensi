@@ -1305,9 +1305,18 @@
             const dedupMatched = Object.values(dedupMap);
             const dupCount = matched.length - dedupMatched.length;
 
+            // Hilangkan "No HP kosong" dari unmatched jika siswa tsb sudah cocok di sheet lain
+            // (misalnya: sheet "Semua Kelas" HP kosong, tapi sheet per kelas sudah ada HP-nya)
+            const matchedIdSet = new Set(dedupMatched.map(r => r.id));
+            const filteredUnmatched = unmatched.filter(u => {
+                if (u.reason !== 'No HP kosong') return true; // tetap tampil jika nama/NIS tidak cocok
+                const s = u.nis ? nisMap[u.nis] : null;
+                return !(s && matchedIdSet.has(s.id)); // hilangkan jika sudah matched
+            });
+
             importRows = dedupMatched;
-            renderPreview(dedupMatched, unmatched);
-            const dupNote = dupCount > 0 ? ` (${dupCount} duplikat dihapus)` : '';
+            renderPreview(dedupMatched, filteredUnmatched);
+            const dupNote = dupCount > 0 ? ` (${dupCount} duplikat diabaikan)` : '';
             zone.innerHTML = `<div class="icon">✅</div><p><strong>File berhasil dibaca</strong></p><span>${rawRows.length} baris, ${dedupMatched.length} cocok${dupNote}</span>`;
             document.getElementById('badge2').classList.add('done');
 
