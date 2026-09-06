@@ -1492,8 +1492,11 @@
             const cards = data.data.map((s, i) => {
                 const liveHp1 = s.no_hp_ortu  || '';
                 const liveHp2 = s.no_hp_ortu2 || '';
-                const pendBadge = s.has_pending
-                    ? `<div style="margin-top:6px;font-size:.72rem;color:#b45309;background:#fef3c7;padding:3px 8px;border-radius:6px;display:inline-block;">⏳ Pending: ${esc(s.pending_hp1 || '—')}</div>`
+                const pendBadge1 = s.has_pending
+                    ? `<div style="margin-top:6px;font-size:.72rem;color:#b45309;background:#fef3c7;padding:3px 8px;border-radius:6px;display:inline-block;">⏳ Pending: ${esc(s.pending_hp1 ?? '—')}</div>`
+                    : '';
+                const pendBadge2 = s.has_pending
+                    ? `<div style="margin-top:4px;font-size:.72rem;color:#b45309;background:#fef3c7;padding:3px 8px;border-radius:6px;display:inline-block;">⏳ Pending: ${esc(s.pending_hp2 ?? '—')}</div>`
                     : '';
                 return `
                 <div style="background:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06);border-left:4px solid ${liveHp1 ? '#86efac' : '#e2e8f0'};">
@@ -1509,11 +1512,12 @@
                         <div>
                             <div style="font-size:.68rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">HP Live (Aktif)</div>
                             <div style="font-size:.9rem;font-weight:600;color:${liveHp1 ? '#1e293b' : '#94a3b8'};font-family:monospace;">${liveHp1 || '— kosong'}</div>
-                            ${pendBadge}
+                            ${pendBadge1}
                         </div>
                         <div>
                             <div style="font-size:.68rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">HP Alternatif</div>
                             <div style="font-size:.85rem;color:${liveHp2 ? '#475569' : '#94a3b8'};font-family:monospace;">${liveHp2 || '—'}</div>
+                            ${pendBadge2}
                         </div>
                     </div>
                 </div>`;
@@ -1521,10 +1525,13 @@
 
             // ── Desktop Table ─────────────────────────────
             const rows = data.data.map((s, i) => {
-                const liveHp1   = esc(s.no_hp_ortu  || '—');
-                const liveHp2   = esc(s.no_hp_ortu2 || '—');
-                const pendBadge = s.has_pending
-                    ? `<div style="font-size:.7rem;color:#f59e0b;margin-top:2px;">⏳ Pending: ${esc(s.pending_hp1 || '—')}</div>`
+                const liveHp1    = esc(s.no_hp_ortu  || '—');
+                const liveHp2    = esc(s.no_hp_ortu2 || '—');
+                const pendBadge1 = s.has_pending
+                    ? `<div style="font-size:.7rem;color:#f59e0b;margin-top:2px;">⏳ Pending: ${esc(s.pending_hp1 ?? '—')}</div>`
+                    : '';
+                const pendBadge2 = s.has_pending
+                    ? `<div style="font-size:.7rem;color:#f59e0b;margin-top:2px;">⏳ Pending: ${esc(s.pending_hp2 ?? '—')}</div>`
                     : '';
                 return `
                 <tr>
@@ -1533,9 +1540,12 @@
                     <td class="td-nis">${esc(s.nis)}</td>
                     <td>
                         <div style="font-size:.85rem;font-weight:600;color:${s.no_hp_ortu ? '#1e293b' : '#94a3b8'}">${liveHp1}</div>
-                        ${pendBadge}
+                        ${pendBadge1}
                     </td>
-                    <td style="font-size:.85rem;color:${s.no_hp_ortu2 ? '#475569' : '#94a3b8'}">${liveHp2}</td>
+                    <td>
+                        <div style="font-size:.85rem;color:${s.no_hp_ortu2 ? '#475569' : '#94a3b8'}">${liveHp2}</div>
+                        ${pendBadge2}
+                    </td>
                 </tr>`;
             }).join('');
 
