@@ -22,6 +22,13 @@ class StudentPhoneController extends Controller
             ->orderBy('nama')
             ->get(['id', 'nama', 'nis', 'kelas_id', 'no_hp_ortu', 'no_hp_ortu2']);
 
+        // Ambil semua pending sekaligus (1 query)
+        $ids     = $students->pluck('id');
+        $pending = PhonePendingUpdate::whereIn('student_id', $ids)
+            ->where('is_applied', false)
+            ->get(['student_id', 'no_hp_ortu', 'no_hp_ortu2'])
+            ->keyBy('student_id');
+
         return response()->json([
             'success' => true,
             'total'   => $students->count(),
@@ -32,6 +39,9 @@ class StudentPhoneController extends Controller
                 'kelas'       => $s->kelas?->nama_kelas ?? '-',
                 'no_hp_ortu'  => $s->no_hp_ortu  ?? '',
                 'no_hp_ortu2' => $s->no_hp_ortu2 ?? '',
+                'pending_hp1' => $pending->has($s->id) ? ($pending[$s->id]->no_hp_ortu  ?? '') : null,
+                'pending_hp2' => $pending->has($s->id) ? ($pending[$s->id]->no_hp_ortu2 ?? '') : null,
+                'has_pending' => $pending->has($s->id),
             ]),
         ]);
     }
@@ -79,17 +89,27 @@ class StudentPhoneController extends Controller
             ->orderBy('nama')
             ->get(['id', 'nama', 'nis', 'no_hp_ortu', 'no_hp_ortu2']);
 
+        // Ambil pending sekaligus
+        $ids     = $students->pluck('id');
+        $pending = PhonePendingUpdate::whereIn('student_id', $ids)
+            ->where('is_applied', false)
+            ->get(['student_id', 'no_hp_ortu', 'no_hp_ortu2'])
+            ->keyBy('student_id');
+
         return response()->json([
-            'success'    => true,
-            'kelas'      => $kelas->nama_kelas,
-            'kelas_id'   => $kelas->id,
-            'jumlah'     => $students->count(),
-            'data'       => $students->map(fn($s) => [
+            'success'  => true,
+            'kelas'    => $kelas->nama_kelas,
+            'kelas_id' => $kelas->id,
+            'jumlah'   => $students->count(),
+            'data'     => $students->map(fn($s) => [
                 'id'          => $s->id,
                 'nama'        => $s->nama,
                 'nis'         => $s->nis,
                 'no_hp_ortu'  => $s->no_hp_ortu  ?? '',
                 'no_hp_ortu2' => $s->no_hp_ortu2 ?? '',
+                'pending_hp1' => $pending->has($s->id) ? ($pending[$s->id]->no_hp_ortu  ?? '') : null,
+                'pending_hp2' => $pending->has($s->id) ? ($pending[$s->id]->no_hp_ortu2 ?? '') : null,
+                'has_pending' => $pending->has($s->id),
             ]),
         ]);
     }
