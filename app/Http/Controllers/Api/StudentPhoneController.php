@@ -12,6 +12,31 @@ use Illuminate\Support\Carbon;
 class StudentPhoneController extends Controller
 {
     /**
+     * Semua siswa aktif (lintas kelas) — untuk fitur import.
+     * GET /api/phone/students/all
+     */
+    public function allStudents()
+    {
+        $students = AttendanceStudent::with('kelas')
+            ->where('is_active', true)
+            ->orderBy('nama')
+            ->get(['id', 'nama', 'nis', 'kelas_id', 'no_hp_ortu', 'no_hp_ortu2']);
+
+        return response()->json([
+            'success' => true,
+            'total'   => $students->count(),
+            'data'    => $students->map(fn($s) => [
+                'id'          => $s->id,
+                'nama'        => $s->nama,
+                'nis'         => $s->nis,
+                'kelas'       => $s->kelas?->nama_kelas ?? '-',
+                'no_hp_ortu'  => $s->no_hp_ortu  ?? '',
+                'no_hp_ortu2' => $s->no_hp_ortu2 ?? '',
+            ]),
+        ]);
+    }
+
+    /**
      * Daftar kelas aktif (yang punya siswa).
      * GET /api/phone/classes
      */

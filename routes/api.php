@@ -45,9 +45,11 @@ Route::middleware(['ekaldik.api'])->prefix('ekaldik')->group(function () {
 // OPTIONS preflight (CORS) — tanpa middleware auth
 Route::options('/phone/{any}', [StudentPhoneController::class, 'options'])->where('any', '.*');
 Route::middleware(['phone.api'])->prefix('phone')->group(function () {
-    Route::get('/classes',      [StudentPhoneController::class, 'classes']);     // daftar kelas
-    Route::get('/students',     [StudentPhoneController::class, 'students']);    // siswa per kelas
-    Route::post('/bulk-update', [StudentPhoneController::class, 'bulkUpdate']); // simpan semua
-    Route::get('/lookup',       [StudentPhoneController::class, 'lookup']);      // cari by NIS
-    Route::post('/update',      [StudentPhoneController::class, 'update']);      // update 1 siswa
+    Route::get('/classes',       [StudentPhoneController::class, 'classes']);       // daftar kelas
+    Route::get('/students',      [StudentPhoneController::class, 'students']);      // siswa per kelas
+    Route::get('/students/all',  [StudentPhoneController::class, 'allStudents']);   // semua siswa (untuk import)
+    Route::post('/bulk-update',  [StudentPhoneController::class, 'bulkUpdate']);    // simpan semua
+    Route::get('/lookup',        [StudentPhoneController::class, 'lookup']);        // cari by NIS
+    Route::post('/update',       [StudentPhoneController::class, 'update']);        // update 1 siswa
 });
+
