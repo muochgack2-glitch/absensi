@@ -1147,8 +1147,7 @@
             if (!kelasId) { toast('Pilih kelas terlebih dahulu.', 'err'); return; }
 
             const btn = document.getElementById('btnTampilkan');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span>';
+            if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>'; }
             clearAlert('alertGlobal'); clearAlert('alertSimpan');
 
             try {
@@ -1171,8 +1170,7 @@
             } catch (e) {
                 showAlert('alertGlobal', 'danger', e.message || 'Gagal memuat data siswa.');
             } finally {
-                btn.disabled = false;
-                btn.innerHTML = 'Tampilkan';
+                if (btn) { btn.disabled = false; btn.innerHTML = 'Tampilkan'; }
             }
         }
 
@@ -1824,6 +1822,11 @@
                     `✅ <strong>${data.queued} data</strong> berhasil diantrekan.<br>
                  <small>Data akan aktif setelah admin menekan tombol Sinkron di halaman Data Siswa.</small>`);
                 importRows = [];
+
+                // Auto-refresh tab Edit supaya langsung tampil data staging terbaru
+                if (document.getElementById('selectKelas')?.value) {
+                    await tampilkan();
+                }
             } catch (e) {
                 showAlert('alertImport', 'danger', '❌ ' + (e.message || 'Gagal mengirim data.'));
                 toast('Gagal kirim!', 'err');
