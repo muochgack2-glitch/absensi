@@ -267,6 +267,11 @@
             border-left-color: #fca5a5;
         }
 
+        /* Card dengan data staging (belum sinkron) */
+        .student-card.pending {
+            border-left-color: #fde68a;
+        }
+
         .student-card.dirty {
             border-left-color: #fde68a;
         }
@@ -360,6 +365,12 @@
         .hp-input.has-value {
             border-color: #86efac;
             background: #f0fdf4;
+        }
+
+        /* Data masih di staging (belum sinkron admin) */
+        .hp-input.pending {
+            border-color: #fde68a;
+            background: #fffbeb;
         }
 
         .hp-input.empty-warn {
@@ -1233,12 +1244,24 @@
                 wrap.innerHTML = `<div class="empty-state"><div class="icon">👤</div><p>Tidak ada siswa aktif.</p></div>`;
                 return;
             }
-            wrap.innerHTML = data.map((s, i) => `
-            <div class="student-card ${s.no_hp_ortu ? 'has-hp' : 'no-hp'}" id="card_${s.id}">
+            wrap.innerHTML = data.map((s, i) => {
+                // Tampilkan nilai staging jika ada, jika tidak tampilkan live
+                const displayHp1 = s.has_pending ? (s.pending_hp1 ?? '') : (s.no_hp_ortu ?? '');
+                const displayHp2 = s.has_pending ? (s.pending_hp2 ?? '') : (s.no_hp_ortu2 ?? '');
+                // Warna border: kuning=staging, hijau=live, merah=kosong
+                const cls1 = s.has_pending
+                    ? (displayHp1 ? 'pending' : 'empty-warn')
+                    : (displayHp1 ? 'has-value' : 'empty-warn');
+                const cardCls = s.has_pending ? 'pending' : (displayHp1 ? 'has-hp' : 'no-hp');
+                const pendingLabel = s.has_pending
+                    ? `<span style="font-size:.68rem;background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:8px;margin-left:6px;">⏳ Staging</span>`
+                    : '';
+                return `
+            <div class="student-card ${cardCls}" id="card_${s.id}">
                 <div class="student-card-header">
                     <div class="student-avatar">${s.nama.charAt(0).toUpperCase()}</div>
                     <div class="student-info-text">
-                        <div class="student-nama">${esc(s.nama)}</div>
+                        <div class="student-nama">${esc(s.nama)}${pendingLabel}</div>
                         <div class="student-nis">NIS: ${esc(s.nis)}</div>
                     </div>
                     <div class="student-num">${i + 1}</div>
@@ -1246,9 +1269,9 @@
                 <div class="student-fields">
                     <div class="field-group">
                         <label>No HP Ortu (Utama) *</label>
-                        <input type="tel" inputmode="numeric" class="hp-input ${s.no_hp_ortu ? 'has-value' : 'empty-warn'}"
+                        <input type="tel" inputmode="numeric" class="hp-input ${cls1}"
                             id="c_hp1_${s.id}"
-                            value="${esc(s.no_hp_ortu)}"
+                            value="${esc(displayHp1)}"
                             placeholder="628xxxxxxxxx"
                             oninput="onHpInput(this,'${s.id}','c')">
                     </div>
@@ -1256,13 +1279,14 @@
                         <label>No HP Ortu 2 <span style="font-size:.7rem;color:#94a3b8;font-weight:400;">(hanya tampil)</span></label>
                         <input type="tel" inputmode="numeric" class="hp-input"
                             id="c_hp2_${s.id}"
-                            value="${esc(s.no_hp_ortu2)}"
+                            value="${esc(displayHp2)}"
                             placeholder="—"
                             readonly tabindex="-1">
                     </div>
                 </div>
-            </div>
-        `).join('');
+            </div>`;
+            }).join('');
+
         }
 
         // ── Render desktop table ─────────────────────
@@ -1276,7 +1300,10 @@
                 // Sama seperti renderCards: tampilkan staging jika ada, bukan data live
                 const displayHp1 = s.has_pending ? (s.pending_hp1 ?? '') : (s.no_hp_ortu ?? '');
                 const displayHp2 = s.has_pending ? (s.pending_hp2 ?? '') : (s.no_hp_ortu2 ?? '');
-                const cls1 = displayHp1 ? 'has-value' : 'empty-warn';
+                // Kuning=staging, hijau=live, merah=kosong
+                const cls1 = s.has_pending
+                    ? (displayHp1 ? 'pending' : 'empty-warn')
+                    : (displayHp1 ? 'has-value' : 'empty-warn');
                 return `
             <tr>
                 <td class="td-num">${i + 1}</td>
