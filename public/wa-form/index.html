@@ -1578,9 +1578,12 @@
                 'no. handphone', 'nomer hp', 'nomer orangtua',
             ];
             for (const k of HP_KEYS) {
-                if (row[k] !== undefined && String(row[k]).trim()) return String(row[k]).trim();
+                // Jika kolom dikenal ADA di row (meski kosong), langsung return
+                // tanpa fallback — supaya kolom HP Ortu 2 tidak ikut terbaca
+                if (row[k] !== undefined) return String(row[k]).trim();
             }
-            // Fallback: cari kolom yang nilainya angka panjang 10-15 digit
+            // Fallback hanya jika TIDAK ADA kolom HP yang dikenal sama sekali
+            // (template non-standar / CSV tanpa header yang sesuai)
             for (const v of Object.values(row)) {
                 const s = String(v).replace(/\D/g, '');
                 if (s.length >= 10 && s.length <= 15) return String(v).trim();
