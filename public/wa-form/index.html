@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
@@ -10,25 +11,33 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         :root {
-            --primary:   #2563eb;
+            --primary: #2563eb;
             --primary-h: #1d4ed8;
-            --purple:    #7c3aed;
-            --green:     #16a34a;
-            --danger:    #dc2626;
-            --orange:    #ea580c;
-            --bg:        #f1f5f9;
-            --card:      #ffffff;
-            --border:    #e2e8f0;
-            --text:      #1e293b;
-            --muted:     #64748b;
-            --radius:    14px;
+            --purple: #7c3aed;
+            --green: #16a34a;
+            --danger: #dc2626;
+            --orange: #ea580c;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --muted: #64748b;
+            --radius: 14px;
             --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
 
-        html { -webkit-text-size-adjust: 100%; }
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -48,10 +57,19 @@
             position: sticky;
             top: 0;
             z-index: 20;
-            box-shadow: 0 2px 12px rgba(37,99,235,.3);
+            box-shadow: 0 2px 12px rgba(37, 99, 235, .3);
         }
-        .topbar-icon { font-size: 20px; flex-shrink: 0; }
-        .topbar-title { flex: 1; min-width: 0; }
+
+        .topbar-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .topbar-title {
+            flex: 1;
+            min-width: 0;
+        }
+
         .topbar-title h1 {
             font-size: 0.95rem;
             font-weight: 700;
@@ -60,9 +78,10 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
         .topbar-title p {
             font-size: 0.72rem;
-            color: rgba(255,255,255,.75);
+            color: rgba(255, 255, 255, .75);
             margin-top: 1px;
             white-space: nowrap;
             overflow: hidden;
@@ -82,9 +101,10 @@
             background: var(--card);
             border-radius: var(--radius);
             padding: 16px;
-            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .06);
             margin-bottom: 14px;
         }
+
         .filter-label {
             font-size: 0.78rem;
             font-weight: 600;
@@ -93,11 +113,13 @@
             letter-spacing: .04em;
             margin-bottom: 8px;
         }
+
         .filter-row {
             display: flex;
             gap: 10px;
             align-items: stretch;
         }
+
         select#selectKelas {
             flex: 1;
             min-width: 0;
@@ -118,7 +140,10 @@
             outline: none;
             transition: border-color .2s;
         }
-        select#selectKelas:focus { border-color: var(--primary); }
+
+        select#selectKelas:focus {
+            border-color: var(--primary);
+        }
 
         .btn-tampilkan {
             padding: 12px 18px;
@@ -137,8 +162,15 @@
             transition: background .2s;
             flex-shrink: 0;
         }
-        .btn-tampilkan:hover { background: var(--primary-h); }
-        .btn-tampilkan:disabled { background: #93c5fd; cursor: not-allowed; }
+
+        .btn-tampilkan:hover {
+            background: var(--primary-h);
+        }
+
+        .btn-tampilkan:disabled {
+            background: #93c5fd;
+            cursor: not-allowed;
+        }
 
         /* ===== SECTION HEADER ===== */
         .section-header {
@@ -146,8 +178,9 @@
             border-radius: var(--radius);
             padding: 14px 16px;
             margin-bottom: 10px;
-            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .06);
         }
+
         .section-header-top {
             display: flex;
             align-items: flex-start;
@@ -155,8 +188,18 @@
             gap: 10px;
             margin-bottom: 12px;
         }
-        .section-header-top h2 { font-size: 1rem; font-weight: 700; }
-        .section-header-top p  { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+
+        .section-header-top h2 {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .section-header-top p {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
         .btn-format {
             padding: 8px 14px;
             background: var(--purple);
@@ -174,7 +217,10 @@
             transition: .2s;
             flex-shrink: 0;
         }
-        .btn-format:hover { background: #6d28d9; }
+
+        .btn-format:hover {
+            background: #6d28d9;
+        }
 
         .info-box {
             background: #eff6ff;
@@ -185,7 +231,11 @@
             color: #1e40af;
             line-height: 1.5;
         }
-        .info-box strong { font-weight: 600; }
+
+        .info-box strong {
+            font-weight: 600;
+        }
+
         .info-box code {
             background: #dbeafe;
             padding: 1px 5px;
@@ -194,19 +244,32 @@
         }
 
         /* ===== STUDENT CARDS (mobile) ===== */
-        .student-list { display: flex; flex-direction: column; gap: 10px; }
+        .student-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
         .student-card {
             background: var(--card);
             border-radius: 12px;
             padding: 14px 16px;
-            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .06);
             border-left: 4px solid var(--border);
             transition: border-color .2s;
         }
-        .student-card.has-hp  { border-left-color: #86efac; }
-        .student-card.no-hp   { border-left-color: #fca5a5; }
-        .student-card.dirty   { border-left-color: #fde68a; }
+
+        .student-card.has-hp {
+            border-left-color: #86efac;
+        }
+
+        .student-card.no-hp {
+            border-left-color: #fca5a5;
+        }
+
+        .student-card.dirty {
+            border-left-color: #fde68a;
+        }
 
         .student-card-header {
             display: flex;
@@ -214,8 +277,10 @@
             gap: 12px;
             margin-bottom: 12px;
         }
+
         .student-avatar {
-            width: 38px; height: 38px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--primary), #7c3aed);
             color: #fff;
@@ -226,7 +291,12 @@
             justify-content: center;
             flex-shrink: 0;
         }
-        .student-info-text { flex: 1; min-width: 0; }
+
+        .student-info-text {
+            flex: 1;
+            min-width: 0;
+        }
+
         .student-nama {
             font-weight: 700;
             font-size: 0.92rem;
@@ -234,12 +304,14 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
         .student-nis {
             font-size: 0.75rem;
             color: var(--muted);
             font-family: monospace;
             margin-top: 1px;
         }
+
         .student-num {
             font-size: 0.75rem;
             font-weight: 700;
@@ -249,7 +321,12 @@
             border-radius: 20px;
         }
 
-        .student-fields { display: flex; flex-direction: column; gap: 8px; }
+        .student-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
         .field-group label {
             display: block;
             font-size: 0.72rem;
@@ -259,6 +336,7 @@
             letter-spacing: .04em;
             margin-bottom: 5px;
         }
+
         .hp-input {
             width: 100%;
             padding: 11px 13px;
@@ -272,15 +350,27 @@
             transition: border-color .2s, box-shadow .2s;
             -webkit-appearance: none;
         }
+
         .hp-input:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, .1);
             background: #fff;
         }
-        .hp-input.has-value { border-color: #86efac; background: #f0fdf4; }
-        .hp-input.empty-warn { border-color: #fca5a5; background: #fef2f2; }
-        .hp-input.changed    { border-color: #fde68a; background: #fffbeb; }
-        .hp-input.pending-input { border-color: #f59e0b; background: #fffbeb; color: #92400e; font-weight: 600; }
+
+        .hp-input.has-value {
+            border-color: #86efac;
+            background: #f0fdf4;
+        }
+
+        .hp-input.empty-warn {
+            border-color: #fca5a5;
+            background: #fef2f2;
+        }
+
+        .hp-input.changed {
+            border-color: #fde68a;
+            background: #fffbeb;
+        }
 
         .hp-input[readonly] {
             background: #f1f5f9 !important;
@@ -292,19 +382,31 @@
 
         /* ===== DESKTOP TABLE (≥640px) ===== */
         @media (min-width: 640px) {
-            .student-list { display: none; }
-            .desktop-table-wrap { display: block; }
-        }
-        @media (max-width: 639px) {
-            .desktop-table-wrap { display: none; }
+            .student-list {
+                display: none;
+            }
+
+            .desktop-table-wrap {
+                display: block;
+            }
         }
 
-        .desktop-table-wrap { overflow-x: auto; }
+        @media (max-width: 639px) {
+            .desktop-table-wrap {
+                display: none;
+            }
+        }
+
+        .desktop-table-wrap {
+            overflow-x: auto;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.88rem;
         }
+
         thead th {
             background: #f8fafc;
             padding: 10px 14px;
@@ -316,19 +418,49 @@
             letter-spacing: .04em;
             border-bottom: 2px solid var(--border);
         }
-        tbody tr { border-bottom: 1px solid #f1f5f9; }
-        tbody tr:hover { background: #fafbfd; }
-        tbody td { padding: 10px 14px; vertical-align: middle; }
-        .td-num  { color: var(--muted); font-size: 0.78rem; width: 36px; }
-        .td-nama { font-weight: 600; font-size: 0.88rem; }
-        .td-nis  { color: var(--muted); font-size: 0.8rem; font-family: monospace; }
-        table .hp-input { min-width: 155px; padding: 8px 11px; font-size: 0.85rem; }
+
+        tbody tr {
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        tbody tr:hover {
+            background: #fafbfd;
+        }
+
+        tbody td {
+            padding: 10px 14px;
+            vertical-align: middle;
+        }
+
+        .td-num {
+            color: var(--muted);
+            font-size: 0.78rem;
+            width: 36px;
+        }
+
+        .td-nama {
+            font-weight: 600;
+            font-size: 0.88rem;
+        }
+
+        .td-nis {
+            color: var(--muted);
+            font-size: 0.8rem;
+            font-family: monospace;
+        }
+
+        table .hp-input {
+            min-width: 155px;
+            padding: 8px 11px;
+            font-size: 0.85rem;
+        }
 
         /* ===== STICKY BOTTOM BAR ===== */
         .sticky-bar {
             position: fixed;
             bottom: 0;
-            left: 0; right: 0;
+            left: 0;
+            right: 0;
             background: var(--card);
             border-top: 1px solid var(--border);
             padding: 14px 16px;
@@ -338,16 +470,26 @@
             justify-content: space-between;
             gap: 10px;
             z-index: 30;
-            box-shadow: 0 -4px 20px rgba(0,0,0,.08);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, .08);
         }
-        .sticky-bar.visible { display: flex; }
+
+        .sticky-bar.visible {
+            display: flex;
+        }
+
         .sticky-bar-info {
             font-size: 0.78rem;
             color: var(--muted);
             flex: 1;
             min-width: 0;
         }
-        .sticky-bar-info strong { color: var(--text); display: block; font-size: 0.88rem; }
+
+        .sticky-bar-info strong {
+            color: var(--text);
+            display: block;
+            font-size: 0.88rem;
+        }
+
         .btn-simpan {
             padding: 13px 24px;
             background: var(--green);
@@ -365,8 +507,15 @@
             white-space: nowrap;
             flex-shrink: 0;
         }
-        .btn-simpan:hover:not(:disabled) { background: #15803d; }
-        .btn-simpan:disabled { background: #86efac; cursor: not-allowed; }
+
+        .btn-simpan:hover:not(:disabled) {
+            background: #15803d;
+        }
+
+        .btn-simpan:disabled {
+            background: #86efac;
+            cursor: not-allowed;
+        }
 
         /* ===== ALERTS ===== */
         .alert {
@@ -379,8 +528,18 @@
             gap: 9px;
             line-height: 1.5;
         }
-        .alert-danger  { background:#fef2f2; border:1px solid #fecaca; color:#991b1b; }
-        .alert-success { background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; }
+
+        .alert-danger {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
 
         /* ===== EMPTY STATES ===== */
         .empty-state {
@@ -388,47 +547,81 @@
             padding: 48px 20px;
             color: var(--muted);
         }
-        .empty-state .icon { font-size: 44px; margin-bottom: 14px; opacity: .6; }
-        .empty-state p { font-size: 0.9rem; }
+
+        .empty-state .icon {
+            font-size: 44px;
+            margin-bottom: 14px;
+            opacity: .6;
+        }
+
+        .empty-state p {
+            font-size: 0.9rem;
+        }
 
         /* ===== SPINNER ===== */
         .spinner {
-            width: 16px; height: 16px;
-            border: 2.5px solid rgba(255,255,255,.4);
+            width: 16px;
+            height: 16px;
+            border: 2.5px solid rgba(255, 255, 255, .4);
             border-top-color: #fff;
             border-radius: 50%;
             animation: spin .7s linear infinite;
             display: inline-block;
             flex-shrink: 0;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
         /* ===== TOAST ===== */
         #toast {
             position: fixed;
-            bottom: 80px; left: 16px; right: 16px;
+            bottom: 80px;
+            left: 16px;
+            right: 16px;
             background: #1e293b;
             color: #fff;
             padding: 13px 18px;
             border-radius: 12px;
             font-size: 0.88rem;
             font-weight: 500;
-            box-shadow: 0 8px 24px rgba(0,0,0,.2);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .2);
             z-index: 100;
             transform: translateY(20px);
             opacity: 0;
             transition: .25s ease;
             text-align: center;
         }
-        #toast.show { transform: translateY(0); opacity: 1; }
-        #toast.ok  { background: var(--green); }
-        #toast.err { background: var(--danger); }
 
-        @media (min-width: 480px) {
-            #toast { left: auto; right: 20px; width: 320px; text-align: left; bottom: 90px; }
+        #toast.show {
+            transform: translateY(0);
+            opacity: 1;
         }
 
-        #tableSection { display: none; }
+        #toast.ok {
+            background: var(--green);
+        }
+
+        #toast.err {
+            background: var(--danger);
+        }
+
+        @media (min-width: 480px) {
+            #toast {
+                left: auto;
+                right: 20px;
+                width: 320px;
+                text-align: left;
+                bottom: 90px;
+            }
+        }
+
+        #tableSection {
+            display: none;
+        }
 
         /* ===== TABS ===== */
         .tab-nav {
@@ -438,8 +631,9 @@
             border-radius: 12px;
             padding: 5px;
             margin-bottom: 14px;
-            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .06);
         }
+
         .tab-btn {
             flex: 1;
             padding: 10px 12px;
@@ -457,10 +651,11 @@
             justify-content: center;
             gap: 6px;
         }
+
         .tab-btn.active {
             background: var(--primary);
             color: #fff;
-            box-shadow: 0 2px 8px rgba(37,99,235,.25);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, .25);
         }
 
         /* ===== IMPORT SECTION ===== */
@@ -469,16 +664,19 @@
             border-radius: var(--radius);
             padding: 18px 16px;
             margin-bottom: 14px;
-            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .06);
         }
+
         .step-header {
             display: flex;
             align-items: center;
             gap: 10px;
             margin-bottom: 14px;
         }
+
         .step-badge {
-            width: 28px; height: 28px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             background: var(--primary);
             color: #fff;
@@ -489,9 +687,22 @@
             justify-content: center;
             flex-shrink: 0;
         }
-        .step-badge.done { background: var(--green); }
-        .step-title { font-size: 0.9rem; font-weight: 700; color: var(--text); }
-        .step-desc  { font-size: 0.78rem; color: var(--muted); margin-top: 1px; }
+
+        .step-badge.done {
+            background: var(--green);
+        }
+
+        .step-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .step-desc {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-top: 1px;
+        }
 
         .btn-download {
             width: 100%;
@@ -510,8 +721,15 @@
             gap: 8px;
             transition: .2s;
         }
-        .btn-download:hover { opacity: .92; }
-        .btn-download:disabled { opacity: .6; cursor: not-allowed; }
+
+        .btn-download:hover {
+            opacity: .92;
+        }
+
+        .btn-download:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
 
         .upload-zone {
             border: 2px dashed var(--border);
@@ -522,15 +740,31 @@
             transition: .2s;
             color: var(--muted);
         }
-        .upload-zone:hover, .upload-zone.drag-over {
+
+        .upload-zone:hover,
+        .upload-zone.drag-over {
             border-color: var(--primary);
             background: #eff6ff;
             color: var(--primary);
         }
-        .upload-zone .icon { font-size: 36px; margin-bottom: 8px; }
-        .upload-zone p { font-size: 0.85rem; margin-bottom: 4px; }
-        .upload-zone span { font-size: 0.75rem; }
-        #fileInput { display: none; }
+
+        .upload-zone .icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .upload-zone p {
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+
+        .upload-zone span {
+            font-size: 0.75rem;
+        }
+
+        #fileInput {
+            display: none;
+        }
 
         .preview-stats {
             display: flex;
@@ -538,6 +772,7 @@
             margin-bottom: 14px;
             flex-wrap: wrap;
         }
+
         .stat-chip {
             padding: 6px 12px;
             border-radius: 20px;
@@ -547,16 +782,32 @@
             align-items: center;
             gap: 5px;
         }
-        .chip-green  { background: #dcfce7; color: #16a34a; }
-        .chip-orange { background: #fff7ed; color: #ea580c; }
-        .chip-red    { background: #fef2f2; color: #dc2626; }
 
-        .preview-table-wrap { overflow-x: auto; }
+        .chip-green {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .chip-orange {
+            background: #fff7ed;
+            color: #ea580c;
+        }
+
+        .chip-red {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .preview-table-wrap {
+            overflow-x: auto;
+        }
+
         .preview-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.82rem;
         }
+
         .preview-table th {
             background: #f1f5f9;
             padding: 9px 10px;
@@ -567,15 +818,38 @@
             text-transform: uppercase;
             border-bottom: 1px solid var(--border);
         }
+
         .preview-table td {
             padding: 9px 10px;
             border-bottom: 1px solid #f1f5f9;
             vertical-align: middle;
         }
-        .preview-table tr.matched { background: #f0fdf4; }
-        .preview-table tr.no-match { background: #fef2f2; }
-        .badge-ok   { background: #dcfce7; color: #16a34a; padding: 2px 8px; border-radius: 20px; font-size: .7rem; font-weight: 600; }
-        .badge-warn { background: #fef2f2; color: #dc2626; padding: 2px 8px; border-radius: 20px; font-size: .7rem; font-weight: 600; }
+
+        .preview-table tr.matched {
+            background: #f0fdf4;
+        }
+
+        .preview-table tr.no-match {
+            background: #fef2f2;
+        }
+
+        .badge-ok {
+            background: #dcfce7;
+            color: #16a34a;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: .7rem;
+            font-weight: 600;
+        }
+
+        .badge-warn {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: .7rem;
+            font-weight: 600;
+        }
 
         .btn-submit-import {
             width: 100%;
@@ -595,8 +869,16 @@
             transition: .2s;
             margin-top: 14px;
         }
-        .btn-submit-import:hover:not(:disabled) { background: var(--green-h, #15803d); }
-        .btn-submit-import:disabled { opacity: .6; cursor: not-allowed; }
+
+        .btn-submit-import:hover:not(:disabled) {
+            background: var(--green-h, #15803d);
+        }
+
+        .btn-submit-import:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
         .btn-reset-import {
             width: 100%;
             padding: 10px;
@@ -610,315 +892,288 @@
             color: var(--muted);
             margin-top: 8px;
         }
-        #tabImport { display: none; }
+
+        #tabImport {
+            display: none;
+        }
     </style>
 </head>
+
 <body>
 
-<!-- Top Bar -->
-<div class="topbar">
-    <div class="topbar-icon">📋</div>
-    <div class="topbar-title">
-        <h1>Update HP Orang Tua</h1>
-        <p>SMK PGRI Blora — Per Kelas</p>
-    </div>
-</div>
-
-<!-- Tab Nav -->
-<div style="padding: 12px 16px 0; max-width:720px; margin:0 auto;">
-    <div class="tab-nav">
-        <button class="tab-btn active" id="tabBtnEdit" onclick="switchTab('edit')">✏️ Edit per Kelas</button>
-        <button class="tab-btn" id="tabBtnImport" onclick="switchTab('import')">📥 Import File</button>
-        <button class="tab-btn" id="tabBtnLive" onclick="switchTab('live')">👁️ Data Live</button>
-    </div>
-</div>
-
-<!-- TAB: Edit per Kelas -->
-<div id="tabEdit">
-<div class="content">
-
-    <!-- Filter Kelas -->
-    <div class="filter-card">
-        <div class="filter-label">Pilih Kelas</div>
-        <div class="filter-row">
-            <select id="selectKelas">
-                <option value="">⏳ Memuat daftar kelas…</option>
-            </select>
-            <button class="btn-tampilkan" id="btnTampilkan" onclick="tampilkan()">
-                Tampilkan
-            </button>
+    <!-- Top Bar -->
+    <div class="topbar">
+        <div class="topbar-icon">📋</div>
+        <div class="topbar-title">
+            <h1>Update HP Orang Tua</h1>
+            <p>SMK PGRI Blora — Per Kelas</p>
         </div>
     </div>
 
-    <!-- Alert global -->
-    <div id="alertGlobal"></div>
+    <!-- Tab Nav -->
+    <div style="padding: 12px 16px 0; max-width:720px; margin:0 auto;">
+        <div class="tab-nav">
+            <button class="tab-btn active" id="tabBtnEdit" onclick="switchTab('edit')">✏️ Edit per Kelas</button>
+            <button class="tab-btn" id="tabBtnImport" onclick="switchTab('import')">📥 Import File</button>
+        </div>
+    </div>
 
-    <!-- Tabel / Cards Siswa -->
-    <div id="tableSection">
+    <!-- TAB: Edit per Kelas -->
+    <div id="tabEdit">
+        <div class="content">
 
-        <!-- Section header -->
-        <div class="section-header">
-            <div class="section-header-top">
-                <div>
-                    <h2 id="titleKelas">—</h2>
-                    <p id="subtitleKelas">—</p>
+            <!-- Filter Kelas -->
+            <div class="filter-card">
+                <div class="filter-label">Pilih Kelas</div>
+                <div class="filter-row">
+                    <select id="selectKelas">
+                        <option value="">⏳ Memuat daftar kelas…</option>
+                    </select>
+                    <button class="btn-tampilkan" id="btnTampilkan" onclick="tampilkan()">
+                        Tampilkan
+                    </button>
                 </div>
-                <button class="btn-format" id="btnFormat" onclick="formatOtomatis()">
-                    ✏️ Format
+            </div>
+
+            <!-- Alert global -->
+            <div id="alertGlobal"></div>
+
+            <!-- Tabel / Cards Siswa -->
+            <div id="tableSection">
+
+                <!-- Section header -->
+                <div class="section-header">
+                    <div class="section-header-top">
+                        <div>
+                            <h2 id="titleKelas">—</h2>
+                            <p id="subtitleKelas">—</p>
+                        </div>
+                        <button class="btn-format" id="btnFormat" onclick="formatOtomatis()">
+                            ✏️ Format
+                        </button>
+                    </div>
+                    <div class="info-box">
+                        ℹ️ Format: <strong>628XXXXXXXXX</strong>.
+                        Contoh: <code>6281234567890</code>
+                        — tanpa tanda + atau spasi.
+                    </div>
+                </div>
+
+                <!-- Alert simpan -->
+                <div id="alertSimpan"></div>
+
+                <!-- Mobile: Cards -->
+                <div class="student-list" id="studentCards"></div>
+
+                <!-- Desktop: Table -->
+                <div class="desktop-table-wrap"
+                    style="background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+                    <table id="tabelSiswa">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Nama Siswa</th>
+                                <th>NIS</th>
+                                <th>No HP Ortu (Utama)</th>
+                                <th>No HP Ortu 2 (Alternatif)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodySiswa"></tbody>
+                    </table>
+                </div>
+
+            </div>
+
+            <!-- Empty prompt -->
+            <div id="promptSection">
+                <div class="empty-state">
+                    <div class="icon">🏫</div>
+                    <p>Pilih kelas di atas<br>lalu ketuk <strong>Tampilkan</strong></p>
+                </div>
+            </div>
+
+        </div>
+    </div><!-- /tabEdit -->
+
+    <!-- TAB: Import File -->
+    <div id="tabImport">
+        <div class="content">
+
+            <!-- Langkah 1: Download Template -->
+            <div class="import-card">
+                <div class="step-header">
+                    <div class="step-badge" id="badge1">1</div>
+                    <div>
+                        <div class="step-title">Download Template</div>
+                        <div class="step-desc">File Excel berisi semua siswa aktif — isi kolom No HP</div>
+                    </div>
+                </div>
+                <button class="btn-download" id="btnDownloadTemplate" onclick="downloadTemplate()">
+                    📥 Download Template Excel
                 </button>
             </div>
-            <div class="info-box">
-                ℹ️ Format: <strong>628XXXXXXXXX</strong>.
-                Contoh: <code>6281234567890</code>
-                — tanpa tanda + atau spasi.
+
+            <!-- Langkah 2: Upload File -->
+            <div class="import-card">
+                <div class="step-header">
+                    <div class="step-badge" id="badge2">2</div>
+                    <div>
+                        <div class="step-title">Upload File</div>
+                        <div class="step-desc">CSV atau Excel (.xlsx) yang sudah diisi No HP</div>
+                    </div>
+                </div>
+                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                    <div class="icon">📂</div>
+                    <p><strong>Ketuk untuk pilih file</strong></p>
+                    <span>CSV atau Excel (.csv, .xlsx)</span>
+                </div>
+                <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" onchange="handleFileUpload(this)">
             </div>
-        </div>
 
-        <!-- Alert simpan -->
-        <div id="alertSimpan"></div>
+            <!-- Langkah 3: Preview & Submit -->
+            <div class="import-card" id="previewCard" style="display:none;">
+                <div class="step-header">
+                    <div class="step-badge done" id="badge3">3</div>
+                    <div>
+                        <div class="step-title">Preview & Kirim</div>
+                        <div class="step-desc" id="previewDesc">—</div>
+                    </div>
+                </div>
 
-        <!-- Mobile: Cards -->
-        <div class="student-list" id="studentCards"></div>
+                <!-- Stats chips -->
+                <div class="preview-stats" id="previewStats"></div>
 
-        <!-- Desktop: Table -->
-        <div class="desktop-table-wrap" style="background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
-            <table id="tabelSiswa">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Nama Siswa</th>
-                        <th>NIS</th>
-                        <th>No HP Ortu (Utama)</th>
-                        <th>No HP Ortu 2 (Alternatif)</th>
-                    </tr>
-                </thead>
-                <tbody id="tbodySiswa"></tbody>
-            </table>
-        </div>
+                <!-- Preview table -->
+                <div class="preview-table-wrap">
+                    <table class="preview-table">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>NIS</th>
+                                <th>Nama</th>
+                                <th>Kelas</th>
+                                <th>HP Utama (baru)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewBody"></tbody>
+                    </table>
+                </div>
 
-    </div>
-
-    <!-- Empty prompt -->
-    <div id="promptSection">
-        <div class="empty-state">
-            <div class="icon">🏫</div>
-            <p>Pilih kelas di atas<br>lalu ketuk <strong>Tampilkan</strong></p>
-        </div>
-    </div>
-
-</div>
-</div><!-- /tabEdit -->
-
-<!-- TAB: Import File -->
-<div id="tabImport">
-<div class="content">
-
-    <!-- Langkah 1: Download Template -->
-    <div class="import-card">
-        <div class="step-header">
-            <div class="step-badge" id="badge1">1</div>
-            <div>
-                <div class="step-title">Download Template</div>
-                <div class="step-desc">File Excel berisi semua siswa aktif — isi kolom No HP</div>
+                <!-- Actions -->
+                <button class="btn-submit-import" id="btnSubmitImport" onclick="submitImport()">
+                    🚀 Kirim ke Staging
+                </button>
+                <button class="btn-reset-import" onclick="resetImport()">↩ Upload Ulang</button>
             </div>
+
+            <div id="alertImport"></div>
+
         </div>
-        <button class="btn-download" id="btnDownloadTemplate" onclick="downloadTemplate()">
-            📥 Download Template Excel
+    </div><!-- /tabImport -->
+
+    <!-- Sticky Bottom Bar -->
+    <div class="sticky-bar" id="stickyBar">
+        <div class="sticky-bar-info">
+            <strong id="stickyTitle">—</strong>
+            <span id="stickyCount">—</span>
+        </div>
+        <button class="btn-simpan" id="btnSimpan" onclick="simpanSemua()">
+            💾 Simpan
         </button>
     </div>
 
-    <!-- Langkah 2: Upload File -->
-    <div class="import-card">
-        <div class="step-header">
-            <div class="step-badge" id="badge2">2</div>
-            <div>
-                <div class="step-title">Upload File</div>
-                <div class="step-desc">CSV atau Excel (.xlsx) yang sudah diisi No HP</div>
-            </div>
-        </div>
-        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
-            <div class="icon">📂</div>
-            <p><strong>Ketuk untuk pilih file</strong></p>
-            <span>CSV atau Excel (.csv, .xlsx)</span>
-        </div>
-        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" onchange="handleFileUpload(this)">
-    </div>
+    <div id="toast"></div>
 
-    <!-- Langkah 3: Preview & Submit -->
-    <div class="import-card" id="previewCard" style="display:none;">
-        <div class="step-header">
-            <div class="step-badge done" id="badge3">3</div>
-            <div>
-                <div class="step-title">Preview & Kirim</div>
-                <div class="step-desc" id="previewDesc">—</div>
-            </div>
-        </div>
+    <script>
+        // =============================
+        // KONFIGURASI
+        // =============================
+        const API_BASE = 'https://absensi.smkpgriblora.sch.id/api/phone';
+        const API_KEY = 'K0e6k4HW4cJnVuCSdFF5HHZCRmKYjzxR4mDFl9DDn-Q';
+        // =============================
 
-        <!-- Stats chips -->
-        <div class="preview-stats" id="previewStats"></div>
+        const H = { 'X-API-Key': API_KEY, 'Content-Type': 'application/json' };
+        let siswaData = [];
 
-        <!-- Preview table -->
-        <div class="preview-table-wrap">
-            <table class="preview-table">
-                <thead>
-                    <tr>
-                        <th>Status</th>
-                        <th>NIS</th>
-                        <th>Nama</th>
-                        <th>Kelas</th>
-                        <th>HP Utama (baru)</th>
-                    </tr>
-                </thead>
-                <tbody id="previewBody"></tbody>
-            </table>
-        </div>
-
-        <!-- Actions -->
-        <button class="btn-submit-import" id="btnSubmitImport" onclick="submitImport()">
-            🚀 Kirim ke Staging
-        </button>
-        <button class="btn-reset-import" onclick="resetImport()">↩ Upload Ulang</button>
-    </div>
-
-    <div id="alertImport"></div>
-
-</div>
-</div><!-- /tabImport -->
-
-<!-- TAB: Data Live (read-only) -->
-<div id="tabLive" style="display:none;">
-<div class="content">
-
-    <div class="filter-card">
-        <div class="filter-label">Pilih Kelas</div>
-        <div class="filter-row">
-            <select class="filter-select" id="liveKelasSelect">
-                <option value="">— Pilih kelas —</option>
-            </select>
-            <button class="btn-tampilkan" onclick="loadLiveData()">Tampilkan</button>
-        </div>
-    </div>
-
-    <div id="liveSection">
-        <div class="empty-state">
-            <div class="icon">🏫</div>
-            <p>Pilih kelas di atas<br>lalu ketuk <strong>Tampilkan</strong></p>
-        </div>
-    </div>
-
-</div>
-</div><!-- /tabLive -->
-
-<!-- Sticky Bottom Bar -->
-<div class="sticky-bar" id="stickyBar">
-    <div class="sticky-bar-info">
-        <strong id="stickyTitle">—</strong>
-        <span id="stickyCount">—</span>
-    </div>
-    <button class="btn-simpan" id="btnSimpan" onclick="simpanSemua()">
-        💾 Simpan
-    </button>
-</div>
-
-<div id="toast"></div>
-
-<script>
-    // =============================
-    // KONFIGURASI
-    // =============================
-    const API_BASE = 'https://absensi.smkpgriblora.sch.id/api/phone';
-    const API_KEY  = 'K0e6k4HW4cJnVuCSdFF5HHZCRmKYjzxR4mDFl9DDn-Q';
-    // =============================
-
-    const H = { 'X-API-Key': API_KEY, 'Content-Type': 'application/json' };
-    let siswaData = [];
-
-    // ── Load kelas ──────────────────────────────
-    async function loadKelas() {
-        try {
-            const res  = await fetch(`${API_BASE}/classes`, { headers: H });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.message);
-            const sel = document.getElementById('selectKelas');
-            sel.innerHTML = '<option value="">— Pilih Kelas —</option>';
-            data.data.forEach(k => {
-                const o = document.createElement('option');
-                o.value = k.id;
-                o.textContent = `${k.nama_kelas}  (${k.jumlah} siswa)`;
-                sel.appendChild(o);
-            });
-        } catch {
-            document.getElementById('selectKelas').innerHTML =
-                '<option value="">⚠️ Gagal memuat — coba refresh</option>';
-            showAlert('alertGlobal', 'danger', 'Gagal terhubung ke server.');
+        // ── Load kelas ──────────────────────────────
+        async function loadKelas() {
+            try {
+                const res = await fetch(`${API_BASE}/classes`, { headers: H });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message);
+                const sel = document.getElementById('selectKelas');
+                sel.innerHTML = '<option value="">— Pilih Kelas —</option>';
+                data.data.forEach(k => {
+                    const o = document.createElement('option');
+                    o.value = k.id;
+                    o.textContent = `${k.nama_kelas}  (${k.jumlah} siswa)`;
+                    sel.appendChild(o);
+                });
+            } catch {
+                document.getElementById('selectKelas').innerHTML =
+                    '<option value="">⚠️ Gagal memuat — coba refresh</option>';
+                showAlert('alertGlobal', 'danger', 'Gagal terhubung ke server.');
+            }
         }
-    }
 
-    // ── Tampilkan siswa ─────────────────────────
-    async function tampilkan() {
-        const kelasId = document.getElementById('selectKelas').value;
-        if (!kelasId) { toast('Pilih kelas terlebih dahulu.', 'err'); return; }
+        // ── Tampilkan siswa ─────────────────────────
+        async function tampilkan() {
+            const kelasId = document.getElementById('selectKelas').value;
+            if (!kelasId) { toast('Pilih kelas terlebih dahulu.', 'err'); return; }
 
-        const btn = document.getElementById('btnTampilkan');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span>';
-        clearAlert('alertGlobal'); clearAlert('alertSimpan');
+            const btn = document.getElementById('btnTampilkan');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>';
+            clearAlert('alertGlobal'); clearAlert('alertSimpan');
 
-        try {
-            const res  = await fetch(`${API_BASE}/students?kelas_id=${kelasId}`, { headers: H });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.message);
+            try {
+                const res = await fetch(`${API_BASE}/students?kelas_id=${kelasId}`, { headers: H });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message);
 
-            siswaData = data.data;
-            document.getElementById('titleKelas').textContent    = data.kelas;
-            document.getElementById('subtitleKelas').textContent = `${data.jumlah} siswa aktif`;
-            document.getElementById('stickyTitle').textContent   = data.kelas;
-            document.getElementById('stickyCount').textContent   = `${data.jumlah} siswa`;
+                siswaData = data.data;
+                document.getElementById('titleKelas').textContent = data.kelas;
+                document.getElementById('subtitleKelas').textContent = `${data.jumlah} siswa aktif`;
+                document.getElementById('stickyTitle').textContent = data.kelas;
+                document.getElementById('stickyCount').textContent = `${data.jumlah} siswa`;
 
-            document.getElementById('tableSection').style.display  = 'block';
-            document.getElementById('promptSection').style.display = 'none';
-            document.getElementById('stickyBar').classList.add('visible');
+                document.getElementById('tableSection').style.display = 'block';
+                document.getElementById('promptSection').style.display = 'none';
+                document.getElementById('stickyBar').classList.add('visible');
 
-            renderCards(data.data);
-            renderTable(data.data);
-        } catch (e) {
-            showAlert('alertGlobal', 'danger', e.message || 'Gagal memuat data siswa.');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = 'Tampilkan';
+                renderCards(data.data);
+                renderTable(data.data);
+            } catch (e) {
+                showAlert('alertGlobal', 'danger', e.message || 'Gagal memuat data siswa.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Tampilkan';
+            }
         }
-    }
 
-    // ── Render mobile cards ──────────────────────
-    function renderCards(data) {
-        const wrap = document.getElementById('studentCards');
-        if (!data.length) {
-            wrap.innerHTML = `<div class="empty-state"><div class="icon">👤</div><p>Tidak ada siswa aktif.</p></div>`;
-            return;
-        }
-        wrap.innerHTML = data.map((s, i) => {
-            // Jika ada pending, tampilkan nomor pending (kuning) bukan live
-            const displayHp1    = s.has_pending ? (s.pending_hp1 || '') : (s.no_hp_ortu  || '');
-            // hp2: fallback ke live jika pending_hp2 kosong (hp2 tidak selalu diimport)
-            const displayHp2    = s.has_pending ? (s.pending_hp2 || s.no_hp_ortu2 || '') : (s.no_hp_ortu2 || '');
-            const pendingBadge  = s.has_pending ? `<span style="font-size:.65rem;background:#f59e0b;color:#fff;padding:2px 7px;border-radius:99px;font-weight:700;margin-left:6px;">⏳ Pending</span>` : '';
-            const inputClass    = s.has_pending ? 'hp-input pending-input' : `hp-input ${displayHp1 ? 'has-value' : 'empty-warn'}`;
-            return `
-            <div class="student-card ${displayHp1 ? 'has-hp' : 'no-hp'}" id="card_${s.id}">
+        // ── Render mobile cards ──────────────────────
+        function renderCards(data) {
+            const wrap = document.getElementById('studentCards');
+            if (!data.length) {
+                wrap.innerHTML = `<div class="empty-state"><div class="icon">👤</div><p>Tidak ada siswa aktif.</p></div>`;
+                return;
+            }
+            wrap.innerHTML = data.map((s, i) => `
+            <div class="student-card ${s.no_hp_ortu ? 'has-hp' : 'no-hp'}" id="card_${s.id}">
                 <div class="student-card-header">
                     <div class="student-avatar">${s.nama.charAt(0).toUpperCase()}</div>
                     <div class="student-info-text">
-                        <div class="student-nama">${esc(s.nama)} ${pendingBadge}</div>
+                        <div class="student-nama">${esc(s.nama)}</div>
                         <div class="student-nis">NIS: ${esc(s.nis)}</div>
                     </div>
                     <div class="student-num">${i + 1}</div>
                 </div>
                 <div class="student-fields">
                     <div class="field-group">
-                        <label>No HP Ortu (Utama) *${s.has_pending ? ' <span style="font-size:.65rem;color:#f59e0b;">— menunggu sinkron</span>' : ''}</label>
-                        <input type="tel" inputmode="numeric" class="${inputClass}"
+                        <label>No HP Ortu (Utama) *</label>
+                        <input type="tel" inputmode="numeric" class="hp-input ${s.no_hp_ortu ? 'has-value' : 'empty-warn'}"
                             id="c_hp1_${s.id}"
-                            value="${esc(displayHp1)}"
+                            value="${esc(s.no_hp_ortu)}"
                             placeholder="628xxxxxxxxx"
                             oninput="onHpInput(this,'${s.id}','c')">
                     </div>
@@ -926,643 +1181,553 @@
                         <label>No HP Ortu 2 <span style="font-size:.7rem;color:#94a3b8;font-weight:400;">(hanya tampil)</span></label>
                         <input type="tel" inputmode="numeric" class="hp-input"
                             id="c_hp2_${s.id}"
-                            value="${esc(displayHp2)}"
+                            value="${esc(s.no_hp_ortu2)}"
                             placeholder="—"
                             readonly tabindex="-1">
                     </div>
                 </div>
-            </div>`;
-        }).join('');
-    }
-
-    // ── Render desktop table ─────────────────────
-    function renderTable(data) {
-        const tbody = document.getElementById('tbodySiswa');
-        if (!data.length) {
-            tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><p>Tidak ada siswa.</p></div></td></tr>`;
-            return;
+            </div>
+        `).join('');
         }
-        tbody.innerHTML = data.map((s, i) => {
-            const displayHp1 = s.has_pending ? (s.pending_hp1 || '') : (s.no_hp_ortu  || '');
-            // hp2: fallback ke live jika pending_hp2 kosong
-            const displayHp2 = s.has_pending ? (s.pending_hp2 || s.no_hp_ortu2 || '') : (s.no_hp_ortu2 || '');
-            const badge      = s.has_pending ? `<span style="font-size:.6rem;background:#f59e0b;color:#fff;padding:1px 6px;border-radius:99px;font-weight:700;margin-left:4px;">⏳</span>` : '';
-            const cls        = s.has_pending ? 'hp-input pending-input' : `hp-input ${displayHp1 ? 'has-value' : 'empty-warn'}`;
-            return `
-            <tr>
-                <td class="td-num">${i + 1}</td>
-                <td class="td-nama">${esc(s.nama)} ${badge}</td>
-                <td class="td-nis">${esc(s.nis)}</td>
-                <td>
-                    <input type="tel" inputmode="numeric" class="${cls}"
-                        id="t_hp1_${s.id}" value="${esc(displayHp1)}" placeholder="628..."
-                        oninput="onHpInput(this,'${s.id}','t')">
-                </td>
-                <td>
-                    <input type="tel" inputmode="numeric" class="hp-input"
-                        id="t_hp2_${s.id}" value="${esc(displayHp2)}" placeholder="—"
-                        readonly tabindex="-1">
-                </td>
-            </tr>`;
-        }).join('');
-    }
 
-    // ── Tab Live: sync dropdown kelas ────────────
-    function syncLiveDropdown() {
-        const editSel = document.getElementById('selectKelas');
-        const liveSel = document.getElementById('liveKelasSelect');
-        if (!editSel || !liveSel) return;
-        // Copy options dari Edit tab jika belum terisi
-        if (liveSel.options.length <= 1 && editSel.options.length > 1) {
-            liveSel.innerHTML = '<option value="">— Pilih kelas —</option>';
-            Array.from(editSel.options).slice(1).forEach(o => {
-                const opt = document.createElement('option');
-                opt.value = o.value;
-                opt.textContent = o.textContent;
-                liveSel.appendChild(opt);
-            });
-        }
-        // Sync pilihan kelas yang sama
-        if (editSel.value) liveSel.value = editSel.value;
-    }
-
-    // ── Tab Live: load data live (read-only) ─────
-    async function loadLiveData() {
-        const kelasId = document.getElementById('liveKelasSelect').value;
-        if (!kelasId) { toast('Pilih kelas terlebih dahulu.', 'err'); return; }
-        const sec = document.getElementById('liveSection');
-        sec.innerHTML = `<div class="empty-state"><span class="spinner"></span><p>Memuat data...</p></div>`;
-        try {
-            const res  = await fetch(`${API_BASE}/students?kelas_id=${kelasId}`, { headers: H });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.message);
-            renderLiveTable(data);
-        } catch (e) {
-            sec.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p>${esc(e.message || 'Gagal memuat data.')}</p></div>`;
-        }
-    }
-
-    // ── Tab Live: render tabel read-only ─────────
-    function renderLiveTable(data) {
-        const sec = document.getElementById('liveSection');
-        const pendingCount = data.data.filter(s => s.has_pending).length;
-        const pendingInfo  = pendingCount > 0
-            ? `<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 14px;font-size:.8rem;color:#92400e;margin-bottom:12px;">
-                ⏳ <strong>${pendingCount} siswa</strong> punya update HP yang belum disinkron admin.
-               </div>`
-            : '';
-        const rows = data.data.map((s, i) => {
-            const liveHp1 = esc(s.no_hp_ortu  || '—');
-            const liveHp2 = esc(s.no_hp_ortu2 || '—');
-            const pendBadge = s.has_pending
-                ? `<div style="font-size:.7rem;color:#f59e0b;margin-top:2px;">⏳ Pending: ${esc(s.pending_hp1 || '—')}</div>`
-                : '';
-            return `
+        // ── Render desktop table ─────────────────────
+        function renderTable(data) {
+            const tbody = document.getElementById('tbodySiswa');
+            if (!data.length) {
+                tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><p>Tidak ada siswa.</p></div></td></tr>`;
+                return;
+            }
+            tbody.innerHTML = data.map((s, i) => `
             <tr>
                 <td class="td-num">${i + 1}</td>
                 <td class="td-nama">${esc(s.nama)}</td>
                 <td class="td-nis">${esc(s.nis)}</td>
                 <td>
-                    <div style="font-size:.85rem;font-weight:600;color:${s.no_hp_ortu ? '#1e293b' : '#94a3b8'}">${liveHp1}</div>
-                    ${pendBadge}
+                    <input type="tel" inputmode="numeric" class="hp-input ${s.no_hp_ortu ? 'has-value' : 'empty-warn'}"
+                        id="t_hp1_${s.id}" value="${esc(s.no_hp_ortu)}" placeholder="628..."
+                        oninput="onHpInput(this,'${s.id}','t')">
                 </td>
-                <td style="font-size:.85rem;color:${s.no_hp_ortu2 ? '#475569' : '#94a3b8'}">${liveHp2}</td>
-            </tr>`;
-        }).join('');
-        sec.innerHTML = `
-            ${pendingInfo}
-            <div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08);">
-                <div style="padding:12px 16px;border-bottom:1px solid #f1f5f9;">
-                    <strong style="font-size:.95rem;">${esc(data.kelas)}</strong>
-                    <span style="font-size:.8rem;color:#64748b;margin-left:8px;">${data.jumlah} siswa aktif</span>
-                </div>
-                <div style="overflow-x:auto;">
-                    <table class="preview-table" style="width:100%;">
-                        <thead>
-                            <tr>
-                                <th>#</th><th>Nama</th><th>NIS</th>
-                                <th>HP Aktif (Live)</th><th>HP Alternatif</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rows}</tbody>
-                    </table>
-                </div>
-            </div>`;
-    }
-
-    // Sync card ↔ table input values
-    function onHpInput(input, id, src) {
-        const field = input.id.includes('hp1') ? 'hp1' : 'hp2';
-        const otherPrefix = src === 'c' ? 't' : 'c';
-        const other = document.getElementById(`${otherPrefix}_${field}_${id}`);
-        if (other) other.value = input.value;
-
-        // Styling
-        [input, other].forEach(el => {
-            if (!el) return;
-            el.classList.remove('has-value','empty-warn','changed');
-            if (el.value) el.classList.add(field === 'hp1' ? 'changed' : 'has-value');
-            else if (field === 'hp1') el.classList.add('empty-warn');
-        });
-
-        // Card border
-        const card = document.getElementById(`card_${id}`);
-        if (card) {
-            const hp1 = document.getElementById(`c_hp1_${id}`)?.value || '';
-            card.classList.remove('has-hp','no-hp','dirty');
-            card.classList.add(hp1 ? 'dirty' : 'no-hp');
+                <td>
+                    <input type="tel" inputmode="numeric" class="hp-input"
+                        id="t_hp2_${s.id}" value="${esc(s.no_hp_ortu2)}" placeholder="—"
+                        readonly tabindex="-1">
+                </td>
+            </tr>
+        `).join('');
         }
-    }
 
-    // ── Format Otomatis ──────────────────────────
-    function formatOtomatis() {
-        siswaData.forEach(s => {
-            ['hp1','hp2'].forEach(field => {
-                ['c','t'].forEach(prefix => {
-                    const el = document.getElementById(`${prefix}_${field}_${s.id}`);
-                    if (!el || !el.value) return;
-                    let v = el.value.replace(/\D/g,'');
-                    if (v.startsWith('0'))     v = '62' + v.slice(1);
-                    else if (v.startsWith('8')) v = '62' + v;
-                    el.value = v;
-                    el.classList.remove('has-value','empty-warn','changed');
-                    el.classList.add(v ? (field === 'hp1' ? 'has-value' : 'has-value') : (field === 'hp1' ? 'empty-warn' : ''));
-                });
+        // Sync card ↔ table input values
+        function onHpInput(input, id, src) {
+            const field = input.id.includes('hp1') ? 'hp1' : 'hp2';
+            const otherPrefix = src === 'c' ? 't' : 'c';
+            const other = document.getElementById(`${otherPrefix}_${field}_${id}`);
+            if (other) other.value = input.value;
+
+            // Styling
+            [input, other].forEach(el => {
+                if (!el) return;
+                el.classList.remove('has-value', 'empty-warn', 'changed');
+                if (el.value) el.classList.add(field === 'hp1' ? 'changed' : 'has-value');
+                else if (field === 'hp1') el.classList.add('empty-warn');
             });
-        });
-        toast('Format nomor HP berhasil dirapikan ✓', 'ok');
-    }
 
-    // ── Simpan Semua ─────────────────────────────
-    async function simpanSemua() {
-        clearAlert('alertSimpan');
+            // Card border
+            const card = document.getElementById(`card_${id}`);
+            if (card) {
+                const hp1 = document.getElementById(`c_hp1_${id}`)?.value || '';
+                card.classList.remove('has-hp', 'no-hp', 'dirty');
+                card.classList.add(hp1 ? 'dirty' : 'no-hp');
+            }
+        }
 
-        const payload = siswaData.map(s => ({
-            id:         s.id,
-            no_hp_ortu: getVal(s.id, 'hp1'),
-            // hp2 dikunci — tidak dikirim
-        }));
-
-        const btn = document.getElementById('btnSimpan');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span>';
-
-        try {
-            const res  = await fetch(`${API_BASE}/bulk-update`, {
-                method: 'POST', headers: H,
-                body: JSON.stringify({ students: payload }),
-            });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.message);
-
-            toast(data.message + ' — menunggu sinkronisasi admin', 'ok');
-            showAlert('alertSimpan', 'success',
-                `✅ ${data.message}.<br><small>Data akan aktif setelah admin melakukan sinkronisasi.</small>`);
-
-            // Update card border ke hijau
+        // ── Format Otomatis ──────────────────────────
+        function formatOtomatis() {
             siswaData.forEach(s => {
-                const card = document.getElementById(`card_${s.id}`);
-                if (card) { card.classList.remove('dirty','no-hp'); card.classList.add('has-hp'); }
-                ['c','t'].forEach(p => {
-                    const el = document.getElementById(`${p}_hp1_${s.id}`);
-                    if (el?.value) { el.classList.remove('changed'); el.classList.add('has-value'); }
+                ['hp1', 'hp2'].forEach(field => {
+                    ['c', 't'].forEach(prefix => {
+                        const el = document.getElementById(`${prefix}_${field}_${s.id}`);
+                        if (!el || !el.value) return;
+                        let v = el.value.replace(/\D/g, '');
+                        if (v.startsWith('0')) v = '62' + v.slice(1);
+                        else if (v.startsWith('8')) v = '62' + v;
+                        el.value = v;
+                        el.classList.remove('has-value', 'empty-warn', 'changed');
+                        el.classList.add(v ? (field === 'hp1' ? 'has-value' : 'has-value') : (field === 'hp1' ? 'empty-warn' : ''));
+                    });
                 });
             });
-        } catch (e) {
-            showAlert('alertSimpan', 'danger', e.message || 'Gagal menyimpan. Coba lagi.');
-            toast('Gagal menyimpan!', 'err');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '💾 Simpan';
+            toast('Format nomor HP berhasil dirapikan ✓', 'ok');
         }
-    }
 
-    // ── Helpers ──────────────────────────────────
-    function getVal(id, field) {
-        // Ambil dari card (mobile) atau table (desktop)
-        return document.getElementById(`c_${field}_${id}`)?.value
-            || document.getElementById(`t_${field}_${id}`)?.value
-            || '';
-    }
+        // ── Simpan Semua ─────────────────────────────
+        async function simpanSemua() {
+            clearAlert('alertSimpan');
 
-    function showAlert(id, type, msg) {
-        document.getElementById(id).innerHTML =
-            `<div class="alert alert-${type}">${msg}</div>`;
-    }
-    function clearAlert(id) { document.getElementById(id).innerHTML = ''; }
+            const payload = siswaData.map(s => ({
+                id: s.id,
+                no_hp_ortu: getVal(s.id, 'hp1'),
+                // hp2 dikunci — tidak dikirim
+            }));
 
-    function esc(s) {
-        return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
+            const btn = document.getElementById('btnSimpan');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>';
 
-    let toastT;
-    function toast(msg, type = '') {
-        const el = document.getElementById('toast');
-        el.textContent = msg;
-        el.className = `show ${type}`;
-        clearTimeout(toastT);
-        toastT = setTimeout(() => el.className = '', 3500);
-    }
-
-    // ── Enter / submit ───────────────────────────
-    document.addEventListener('DOMContentLoaded', () => {
-        loadKelas();
-        document.getElementById('selectKelas').addEventListener('change', () => {
-            if (document.getElementById('selectKelas').value) tampilkan();
-        });
-        // Drag & drop events
-        const zone = document.getElementById('uploadZone');
-        if (zone) {
-            zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-            zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-            zone.addEventListener('drop', e => {
-                e.preventDefault();
-                zone.classList.remove('drag-over');
-                const f = e.dataTransfer.files[0];
-                if (f) processImportFile(f);
-            });
-        }
-    });
-
-    // ── Tab Switching ─────────────────────────────
-    function switchTab(tab) {
-        const isEdit   = tab === 'edit';
-        const isImport = tab === 'import';
-        const isLive   = tab === 'live';
-        document.getElementById('tabEdit').style.display   = isEdit   ? 'block' : 'none';
-        document.getElementById('tabImport').style.display = isImport ? 'block' : 'none';
-        document.getElementById('tabLive').style.display   = isLive   ? 'block' : 'none';
-        document.getElementById('stickyBar').style.display = isEdit   ? ''      : 'none';
-        document.getElementById('tabBtnEdit').classList.toggle('active', isEdit);
-        document.getElementById('tabBtnImport').classList.toggle('active', isImport);
-        document.getElementById('tabBtnLive').classList.toggle('active', isLive);
-        // Sync dropdown kelas ke tab Live saat pertama dibuka
-        if (isLive) syncLiveDropdown();
-    }
-
-    // ── IMPORT: Download Template ─────────────────
-    async function downloadTemplate() {
-        const btn = document.getElementById('btnDownloadTemplate');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span> Memuat data siswa…';
-        try {
-            const res  = await fetch(`${API_BASE}/students/all`, { headers: H });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.message);
-
-            // Kelompokkan per kelas, urutkan kelas → nama
-            const byKelas = {};
-            data.data.forEach(s => {
-                if (!byKelas[s.kelas]) byKelas[s.kelas] = [];
-                byKelas[s.kelas].push(s);
-            });
-            // Sort kelas abjad, lalu siswa abjad di tiap kelas
-            const kelasSorted = Object.keys(byKelas).sort((a, b) => a.localeCompare(b, 'id'));
-            kelasSorted.forEach(k => byKelas[k].sort((a, b) => a.nama.localeCompare(b.nama, 'id')));
-
-            const HEADER = ['NIS', 'Nama', 'Kelas', 'No HP Ortu (Utama)', 'No HP Ortu 2 (Opsional)'];
-            const COL_W  = [{ wch: 12 }, { wch: 32 }, { wch: 14 }, { wch: 24 }, { wch: 24 }];
-
-            const wb = XLSX.utils.book_new();
-
-            // ── Sheet 1: Semua Kelas (sorted kelas → nama) ──
-            const allRows = [HEADER];
-            kelasSorted.forEach(k => {
-                byKelas[k].forEach(s => {
-                    allRows.push([s.nis, s.nama, s.kelas, s.no_hp_ortu || '', s.no_hp_ortu2 || '']);
+            try {
+                const res = await fetch(`${API_BASE}/bulk-update`, {
+                    method: 'POST', headers: H,
+                    body: JSON.stringify({ students: payload }),
                 });
-            });
-            const wsAll = XLSX.utils.aoa_to_sheet(allRows);
-            wsAll['!cols'] = COL_W;
-            XLSX.utils.book_append_sheet(wb, wsAll, 'Semua Kelas');
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message);
 
-            // ── Sheet per kelas ─────────────────────────────
-            kelasSorted.forEach(k => {
-                const rows = [HEADER, ...byKelas[k].map((s, i) => [
-                    s.nis, s.nama, s.kelas, s.no_hp_ortu || '', s.no_hp_ortu2 || ''
-                ])];
-                const ws = XLSX.utils.aoa_to_sheet(rows);
-                ws['!cols'] = COL_W;
-                // Nama sheet max 31 karakter (batas Excel)
-                const sheetName = k.substring(0, 31);
-                XLSX.utils.book_append_sheet(wb, ws, sheetName);
-            });
+                toast(data.message + ' — menunggu sinkronisasi admin', 'ok');
+                showAlert('alertSimpan', 'success',
+                    `✅ ${data.message}.<br><small>Data akan aktif setelah admin melakukan sinkronisasi.</small>`);
 
-            XLSX.writeFile(wb, 'template_hp_ortu.xlsx');
-            document.getElementById('badge1').classList.add('done');
-            toast(`Template Excel ${kelasSorted.length} kelas berhasil diunduh ✓`, 'ok');
-        } catch (e) {
-            toast('Gagal: ' + (e.message || 'Error'), 'err');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '📥 Download Template Excel';
-        }
-    }
-
-
-    // ── IMPORT: Handle File Upload ────────────────
-    function handleFileUpload(input) {
-        const file = input.files[0];
-        if (!file) return;
-        processImportFile(file);
-        input.value = ''; // reset supaya bisa upload ulang file sama
-    }
-
-    function processImportFile(file) {
-        const ext = file.name.split('.').pop().toLowerCase();
-        const zone = document.getElementById('uploadZone');
-        zone.innerHTML = `<div class="icon">⏳</div><p>Membaca file…</p>`;
-
-        const reader = new FileReader();
-
-        if (ext === 'csv') {
-            reader.onload = e => parseAndPreview(e.target.result, 'csv');
-            reader.readAsText(file, 'UTF-8');
-        } else if (ext === 'xlsx' || ext === 'xls') {
-            reader.onload = e => parseAndPreview(e.target.result, 'excel');
-            reader.readAsArrayBuffer(file);
-        } else {
-            zone.innerHTML = `<div class="icon">📂</div><p><strong>Ketuk untuk pilih file</strong></p><span>CSV atau Excel (.csv, .xlsx)</span>`;
-            toast('Format tidak didukung. Gunakan .csv atau .xlsx', 'err');
-        }
-    }
-
-    let importRows = []; // matched rows siap kirim
-
-    // Normalize nama untuk matching
-    function normName(s) {
-        return String(s || '').toLowerCase()
-            .replace(/[^a-z0-9\s]/g, '')
-            .replace(/\s+/g, ' ')
-            .trim();
-    }
-
-    // Deteksi kolom HP dari berbagai nama header
-    function detectHpCol(row) {
-        const HP_KEYS = [
-            'no hp ortu (utama)', 'no_hp_ortu', 'nomor orangtua',
-            'nomor orang tua', 'no orangtua', 'hp utama', 'hp1',
-            'no hp', 'nomor hp', 'phone', 'handphone', 'telepon',
-            'no telp', 'no. hp', 'nomor telepon', 'no handphone',
-            'no. handphone', 'nomer hp', 'nomer orangtua',
-        ];
-        for (const k of HP_KEYS) {
-            if (row[k] !== undefined && String(row[k]).trim()) return String(row[k]).trim();
-        }
-        // Fallback: cari kolom yang nilainya angka panjang 10-15 digit
-        for (const v of Object.values(row)) {
-            const s = String(v).replace(/\D/g,'');
-            if (s.length >= 10 && s.length <= 15) return String(v).trim();
-        }
-        return '';
-    }
-
-    function detectHp2Col(row) {
-        const HP2_KEYS = [
-            'no hp ortu 2 (opsional)', 'no_hp_ortu2', 'hp2',
-            'hp alternatif', 'nomor orangtua 2', 'no hp 2', 'hp 2',
-        ];
-        for (const k of HP2_KEYS) {
-            if (row[k] !== undefined) return String(row[k]).trim();
-        }
-        return '';
-    }
-
-    async function parseAndPreview(content, type) {
-        const zone = document.getElementById('uploadZone');
-        try {
-            let rawRows = [];
-
-            if (type === 'csv') {
-                rawRows = parseCSV(content);
-            } else {
-                // Baca SEMUA sheet dari Excel
-                const wb = XLSX.read(content, { type: 'array' });
-                wb.SheetNames.forEach(sheetName => {
-                    const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], {
-                        defval: '', header: 1
+                // Update card border ke hijau
+                siswaData.forEach(s => {
+                    const card = document.getElementById(`card_${s.id}`);
+                    if (card) { card.classList.remove('dirty', 'no-hp'); card.classList.add('has-hp'); }
+                    ['c', 't'].forEach(p => {
+                        const el = document.getElementById(`${p}_hp1_${s.id}`);
+                        if (el?.value) { el.classList.remove('changed'); el.classList.add('has-value'); }
                     });
-                    if (!rows.length) return;
+                });
+            } catch (e) {
+                showAlert('alertSimpan', 'danger', e.message || 'Gagal menyimpan. Coba lagi.');
+                toast('Gagal menyimpan!', 'err');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '💾 Simpan';
+            }
+        }
 
-                    // Cari baris header (baris yang mengandung kata 'nama' atau 'nis')
-                    let headerIdx = -1;
-                    for (let i = 0; i < Math.min(rows.length, 10); i++) {
-                        const rowStr = rows[i].join(' ').toLowerCase();
-                        if (rowStr.includes('nama') || rowStr.includes('nis') || rowStr.includes('siswa')) {
-                            headerIdx = i;
-                            break;
-                        }
-                    }
-                    if (headerIdx === -1) return;
+        // ── Helpers ──────────────────────────────────
+        function getVal(id, field) {
+            // Ambil dari card (mobile) atau table (desktop)
+            return document.getElementById(`c_${field}_${id}`)?.value
+                || document.getElementById(`t_${field}_${id}`)?.value
+                || '';
+        }
 
-                    const headers = rows[headerIdx].map(h => String(h || '').toLowerCase().trim());
-                    rows.slice(headerIdx + 1).forEach(r => {
-                        if (!r.some(v => v !== '' && v !== null && v !== undefined)) return;
-                        const obj = {};
-                        headers.forEach((h, i) => obj[h] = r[i] ?? '');
-                        rawRows.push(obj);
-                    });
+        function showAlert(id, type, msg) {
+            document.getElementById(id).innerHTML =
+                `<div class="alert alert-${type}">${msg}</div>`;
+        }
+        function clearAlert(id) { document.getElementById(id).innerHTML = ''; }
+
+        function esc(s) {
+            return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        let toastT;
+        function toast(msg, type = '') {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.className = `show ${type}`;
+            clearTimeout(toastT);
+            toastT = setTimeout(() => el.className = '', 3500);
+        }
+
+        // ── Enter / submit ───────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            loadKelas();
+            document.getElementById('selectKelas').addEventListener('change', () => {
+                if (document.getElementById('selectKelas').value) tampilkan();
+            });
+            // Drag & drop events
+            const zone = document.getElementById('uploadZone');
+            if (zone) {
+                zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+                zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+                zone.addEventListener('drop', e => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    const f = e.dataTransfer.files[0];
+                    if (f) processImportFile(f);
                 });
             }
+        });
 
-            if (!rawRows.length) throw new Error('File kosong atau tidak ada data yang bisa dibaca.');
+        // ── Tab Switching ─────────────────────────────
+        function switchTab(tab) {
+            const isEdit = tab === 'edit';
+            document.getElementById('tabEdit').style.display = isEdit ? 'block' : 'none';
+            document.getElementById('tabImport').style.display = isEdit ? 'none' : 'block';
+            document.getElementById('stickyBar').style.display = isEdit ? '' : 'none';
+            document.getElementById('tabBtnEdit').classList.toggle('active', isEdit);
+            document.getElementById('tabBtnImport').classList.toggle('active', !isEdit);
+        }
 
-            // Load semua siswa
-            zone.innerHTML = `<div class="icon">🔍</div><p>Mencocokkan data siswa…</p>`;
-            const res   = await fetch(`${API_BASE}/students/all`, { headers: H });
-            const sData = await res.json();
-            if (!sData.success) throw new Error('Gagal load data siswa dari server.');
+        // ── IMPORT: Download Template ─────────────────
+        async function downloadTemplate() {
+            const btn = document.getElementById('btnDownloadTemplate');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Memuat data siswa…';
+            try {
+                const res = await fetch(`${API_BASE}/students/all`, { headers: H });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message);
 
-            // Build NIS map + Nama map + Partial map
-            const nisMap = {}, namaMap = {}, partialMap = {};
-            sData.data.forEach(s => {
-                nisMap[String(s.nis).trim()] = s;
-                namaMap[normName(s.nama)] = s;
-                const partial = normName(s.nama).split(' ').slice(0, 3).join(' ');
-                if (!partialMap[partial]) partialMap[partial] = s;
-            });
+                // Kelompokkan per kelas, urutkan kelas → nama
+                const byKelas = {};
+                data.data.forEach(s => {
+                    if (!byKelas[s.kelas]) byKelas[s.kelas] = [];
+                    byKelas[s.kelas].push(s);
+                });
+                // Sort kelas abjad, lalu siswa abjad di tiap kelas
+                const kelasSorted = Object.keys(byKelas).sort((a, b) => a.localeCompare(b, 'id'));
+                kelasSorted.forEach(k => byKelas[k].sort((a, b) => a.nama.localeCompare(b.nama, 'id')));
 
-            // Match setiap baris
-            const matched = [], unmatched = [];
-            rawRows.forEach(rawRow => {
-                const row = {};
-                Object.keys(rawRow).forEach(k => row[k.toLowerCase().trim()] = String(rawRow[k] ?? '').trim());
+                const HEADER = ['NIS', 'Nama', 'Kelas', 'No HP Ortu (Utama)', 'No HP Ortu 2 (Opsional)'];
+                const COL_W = [{ wch: 12 }, { wch: 32 }, { wch: 14 }, { wch: 24 }, { wch: 24 }];
 
-                const nis  = row['nis'] || '';
-                const nama = row['nama siswa'] || row['nama'] || row['name'] || row['siswa'] || '';
-                const hp1  = detectHpCol(row);
-                const hp2  = detectHp2Col(row);
+                const wb = XLSX.utils.book_new();
 
-                // Skip baris kosong atau baris header
-                if (!nama && !nis && !hp1) return;
-                if (['nama siswa','nama','name','siswa','no','no.'].includes(normName(nama))) return;
+                // ── Sheet 1: Semua Kelas (sorted kelas → nama) ──
+                const allRows = [HEADER];
+                kelasSorted.forEach(k => {
+                    byKelas[k].forEach(s => {
+                        allRows.push([s.nis, s.nama, s.kelas, s.no_hp_ortu || '', s.no_hp_ortu2 || '']);
+                    });
+                });
+                const wsAll = XLSX.utils.aoa_to_sheet(allRows);
+                wsAll['!cols'] = COL_W;
+                XLSX.utils.book_append_sheet(wb, wsAll, 'Semua Kelas');
 
-                let student = null, matchMethod = '';
+                // ── Sheet per kelas ─────────────────────────────
+                kelasSorted.forEach(k => {
+                    const rows = [HEADER, ...byKelas[k].map((s, i) => [
+                        s.nis, s.nama, s.kelas, s.no_hp_ortu || '', s.no_hp_ortu2 || ''
+                    ])];
+                    const ws = XLSX.utils.aoa_to_sheet(rows);
+                    ws['!cols'] = COL_W;
+                    // Nama sheet max 31 karakter (batas Excel)
+                    const sheetName = k.substring(0, 31);
+                    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+                });
 
-                // 1. Match by NIS (paling akurat)
-                if (nis && nisMap[nis]) { student = nisMap[nis]; matchMethod = 'NIS'; }
+                XLSX.writeFile(wb, 'template_hp_ortu.xlsx');
+                document.getElementById('badge1').classList.add('done');
+                toast(`Template Excel ${kelasSorted.length} kelas berhasil diunduh ✓`, 'ok');
+            } catch (e) {
+                toast('Gagal: ' + (e.message || 'Error'), 'err');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '📥 Download Template Excel';
+            }
+        }
 
-                // 2. Match by Nama exact
-                if (!student && nama) {
-                    const nk = normName(nama);
-                    if (namaMap[nk]) { student = namaMap[nk]; matchMethod = 'Nama'; }
-                }
-                // 3. Match by 3 kata pertama
-                if (!student && nama) {
-                    const pk = normName(nama).split(' ').slice(0, 3).join(' ');
-                    if (partialMap[pk]) { student = partialMap[pk]; matchMethod = 'Nama (~)'; }
-                }
-                // 4. Match contains
-                if (!student && nama) {
-                    const nk = normName(nama);
-                    for (const [k, s] of Object.entries(namaMap)) {
-                        if (k.includes(nk) || nk.includes(k)) { student = s; matchMethod = 'Nama (≈)'; break; }
-                    }
-                }
 
-                if (student && hp1) {
-                    matched.push({ ...student, new_hp1: hp1, new_hp2: hp2, matchMethod });
+        // ── IMPORT: Handle File Upload ────────────────
+        function handleFileUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            processImportFile(file);
+            input.value = ''; // reset supaya bisa upload ulang file sama
+        }
+
+        function processImportFile(file) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            const zone = document.getElementById('uploadZone');
+            zone.innerHTML = `<div class="icon">⏳</div><p>Membaca file…</p>`;
+
+            const reader = new FileReader();
+
+            if (ext === 'csv') {
+                reader.onload = e => parseAndPreview(e.target.result, 'csv');
+                reader.readAsText(file, 'UTF-8');
+            } else if (ext === 'xlsx' || ext === 'xls') {
+                reader.onload = e => parseAndPreview(e.target.result, 'excel');
+                reader.readAsArrayBuffer(file);
+            } else {
+                zone.innerHTML = `<div class="icon">📂</div><p><strong>Ketuk untuk pilih file</strong></p><span>CSV atau Excel (.csv, .xlsx)</span>`;
+                toast('Format tidak didukung. Gunakan .csv atau .xlsx', 'err');
+            }
+        }
+
+        let importRows = []; // matched rows siap kirim
+
+        // Normalize nama untuk matching
+        function normName(s) {
+            return String(s || '').toLowerCase()
+                .replace(/[^a-z0-9\s]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        // Deteksi kolom HP dari berbagai nama header
+        function detectHpCol(row) {
+            const HP_KEYS = [
+                'no hp ortu (utama)', 'no_hp_ortu', 'nomor orangtua',
+                'nomor orang tua', 'no orangtua', 'hp utama', 'hp1',
+                'no hp', 'nomor hp', 'phone', 'handphone', 'telepon',
+                'no telp', 'no. hp', 'nomor telepon', 'no handphone',
+                'no. handphone', 'nomer hp', 'nomer orangtua',
+            ];
+            for (const k of HP_KEYS) {
+                if (row[k] !== undefined && String(row[k]).trim()) return String(row[k]).trim();
+            }
+            // Fallback: cari kolom yang nilainya angka panjang 10-15 digit
+            for (const v of Object.values(row)) {
+                const s = String(v).replace(/\D/g, '');
+                if (s.length >= 10 && s.length <= 15) return String(v).trim();
+            }
+            return '';
+        }
+
+        function detectHp2Col(row) {
+            const HP2_KEYS = [
+                'no hp ortu 2 (opsional)', 'no_hp_ortu2', 'hp2',
+                'hp alternatif', 'nomor orangtua 2', 'no hp 2', 'hp 2',
+            ];
+            for (const k of HP2_KEYS) {
+                if (row[k] !== undefined) return String(row[k]).trim();
+            }
+            return '';
+        }
+
+        async function parseAndPreview(content, type) {
+            const zone = document.getElementById('uploadZone');
+            try {
+                let rawRows = [];
+
+                if (type === 'csv') {
+                    rawRows = parseCSV(content);
                 } else {
-                    unmatched.push({ nis, nama, hp1, reason: !student ? 'Nama/NIS tidak cocok' : 'No HP kosong' });
+                    // Baca SEMUA sheet dari Excel
+                    const wb = XLSX.read(content, { type: 'array' });
+                    wb.SheetNames.forEach(sheetName => {
+                        const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], {
+                            defval: '', header: 1
+                        });
+                        if (!rows.length) return;
+
+                        // Cari baris header (baris yang mengandung kata 'nama' atau 'nis')
+                        let headerIdx = -1;
+                        for (let i = 0; i < Math.min(rows.length, 10); i++) {
+                            const rowStr = rows[i].join(' ').toLowerCase();
+                            if (rowStr.includes('nama') || rowStr.includes('nis') || rowStr.includes('siswa')) {
+                                headerIdx = i;
+                                break;
+                            }
+                        }
+                        if (headerIdx === -1) return;
+
+                        const headers = rows[headerIdx].map(h => String(h || '').toLowerCase().trim());
+                        rows.slice(headerIdx + 1).forEach(r => {
+                            if (!r.some(v => v !== '' && v !== null && v !== undefined)) return;
+                            const obj = {};
+                            headers.forEach((h, i) => obj[h] = r[i] ?? '');
+                            rawRows.push(obj);
+                        });
+                    });
                 }
-            });
 
-            // Deduplikasi: jika siswa muncul di beberapa sheet, ambil yang terakhir (paling lengkap)
-            const dedupMap = {};
-            matched.forEach(r => { dedupMap[r.id] = r; });
-            const dedupMatched = Object.values(dedupMap);
-            const dupCount = matched.length - dedupMatched.length;
+                if (!rawRows.length) throw new Error('File kosong atau tidak ada data yang bisa dibaca.');
 
-            // Hilangkan "No HP kosong" dari unmatched jika siswa tsb sudah cocok di sheet lain
-            // (misalnya: sheet "Semua Kelas" HP kosong, tapi sheet per kelas sudah ada HP-nya)
-            const matchedIdSet = new Set(dedupMatched.map(r => r.id));
-            const filteredUnmatched = unmatched.filter(u => {
-                if (u.reason !== 'No HP kosong') return true; // tetap tampil jika nama/NIS tidak cocok
-                const s = u.nis ? nisMap[u.nis] : null;
-                return !(s && matchedIdSet.has(s.id)); // hilangkan jika sudah matched
-            });
+                // Load semua siswa
+                zone.innerHTML = `<div class="icon">🔍</div><p>Mencocokkan data siswa…</p>`;
+                const res = await fetch(`${API_BASE}/students/all`, { headers: H });
+                const sData = await res.json();
+                if (!sData.success) throw new Error('Gagal load data siswa dari server.');
 
-            importRows = dedupMatched;
-            renderPreview(dedupMatched, filteredUnmatched);
-            const dupNote = dupCount > 0 ? ` (${dupCount} duplikat diabaikan)` : '';
-            zone.innerHTML = `<div class="icon">✅</div><p><strong>File berhasil dibaca</strong></p><span>${rawRows.length} baris, ${dedupMatched.length} cocok${dupNote}</span>`;
-            document.getElementById('badge2').classList.add('done');
+                // Build NIS map + Nama map + Partial map
+                const nisMap = {}, namaMap = {}, partialMap = {};
+                sData.data.forEach(s => {
+                    nisMap[String(s.nis).trim()] = s;
+                    namaMap[normName(s.nama)] = s;
+                    const partial = normName(s.nama).split(' ').slice(0, 3).join(' ');
+                    if (!partialMap[partial]) partialMap[partial] = s;
+                });
 
-        } catch (e) {
-            zone.innerHTML = `<div class="icon">📂</div><p><strong>Ketuk untuk pilih file</strong></p><span>CSV atau Excel (.csv, .xlsx)</span>`;
-            toast('Gagal membaca file: ' + e.message, 'err');
+                // Match setiap baris
+                const matched = [], unmatched = [];
+                rawRows.forEach(rawRow => {
+                    const row = {};
+                    Object.keys(rawRow).forEach(k => row[k.toLowerCase().trim()] = String(rawRow[k] ?? '').trim());
+
+                    const nis = row['nis'] || '';
+                    const nama = row['nama siswa'] || row['nama'] || row['name'] || row['siswa'] || '';
+                    const hp1 = detectHpCol(row);
+                    const hp2 = detectHp2Col(row);
+
+                    // Skip baris kosong atau baris header
+                    if (!nama && !nis && !hp1) return;
+                    if (['nama siswa', 'nama', 'name', 'siswa', 'no', 'no.'].includes(normName(nama))) return;
+
+                    let student = null, matchMethod = '';
+
+                    // 1. Match by NIS (paling akurat)
+                    if (nis && nisMap[nis]) { student = nisMap[nis]; matchMethod = 'NIS'; }
+
+                    // 2. Match by Nama exact
+                    if (!student && nama) {
+                        const nk = normName(nama);
+                        if (namaMap[nk]) { student = namaMap[nk]; matchMethod = 'Nama'; }
+                    }
+                    // 3. Match by 3 kata pertama
+                    if (!student && nama) {
+                        const pk = normName(nama).split(' ').slice(0, 3).join(' ');
+                        if (partialMap[pk]) { student = partialMap[pk]; matchMethod = 'Nama (~)'; }
+                    }
+                    // 4. Match contains
+                    if (!student && nama) {
+                        const nk = normName(nama);
+                        for (const [k, s] of Object.entries(namaMap)) {
+                            if (k.includes(nk) || nk.includes(k)) { student = s; matchMethod = 'Nama (≈)'; break; }
+                        }
+                    }
+
+                    if (student) {
+                        // Siswa ditemukan → selalu masuk matched meski hp1 kosong
+                        // (hp kosong = update staging jadi kosong juga)
+                        matched.push({ ...student, new_hp1: hp1, new_hp2: hp2, matchMethod });
+                    } else {
+                        // Tidak cocok hanya kalau NIS/nama tidak ada di database
+                        unmatched.push({ nis, nama, hp1, reason: 'Nama/NIS tidak cocok' });
+                    }
+                });
+
+                // Deduplikasi: jika siswa muncul di beberapa sheet, ambil yang terakhir
+                const dedupMap = {};
+                matched.forEach(r => { dedupMap[r.id] = r; });
+                const dedupMatched = Object.values(dedupMap);
+                const dupCount = matched.length - dedupMatched.length;
+
+                importRows = dedupMatched;
+                renderPreview(dedupMatched, unmatched);
+                const emptyCount = dedupMatched.filter(r => !r.new_hp1).length;
+                const dupNote   = dupCount   > 0 ? ` (${dupCount} duplikat diabaikan)` : '';
+                const emptyNote = emptyCount > 0 ? `, ${emptyCount} HP dikosongkan` : '';
+                zone.innerHTML = `<div class="icon">✅</div><p><strong>File berhasil dibaca</strong></p><span>${rawRows.length} baris, ${dedupMatched.length} cocok${emptyNote}${dupNote}</span>`;
+                document.getElementById('badge2').classList.add('done');
+
+            } catch (e) {
+                zone.innerHTML = `<div class="icon">📂</div><p><strong>Ketuk untuk pilih file</strong></p><span>CSV atau Excel (.csv, .xlsx)</span>`;
+                toast('Gagal membaca file: ' + e.message, 'err');
+            }
         }
-    }
 
-    function parseCSV(text) {
-        // Hapus BOM jika ada
-        if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
-        const lines = text.split(/\r?\n/).filter(l => l.trim());
-        if (lines.length < 2) return [];
-        const headers = splitCSVLine(lines[0]).map(h => h.toLowerCase().trim());
-        return lines.slice(1).map(line => {
-            const vals = splitCSVLine(line);
-            const obj = {};
-            headers.forEach((h, i) => obj[h] = (vals[i] || '').trim());
-            return obj;
-        }).filter(r => Object.values(r).some(v => v));
-    }
-
-    function splitCSVLine(line) {
-        const result = [];
-        let inQ = false, cur = '';
-        for (let i = 0; i < line.length; i++) {
-            const c = line[i];
-            if (c === '"') { inQ = !inQ; continue; }
-            if (c === ',' && !inQ) { result.push(cur); cur = ''; continue; }
-            cur += c;
+        function parseCSV(text) {
+            // Hapus BOM jika ada
+            if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+            const lines = text.split(/\r?\n/).filter(l => l.trim());
+            if (lines.length < 2) return [];
+            const headers = splitCSVLine(lines[0]).map(h => h.toLowerCase().trim());
+            return lines.slice(1).map(line => {
+                const vals = splitCSVLine(line);
+                const obj = {};
+                headers.forEach((h, i) => obj[h] = (vals[i] || '').trim());
+                return obj;
+            }).filter(r => Object.values(r).some(v => v));
         }
-        result.push(cur);
-        return result;
-    }
 
-    function renderPreview(matched, unmatched) {
-        const statsEl = document.getElementById('previewStats');
-        const bodyEl  = document.getElementById('previewBody');
-        const descEl  = document.getElementById('previewDesc');
+        function splitCSVLine(line) {
+            const result = [];
+            let inQ = false, cur = '';
+            for (let i = 0; i < line.length; i++) {
+                const c = line[i];
+                if (c === '"') { inQ = !inQ; continue; }
+                if (c === ',' && !inQ) { result.push(cur); cur = ''; continue; }
+                cur += c;
+            }
+            result.push(cur);
+            return result;
+        }
 
-        descEl.textContent = `${matched.length} data siap dikirim, ${unmatched.length} tidak cocok`;
+        function renderPreview(matched, unmatched) {
+            const statsEl = document.getElementById('previewStats');
+            const bodyEl  = document.getElementById('previewBody');
+            const descEl  = document.getElementById('previewDesc');
 
-        statsEl.innerHTML = `
-            <div class="stat-chip chip-green">✅ ${matched.length} cocok</div>
-            ${unmatched.length ? `<div class="stat-chip chip-red">⚠️ ${unmatched.length} tidak cocok</div>` : ''}
-        `;
+            const withHp    = matched.filter(r => r.new_hp1).length;
+            const withoutHp = matched.filter(r => !r.new_hp1).length;
 
-        bodyEl.innerHTML = [
-            ...matched.slice(0, 100).map(r => `
-                <tr class="matched">
-                    <td><span class="badge-ok">✓ ${esc(r.matchMethod || 'Cocok')}</span></td>
-                    <td>${esc(r.nis)}</td>
-                    <td>${esc(r.nama)}</td>
-                    <td>${esc(r.kelas)}</td>
-                    <td>${esc(r.new_hp1)}</td>
-                </tr>
-            `),
-            ...unmatched.slice(0, 20).map(r => `
+            descEl.textContent = `${matched.length} data siap dikirim` +
+                (unmatched.length ? `, ${unmatched.length} tidak cocok` : '');
+
+            statsEl.innerHTML = `
+                <div class="stat-chip chip-green">✅ ${withHp} ada HP</div>
+                ${withoutHp ? `<div class="stat-chip" style="background:#fff7ed;color:#92400e;border:1px solid #fde68a;">⚠️ ${withoutHp} HP dikosongkan</div>` : ''}
+                ${unmatched.length ? `<div class="stat-chip chip-red">❌ ${unmatched.length} tidak cocok</div>` : ''}
+            `;
+
+            bodyEl.innerHTML = [
+                ...matched.slice(0, 200).map(r => {
+                    const hasHp = !!r.new_hp1;
+                    const badge = hasHp
+                        ? `<span class="badge-ok">✓ ${esc(r.matchMethod || 'Cocok')}</span>`
+                        : `<span class="badge-warn" style="background:#fff7ed;color:#92400e;border:1px solid #fde68a;">⚠️ HP Kosong</span>`;
+                    return `
+                    <tr class="${hasHp ? 'matched' : ''}" style="${hasHp ? '' : 'background:#fffbeb;'}">
+                        <td>${badge}</td>
+                        <td>${esc(r.nis)}</td>
+                        <td>${esc(r.nama)}</td>
+                        <td>${esc(r.kelas)}</td>
+                        <td style="color:${hasHp ? '' : '#92400e'};font-style:${hasHp ? 'normal' : 'italic'}">${hasHp ? esc(r.new_hp1) : '— dikosongkan'}</td>
+                    </tr>`;
+                }),
+                ...unmatched.slice(0, 20).map(r => `
                 <tr class="no-match">
-                    <td><span class="badge-warn">✗ ${esc(r.reason)}</span></td>
+                    <td><span class="badge-warn">❌ ${esc(r.reason)}</span></td>
                     <td>${esc(r.nis) || '—'}</td>
                     <td>${esc(r.nama) || '—'}</td>
                     <td>—</td>
-                    <td>${esc(r.hp1) || '—'}</td>
-                </tr>
-            `),
-        ].join('');
+                    <td>—</td>
+                </tr>`),
+            ].join('');
 
-        document.getElementById('previewCard').style.display = 'block';
-        document.getElementById('btnSubmitImport').disabled = matched.length === 0;
-    }
-
-
-    // ── IMPORT: Submit ────────────────────────────
-    async function submitImport() {
-        if (!importRows.length) return;
-        const btn = document.getElementById('btnSubmitImport');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span> Mengirim…';
-        clearAlert('alertImport');
-
-        const payload = importRows.map(r => ({
-            id:          r.id,
-            no_hp_ortu:  r.new_hp1,
-            no_hp_ortu2: r.new_hp2 || '',
-        }));
-
-        try {
-            const res  = await fetch(`${API_BASE}/bulk-update`, {
-                method: 'POST', headers: H,
-                body: JSON.stringify({ students: payload }),
-            });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.message);
-
-            toast(data.message + ' — menunggu sinkronisasi admin ✓', 'ok');
-            showAlert('alertImport', 'success',
-                `✅ <strong>${data.queued} data</strong> berhasil diantrekan.<br>
-                 <small>Data akan aktif setelah admin menekan tombol Sinkron di halaman Data Siswa.</small>`);
-            importRows = [];
-        } catch (e) {
-            showAlert('alertImport', 'danger', '❌ ' + (e.message || 'Gagal mengirim data.'));
-            toast('Gagal kirim!', 'err');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '🚀 Kirim ke Staging';
+            document.getElementById('previewCard').style.display = 'block';
+            document.getElementById('btnSubmitImport').disabled = matched.length === 0;
         }
-    }
 
-    function resetImport() {
-        importRows = [];
-        document.getElementById('previewCard').style.display = 'none';
-        clearAlert('alertImport');
-        document.getElementById('uploadZone').innerHTML =
-            `<div class="icon">📂</div><p><strong>Ketuk untuk pilih file</strong></p><span>CSV atau Excel (.csv, .xlsx)</span>`;
-        document.getElementById('badge2').classList.remove('done');
-    }
-</script>
+        // ── IMPORT: Submit ────────────────────────────
+        async function submitImport() {
+            if (!importRows.length) return;
+            const btn = document.getElementById('btnSubmitImport');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Mengirim…';
+            clearAlert('alertImport');
+
+            const payload = importRows.map(r => ({
+                id: r.id,
+                no_hp_ortu: r.new_hp1,
+                no_hp_ortu2: r.new_hp2 || '',
+            }));
+
+            try {
+                const res = await fetch(`${API_BASE}/bulk-update`, {
+                    method: 'POST', headers: H,
+                    body: JSON.stringify({ students: payload }),
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message);
+
+                toast(data.message + ' — menunggu sinkronisasi admin ✓', 'ok');
+                showAlert('alertImport', 'success',
+                    `✅ <strong>${data.queued} data</strong> berhasil diantrekan.<br>
+                 <small>Data akan aktif setelah admin menekan tombol Sinkron di halaman Data Siswa.</small>`);
+                importRows = [];
+            } catch (e) {
+                showAlert('alertImport', 'danger', '❌ ' + (e.message || 'Gagal mengirim data.'));
+                toast('Gagal kirim!', 'err');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🚀 Kirim ke Staging';
+            }
+        }
+
+        function resetImport() {
+            importRows = [];
+            document.getElementById('previewCard').style.display = 'none';
+            clearAlert('alertImport');
+            document.getElementById('uploadZone').innerHTML =
+                `<div class="icon">📂</div><p><strong>Ketuk untuk pilih file</strong></p><span>CSV atau Excel (.csv, .xlsx)</span>`;
+            document.getElementById('badge2').classList.remove('done');
+        }
+    </script>
 </body>
+
 </html>
