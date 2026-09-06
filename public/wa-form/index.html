@@ -1299,9 +1299,16 @@
                 }
             });
 
-            importRows = matched;
-            renderPreview(matched, unmatched);
-            zone.innerHTML = `<div class="icon">✅</div><p><strong>File berhasil dibaca</strong></p><span>${rawRows.length} baris, ${matched.length} cocok</span>`;
+            // Deduplikasi: jika siswa muncul di beberapa sheet, ambil yang terakhir (paling lengkap)
+            const dedupMap = {};
+            matched.forEach(r => { dedupMap[r.id] = r; });
+            const dedupMatched = Object.values(dedupMap);
+            const dupCount = matched.length - dedupMatched.length;
+
+            importRows = dedupMatched;
+            renderPreview(dedupMatched, unmatched);
+            const dupNote = dupCount > 0 ? ` (${dupCount} duplikat dihapus)` : '';
+            zone.innerHTML = `<div class="icon">✅</div><p><strong>File berhasil dibaca</strong></p><span>${rawRows.length} baris, ${dedupMatched.length} cocok${dupNote}</span>`;
             document.getElementById('badge2').classList.add('done');
 
         } catch (e) {
