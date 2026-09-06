@@ -1054,6 +1054,7 @@
                                 <th>Nama</th>
                                 <th>Kelas</th>
                                 <th>HP Utama (baru)</th>
+                                <th>HP Alternatif (baru)</th>
                             </tr>
                         </thead>
                         <tbody id="previewBody"></tbody>
@@ -1773,7 +1774,8 @@
 
             bodyEl.innerHTML = [
                 ...matched.slice(0, 200).map(r => {
-                    const hasHp = !!r.new_hp1;
+                    const hasHp  = !!r.new_hp1;
+                    const hasHp2 = !!r.new_hp2;
                     const badge = hasHp
                         ? `<span class="badge-ok">✓ ${esc(r.matchMethod || 'Cocok')}</span>`
                         : `<span class="badge-warn" style="background:#fff7ed;color:#92400e;border:1px solid #fde68a;">⚠️ HP Kosong</span>`;
@@ -1784,6 +1786,7 @@
                         <td>${esc(r.nama)}</td>
                         <td>${esc(r.kelas)}</td>
                         <td style="color:${hasHp ? '' : '#92400e'};font-style:${hasHp ? 'normal' : 'italic'}">${hasHp ? esc(r.new_hp1) : '— dikosongkan'}</td>
+                        <td style="color:${hasHp2 ? '#475569' : '#94a3b8'};font-style:${hasHp2 ? 'normal' : 'italic'}">${hasHp2 ? esc(r.new_hp2) : '—'}</td>
                     </tr>`;
                 }),
                 ...unmatched.slice(0, 20).map(r => `
@@ -1791,6 +1794,7 @@
                     <td><span class="badge-warn">❌ ${esc(r.reason)}</span></td>
                     <td>${esc(r.nis) || '—'}</td>
                     <td>${esc(r.nama) || '—'}</td>
+                    <td>—</td>
                     <td>—</td>
                     <td>—</td>
                 </tr>`),
