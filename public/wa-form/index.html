@@ -1182,6 +1182,7 @@
 
         const H = { 'X-API-Key': API_KEY, 'Content-Type': 'application/json' };
         let siswaData = [];
+        let originalValues = {}; // snapshot HP1 saat tampilkan() dipanggil
 
         // ── Load kelas ──────────────────────────────
         async function loadKelas() {
@@ -1230,6 +1231,14 @@
 
                 renderCards(data.data);
                 renderTable(data.data);
+
+                // ── Snapshot nilai awal (untuk deteksi perubahan) ──
+                originalValues = {};
+                data.data.forEach(s => {
+                    originalValues[s.id] = s.has_pending
+                        ? (s.pending_hp1 ?? '')
+                        : (s.no_hp_ortu ?? '');
+                });
             } catch (e) {
                 showAlert('alertGlobal', 'danger', e.message || 'Gagal memuat data siswa.');
             } finally {
@@ -1366,11 +1375,23 @@
             toast('Format nomor HP berhasil dirapikan ✓', 'ok');
         }
 
-        // ── Simpan Semua ─────────────────────────────
+        // ── Simpan (hanya siswa yang berubah) ────────
         async function simpanSemua() {
             clearAlert('alertSimpan');
 
-            const payload = siswaData.map(s => ({
+            // Filter hanya siswa yang HP-nya berubah dari nilai awal
+            const changed = siswaData.filter(s => {
+                const current  = getVal(s.id, 'hp1').trim();
+                const original = (originalValues[s.id] ?? '').trim();
+                return current !== original;
+            });
+
+            if (!changed.length) {
+                toast('Tidak ada perubahan untuk disimpan.', 'err');
+                return;
+            }
+
+            const payload = changed.map(s => ({
                 id: s.id,
                 no_hp_ortu: getVal(s.id, 'hp1'),
                 // hp2 dikunci — tidak dikirim
@@ -1388,17 +1409,21 @@
                 const data = await res.json();
                 if (!data.success) throw new Error(data.message);
 
-                toast(data.message + ' — menunggu sinkronisasi admin', 'ok');
+                const n = changed.length;
+                toast(`${n} siswa disimpan — menunggu sinkronisasi admin`, 'ok');
                 showAlert('alertSimpan', 'success',
-                    `✅ ${data.message}.<br><small>Data akan aktif setelah admin melakukan sinkronisasi.</small>`);
+                    `✅ ${n} siswa berhasil disimpan ke staging.<br><small>Data akan aktif setelah admin melakukan sinkronisasi.</small>`);
 
-                // Update card border ke hijau
-                siswaData.forEach(s => {
+                // Update snapshot & border hanya untuk siswa yang berubah
+                changed.forEach(s => {
+                    const newVal = getVal(s.id, 'hp1');
+                    originalValues[s.id] = newVal; // update snapshot
+
                     const card = document.getElementById(`card_${s.id}`);
-                    if (card) { card.classList.remove('dirty', 'no-hp'); card.classList.add('has-hp'); }
+                    if (card) { card.classList.remove('dirty', 'no-hp', 'has-hp'); card.classList.add('pending'); }
                     ['c', 't'].forEach(p => {
                         const el = document.getElementById(`${p}_hp1_${s.id}`);
-                        if (el?.value) { el.classList.remove('changed'); el.classList.add('has-value'); }
+                        if (el) { el.classList.remove('changed', 'has-value', 'empty-warn'); el.classList.add(newVal ? 'pending' : 'empty-warn'); }
                     });
                 });
             } catch (e) {
