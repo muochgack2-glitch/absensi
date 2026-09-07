@@ -204,15 +204,10 @@ class AttendanceSettingController extends Controller
 
         // Validate all settings
         $rules = [
-            'settings.check_in_time'                 => 'required|date_format:H:i',
-            'settings.check_out_time'                => 'required|date_format:H:i|after:settings.check_in_time',
-            'settings.check_out_start_time'          => 'nullable|date_format:H:i',
-            'settings.tolerance_minutes'             => 'required|integer|min:0|max:60',
-            'settings.cutoff_time'                   => 'required|date_format:H:i|after:settings.check_in_time',
-            'settings.enable_parent_notification'    => 'nullable|boolean',
-            'settings.include_photo_in_notification' => 'nullable|boolean',
             'settings.school_name'                   => 'required|string|max:100',
             'settings.announcement'                  => 'nullable|string|max:255',
+            'settings.enable_parent_notification'    => 'nullable|boolean',
+            'settings.include_photo_in_notification' => 'nullable|boolean',
             'settings.auto_absent_notify'            => 'nullable|boolean',
             'settings.absent_notify_time'            => 'nullable|date_format:H:i',
             'settings.absent_notify_days'            => 'nullable|string',
@@ -222,6 +217,7 @@ class AttendanceSettingController extends Controller
             'settings.late_warning_min_count'        => 'nullable|integer|min:1|max:20',
             'settings.use_dual_camera'               => 'nullable|in:0,1',
             'settings.modal_auto_close'              => 'nullable|integer|min:1|max:10',
+            // Jam & toleransi dihandle oleh updateSettingWaktu (halaman terpisah)
         ];
 
         $messages = [
