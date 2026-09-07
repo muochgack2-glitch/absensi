@@ -92,14 +92,17 @@ class AttendanceSettingController extends Controller
 
     public function updateNotifikasi(Request $request)
     {
-        // Checkbox toggles
+        // Checkbox toggles (nilai '0'/'1')
         foreach (['enable_parent_notification', 'include_photo_in_notification', 'auto_absent_notify', 'late_warning_enabled'] as $key) {
             AttendanceSetting::set($key,
                 $request->input("settings.{$key}", '0') == '1' ? '1' : '0', 'notification');
         }
-        // late_notify_enabled pakai 'true'/'false'
-        AttendanceSetting::set('late_notify_enabled',
-            $request->input('settings.late_notify_enabled') === 'true' ? 'true' : 'false', 'notification');
+
+        // Toggles yang pakai 'true'/'false' (sesuai value di hidden input view)
+        foreach (['late_notify_enabled', 'notify_all_checkin', 'notify_checkout'] as $key) {
+            AttendanceSetting::set($key,
+                $request->input("settings.{$key}") === 'true' ? 'true' : 'false', 'notification');
+        }
 
         // Waktu & hari alpha
         if (isset($request->settings['absent_notify_time'])) {
