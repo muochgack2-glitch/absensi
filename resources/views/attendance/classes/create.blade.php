@@ -40,9 +40,9 @@
                             :error="$errors->first('tingkat')"
                         >
                             <option value="">Pilih Tingkat</option>
-                            <option value="10" {{ old('tingkat') == 10 ? 'selected' : '' }}>Kelas 10</option>
-                            <option value="11" {{ old('tingkat') == 11 ? 'selected' : '' }}>Kelas 11</option>
-                            <option value="12" {{ old('tingkat') == 12 ? 'selected' : '' }}>Kelas 12</option>
+                            <option value="X" {{ old('tingkat') == 'X' ? 'selected' : '' }}>X (Kelas 10)</option>
+                            <option value="XI" {{ old('tingkat') == 'XI' ? 'selected' : '' }}>XI (Kelas 11)</option>
+                            <option value="XII" {{ old('tingkat') == 'XII' ? 'selected' : '' }}>XII (Kelas 12)</option>
                         </x-select>
 
                         <x-input
