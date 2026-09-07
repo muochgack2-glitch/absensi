@@ -62,6 +62,24 @@
                             helper="Jam resmi pulang — untuk menandai pulang cepat/tepat waktu"
                             required
                         />
+                        {{-- Jam pulang khusus Jumat --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Jam Pulang Khusus
+                                <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                                    🕌 Jumat
+                                </span>
+                            </label>
+                            <input
+                                type="time"
+                                name="settings[friday_check_out_time]"
+                                value="{{ old('settings.friday_check_out_time', $settings['time']['friday_check_out_time'] ?? '11:30') }}"
+                                class="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Jam pulang di hari Jumat — biasanya lebih awal (contoh: 11:30). Kosongkan jika sama dengan hari biasa.
+                            </p>
+                        </div>
                         <x-input
                             type="time"
                             name="settings[check_out_start_time]"

@@ -52,6 +52,26 @@ class AttendanceStatusService
     }
 
     /**
+     * Get the effective check-out time based on day of week.
+     * On Fridays, uses 'friday_check_out_time' if configured.
+     *
+     * @return string Time string in H:i format
+     */
+    private function getEffectiveCheckOutTime(): string
+    {
+        $isFriday = Carbon::now()->dayOfWeek === Carbon::FRIDAY;
+
+        if ($isFriday) {
+            $fridayTime = AttendanceSetting::get('friday_check_out_time', '');
+            if ($fridayTime) {
+                return $fridayTime;
+            }
+        }
+
+        return AttendanceSetting::get('check_out_time', '15:00');
+    }
+
+    /**
      * Check if current time is within check-out window.
      *
      * @param string|null $time Optional time to check (defaults to now)
@@ -59,8 +79,7 @@ class AttendanceStatusService
      */
     public function isWithinCheckOutWindow(?string $time = null): bool
     {
-        // Get check-out time from settings
-        $officialCheckOutTime = AttendanceSetting::get('check_out_time', '15:00');
+        $officialCheckOutTime = $this->getEffectiveCheckOutTime();
 
         // Use provided time or current time
         $currentTime = $time ? Carbon::createFromTimeString($time) : Carbon::now();
@@ -77,9 +96,8 @@ class AttendanceStatusService
      */
     public function determineCheckOutStatus(): string
     {
-        $officialCheckOutTime = AttendanceSetting::get('check_out_time', '15:00');
-        $now = Carbon::now();
-        $checkOut = Carbon::createFromTimeString($officialCheckOutTime);
+        $now      = Carbon::now();
+        $checkOut = Carbon::createFromTimeString($this->getEffectiveCheckOutTime());
 
         return $now->greaterThanOrEqualTo($checkOut) ? 'pulang' : 'pulang_cepat';
     }
@@ -91,21 +109,24 @@ class AttendanceStatusService
      */
     public function getTimeWindowInfo(): array
     {
-        $checkInTime = AttendanceSetting::get('check_in_time', '07:00');
-        $checkOutTime = AttendanceSetting::get('check_out_time', '15:00');
+        $checkInTime      = AttendanceSetting::get('check_in_time', '07:00');
+        $checkOutTime     = $this->getEffectiveCheckOutTime();
         $toleranceMinutes = (int) AttendanceSetting::get('tolerance_minutes', 15);
-        $cutoffTime = AttendanceSetting::get('cutoff_time', '09:00');
+        $cutoffTime       = AttendanceSetting::get('cutoff_time', '09:00');
+        $isFriday         = Carbon::now()->dayOfWeek === Carbon::FRIDAY;
 
-        $official = Carbon::createFromTimeString($checkInTime);
-        $toleranceEnd = $official->copy()->addMinutes($toleranceMinutes);
+        $official      = Carbon::createFromTimeString($checkInTime);
+        $toleranceEnd  = $official->copy()->addMinutes($toleranceMinutes);
 
         return [
-            'check_in_time' => $checkInTime,
-            'check_out_time' => $checkOutTime,
-            'tolerance_minutes' => $toleranceMinutes,
-            'tolerance_end' => $toleranceEnd->format('H:i'),
-            'cutoff_time' => $cutoffTime,
-            'is_within_check_in_window' => $this->isWithinCheckInWindow(),
+            'check_in_time'              => $checkInTime,
+            'check_out_time'             => $checkOutTime,
+            'is_friday_schedule'         => $isFriday && AttendanceSetting::get('friday_check_out_time', '') !== '',
+            'friday_check_out_time'      => AttendanceSetting::get('friday_check_out_time', ''),
+            'tolerance_minutes'          => $toleranceMinutes,
+            'tolerance_end'              => $toleranceEnd->format('H:i'),
+            'cutoff_time'                => $cutoffTime,
+            'is_within_check_in_window'  => $this->isWithinCheckInWindow(),
             'is_within_check_out_window' => $this->isWithinCheckOutWindow(),
         ];
     }

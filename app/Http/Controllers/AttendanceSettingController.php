@@ -30,12 +30,13 @@ class AttendanceSettingController extends Controller
     public function updateSettingWaktu(Request $request)
     {
         $keys = [
-            'check_in_time'      => ['group' => 'time'],
-            'check_out_time'     => ['group' => 'time'],
-            'check_out_start_time' => ['group' => 'time'],
-            'cutoff_time'        => ['group' => 'time'],
-            'tolerance_minutes'  => ['group' => 'tolerance'],
-            'modal_auto_close'   => ['group' => 'general'],
+            'check_in_time'           => ['group' => 'time'],
+            'check_out_time'          => ['group' => 'time'],
+            'friday_check_out_time'   => ['group' => 'time'],
+            'check_out_start_time'    => ['group' => 'time'],
+            'cutoff_time'             => ['group' => 'time'],
+            'tolerance_minutes'       => ['group' => 'tolerance'],
+            'modal_auto_close'        => ['group' => 'general'],
         ];
 
         foreach ($keys as $key => $meta) {
