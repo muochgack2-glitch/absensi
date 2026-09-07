@@ -11,13 +11,12 @@ return new class extends Migration
             [
                 'key'         => 'friday_check_out_time',
                 'value'       => '11:30',
-                'group'       => 'time',
-                'label'       => 'Jam Pulang Khusus Jumat',
+                'group_name'  => 'time',
                 'description' => 'Jam pulang resmi di hari Jumat (biasanya lebih awal dari hari lain)',
                 'created_at'  => now(),
                 'updated_at'  => now(),
             ],
-        ], ['key'], ['value', 'group', 'label', 'description', 'updated_at']);
+        ], ['key'], ['value', 'group_name', 'description', 'updated_at']);
     }
 
     public function down(): void
