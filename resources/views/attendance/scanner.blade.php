@@ -491,9 +491,14 @@
             const currentMinute = now.getMinutes();
             const currentTime = currentHour * 60 + currentMinute; // Convert to minutes
             
-            // Check-out start time (default: 15:00 = 900 minutes)
-            // You can adjust this threshold based on school schedule
-            const checkOutStartTime = 15 * 60; // 15:00 in minutes
+            // Check-out start time — dari setting (Pengaturan Waktu → Jam Mulai Scanner Pulang)
+            // Hari Jumat: jam pulang resmi = {{ $timeInfo['check_out_time'] ?? '15:00' }}
+            //             (diatur lewat "Jam Pulang Khusus Jumat" di settings)
+            @php
+                [$coH, $coM] = explode(':', $checkOutStartTime);
+                $coMinutes   = (int)$coH * 60 + (int)$coM;
+            @endphp
+            const checkOutStartTime = {{ $coMinutes }}; // {{ $checkOutStartTime }} in minutes
             
             // Determine initial action based on time
             const initialAction = currentTime >= checkOutStartTime ? 'check_out' : 'check_in';

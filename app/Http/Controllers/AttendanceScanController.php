@@ -86,9 +86,16 @@ class AttendanceScanController extends Controller
     public function showScanner()
     {
         $useDualCamera = \App\Models\AttendanceSetting::get('use_dual_camera', '0');
-        // qr_camera_index & photo_camera_index dihapus — kamera dipilih via localStorage per-browser
 
-        return view('attendance.scanner', compact('useDualCamera'));
+        // Jam scanner beralih ke mode PULANG (dari setting, default 12:00)
+        $checkOutStartTime = \App\Models\AttendanceSetting::get('check_out_start_time', '12:00');
+
+        // Jam pulang resmi hari ini (Jumat bisa beda) — untuk info di scanner
+        $statusService    = app(\App\Services\AttendanceStatusService::class);
+        $timeInfo         = $statusService->getTimeWindowInfo();
+
+        return view('attendance.scanner', compact('useDualCamera', 'checkOutStartTime', 'timeInfo'));
     }
+
 }
 
