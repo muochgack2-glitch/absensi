@@ -21,7 +21,7 @@ class StoreAttendanceClassRequest extends FormRequest
     {
         return [
             'nama_kelas' => 'required|string|max:50',
-            'tingkat' => 'required|integer|in:10,11,12',
+            'tingkat' => 'required|string|in:X,XI,XII',
             'jurusan' => 'required|string|max:50',
             'wali_kelas_id' => 'nullable|exists:users,id',
             'is_active' => 'boolean'
@@ -37,7 +37,7 @@ class StoreAttendanceClassRequest extends FormRequest
             'nama_kelas.required' => 'Nama kelas wajib diisi.',
             'nama_kelas.max' => 'Nama kelas maksimal 50 karakter.',
             'tingkat.required' => 'Tingkat kelas wajib diisi.',
-            'tingkat.in' => 'Tingkat kelas harus 10, 11, atau 12.',
+            'tingkat.in' => 'Tingkat kelas harus X, XI, atau XII.',
             'jurusan.required' => 'Jurusan wajib diisi.',
             'jurusan.max' => 'Jurusan maksimal 50 karakter.',
             'wali_kelas_id.exists' => 'Wali kelas yang dipilih tidak valid.',

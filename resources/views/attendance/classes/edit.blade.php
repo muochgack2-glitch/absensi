@@ -57,14 +57,24 @@
                     </div>
 
                     {{-- Wali Kelas (optional) --}}
-                    <x-input
-                        type="text"
-                        name="wali_kelas"
-                        label="Wali Kelas"
-                        :value="old('wali_kelas', $class->wali_kelas ?? '')"
-                        placeholder="Nama wali kelas (opsional)"
-                        :error="$errors->first('wali_kelas')"
-                    />
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Wali Kelas</label>
+                        <select
+                            name="wali_kelas_id"
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        >
+                            <option value="">— Tidak ada wali kelas —</option>
+                            @foreach($teachers as $teacher)
+                                <option value="{{ $teacher->id }}"
+                                    {{ old('wali_kelas_id', $class->wali_kelas_id) == $teacher->id ? 'selected' : '' }}>
+                                    {{ $teacher->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('wali_kelas_id')
+                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
 
                     {{-- Status Aktif --}}
                     <div>
