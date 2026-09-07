@@ -43,7 +43,7 @@
                     <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div>
                             <label class="text-sm font-medium text-gray-900 dark:text-white">Kirim Notifikasi ke Orang Tua</label>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Aktifkan notifikasi WhatsApp otomatis saat siswa absen</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">WA dikirim ke ortu ketika siswa <strong>tidak hadir (alpha)</strong> — master toggle untuk semua notifikasi absen terjadwal</p>
                         </div>
                         <div>
                             <input type="hidden" name="settings[enable_parent_notification]" value="0">
@@ -105,7 +105,7 @@
                     <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div>
                             <label class="text-sm font-medium text-gray-900 dark:text-white">Kirim Notif Semua Check-In</label>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">WA dikirim ke ortu untuk semua siswa yang scan — hadir, toleransi, maupun terlambat</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">WA dikirim ke ortu <strong>setiap kali siswa scan masuk</strong> — terlepas dari status kehadiran (tepat waktu maupun terlambat)</p>
                         </div>
                         <div>
                             <input type="hidden" name="settings[notify_all_checkin]" value="false">
