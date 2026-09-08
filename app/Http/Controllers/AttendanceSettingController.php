@@ -618,16 +618,17 @@ class AttendanceSettingController extends Controller
     /**
      * Kirim ringkasan kehadiran ke wali kelas sekarang (manual trigger)
      */
-    public function sendSummaryNow(): \Illuminate\Http\JsonResponse
+    public function sendSummaryNow(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
     {
+        $type = in_array($request->input('type'), ['masuk', 'pulang']) ? $request->input('type') : 'masuk';
         try {
-            $exitCode = \Illuminate\Support\Facades\Artisan::call('attendance:send-summary');
+            $exitCode = \Illuminate\Support\Facades\Artisan::call('attendance:send-summary', ['--type' => $type]);
             $output   = \Illuminate\Support\Facades\Artisan::output();
 
             return response()->json([
                 'success' => $exitCode === 0,
                 'message' => $exitCode === 0
-                    ? 'Ringkasan berhasil dikirim ke wali kelas!'
+                    ? 'Ringkasan ' . ($type === 'pulang' ? 'pulang' : 'masuk') . ' berhasil dikirim ke wali kelas!'
                     : 'Ada masalah saat pengiriman.',
                 'output'  => $output,
             ]);

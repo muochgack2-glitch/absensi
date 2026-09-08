@@ -111,9 +111,14 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-3">
-                            <button type="button" onclick="sendSummaryNow()" class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-all duration-200">
-                                <i class="fas fa-paper-plane mr-2"></i>Kirim Ringkasan Sekarang
+                        <div class="flex flex-wrap items-center gap-3">
+                            <button type="button" onclick="sendWaliNow('masuk')" id="waliMasukBtn"
+                                class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-all duration-200">
+                                <i class="fas fa-sign-in-alt mr-2"></i>Kirim Masuk
+                            </button>
+                            <button type="button" onclick="sendWaliNow('pulang')" id="waliPulangBtn"
+                                class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium rounded-lg transition-all duration-200">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Kirim Pulang
                             </button>
                             <p class="text-xs text-gray-500 dark:text-gray-400">Kirim manual ke semua wali kelas hari ini</p>
                         </div>
@@ -299,18 +304,39 @@
         if (checkbox.checked) { label.classList.remove('border-gray-300','text-gray-600'); label.classList.add('border-green-500','bg-green-50','text-green-700'); }
         else { label.classList.remove('border-green-500','bg-green-50','text-green-700'); label.classList.add('border-gray-300','text-gray-600'); }
     }
-    async function sendSummaryNow() {
-        const btn = event.currentTarget, result = document.getElementById('summaryResult');
-        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mengirim...';
+    async function sendWaliNow(type) {
+        const btn = type === 'masuk'
+            ? document.getElementById('waliMasukBtn')
+            : document.getElementById('waliPulangBtn');
+        const result = document.getElementById('summaryResult');
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        document.getElementById('waliMasukBtn').disabled = true;
+        document.getElementById('waliPulangBtn').disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mengirim...';
         result.className = 'mt-3 p-3 rounded-lg text-sm bg-blue-50 text-blue-700';
-        result.textContent = 'Sedang mengirim ringkasan ke wali kelas...'; result.classList.remove('hidden');
+        result.textContent = 'Sedang mengirim ringkasan ' + (type === 'pulang' ? 'pulang' : 'masuk') + ' ke wali kelas...';
+        result.classList.remove('hidden');
         try {
-            const res = await fetch('{{ route("attendance.settings.send-summary") }}', { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' } });
+            const res = await fetch('{{ route("attendance.settings.send-summary") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ type })
+            });
             const data = await res.json();
             result.className = 'mt-3 p-3 rounded-lg text-sm ' + (data.success ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700');
             result.innerHTML = '<strong>' + data.message + '</strong>' + (data.output ? '<pre class="mt-2 text-xs whitespace-pre-wrap">' + data.output + '</pre>' : '');
-        } catch(e) { result.className = 'mt-3 p-3 rounded-lg text-sm bg-red-50 text-red-700'; result.textContent = 'Gagal terhubung ke server.'; }
-        btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Kirim Ringkasan Sekarang';
+        } catch(e) {
+            result.className = 'mt-3 p-3 rounded-lg text-sm bg-red-50 text-red-700';
+            result.textContent = 'Gagal terhubung ke server.';
+        }
+        btn.innerHTML = originalHtml;
+        document.getElementById('waliMasukBtn').disabled = false;
+        document.getElementById('waliPulangBtn').disabled = false;
     }
     function toggleWakaFields() {
         const cb = document.getElementById('wakaSummaryEnabled'), f = document.getElementById('wakaFields');
