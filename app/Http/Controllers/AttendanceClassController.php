@@ -135,7 +135,26 @@ class AttendanceClassController extends Controller
             ])->withInput();
         }
 
+        $oldWaliId = $class->wali_kelas_id;
+        $newWaliId = $validated['wali_kelas_id'] ?? null;
+
         $class->update($validated);
+
+        // --- Sinkronisasi users.kelas_id ---
+        // Hapus kelas_id dari wali lama jika diganti
+        if ($oldWaliId && $oldWaliId != $newWaliId) {
+            User::where('id', $oldWaliId)
+                ->where('kelas_id', $class->id)
+                ->update(['kelas_id' => null]);
+        }
+        // Set kelas_id untuk wali baru
+        if ($newWaliId) {
+            // Satu guru hanya boleh jadi wali di 1 kelas — hapus assignment kelas lain
+            AttendanceClass::where('wali_kelas_id', $newWaliId)
+                ->where('id', '!=', $class->id)
+                ->update(['wali_kelas_id' => null]);
+            User::where('id', $newWaliId)->update(['kelas_id' => $class->id]);
+        }
 
         return redirect()
             ->route('attendance.classes.index')

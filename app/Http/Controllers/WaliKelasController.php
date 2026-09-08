@@ -53,7 +53,7 @@ class WaliKelasController extends Controller
             ? $this->generateVerificationCode()
             : null;
 
-        User::create([
+        $newUser = User::create([
             'name'              => $request->name,
             'email'             => $request->email,
             'phone'             => $phone,
@@ -62,6 +62,16 @@ class WaliKelasController extends Controller
             'role'              => $request->role,
             'kelas_id'          => $request->role === 'wali_kelas' ? $request->kelas_id : null,
         ]);
+
+        // Sinkronisasi: update attendance_classes.wali_kelas_id
+        if ($request->role === 'wali_kelas' && $request->kelas_id) {
+            // Hapus wali lama di kelas ini (kelas_id di user lain)
+            User::where('kelas_id', $request->kelas_id)
+                ->where('id', '!=', $newUser->id)
+                ->update(['kelas_id' => null]);
+            AttendanceClass::where('id', $request->kelas_id)
+                ->update(['wali_kelas_id' => $newUser->id]);
+        }
 
         return back()->with('success', "✅ Akun \"{$request->name}\" berhasil dibuat.");
     }
@@ -85,12 +95,15 @@ class WaliKelasController extends Controller
             ? app(\App\Services\AttendanceWhatsAppService::class)->normalizePhone($request->phone)
             : null;
 
+        $oldKelasId = $user->kelas_id;
+        $newKelasId = $request->role === 'wali_kelas' ? $request->kelas_id : null;
+
         $data = [
             'name'     => $request->name,
             'email'    => $request->email,
             'phone'    => $phone,
             'role'     => $request->role,
-            'kelas_id' => $request->role === 'wali_kelas' ? $request->kelas_id : null,
+            'kelas_id' => $newKelasId,
         ];
 
         if ($request->filled('password')) {
@@ -98,6 +111,28 @@ class WaliKelasController extends Controller
         }
 
         $user->update($data);
+
+        // --- Sinkronisasi attendance_classes.wali_kelas_id ---
+        // Hapus relasi di kelas lama
+        if ($oldKelasId && $oldKelasId != $newKelasId) {
+            AttendanceClass::where('id', $oldKelasId)
+                ->where('wali_kelas_id', $user->id)
+                ->update(['wali_kelas_id' => null]);
+        }
+        // Set relasi di kelas baru
+        if ($newKelasId) {
+            // Satu guru hanya boleh jadi wali 1 kelas — clear kelas lama user ini
+            AttendanceClass::where('wali_kelas_id', $user->id)
+                ->where('id', '!=', $newKelasId)
+                ->update(['wali_kelas_id' => null]);
+            // Hapus wali lama di kelas baru ini
+            User::where('kelas_id', $newKelasId)
+                ->where('id', '!=', $user->id)
+                ->update(['kelas_id' => null]);
+            AttendanceClass::where('id', $newKelasId)
+                ->update(['wali_kelas_id' => $user->id]);
+        }
+
         return back()->with('success', "✅ Akun \"{$user->name}\" berhasil diperbarui.");
     }
 
