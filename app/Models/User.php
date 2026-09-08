@@ -14,13 +14,14 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'phone', 'verification_code', 'password', 'role', 'kelas_id'];
+    protected $fillable = ['name', 'email', 'phone', 'verification_code', 'password', 'role', 'kelas_id', 'is_active'];
 
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
+            'is_active'         => 'boolean',
         ];
     }
 

@@ -65,6 +65,12 @@ class SendAttendanceSummary extends Command
                 continue;
             }
 
+            if (!$wali->is_active) {
+                $this->warn("  [{$kelas->nama_kelas}] Wali kelas ({$wali->name}) dinonaktifkan — notifikasi dilewati");
+                $skipped++;
+                continue;
+            }
+
             $studentIds = AttendanceStudent::where('kelas_id', $kelas->id)
                 ->where('is_active', true)->pluck('id');
 

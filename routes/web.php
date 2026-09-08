@@ -355,6 +355,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/attendance/users/{user}', [WaliKelasController::class, 'userUpdate'])->name('attendance.users.update');
         Route::delete('/attendance/users/{user}', [WaliKelasController::class, 'userDestroy'])->name('attendance.users.destroy');
         Route::post('/attendance/users/{user}/regenerate-code', [WaliKelasController::class, 'userRegenerateCode'])->name('attendance.users.regenerate-code');
+        Route::patch('/attendance/users/{user}/toggle-active', [WaliKelasController::class, 'userToggleActive'])->name('attendance.users.toggle-active');
 
         // Tahun Ajaran Management
         Route::get('/attendance/tahun-ajaran', [TahunAjaranController::class, 'index'])->name('attendance.tahun-ajaran.index');

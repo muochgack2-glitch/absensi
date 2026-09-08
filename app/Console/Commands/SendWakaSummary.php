@@ -204,7 +204,7 @@ class SendWakaSummary extends Command
         }
 
         $wakaUsers = User::where('role', 'waka_kesiswaan')
-            ->whereNotNull('phone')->where('phone', '!=', '')->get();
+            ->whereNotNull('phone')->where('phone', '!=', '')->where('is_active', true)->get();
 
         if ($wakaUsers->isEmpty()) {
             $this->warn('Tidak ada user waka_kesiswaan dengan nomor HP yang dikonfigurasi.');

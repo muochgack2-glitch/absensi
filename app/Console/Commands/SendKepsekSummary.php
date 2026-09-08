@@ -210,6 +210,7 @@ class SendKepsekSummary extends Command
         $kepsekUsers = User::where('role', 'kepala_sekolah')
             ->whereNotNull('phone')
             ->where('phone', '!=', '')
+            ->where('is_active', true)
             ->get();
 
         if ($kepsekUsers->isEmpty()) {

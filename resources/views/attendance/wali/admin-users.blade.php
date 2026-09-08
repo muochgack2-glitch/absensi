@@ -140,10 +140,11 @@
                         $initials = collect(explode(' ', $u->name))->take(2)->map(fn($w) => strtoupper(substr($w,0,1)))->implode('');
                         $ac = $avatarColors[$u->role] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300';
                     @endphp
-                    <tr class="user-row hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 transition-colors duration-150"
+                    <tr class="user-row hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 transition-colors duration-150 {{ $u->is_active ? '' : 'opacity-60 bg-gray-50/50 dark:bg-gray-900/30' }}"
                         data-name="{{ strtolower($u->name) }}"
                         data-email="{{ strtolower($u->email) }}"
-                        data-role="{{ $u->role }}">
+                        data-role="{{ $u->role }}"
+                        id="user-row-{{ $u->id }}">
 
                         {{-- Pengguna (avatar + nama) --}}
                         <td class="px-6 py-4">
@@ -152,7 +153,14 @@
                                     {{ $initials }}
                                 </div>
                                 <div>
-                                    <p class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">{{ $u->name }}</p>
+                                    <div class="flex items-center gap-1.5">
+                                        <p class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">{{ $u->name }}</p>
+                                        @if(!$u->is_active)
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+                                            NONAKTIF
+                                        </span>
+                                        @endif
+                                    </div>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 md:hidden mt-0.5">{{ $u->email }}</p>
                                 </div>
                             </div>
@@ -236,6 +244,12 @@
                                     <i class="fas fa-pen text-xs"></i>
                                 </button>
                                 @if($u->id !== auth()->id())
+                                <button onclick="toggleActive({{ $u->id }}, {{ $u->is_active ? 'true' : 'false' }})"
+                                        id="toggle-btn-{{ $u->id }}"
+                                        class="w-8 h-8 rounded-lg flex items-center justify-center transition-all {{ $u->is_active ? 'text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700' : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600' }}"
+                                        title="{{ $u->is_active ? 'Nonaktifkan' : 'Aktifkan' }} user">
+                                    <i id="toggle-icon-{{ $u->id }}" class="fas {{ $u->is_active ? 'fa-toggle-on' : 'fa-toggle-off' }} text-sm"></i>
+                                </button>
                                 <form action="{{ route('attendance.users.destroy', $u) }}" method="POST"
                                       onsubmit="return confirm('Hapus akun {{ addslashes($u->name) }}? Tindakan ini tidak dapat dibatalkan.')">
                                     @csrf @method('DELETE')
@@ -506,6 +520,72 @@
         }
 
         document.getElementById('userSearch').addEventListener('input', applyFilter);
+
+        // ===== TOGGLE ACTIVE =====
+        async function toggleActive(userId, currentlyActive) {
+            const btn  = document.getElementById('toggle-btn-' + userId);
+            const icon = document.getElementById('toggle-icon-' + userId);
+            const row  = document.getElementById('user-row-' + userId);
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`/attendance/users/${userId}/toggle-active`, {
+                    method: 'PATCH',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    }
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    const active = data.is_active;
+                    // Update icon
+                    icon.className = 'fas ' + (active ? 'fa-toggle-on' : 'fa-toggle-off') + ' text-sm';
+                    // Update button color
+                    btn.className  = 'w-8 h-8 rounded-lg flex items-center justify-center transition-all ' +
+                        (active ? 'text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700'
+                                : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600');
+                    btn.title      = (active ? 'Nonaktifkan' : 'Aktifkan') + ' user';
+                    // Update row dimming
+                    row.classList.toggle('opacity-60', !active);
+                    row.classList.toggle('bg-gray-50/50', !active);
+                    row.classList.toggle('dark:bg-gray-900/30', !active);
+                    // Update badge NONAKTIF
+                    let badge = row.querySelector('.nonaktif-badge');
+                    if (!active && !badge) {
+                        const nameEl = row.querySelector('p.font-semibold');
+                        badge = document.createElement('span');
+                        badge.className = 'nonaktif-badge inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400';
+                        badge.textContent = 'NONAKTIF';
+                        nameEl.parentElement.appendChild(badge);
+                    } else if (active && badge) {
+                        badge.remove();
+                    }
+                    // Update onclick state
+                    btn.setAttribute('onclick', `toggleActive(${userId}, ${active})`);
+                    showToast(data.message, active ? 'green' : 'orange');
+                } else {
+                    showToast(data.message, 'red');
+                }
+            } catch(e) {
+                showToast('Gagal terhubung ke server.', 'red');
+            }
+            btn.disabled = false;
+        }
+
+        function showToast(msg, color) {
+            const colors = {
+                green:  'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400',
+                orange: 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-400',
+                red:    'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400',
+            };
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-5 right-5 z-50 flex items-center gap-2 px-4 py-3 border rounded-xl text-sm font-medium shadow-lg animate-fade-in ${colors[color] || colors.green}`;
+            toast.innerHTML = `<i class="fas fa-circle-check"></i><span>${msg}</span>`;
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.style.transition='opacity 0.4s'; toast.style.opacity='0'; setTimeout(()=>toast.remove(),400); }, 3000);
+        }
 
         // Auto-dismiss success toast
         setTimeout(() => {

@@ -147,6 +147,26 @@ class WaliKelasController extends Controller
     }
 
     /**
+     * Toggle is_active status — dipakai via AJAX dari halaman manajemen pengguna.
+     * Jika dinonaktifkan, user tidak akan menerima notifikasi WA apapun.
+     */
+    public function userToggleActive(User $user): \Illuminate\Http\JsonResponse
+    {
+        if ($user->id === Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Tidak dapat menonaktifkan akun Anda sendiri.'], 403);
+        }
+
+        $user->update(['is_active' => !$user->is_active]);
+
+        $label = $user->is_active ? 'diaktifkan' : 'dinonaktifkan';
+        return response()->json([
+            'success'   => true,
+            'is_active' => $user->is_active,
+            'message'   => "Akun \"{$user->name}\" berhasil {$label}.",
+        ]);
+    }
+
+    /**
      * Generate ulang kode verifikasi WA untuk wali kelas (misal karena nomor
      * lama sudah tidak bisa dipakai, atau kode sebelumnya lupa/hilang).
      * Ini mengosongkan phone yang sudah terdaftar (kalau ada) supaya wali
