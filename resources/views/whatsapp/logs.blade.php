@@ -32,7 +32,7 @@
                     <i class="fas fa-paper-plane"></i>
                 </div>
                 <div>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ number_format($stats['total']) }}</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ number_format((\$stats['total'] ?? 0)) }}</p>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Total Hari Ini</p>
                 </div>
             </div>
@@ -41,7 +41,7 @@
                     <i class="fas fa-check-circle"></i>
                 </div>
                 <div>
-                    <p class="text-2xl font-bold text-green-600 dark:text-green-400 leading-none">{{ number_format($stats['sent']) }}</p>
+                    <p class="text-2xl font-bold text-green-600 dark:text-green-400 leading-none">{{ number_format((\$stats['sent'] ?? 0)) }}</p>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Terkirim</p>
                 </div>
             </div>
@@ -50,7 +50,7 @@
                     <i class="fas fa-times-circle"></i>
                 </div>
                 <div>
-                    <p class="text-2xl font-bold text-red-600 dark:text-red-400 leading-none">{{ number_format($stats['failed']) }}</p>
+                    <p class="text-2xl font-bold text-red-600 dark:text-red-400 leading-none">{{ number_format((\$stats['failed'] ?? 0)) }}</p>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Gagal</p>
                 </div>
             </div>
@@ -59,7 +59,7 @@
                     <i class="fas fa-clock"></i>
                 </div>
                 <div>
-                    <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 leading-none">{{ number_format($stats['pending']) }}</p>
+                    <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 leading-none">{{ number_format((\$stats['pending'] ?? 0)) }}</p>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Pending</p>
                 </div>
             </div>
@@ -346,3 +346,4 @@
     </script>
     @endpush
 </x-app-layout>
+
