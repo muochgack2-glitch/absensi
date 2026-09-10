@@ -227,9 +227,18 @@ class WhatsAppController extends Controller
      */
     public function logs(Request $request)
     {
-        $query = WhatsAppLog::with(['student', 'template', 'sender'])->latest();
+        $period = $request->get('period', 'today');
+        $query  = WhatsAppLog::with(['student', 'sender'])->latest();
 
-        // Filters
+        // Filter periode (tab)
+        match($period) {
+            'today' => $query->whereDate('created_at', today()),
+            'week'  => $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]),
+            'month' => $query->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year),
+            default => null,
+        };
+
+        // Filters tambahan
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
@@ -250,9 +259,24 @@ class WhatsAppController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        $logs = $query->paginate(20)->withQueryString();
+        $logs = $query->paginate(25)->withQueryString();
 
-        return view('whatsapp.logs', compact('logs'));
+        // Stats mengikuti periode aktif
+        $sq = WhatsAppLog::query();
+        match($period) {
+            'today' => $sq->whereDate('created_at', today()),
+            'week'  => $sq->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]),
+            'month' => $sq->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year),
+            default => null,
+        };
+        $stats = [
+            'total'   => (clone $sq)->count(),
+            'sent'    => (clone $sq)->where('status', 'sent')->count(),
+            'failed'  => (clone $sq)->where('status', 'failed')->count(),
+            'pending' => (clone $sq)->where('status', 'pending')->count(),
+        ];
+
+        return view('whatsapp.logs', compact('logs', 'stats', 'period'));
     }
 
     /**
@@ -460,3 +484,4 @@ class WhatsAppController extends Controller
         ]);
     }
 }
+

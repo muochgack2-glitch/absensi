@@ -25,7 +25,15 @@
             </div>
         </div>
 
-        {{-- Stats Cards --}}
+        {{-- Stats Cards (label ikut periode aktif) --}}
+        @php
+            $periodLabel = match($period) {
+                'today' => 'Hari Ini',
+                'week'  => 'Minggu Ini',
+                'month' => 'Bulan Ini',
+                default => 'Semua',
+            };
+        @endphp
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-3 shadow-sm">
                 <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 flex-shrink-0">
@@ -33,7 +41,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ number_format($stats['total'] ?? 0) }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Total Hari Ini</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Total {{ $periodLabel }}</p>
                 </div>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-3 shadow-sm">
@@ -99,7 +107,7 @@
                             <i class="fas fa-search text-xs"></i> Filter
                         </button>
                         @if(request()->hasAny(['search','status','type','date_from']))
-                        <a href="{{ route('whatsapp.logs') }}"
+                        <a href="{{ route('whatsapp.logs', ['period' => $period]) }}"
                            class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition" title="Reset filter">
                             <i class="fas fa-times"></i>
                         </a>
@@ -108,6 +116,30 @@
                 </div>
             </form>
         </x-card>
+
+        {{-- Tabs Periode --}}
+        @php
+            $tabs = [
+                'today' => ['label' => 'Harian',   'icon' => 'fa-sun'],
+                'week'  => ['label' => 'Mingguan',  'icon' => 'fa-calendar-week'],
+                'month' => ['label' => 'Bulanan',   'icon' => 'fa-calendar-alt'],
+                'all'   => ['label' => 'Semua',     'icon' => 'fa-list'],
+            ];
+            $otherParams = request()->only(['search','status','type','date_from']);
+        @endphp
+        <div class="flex items-center gap-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-1 shadow-sm w-fit">
+            @foreach($tabs as $key => $tab)
+            @php $isActive = $period === $key; @endphp
+            <a href="{{ route('whatsapp.logs', array_merge($otherParams, ['period' => $key])) }}"
+               class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150
+                      {{ $isActive
+                          ? 'bg-primary-600 text-white shadow'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <i class="fas {{ $tab['icon'] }} text-xs"></i>
+                {{ $tab['label'] }}
+            </a>
+            @endforeach
+        </div>
 
         {{-- Log Table --}}
         <x-card>
