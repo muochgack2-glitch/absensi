@@ -646,8 +646,9 @@ class AttendanceStudentController extends Controller
             $student = AttendanceStudent::find((int)$id);
             if (!$student) continue;
 
-            $student->no_hp_ortu  = $data['no_hp_ortu']  ?? $student->no_hp_ortu;
-            $student->no_hp_ortu2 = $data['no_hp_ortu2'] ?? $student->no_hp_ortu2;
+            // trim dan konversi empty string → null agar field benar-benar kosong di DB
+            $student->no_hp_ortu  = trim($data['no_hp_ortu']  ?? '') ?: null;
+            $student->no_hp_ortu2 = trim($data['no_hp_ortu2'] ?? '') ?: null;
             $student->save();
             $count++;
         }

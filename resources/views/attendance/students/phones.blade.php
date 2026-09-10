@@ -135,7 +135,8 @@
                                    inputmode="numeric"
                                    class="phone-input w-full px-3 py-2.5 text-sm border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition font-mono {{ $student->no_hp_ortu ? 'border-green-300 dark:border-green-700' : 'border-red-300 dark:border-red-700' }}"
                                    data-original="{{ $student->no_hp_ortu }}"
-                                   oninput="markDirty(this)">
+                                   data-peer="desktop-hp1-{{ $student->id }}"
+                                   oninput="markDirty(this); syncPeer(this)">
                         </div>
                         {{-- Input HP Alternatif --}}
                         <div>
@@ -149,7 +150,8 @@
                                    inputmode="numeric"
                                    class="phone-input w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition font-mono"
                                    data-original="{{ $student->no_hp_ortu2 }}"
-                                   oninput="markDirty(this)">
+                                   data-peer="desktop-hp2-{{ $student->id }}"
+                                   oninput="markDirty(this); syncPeer(this)">
                         </div>
                     </div>
                     @endforeach
@@ -176,22 +178,23 @@
                                 </td>
                                 <td class="py-2.5 px-3 text-gray-500 dark:text-gray-400 font-mono text-xs">{{ $student->nis }}</td>
                                 <td class="py-2.5 px-3">
+                                    {{-- Desktop input: tidak disubmit (disabled), hanya mirror dari mobile --}}
                                     <input type="text"
-                                           name="phones[{{ $student->id }}][no_hp_ortu]"
+                                           id="desktop-hp1-{{ $student->id }}"
                                            value="{{ $student->no_hp_ortu }}"
                                            placeholder="628..."
-                                           class="phone-input w-full px-3 py-1.5 text-sm border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition font-mono {{ $student->no_hp_ortu ? 'border-green-300 dark:border-green-700' : 'border-red-300 dark:border-red-700' }}"
-                                           data-original="{{ $student->no_hp_ortu }}"
-                                           oninput="markDirty(this)">
+                                           disabled
+                                           class="phone-input w-full px-3 py-1.5 text-sm border rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition font-mono {{ $student->no_hp_ortu ? 'border-green-300 dark:border-green-700' : 'border-red-300 dark:border-red-700' }}"
+                                           data-original="{{ $student->no_hp_ortu }}">
                                 </td>
                                 <td class="py-2.5 px-3">
                                     <input type="text"
-                                           name="phones[{{ $student->id }}][no_hp_ortu2]"
+                                           id="desktop-hp2-{{ $student->id }}"
                                            value="{{ $student->no_hp_ortu2 }}"
                                            placeholder="Opsional"
-                                           class="phone-input w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition font-mono"
-                                           data-original="{{ $student->no_hp_ortu2 }}"
-                                           oninput="markDirty(this)">
+                                           disabled
+                                           class="phone-input w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition font-mono"
+                                           data-original="{{ $student->no_hp_ortu2 }}">
                                 </td>
                             </tr>
                             @endforeach
@@ -263,14 +266,35 @@
             }
         }
 
+        // ===== Sync mobile input ke pasangan desktop (visual only) =====
+        function syncPeer(input) {
+            const peerId = input.dataset.peer;
+            if (!peerId) return;
+            const peer = document.getElementById(peerId);
+            if (peer) {
+                peer.value = input.value;
+                // sync warna border peer
+                peer.classList.remove('border-green-300','dark:border-green-700','border-red-300','dark:border-red-700','border-gray-300','dark:border-gray-600','border-yellow-400','dark:border-yellow-500');
+                if (input.value !== (input.dataset.original ?? '')) {
+                    peer.classList.add('border-yellow-400');
+                } else if (input.value) {
+                    peer.classList.add('border-green-300');
+                } else {
+                    peer.classList.add('border-gray-300');
+                }
+            }
+        }
+
         document.getElementById('btnFillFormat')?.addEventListener('click', function () {
-            document.querySelectorAll('.phone-input').forEach(function (input) {
+            // Hanya format mobile inputs (yang punya name, bukan desktop mirror)
+            document.querySelectorAll('.phone-input[name]').forEach(function (input) {
                 let val = input.value.trim().replace(/\D/g, '');
                 if (!val) return;
                 if (val.startsWith('0'))      val = '62' + val.slice(1);
                 else if (val.startsWith('8')) val = '62' + val;
                 input.value = val;
                 markDirty(input);
+                syncPeer(input);
             });
         });
     </script>
