@@ -337,19 +337,19 @@ class AttendanceWhatsAppService
      * @param string|null $photoPath Optional photo path
      * @return array
      */
-    public function sendParentNotification(string $phone, string $message, ?string $photoPath = null): array
+    public function sendParentNotification(string $phone, string $message, ?string $photoPath = null, string $type = 'check_in'): array
     {
         // If photo path provided, send with media
         if ($photoPath && Storage::disk('public')->exists($photoPath)) {
             return $this->sendWithMedia($phone, $message, $photoPath, [
-                'type' => 'check_in',
+                'type'    => $type,
                 'sent_by' => null,
             ]);
         }
         
         // Otherwise, send text only
         return $this->send($phone, $message, [
-            'type' => 'check_in',
+            'type'    => $type,
             'sent_by' => null,
         ]);
     }

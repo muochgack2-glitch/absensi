@@ -53,7 +53,7 @@ class AttendanceNotificationService
         // Send notification ke semua nomor
         $result = ['success' => false];
         foreach ($phones as $phone) {
-            $result = $this->whatsAppService->sendParentNotification($phone, $message, $photoPath);
+            $result = $this->whatsAppService->sendParentNotification($phone, $message, $photoPath, 'check_in');
         }
 
         // Log notification attempt
@@ -165,7 +165,7 @@ class AttendanceNotificationService
         // Send notification ke semua nomor
         $result = ['success' => false];
         foreach ($student->getParentPhones() as $phone) {
-            $result = $this->whatsAppService->sendParentNotification($phone, $message);
+            $result = $this->whatsAppService->sendParentNotification($phone, $message, null, 'check_in');
         }
 
         // Log notification attempt
@@ -299,7 +299,7 @@ class AttendanceNotificationService
         // Send notification ke semua nomor
         $result = ['success' => false];
         foreach ($phones as $phone) {
-            $result = $this->whatsAppService->sendParentNotification($phone, $message, $photoPath);
+            $result = $this->whatsAppService->sendParentNotification($phone, $message, $photoPath, 'check_out');
         }
 
         // Log notification attempt
@@ -618,7 +618,7 @@ class AttendanceNotificationService
         // Send notification ke semua nomor
         $result = ['success' => false];
         foreach ($phones as $phone) {
-            $result = $this->whatsAppService->sendParentNotification($phone, $message);
+            $result = $this->whatsAppService->sendParentNotification($phone, $message, null, 'absent');
         }
 
         // Log notification attempt
