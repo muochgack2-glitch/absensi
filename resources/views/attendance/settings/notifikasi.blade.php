@@ -132,9 +132,25 @@
                             </label>
                         </div>
                     </div>
+                    {{-- Toggle Check-Out --}}
+                    <div class="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
+                        <div>
+                            <label class="text-sm font-medium text-gray-900 dark:text-white">🚪 Notifikasi Check-Out (Pulang)</label>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">WA dikirim ke ortu <strong>saat siswa scan pulang</strong> — termasuk notif pulang lebih awal</p>
+                        </div>
+                        <div>
+                            <input type="hidden" name="settings[notify_checkout]" value="false">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="settings[notify_checkout]" value="true" id="notifyCheckout"
+                                       @if(old('settings.notify_checkout', $settings['notification']['notify_checkout'] ?? $settings['general']['notify_checkout'] ?? 'false') === 'true') checked @endif
+                                       class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                            </label>
+                        </div>
+                    </div>
                     {{-- Info box --}}
                     <div class="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg text-xs text-blue-800 dark:text-blue-200">
-                        💡 <strong>Tips:</strong> Aktifkan <em>Kirim Semua</em> jika ingin ortu selalu tahu saat anak scan. Aktifkan <em>Terlambat Saja</em> untuk hemat kuota WA — hanya kirim jika ada masalah.
+                        💡 <strong>Tips:</strong> Aktifkan <em>Kirim Semua</em> jika ingin ortu selalu tahu saat anak scan. Aktifkan <em>Terlambat Saja</em> untuk hemat kuota WA — hanya kirim jika ada masalah. Aktifkan <em>Check-Out</em> agar ortu tahu saat anak pulang.
                     </div>
                 </div>
             </x-card>
