@@ -336,6 +336,7 @@ class AttendanceNotificationService
         if (AttendanceSetting::get('bk_notify_terlambat', '1') !== '1') return;
 
         $bkUsers = User::where('role', 'guru_bk')
+            ->where('is_active', true)         // ← hanya BK aktif
             ->whereNotNull('phone')->where('phone', '!=', '')->get();
         if ($bkUsers->isEmpty()) return;
 
@@ -376,7 +377,7 @@ class AttendanceNotificationService
         $photoPath    = in_array($includePhoto, ['true', '1', 1, true], true) ? $record->check_in_photo : null;
 
         foreach ($bkUsers as $bk) {
-            $this->whatsAppService->sendParentNotification($bk->phone, $message, $photoPath);
+            $this->whatsAppService->sendParentNotification($bk->phone, $message, $photoPath, 'bk_notify');
         }
 
         Log::debug('BK terlambat notif sent', ['student' => $student->nis, 'bk_count' => $bkUsers->count()]);
@@ -391,6 +392,7 @@ class AttendanceNotificationService
         if (AttendanceSetting::get('bk_notify_pulang_cepat', '1') !== '1') return;
 
         $bkUsers = User::where('role', 'guru_bk')
+            ->where('is_active', true)         // ← hanya BK aktif
             ->whereNotNull('phone')->where('phone', '!=', '')->get();
         if ($bkUsers->isEmpty()) return;
 
@@ -426,7 +428,7 @@ class AttendanceNotificationService
         $photoPath    = in_array($includePhoto, ['true', '1', 1, true], true) ? $record->check_out_photo : null;
 
         foreach ($bkUsers as $bk) {
-            $this->whatsAppService->sendParentNotification($bk->phone, $message, $photoPath);
+            $this->whatsAppService->sendParentNotification($bk->phone, $message, $photoPath, 'bk_notify');
         }
 
         Log::debug('BK pulang cepat notif sent', ['student' => $student->nis, 'bk_count' => $bkUsers->count()]);

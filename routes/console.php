@@ -50,6 +50,15 @@ Schedule::call(function () {
         return; // Hari libur, skip notifikasi alfa
     }
 
+    // ── last_sent_date guard ─────────────────────────────────────────────────
+    // Cegah double-send jika withoutOverlapping() lock rilis sebelum menit berikutnya
+    if (AttendanceSetting::get('absent_notify_last_sent', '') === $todayStr) {
+        return; // Sudah dikirim hari ini
+    }
+    // Tandai sudah dikirim SEBELUM Artisan::call agar tidak ada race condition
+    AttendanceSetting::set('absent_notify_last_sent', $todayStr);
+    // ────────────────────────────────────────────────────────────────────────
+
     // Jalankan command mark absent + kirim WA
     Artisan::call('attendance:mark-absent', ['--notify' => true]);
 

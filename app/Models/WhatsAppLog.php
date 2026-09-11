@@ -165,6 +165,7 @@ class WhatsAppLog extends Model
             'absent'           => 'Alpha',
             'broadcast'        => 'Broadcast',
             'late_warning'     => 'Peringatan Terlambat',
+            'bk_notify'        => 'Notif BK',
             'diagnostic_test'  => 'Test Diagnostik',
             default            => ucfirst(str_replace('_', ' ', $this->type)),
         };
