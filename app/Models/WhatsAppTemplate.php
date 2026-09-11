@@ -72,6 +72,23 @@ class WhatsAppTemplate extends Model
      */
     public function parse(array $data): string
     {
+        // Layer 3: Auto-inject {footer} jika tidak disuplai dari luar.
+        // Menggunakan crc32(nis) sebagai seed agar suffix konsisten per siswa
+        // dan tidak double jika template sudah punya {footer}.
+        if (! isset($data['footer'])) {
+            $nis    = $data['nis'] ?? $data['nama'] ?? 'default';
+            $school = $data['sekolah']
+                ?? \App\Models\AttendanceSetting::get('school_name', 'Sekolah');
+
+            $variants = [
+                "_Pesan otomatis dari sistem absensi._",
+                "_Info absensi {$school}._",
+                "_Notifikasi resmi {$school}._",
+                "_Disampaikan sistem absensi digital._",
+            ];
+            $data['footer'] = $variants[abs(crc32((string) $nis)) % count($variants)];
+        }
+
         $message = $this->message;
 
         // Replace variables dengan data

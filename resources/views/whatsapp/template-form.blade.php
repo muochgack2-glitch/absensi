@@ -63,7 +63,7 @@
                         <div class="flex flex-wrap gap-1.5">
                             @php
                                 // Tampilkan variabel dari DB jika edit, atau semua variabel jika buat baru
-                                $allVars = ['sekolah','nama','kelas','hari_tanggal','tanggal','waktu','status','terlambat','jam_resmi','peringatan','pesan'];
+                                $allVars = ['sekolah','nama','kelas','hari_tanggal','tanggal','waktu','status','terlambat','jam_resmi','peringatan','pesan','footer'];
                                 $showVars = $template && $template->variables
                                     ? (is_array($template->variables) ? $template->variables : json_decode($template->variables, true))
                                     : $allVars;
@@ -77,6 +77,9 @@
                         <p class="text-xs text-blue-600 dark:text-blue-400 mt-1.5">
                             💡 <strong>{hari_tanggal}</strong> = format panjang (Senin, 30/08/2026) &nbsp;|&nbsp;
                             <strong>{tanggal}</strong> = format pendek (30/08/2026)
+                        </p>
+                        <p class="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                            ✨ <strong>{footer}</strong> = penutup pesan otomatis (bervariasi per siswa, anti-spam)
                         </p>
                     </div>
                 </div>

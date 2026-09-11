@@ -2,11 +2,13 @@
 
 namespace App\Services;
 
-use App\Models\AttendanceStudent;
+use App\Jobs\SendWhatsAppNotificationJob;
+use App\Models\AttendanceLog;
 use App\Models\AttendanceRecord;
 use App\Models\AttendanceSetting;
-use App\Models\AttendanceLog;
+use App\Models\AttendanceStudent;
 use App\Models\User;
+use App\Models\WhatsAppLog;
 use App\Models\WhatsAppTemplate;
 use Illuminate\Support\Facades\Log;
 
@@ -15,6 +17,71 @@ class AttendanceNotificationService
     public function __construct(
         private AttendanceWhatsAppService $whatsAppService
     ) {}
+
+    /**
+     * Dispatch WA notification ke antrian queue.
+     * Layer 1: non-blocking dispatch
+     * Layer 2: delay kumulatif berdasarkan jumlah WA terkirim hari ini (max 60 detik)
+     *
+     * @param string      $phone      Nomor HP tujuan
+     * @param string      $message    Isi pesan
+     * @param string      $type       Tipe notifikasi
+     * @param string|null $photoPath  Path foto (nullable)
+     * @param int|null    $studentId  ID siswa (untuk log)
+     */
+    private function dispatchWa(
+        string  $phone,
+        string  $message,
+        string  $type,
+        ?string $photoPath = null,
+        ?int    $studentId = null,
+    ): void {
+        // Hitung posisi antrian: jumlah WA yang sudah tercatat hari ini
+        $posisi = WhatsAppLog::whereDate('created_at', today())->count();
+
+        // Delay kumulatif: +4 detik per pesan, maksimal 60 detik
+        $delay  = min($posisi * 4, 60);
+
+        // Jitter acak ±1 detik agar interval tidak persis mekanis
+        $jitter = rand(-1000, 1000) / 1000;
+
+        $finalDelay = (int) max(0, round($delay + $jitter));
+
+        SendWhatsAppNotificationJob::dispatch(
+            phone:     $phone,
+            message:   $message,
+            photoPath: $photoPath,
+            type:      $type,
+            studentId: $studentId,
+        )->onQueue('whatsapp')
+         ->delay(now()->addSeconds($finalDelay));
+
+        Log::debug('[WA Queue] Job dispatched', [
+            'phone'   => $phone,
+            'type'    => $type,
+            'posisi'  => $posisi,
+            'delay_s' => $finalDelay,
+        ]);
+    }
+
+    /**
+     * Dapatkan variasi footer pesan berdasarkan NIS siswa.
+     * Layer 3: anti-fingerprint — suffix berbeda per siswa, konsisten.
+     *
+     * @param string $nis NIS siswa sebagai seed variasi
+     */
+    private function getFooterVariant(string $nis): string
+    {
+        $school = AttendanceSetting::get('school_name', 'Sekolah');
+        $variants = [
+            "_Pesan otomatis dari sistem absensi._",
+            "_Info absensi {$school}._",
+            "_Notifikasi resmi {$school}._",
+            "_Disampaikan sistem absensi digital._",
+        ];
+        // crc32(nis) menghasilkan angka unik per siswa -> suffix konsisten, bukan acak
+        return $variants[abs(crc32($nis)) % count($variants)];
+    }
 
     /**
      * Send check-in notification to parent.
@@ -50,14 +117,13 @@ class AttendanceNotificationService
         $shouldIncludePhoto = in_array($includePhoto, ['true', '1', 1, true], true);
         $photoPath = $shouldIncludePhoto ? $record->check_in_photo : null;
 
-        // Send notification ke semua nomor
-        $result = ['success' => false];
+        // Dispatch ke antrian — non-blocking, scanner tidak perlu nunggu
         foreach ($phones as $phone) {
-            $result = $this->whatsAppService->sendParentNotification($phone, $message, $photoPath, 'check_in');
+            $this->dispatchWa($phone, $message, 'check_in', $photoPath, $student->id);
         }
 
-        // Log notification attempt
-        $this->logNotification($student->id, 'check_in', $result);
+        // Log dispatch attempt (status 'queued' karena belum dikirim langsung)
+        $this->logNotification($student->id, 'check_in', ['success' => true, 'queued' => true]);
 
         // Notifikasi BK: terlambat
         if ($record->status === 'terlambat') {
@@ -178,14 +244,13 @@ class AttendanceNotificationService
         }
         // ─────────────────────────────────────────────────────────────────────
 
-        // Send notification ke semua nomor
-        $result = ['success' => false];
+        // Dispatch ke antrian — non-blocking
         foreach ($student->getParentPhones() as $phone) {
-            $result = $this->whatsAppService->sendParentNotification($phone, $message, null, 'late_warning');
+            $this->dispatchWa($phone, $message, 'late_warning', null, $student->id);
         }
 
-        // Log notification attempt
-        $this->logNotification($student->id, 'late_warning', $result);
+        // Log dispatch attempt
+        $this->logNotification($student->id, 'late_warning', ['success' => true, 'queued' => true]);
 
         Log::info("Late warning sent", [
             'student_id' => $student->id,
@@ -275,7 +340,7 @@ class AttendanceNotificationService
         $message .= "• Trend: {$trendEmoji} *{$trendLabel}*\n\n";
         $message .= "⚠️ Mohon perhatian lebih untuk kedisiplinan waktu.\n";
         $message .= "Keterlambatan berulang dapat mempengaruhi prestasi belajar.\n\n";
-        $message .= "_Pesan otomatis dari sistem absensi_";
+        $message .= "\n" . $this->getFooterVariant($student->nis);
 
         return $message;
     }
@@ -312,14 +377,13 @@ class AttendanceNotificationService
         $shouldIncludePhoto = in_array($includePhoto, ['true', '1', 1, true], true);
         $photoPath = $shouldIncludePhoto ? $record->check_out_photo : null;
 
-        // Send notification ke semua nomor
-        $result = ['success' => false];
+        // Dispatch ke antrian — non-blocking, scanner tidak perlu nunggu
         foreach ($phones as $phone) {
-            $result = $this->whatsAppService->sendParentNotification($phone, $message, $photoPath, 'check_out');
+            $this->dispatchWa($phone, $message, 'check_out', $photoPath, $student->id);
         }
 
-        // Log notification attempt
-        $this->logNotification($student->id, 'check_out', $result);
+        // Log dispatch attempt
+        $this->logNotification($student->id, 'check_out', ['success' => true, 'queued' => true]);
 
         // Notifikasi BK: pulang cepat
         if ($record->check_out_status === 'pulang_cepat') {
@@ -369,18 +433,19 @@ class AttendanceNotificationService
                 "Telat : {$terlambat} menit",
                 "Tgl   : {$tanggal}",
                 "",
-                "_{$schoolName}_",
+                $this->getFooterVariant($student->nis),
             ]);
         }
 
         $includePhoto = AttendanceSetting::get('include_photo_in_notification', 'true');
         $photoPath    = in_array($includePhoto, ['true', '1', 1, true], true) ? $record->check_in_photo : null;
 
+        // Dispatch ke antrian — non-blocking
         foreach ($bkUsers as $bk) {
-            $this->whatsAppService->sendParentNotification($bk->phone, $message, $photoPath, 'bk_notify');
+            $this->dispatchWa($bk->phone, $message, 'bk_notify', $photoPath, $student->id);
         }
 
-        Log::debug('BK terlambat notif sent', ['student' => $student->nis, 'bk_count' => $bkUsers->count()]);
+        Log::debug('BK terlambat notif dispatched', ['student' => $student->nis, 'bk_count' => $bkUsers->count()]);
     }
 
     /**
@@ -420,18 +485,19 @@ class AttendanceNotificationService
                 "Jam   : {$jamPulang} WIB",
                 "Tgl   : {$tanggal}",
                 "",
-                "_{$schoolName}_",
+                $this->getFooterVariant($student->nis),
             ]);
         }
 
         $includePhoto = AttendanceSetting::get('include_photo_in_notification', 'true');
         $photoPath    = in_array($includePhoto, ['true', '1', 1, true], true) ? $record->check_out_photo : null;
 
+        // Dispatch ke antrian — non-blocking
         foreach ($bkUsers as $bk) {
-            $this->whatsAppService->sendParentNotification($bk->phone, $message, $photoPath, 'bk_notify');
+            $this->dispatchWa($bk->phone, $message, 'bk_notify', $photoPath, $student->id);
         }
 
-        Log::debug('BK pulang cepat notif sent', ['student' => $student->nis, 'bk_count' => $bkUsers->count()]);
+        Log::debug('BK pulang cepat notif dispatched', ['student' => $student->nis, 'bk_count' => $bkUsers->count()]);
     }
 
     /**
@@ -467,6 +533,7 @@ class AttendanceNotificationService
 
         $data = [
             'sekolah'         => $schoolName,
+            'nis'             => $student->nis,
             'nama'            => $student->nama,
             'kelas'           => $student->kelas->nama_kelas,
             'waktu'           => $time,
@@ -503,7 +570,7 @@ class AttendanceNotificationService
         $message .= "Hari/Tgl: {$hariTanggal}\n";
         $message .= "Waktu Masuk: *{$time}*\n";
         $message .= "Status: {$statusLabel}\n";
-        $message .= "\n_Pesan otomatis dari sistem absensi_";
+        $message .= "\n" . $this->getFooterVariant($student->nis);
 
         return $message;
     }
@@ -525,6 +592,7 @@ class AttendanceNotificationService
 
         $data = [
             'sekolah'      => $schoolName,
+            'nis'          => $student->nis,
             'nama'         => $student->nama,
             'kelas'        => $student->kelas->nama_kelas,
             'waktu'        => $time,
@@ -559,7 +627,7 @@ class AttendanceNotificationService
             $message .= "{$peringatan}\n";
         }
 
-        $message .= "\n_Pesan otomatis dari sistem absensi_";
+        $message .= "\n" . $this->getFooterVariant($student->nis);
 
         return $message;
     }
@@ -613,6 +681,7 @@ class AttendanceNotificationService
 
         $data = [
             'sekolah'      => $schoolName,
+            'nis'          => $student->nis,
             'nama'         => $student->nama,
             'kelas'        => $student->kelas->nama_kelas,
             'tanggal'      => $tanggal,
@@ -630,17 +699,16 @@ class AttendanceNotificationService
             $message .= "Hari/Tgl: {$hariTanggal}\n";
             $message .= "Status: ❌ *Alpha (Tidak Hadir)*\n\n";
             $message .= "Mohon segera menghubungi pihak sekolah.\n";
-            $message .= "\n_Pesan otomatis dari sistem absensi_";
+            $message .= "\n" . $this->getFooterVariant($student->nis);
         }
 
-        // Send notification ke semua nomor
-        $result = ['success' => false];
+        // Dispatch ke antrian — stagger absent notifications juga
         foreach ($phones as $phone) {
-            $result = $this->whatsAppService->sendParentNotification($phone, $message, null, 'absent');
+            $this->dispatchWa($phone, $message, 'absent', null, $student->id);
         }
 
-        // Log notification attempt
-        $this->logNotification($student->id, 'absent', $result);
+        // Log dispatch attempt
+        $this->logNotification($student->id, 'absent', ['success' => true, 'queued' => true]);
     }
 
     /**
@@ -721,6 +789,7 @@ class AttendanceNotificationService
 
         $data = [
             'sekolah'         => AttendanceSetting::get('school_name', 'Sekolah'),
+            'nis'             => $student->nis,
             'nama'            => $student->nama,
             'kelas'           => $student->kelas->nama_kelas ?? '-',
             'tanggal_absensi' => \Carbon\Carbon::parse($date)->locale('id')->translatedFormat('l, d/m/Y'),
@@ -805,6 +874,7 @@ class AttendanceNotificationService
 
         $data = [
             'sekolah'         => $schoolName,
+            'nis'             => $student->nis,
             'nama'            => $student->nama,
             'kelas'           => $student->kelas->nama_kelas ?? '-',
             'hari_tanggal'    => $hariTanggal,
@@ -885,6 +955,7 @@ class AttendanceNotificationService
 
         $data = [
             'sekolah'         => $schoolName,
+            'nis'             => $student->nis,
             'nama'            => $student->nama,
             'kelas'           => $student->kelas->nama_kelas ?? '-',
             'hari_tanggal'    => $hariTanggal,

@@ -86,7 +86,73 @@
                                 <li>Nomor HP wali kelas harus diisi di profil pengguna</li>
                                 <li>WhatsApp Gateway harus aktif saat jam pengiriman</li>
                                 <li>Cron job Laravel harus terpasang di server</li>
+                                <li>Queue worker WA harus berjalan (<code>queue:work --queue=whatsapp</code> via PM2)</li>
                             </ul>
+
+                            {{-- PM2 Queue Worker Setup --}}
+                            <div class="mt-3 border border-green-300 dark:border-green-700 rounded-lg overflow-hidden">
+                                <button type="button" onclick="togglePreview('pm2QueueSetup')"
+                                    class="w-full flex items-center justify-between px-3 py-2 bg-green-100 dark:bg-green-900/30 text-xs font-semibold text-green-800 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors">
+                                    <span class="flex items-center gap-2">
+                                        <i class="fas fa-terminal"></i>
+                                        Setup PM2 Queue Worker (klik untuk lihat perintah)
+                                    </span>
+                                    <i class="fas fa-chevron-down text-xs transition-transform" id="pm2QueueSetupIcon"></i>
+                                </button>
+                                <div id="pm2QueueSetup" class="hidden p-3 bg-white dark:bg-gray-900 space-y-3">
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Jalankan perintah berikut di server via SSH setelah deploy:</p>
+
+                                    {{-- Start Worker --}}
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">1. Jalankan queue worker:</span>
+                                            <button type="button"
+                                                onclick="copyToClipboard('cmd-pm2-start', this)"
+                                                class="flex items-center gap-1 px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded transition-colors">
+                                                <i class="fas fa-copy text-xs"></i> Copy
+                                            </button>
+                                        </div>
+                                        <pre id="cmd-pm2-start" class="text-xs bg-gray-900 text-green-400 rounded p-3 overflow-x-auto whitespace-pre">pm2 start "php /var/www/html/absensi/artisan queue:work database --queue=whatsapp,default --sleep=3 --tries=3 --timeout=60 --max-time=3600" \
+  --name="absensi-queue-worker" \
+  --restart-delay=3000 \
+  --log=/var/www/html/absensi/storage/logs/queue-worker.log</pre>
+                                    </div>
+
+                                    {{-- Save PM2 --}}
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">2. Simpan agar auto-start saat reboot:</span>
+                                            <button type="button"
+                                                onclick="copyToClipboard('cmd-pm2-save', this)"
+                                                class="flex items-center gap-1 px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded transition-colors">
+                                                <i class="fas fa-copy text-xs"></i> Copy
+                                            </button>
+                                        </div>
+                                        <pre id="cmd-pm2-save" class="text-xs bg-gray-900 text-green-400 rounded p-3 overflow-x-auto whitespace-pre">pm2 save && pm2 startup</pre>
+                                    </div>
+
+                                    {{-- Verify --}}
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">3. Verifikasi worker berjalan:</span>
+                                            <button type="button"
+                                                onclick="copyToClipboard('cmd-pm2-verify', this)"
+                                                class="flex items-center gap-1 px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded transition-colors">
+                                                <i class="fas fa-copy text-xs"></i> Copy
+                                            </button>
+                                        </div>
+                                        <pre id="cmd-pm2-verify" class="text-xs bg-gray-900 text-green-400 rounded p-3 overflow-x-auto whitespace-pre">pm2 status
+pm2 logs absensi-queue-worker --lines 20</pre>
+                                    </div>
+
+                                    <p class="text-xs text-amber-600 dark:text-amber-400">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                                        Sesuaikan path <code>/var/www/html/absensi</code> dengan lokasi instalasi di server Anda.
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
 
                         {{-- Preview Pesan --}}
                         <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
@@ -399,6 +465,31 @@
         const icon = document.getElementById(id + 'Icon');
         el.classList.toggle('hidden');
         icon.style.transform = el.classList.contains('hidden') ? '' : 'rotate(180deg)';
+    }
+
+    function copyToClipboard(elementId, btn) {
+        const text = document.getElementById(elementId).innerText.trim();
+        navigator.clipboard.writeText(text).then(() => {
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check text-xs"></i> Copied!';
+            btn.classList.add('text-green-600', 'dark:text-green-400');
+            setTimeout(() => {
+                btn.innerHTML = orig;
+                btn.classList.remove('text-green-600', 'dark:text-green-400');
+            }, 2000);
+        }).catch(() => {
+            // Fallback untuk browser lama
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity  = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            btn.innerHTML = '<i class="fas fa-check text-xs"></i> Copied!';
+            setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy text-xs"></i> Copy'; }, 2000);
+        });
     }
     </script>
     @endpush
