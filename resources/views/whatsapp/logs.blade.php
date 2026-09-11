@@ -91,11 +91,12 @@
                     </select>
                     <select name="type" class="px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                         <option value="">Semua Tipe</option>
-                        <option value="check_in"  {{ request('type') === 'check_in'  ? 'selected' : '' }}>Check-In</option>
-                        <option value="check_out" {{ request('type') === 'check_out' ? 'selected' : '' }}>Check-Out</option>
-                        <option value="absent"    {{ request('type') === 'absent'    ? 'selected' : '' }}>Alpha</option>
-                        <option value="broadcast" {{ request('type') === 'broadcast' ? 'selected' : '' }}>Broadcast</option>
-                        <option value="manual"    {{ request('type') === 'manual'    ? 'selected' : '' }}>Manual</option>
+                        <option value="check_in"      {{ request('type') === 'check_in'      ? 'selected' : '' }}>Check-In</option>
+                        <option value="check_out"     {{ request('type') === 'check_out'     ? 'selected' : '' }}>Check-Out</option>
+                        <option value="absent"        {{ request('type') === 'absent'        ? 'selected' : '' }}>Alpha</option>
+                        <option value="late_warning"  {{ request('type') === 'late_warning'  ? 'selected' : '' }}>Peringatan Terlambat</option>
+                        <option value="broadcast"     {{ request('type') === 'broadcast'     ? 'selected' : '' }}>Broadcast</option>
+                        <option value="manual"        {{ request('type') === 'manual'        ? 'selected' : '' }}>Manual</option>
                     </select>
                     <div class="relative">
                         <i class="fas fa-calendar absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none"></i>

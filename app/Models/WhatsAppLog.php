@@ -159,13 +159,14 @@ class WhatsAppLog extends Model
     public function getTypeLabelAttribute()
     {
         return match($this->type) {
-            'manual' => 'Manual',
-            'check_in' => 'Check-In',
-            'check_out' => 'Check-Out',
-            'absent' => 'Alpha',
-            'broadcast' => 'Broadcast',
-            'diagnostic_test' => 'Test Diagnostik',
-            default => ucfirst($this->type),
+            'manual'           => 'Manual',
+            'check_in'         => 'Check-In',
+            'check_out'        => 'Check-Out',
+            'absent'           => 'Alpha',
+            'broadcast'        => 'Broadcast',
+            'late_warning'     => 'Peringatan Terlambat',
+            'diagnostic_test'  => 'Test Diagnostik',
+            default            => ucfirst(str_replace('_', ' ', $this->type)),
         };
     }
 

@@ -162,10 +162,26 @@ class AttendanceNotificationService
             $trend
         );
 
+        // ── Daily cooldown guard ─────────────────────────────────────────────
+        // Cegah ortu menerima WA peringatan terlambat lebih dari 1x per hari
+        $alreadySentToday = AttendanceLog::where('student_id', $student->id)
+            ->where('action', 'notification')
+            ->where('message', 'LIKE', '%late_warning%')
+            ->whereDate('created_at', today())
+            ->exists();
+
+        if ($alreadySentToday) {
+            Log::debug('Late warning skipped — already sent today', [
+                'student_id' => $student->id,
+            ]);
+            return;
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
         // Send notification ke semua nomor
         $result = ['success' => false];
         foreach ($student->getParentPhones() as $phone) {
-            $result = $this->whatsAppService->sendParentNotification($phone, $message, null, 'check_in');
+            $result = $this->whatsAppService->sendParentNotification($phone, $message, null, 'late_warning');
         }
 
         // Log notification attempt
