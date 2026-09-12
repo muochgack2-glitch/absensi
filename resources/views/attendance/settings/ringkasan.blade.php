@@ -89,6 +89,29 @@
                                 <li>Queue worker WA harus berjalan (<code>queue:work --queue=whatsapp</code> via PM2)</li>
                             </ul>
 
+                            {{-- Queue Worker Status Widget --}}
+                            <div class="mt-3 rounded-lg border border-green-300 dark:border-green-700 overflow-hidden">
+                                <div class="flex items-center justify-between px-3 py-2 bg-green-100 dark:bg-green-900/30">
+                                    <span class="text-xs font-semibold text-green-800 dark:text-green-300 flex items-center gap-2">
+                                        <i class="fas fa-server"></i> Status Queue Worker
+                                    </span>
+                                    <button type="button" onclick="refreshQueueStatus()"
+                                        class="text-xs text-green-700 dark:text-green-400 hover:text-green-900 dark:hover:text-green-200 flex items-center gap-1 transition-colors"
+                                        title="Refresh status">
+                                        <i class="fas fa-sync-alt text-xs" id="queueRefreshIcon"></i> Refresh
+                                    </button>
+                                </div>
+                                <div id="queueStatusWidget" class="p-3 bg-white dark:bg-gray-900 grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+                                    {{-- Diisi JS --}}
+                                    <div class="col-span-4 text-xs text-gray-400 dark:text-gray-500 py-2">
+                                        <i class="fas fa-spinner fa-spin mr-1"></i> Memuat status...
+                                    </div>
+                                </div>
+                                <div class="px-3 pb-2 bg-white dark:bg-gray-900">
+                                    <p class="text-xs text-gray-400 dark:text-gray-500" id="queueCheckedAt"></p>
+                                </div>
+                            </div>
+
                             {{-- PM2 Queue Worker Setup --}}
                             <div class="mt-3 border border-green-300 dark:border-green-700 rounded-lg overflow-hidden">
                                 <button type="button" onclick="togglePreview('pm2QueueSetup')"
@@ -478,7 +501,6 @@ pm2 logs absensi-queue-worker --lines 20</pre>
                 btn.classList.remove('text-green-600', 'dark:text-green-400');
             }, 2000);
         }).catch(() => {
-            // Fallback untuk browser lama
             const ta = document.createElement('textarea');
             ta.value = text;
             ta.style.position = 'fixed';
@@ -491,6 +513,58 @@ pm2 logs absensi-queue-worker --lines 20</pre>
             setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy text-xs"></i> Copy'; }, 2000);
         });
     }
+
+    // ── Queue Worker Status Widget ────────────────────────────────────────────
+    function refreshQueueStatus() {
+        const icon = document.getElementById('queueRefreshIcon');
+        icon.classList.add('fa-spin');
+
+        fetch('{{ route("attendance.ringkasan.queue-status") }}')
+            .then(r => r.json())
+            .then(data => {
+                icon.classList.remove('fa-spin');
+
+                // Warna & label berdasarkan status worker
+                const statusConfig = {
+                    'running': { color: 'green',  icon: 'fa-circle-check', label: 'Berjalan' },
+                    'idle':    { color: 'blue',   icon: 'fa-circle-check', label: 'Idle (Siap)' },
+                    'dead':    { color: 'red',    icon: 'fa-circle-xmark', label: 'Tidak Aktif ⚠' },
+                };
+                const cfg = statusConfig[data.worker_status] ?? statusConfig['idle'];
+
+                const colorMap = {
+                    green: 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700',
+                    blue:  'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700',
+                    red:   'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700',
+                };
+
+                const card = (icon, label, value, colorClass) => `
+                    <div class="rounded-lg border p-2 ${colorClass}">
+                        <div class="text-lg mb-0.5"><i class="fas ${icon}"></i></div>
+                        <div class="text-xs font-semibold leading-tight">${value}</div>
+                        <div class="text-xs opacity-75 mt-0.5">${label}</div>
+                    </div>`;
+
+                document.getElementById('queueStatusWidget').innerHTML =
+                    card(cfg.icon, 'Worker PM2', cfg.label, colorMap[cfg.color]) +
+                    card('fa-hourglass-half', 'Pending', data.pending + ' job', data.pending > 0 ? colorMap.blue : colorMap.green) +
+                    card('fa-triangle-exclamation', 'Gagal', data.failed + ' job', data.failed > 0 ? colorMap.red : colorMap.green) +
+                    card('fa-paper-plane', 'WA Terakhir', data.last_sent, colorMap.blue);
+
+                document.getElementById('queueCheckedAt').textContent = 'Dicek pukul ' + data.checked_at + ' · Auto-refresh 30 detik';
+            })
+            .catch(() => {
+                icon.classList.remove('fa-spin');
+                document.getElementById('queueStatusWidget').innerHTML =
+                    '<div class="col-span-4 text-xs text-red-500 py-2"><i class="fas fa-exclamation-circle mr-1"></i>Gagal mengambil data status.</div>';
+            });
+    }
+
+    // Load saat halaman dibuka + auto-refresh tiap 30 detik
+    document.addEventListener('DOMContentLoaded', () => {
+        refreshQueueStatus();
+        setInterval(refreshQueueStatus, 30000);
+    });
     </script>
     @endpush
 </x-app-layout>

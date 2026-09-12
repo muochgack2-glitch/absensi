@@ -177,6 +177,60 @@ class AttendanceSettingController extends Controller
     }
 
     /**
+     * JSON: status antrian WA untuk widget di halaman ringkasan
+     */
+    public function queueStatus(): \Illuminate\Http\JsonResponse
+    {
+        // 1. Jobs pending di antrian whatsapp
+        $pendingJobs = \DB::table('jobs')
+            ->where('queue', 'whatsapp')
+            ->count();
+
+        // 2. Jobs yang sudah terlalu lama pending (> 3 menit) — indikasi worker mati
+        $stuckJobs = \DB::table('jobs')
+            ->where('queue', 'whatsapp')
+            ->where('created_at', '<', now()->subMinutes(3)->timestamp)
+            ->count();
+
+        // 3. Failed jobs (antrian WA saja)
+        $failedJobs = \DB::table('failed_jobs')
+            ->where('queue', 'whatsapp')
+            ->count();
+
+        // 4. WA terakhir terkirim (dari whatsapp_logs)
+        $lastSent = \DB::table('whatsapp_logs')
+            ->orderByDesc('created_at')
+            ->value('created_at');
+
+        $lastSentLabel = $lastSent
+            ? \Carbon\Carbon::parse($lastSent)->diffForHumans()
+            : 'Belum ada';
+
+        // 5. Heuristik: worker hidup?
+        //    - Jika ada stuck jobs DAN tidak ada WA terkirim dalam 5 menit terakhir → kemungkinan mati
+        $recentWa = \DB::table('whatsapp_logs')
+            ->where('created_at', '>=', now()->subMinutes(5))
+            ->exists();
+
+        if ($stuckJobs > 0 && ! $recentWa) {
+            $workerStatus = 'dead';     // Worker kemungkinan tidak berjalan
+        } elseif ($pendingJobs === 0 && $failedJobs === 0) {
+            $workerStatus = 'idle';     // Antrian kosong, tidak ada masalah
+        } else {
+            $workerStatus = 'running';  // Ada job, dan worker memproses
+        }
+
+        return response()->json([
+            'pending'       => $pendingJobs,
+            'stuck'         => $stuckJobs,
+            'failed'        => $failedJobs,
+            'last_sent'     => $lastSentLabel,
+            'worker_status' => $workerStatus,
+            'checked_at'    => now()->format('H:i:s'),
+        ]);
+    }
+
+    /**
      * Update settings
      */
 

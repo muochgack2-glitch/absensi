@@ -268,6 +268,8 @@ Route::middleware(['auth'])->group(function () {
         ->name('attendance.ringkasan.index');
     Route::put('/attendance/ringkasan', [AttendanceSettingController::class, 'updateRingkasan'])
         ->name('attendance.ringkasan.update');
+    Route::get('/attendance/ringkasan/queue-status', [AttendanceSettingController::class, 'queueStatus'])
+        ->name('attendance.ringkasan.queue-status');
 
 
     // Settings admin-only
