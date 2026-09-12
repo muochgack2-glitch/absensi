@@ -135,10 +135,10 @@
                                                 <i class="fas fa-copy text-xs"></i> Copy
                                             </button>
                                         </div>
-                                        <pre id="cmd-pm2-start" class="text-xs bg-gray-900 text-green-400 rounded p-3 overflow-x-auto whitespace-pre">pm2 start "php /var/www/html/absensi/artisan queue:work database --queue=whatsapp,default --sleep=3 --tries=3 --timeout=60 --max-time=3600" \
+                                        <pre id="cmd-pm2-start" class="text-xs bg-gray-900 text-green-400 rounded p-3 overflow-x-auto whitespace-pre">pm2 start "php /www/wwwroot/absensi/artisan queue:work database --queue=whatsapp,default --sleep=3 --tries=3 --timeout=60 --max-time=3600" \
   --name="absensi-queue-worker" \
   --restart-delay=3000 \
-  --log=/var/www/html/absensi/storage/logs/queue-worker.log</pre>
+  --log=/www/wwwroot/absensi/storage/logs/queue-worker.log</pre>
                                     </div>
 
                                     {{-- Save PM2 --}}
@@ -170,7 +170,7 @@ pm2 logs absensi-queue-worker --lines 20</pre>
 
                                     <p class="text-xs text-amber-600 dark:text-amber-400">
                                         <i class="fas fa-exclamation-triangle mr-1"></i>
-                                        Sesuaikan path <code>/var/www/html/absensi</code> dengan lokasi instalasi di server Anda.
+                                        Sesuaikan path <code>/www/wwwroot/absensi</code> dengan lokasi instalasi di server Anda.
                                     </p>
                                 </div>
                             </div>
