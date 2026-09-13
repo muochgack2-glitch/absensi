@@ -42,10 +42,12 @@ class AttendanceNotificationService
         // Delay kumulatif: +4 detik per pesan, maksimal 60 detik
         $delay  = min($posisi * 4, 60);
 
-        // Jitter acak ±1 detik agar interval tidak persis mekanis
-        $jitter = rand(-1000, 1000) / 1000;
+        // Stagger acak 0–90 detik: saat burst (misal pulang bareng),
+        // tiap job punya "jadwal kirim" yang berbeda-beda, tidak semua
+        // menumpuk di satu momen yang sama.
+        $stagger = rand(0, 90);
 
-        $finalDelay = (int) max(0, round($delay + $jitter));
+        $finalDelay = (int) max(0, $delay + $stagger);
 
         SendWhatsAppNotificationJob::dispatch(
             phone:     $phone,
@@ -57,10 +59,12 @@ class AttendanceNotificationService
          ->delay(now()->addSeconds($finalDelay));
 
         Log::debug('[WA Queue] Job dispatched', [
-            'phone'   => $phone,
-            'type'    => $type,
-            'posisi'  => $posisi,
-            'delay_s' => $finalDelay,
+            'phone'    => $phone,
+            'type'     => $type,
+            'posisi'   => $posisi,
+            'base_s'   => $delay,
+            'stagger_s'=> $stagger,
+            'total_s'  => $finalDelay,
         ]);
     }
 
