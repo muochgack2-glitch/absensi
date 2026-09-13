@@ -40,14 +40,23 @@ class AttendanceNotificationService
         $posisi = WhatsAppLog::whereDate('created_at', today())->count();
 
         // Delay kumulatif: +4 detik per pesan, maksimal 60 detik
-        $delay  = min($posisi * 4, 60);
+        $delay = min($posisi * 4, 60);
 
         // Stagger acak 0–90 detik: saat burst (misal pulang bareng),
         // tiap job punya "jadwal kirim" yang berbeda-beda, tidak semua
         // menumpuk di satu momen yang sama.
         $stagger = rand(0, 90);
 
-        $finalDelay = (int) max(0, $delay + $stagger);
+        // Deteksi kontak baru: nomor yang belum pernah terima WA dari sistem.
+        // Kontak baru lebih berisiko di-flag WA sehingga diberi delay extra
+        // lebih panjang agar tidak terlihat seperti blast massal ke nomor baru.
+        $isNewContact = ! WhatsAppLog::where('phone', $phone)
+            ->where('status', 'sent')
+            ->exists();
+
+        $newContactExtra = $isNewContact ? rand(60, 180) : 0;
+
+        $finalDelay = (int) max(0, $delay + $stagger + $newContactExtra);
 
         SendWhatsAppNotificationJob::dispatch(
             phone:     $phone,
@@ -59,12 +68,14 @@ class AttendanceNotificationService
          ->delay(now()->addSeconds($finalDelay));
 
         Log::debug('[WA Queue] Job dispatched', [
-            'phone'    => $phone,
-            'type'     => $type,
-            'posisi'   => $posisi,
-            'base_s'   => $delay,
-            'stagger_s'=> $stagger,
-            'total_s'  => $finalDelay,
+            'phone'         => $phone,
+            'type'          => $type,
+            'new_contact'   => $isNewContact,
+            'posisi'        => $posisi,
+            'base_s'        => $delay,
+            'stagger_s'     => $stagger,
+            'new_extra_s'   => $newContactExtra,
+            'total_s'       => $finalDelay,
         ]);
     }
 
