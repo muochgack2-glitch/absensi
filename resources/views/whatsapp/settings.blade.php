@@ -25,9 +25,8 @@
             $settings['general'] = \App\Models\AttendanceSetting::getByGroup('general');
         @endphp
 
-        <form action="{{ route('attendance.settings.update') }}" method="POST">
+        <form action="{{ route('whatsapp.settings.update') }}" method="POST">
             @csrf
-            @method('PUT')
 
 
             {{-- Notifikasi WhatsApp --}}
