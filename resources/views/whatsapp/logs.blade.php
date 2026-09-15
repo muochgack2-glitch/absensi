@@ -202,6 +202,14 @@
                                             <p class="font-medium text-gray-900 dark:text-white text-xs leading-tight">{{ $log->student->nama }}</p>
                                             <p class="font-mono text-gray-400 text-[11px]">{{ $log->phone }}</p>
                                         </div>
+                                    @elseif($log->recipientUser)
+                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                                            {{ mb_strtoupper(mb_substr($log->recipientUser->name, 0, 1)) }}
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900 dark:text-white text-xs leading-tight">{{ $log->recipientUser->name }}</p>
+                                            <p class="font-mono text-gray-400 text-[11px]">{{ $log->phone }}</p>
+                                        </div>
                                     @else
                                         <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
                                             <i class="fas fa-user text-xs text-gray-500"></i>
@@ -292,6 +300,14 @@
                                 </div>
                                 <div class="min-w-0">
                                     <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">{{ $log->student->nama }}</p>
+                                    <p class="font-mono text-gray-400 text-[11px]">{{ $log->phone }}</p>
+                                </div>
+                            @elseif($log->recipientUser)
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                                    {{ mb_strtoupper(mb_substr($log->recipientUser->name, 0, 1)) }}
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">{{ $log->recipientUser->name }}</p>
                                     <p class="font-mono text-gray-400 text-[11px]">{{ $log->phone }}</p>
                                 </div>
                             @else

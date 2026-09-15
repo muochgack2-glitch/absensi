@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class WhatsAppLog extends Model
 {
@@ -54,6 +55,14 @@ class WhatsAppLog extends Model
     public function sender(): BelongsTo
     {
         return $this->belongsTo(User::class, 'sent_by');
+    }
+
+    /**
+     * Relasi ke User berdasarkan nomor HP penerima (untuk log tanpa student_id)
+     */
+    public function recipientUser(): HasOne
+    {
+        return $this->hasOne(User::class, 'phone', 'phone_normalized');
     }
 
     /**
