@@ -161,6 +161,7 @@
                             <th class="text-left py-3 px-3 text-gray-500 dark:text-gray-400 font-semibold">Pesan <span class="normal-case font-normal text-gray-400">(klik detail)</span></th>
                             <th class="text-left py-3 px-3 text-gray-500 dark:text-gray-400 font-semibold w-28">Tipe</th>
                             <th class="text-left py-3 px-3 text-gray-500 dark:text-gray-400 font-semibold w-36">Status</th>
+                            <th class="text-left py-3 px-3 text-gray-500 dark:text-gray-400 font-semibold w-28">Gateway</th>
                             <th class="text-left py-3 px-3 text-gray-500 dark:text-gray-400 font-semibold w-24">Waktu</th>
                         </tr>
                     </thead>
@@ -181,6 +182,13 @@
                                     ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                                     : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400');
                             $si = $log->status === 'sent' ? 'fa-check' : ($log->status === 'failed' ? 'fa-times' : 'fa-clock');
+                            // Gateway badge
+                            $gw = $log->gateway ?? 'primary';
+                            $gwClass = $gw === 'backup'
+                                ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400'
+                                : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400';
+                            $gwIcon  = $gw === 'backup' ? 'fa-random' : 'fa-server';
+                            $gwLabel = $gw === 'backup' ? 'Backup' : 'Primary';
                         @endphp
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors group">
                             <td class="py-3 px-3 text-gray-400 text-xs">{{ $logs->firstItem() + $i }}</td>
@@ -224,13 +232,18 @@
                                     </p>
                                 @endif
                             </td>
+                            <td class="py-3 px-3">
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-full {{ $gwClass }}" title="Gateway {{ $gwLabel }}">
+                                    <i class="fas {{ $gwIcon }} text-[9px]"></i> {{ $gwLabel }}
+                                </span>
+                            </td>
                             <td class="py-3 px-3 text-gray-500 dark:text-gray-400 text-xs whitespace-nowrap" title="{{ $log->created_at->format('d/m/Y H:i:s') }}">
                                 {{ $log->created_at->format('d/m H:i') }}
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="py-16 text-center">
+                            <td colspan="7" class="py-16 text-center">
                                 <div class="flex flex-col items-center gap-3 text-gray-400 dark:text-gray-500">
                                     <div class="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                                         <i class="fas fa-inbox text-3xl opacity-50"></i>
@@ -264,6 +277,11 @@
                     $borderColor = $log->status === 'sent' ? 'border-l-green-400' : ($log->status === 'failed' ? 'border-l-red-400' : 'border-l-yellow-400');
                     $scm = $log->status === 'sent' ? 'bg-green-100 text-green-700' : ($log->status === 'failed' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700');
                     $sim = $log->status === 'sent' ? 'fa-check' : ($log->status === 'failed' ? 'fa-times' : 'fa-clock');
+                    // Gateway mobile
+                    $gwm       = $log->gateway ?? 'primary';
+                    $gwmClass  = $gwm === 'backup' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700';
+                    $gwmIcon   = $gwm === 'backup' ? 'fa-random' : 'fa-server';
+                    $gwmLabel  = $gwm === 'backup' ? 'Backup' : 'Primary';
                 @endphp
                 <div class="border border-gray-200 dark:border-gray-700 border-l-4 {{ $borderColor }} rounded-xl p-3.5">
                     <div class="flex items-start justify-between gap-2 mb-2">
@@ -294,9 +312,12 @@
                             class="text-xs text-gray-600 dark:text-gray-400 text-left line-clamp-2 mb-2 hover:text-primary-600 transition w-full">
                         {{ Str::limit($log->message, 100) }}
                     </button>
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between flex-wrap gap-1">
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-full {{ $tc[0] }}">
                             <i class="fas {{ $tc[1] }} text-[9px]"></i> {{ $log->type_label }}
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-full {{ $gwmClass }}">
+                            <i class="fas {{ $gwmIcon }} text-[9px]"></i> {{ $gwmLabel }}
                         </span>
                         @if($log->error_message)
                             <p class="text-[10px] text-red-500 truncate max-w-[180px]" title="{{ $log->error_message }}">{{ Str::limit($log->error_message, 40) }}</p>

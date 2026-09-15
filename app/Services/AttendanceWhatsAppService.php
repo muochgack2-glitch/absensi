@@ -230,15 +230,19 @@ class AttendanceWhatsAppService
         // Get appropriate gateway URL based on context
         $serverUrl = $this->getActiveServerUrl($options['type'] ?? null);
         
+        // Tentukan label gateway: primary (:3001) atau backup (:3000)
+        $gatewayLabel = str_contains($serverUrl, '3001') ? 'primary' : (str_contains($serverUrl, '3000') ? 'backup' : 'primary');
+
         // Create log entry
         $log = WhatsAppLog::create([
-            'phone' => $phone,
-            'message' => $message,
-            'status' => 'pending',
-            'type' => $options['type'] ?? 'manual',
+            'phone'      => $phone,
+            'message'    => $message,
+            'status'     => 'pending',
+            'type'       => $options['type'] ?? 'manual',
             'student_id' => $options['student_id'] ?? null,
-            'template_id' => $options['template_id'] ?? null,
-            'sent_by' => $options['sent_by'] ?? auth()->id(),
+            'template_id'=> $options['template_id'] ?? null,
+            'sent_by'    => $options['sent_by'] ?? auth()->id(),
+            'gateway'    => $gatewayLabel,
         ]);
 
         try {
@@ -371,15 +375,19 @@ class AttendanceWhatsAppService
         // Get appropriate gateway URL
         $serverUrl = $this->getActiveServerUrl($options['type'] ?? null);
         
+        // Tentukan label gateway
+        $gatewayLabel = str_contains($serverUrl, '3001') ? 'primary' : (str_contains($serverUrl, '3000') ? 'backup' : 'primary');
+
         // Create log entry
         $log = WhatsAppLog::create([
-            'phone' => $phone,
-            'message' => $caption,
-            'status' => 'pending',
-            'type' => $options['type'] ?? 'manual',
-            'student_id' => $options['student_id'] ?? null,
+            'phone'       => $phone,
+            'message'     => $caption,
+            'status'      => 'pending',
+            'type'        => $options['type'] ?? 'manual',
+            'student_id'  => $options['student_id'] ?? null,
             'template_id' => $options['template_id'] ?? null,
-            'sent_by' => $options['sent_by'] ?? auth()->id(),
+            'sent_by'     => $options['sent_by'] ?? auth()->id(),
+            'gateway'     => $gatewayLabel,
         ]);
 
         try {

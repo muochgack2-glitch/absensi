@@ -24,6 +24,7 @@ class WhatsAppLog extends Model
         'error_message',
         'sent_at',
         'metadata',
+        'gateway',
     ];
 
     protected $casts = [
