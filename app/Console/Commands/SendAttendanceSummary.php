@@ -9,6 +9,7 @@ use App\Models\AttendanceStudent;
 use App\Services\AttendanceWhatsAppService;
 use App\Services\AttendanceSummaryMessageService;
 use Carbon\Carbon;
+use App\Jobs\SendWhatsAppNotificationJob;
 
 class SendAttendanceSummary extends Command
 {
@@ -152,19 +153,13 @@ class SendAttendanceSummary extends Command
                 $sent++; continue;
             }
 
-            try {
-                $result = $this->waService->send($wali->phone, $message, ['type' => 'summary', 'sent_by' => null]);
-                if ($result['success'] ?? false) {
-                    $this->info("  Terkirim ke {$wali->name} ({$wali->phone})");
-                    $sent++;
-                } else {
-                    $this->error("  Gagal: " . ($result['message'] ?? 'unknown'));
-                    $failed++;
-                }
-            } catch (\Exception $e) {
-                $this->error("  Error [{$kelas->nama_kelas}]: " . $e->getMessage());
-                $failed++;
-            }
+            // Dispatch ke antrian dengan delay kumulatif (4 detik per pesan)
+            $delay = min($sent * 4, 60);
+            SendWhatsAppNotificationJob::dispatch($wali->phone, $message, null, "summary")
+                ->onQueue('whatsapp')
+                ->delay(now()->addSeconds($delay));
+            $this->info("  Dijadwalkan ke {$wali->name} ({$wali->phone}) | delay:{$delay}s");
+            $sent++;
         }
 
         $this->newLine();

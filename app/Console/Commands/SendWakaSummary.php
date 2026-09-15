@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\AttendanceWhatsAppService;
 use App\Services\AttendanceSummaryMessageService;
 use Carbon\Carbon;
+use App\Jobs\SendWhatsAppNotificationJob;
 
 class SendWakaSummary extends Command
 {
@@ -213,19 +214,13 @@ class SendWakaSummary extends Command
 
         $sent = $failed = 0;
         foreach ($wakaUsers as $waka) {
-            try {
-                $result = $this->waService->send($waka->phone, $message, ['type' => "waka-{$type}", 'sent_by' => null]);
-                if ($result['success'] ?? false) {
-                    $this->info("Terkirim ke {$waka->name} ({$waka->phone})");
-                    $sent++;
-                } else {
-                    $this->error("Gagal ke {$waka->name}: " . ($result['message'] ?? 'unknown'));
-                    $failed++;
-                }
-            } catch (\Exception $e) {
-                $this->error("Error [{$waka->name}]: " . $e->getMessage());
-                $failed++;
-            }
+            // Dispatch ke antrian dengan delay kumulatif
+            $delay = min($sent * 4, 60);
+            SendWhatsAppNotificationJob::dispatch($waka->phone, $message, null, "waka-" . $type)
+                ->onQueue('whatsapp')
+                ->delay(now()->addSeconds($delay));
+            $this->info("Dijadwalkan ke {$waka->name} ({$waka->phone}) | delay:{$delay}s");
+            $sent++;
         }
 
         $this->info("Selesai. Terkirim:{$sent} Gagal:{$failed}");
