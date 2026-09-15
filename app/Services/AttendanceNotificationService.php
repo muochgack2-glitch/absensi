@@ -9,6 +9,7 @@ use App\Models\AttendanceSetting;
 use App\Models\AttendanceStudent;
 use App\Models\User;
 use App\Models\WhatsAppLog;
+use App\Models\WhatsAppSetting;
 use App\Models\WhatsAppTemplate;
 use Illuminate\Support\Facades\Log;
 
@@ -39,8 +40,9 @@ class AttendanceNotificationService
         // Hitung posisi antrian: jumlah WA yang sudah tercatat hari ini
         $posisi = WhatsAppLog::whereDate('created_at', today())->count();
 
-        // Delay kumulatif: +4 detik per pesan, maksimal 60 detik
-        $delay = min($posisi * 4, 60);
+        // Delay kumulatif: +N detik per pesan (bisa diatur di WA Settings), maksimal 60 detik
+        $delayPerPesan = (int) WhatsAppSetting::get('wa_queue_delay_per_message', 4);
+        $delay = min($posisi * $delayPerPesan, 60);
 
         // Stagger acak 0–90 detik: saat burst (misal pulang bareng),
         // tiap job punya "jadwal kirim" yang berbeda-beda, tidak semua

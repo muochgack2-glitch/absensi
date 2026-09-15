@@ -8,7 +8,7 @@ use App\Models\AttendanceRecord;
 use App\Models\AttendanceStudent;
 use App\Services\AttendanceWhatsAppService;
 use App\Services\AttendanceSummaryMessageService;
-use Carbon\Carbon;
+use App\Models\WhatsAppSetting;
 use App\Jobs\SendWhatsAppNotificationJob;
 
 class SendAttendanceSummary extends Command
@@ -154,7 +154,8 @@ class SendAttendanceSummary extends Command
             }
 
             // Dispatch ke antrian dengan delay kumulatif (4 detik per pesan)
-            $delay = min($sent * 4, 60);
+            $delayPerPesan = (int) WhatsAppSetting::get('wa_queue_delay_per_message', 4);
+            $delay = min($sent * $delayPerPesan, 60);
             SendWhatsAppNotificationJob::dispatch($wali->phone, $message, null, "summary")
                 ->onQueue('whatsapp')
                 ->delay(now()->addSeconds($delay));

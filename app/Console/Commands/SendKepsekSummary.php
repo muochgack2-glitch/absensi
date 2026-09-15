@@ -10,7 +10,7 @@ use App\Models\Holiday;
 use App\Models\User;
 use App\Services\AttendanceWhatsAppService;
 use App\Services\AttendanceSummaryMessageService;
-use Carbon\Carbon;
+use App\Models\WhatsAppSetting;
 use App\Jobs\SendWhatsAppNotificationJob;
 
 class SendKepsekSummary extends Command
@@ -222,7 +222,8 @@ class SendKepsekSummary extends Command
         $sent = $failed = 0;
         foreach ($kepsekUsers as $kepsek) {
             // Dispatch ke antrian dengan delay kumulatif
-            $delay = min($sent * 4, 60);
+            $delayPerPesan = (int) WhatsAppSetting::get('wa_queue_delay_per_message', 4);
+            $delay = min($sent * $delayPerPesan, 60);
             SendWhatsAppNotificationJob::dispatch($kepsek->phone, $message, null, "kepsek-" . $type)
                 ->onQueue('whatsapp')
                 ->delay(now()->addSeconds($delay));
