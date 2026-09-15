@@ -230,8 +230,9 @@ class AttendanceWhatsAppService
         // Get appropriate gateway URL based on context
         $serverUrl = $this->getActiveServerUrl($options['type'] ?? null);
         
-        // Tentukan label gateway: primary (:3001) atau backup (:3000)
-        $gatewayLabel = str_contains($serverUrl, '3001') ? 'primary' : (str_contains($serverUrl, '3000') ? 'backup' : 'primary');
+        // Tentukan label gateway: bandingkan dengan setting, bukan hardcode port
+        $primaryUrl   = WhatsAppSetting::get('wa_server_url', 'http://localhost:3001');
+        $gatewayLabel = ($serverUrl === $primaryUrl) ? 'primary' : 'backup';
 
         // Create log entry
         $log = WhatsAppLog::create([
@@ -375,8 +376,9 @@ class AttendanceWhatsAppService
         // Get appropriate gateway URL
         $serverUrl = $this->getActiveServerUrl($options['type'] ?? null);
         
-        // Tentukan label gateway
-        $gatewayLabel = str_contains($serverUrl, '3001') ? 'primary' : (str_contains($serverUrl, '3000') ? 'backup' : 'primary');
+        // Tentukan label gateway: bandingkan dengan setting, bukan hardcode port
+        $primaryUrl   = WhatsAppSetting::get('wa_server_url', 'http://localhost:3001');
+        $gatewayLabel = ($serverUrl === $primaryUrl) ? 'primary' : 'backup';
 
         // Create log entry
         $log = WhatsAppLog::create([
