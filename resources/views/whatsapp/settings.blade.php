@@ -87,11 +87,11 @@
                     {{-- Delay Antar Pesan (Anti-Spam / Rate Limit) --}}
                     <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <label class="block text-sm font-medium text-gray-900 dark:text-white mb-1">
-                            ⏱️ Delay Antar Pesan (detik)
+                            ⏱️ Delay Broadcast (detik)
                         </label>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                            Jeda waktu antar pengiriman WA saat kirim massal (ringkasan kelas, broadcast).
-                            Naikkan ke <strong>5–10 detik</strong> jika akun WA terkena batas pengiriman.
+                            Jeda antar pesan saat fitur <strong>Broadcast</strong> dijalankan secara langsung dari halaman Broadcast.
+                            Naikkan ke <strong>5–10 detik</strong> jika akun WA sering terkena batas pengiriman.
                         </p>
                         <div class="flex items-center gap-3">
                             <input type="number"
@@ -115,11 +115,11 @@
                     {{-- Delay Antrian Notifikasi Scan/Ringkasan --}}
                     <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <label class="block text-sm font-medium text-gray-900 dark:text-white mb-1">
-                            ⏳ Delay Antrian Scan/Ringkasan (detik per pesan)
+                            ⏳ Delay Antrian Notifikasi (detik per pesan)
                         </label>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                            Jeda kumulatif antar job di antrian saat siswa scan atau pengiriman ringkasan.
-                            Makin banyak pesan hari ini → makin lama jeda. Nilai lebih tinggi = lebih aman dari ban WA.
+                            Mengatur jeda pengiriman notifikasi yang masuk antrian: scan siswa, ringkasan wali kelas, kepsek, dan waka.
+                            Semakin banyak pesan yang sudah dikirim hari ini, semakin lama jeda otomatis ditambahkan.
                         </p>
                         <div class="flex items-center gap-3">
                             <input type="number"
@@ -137,7 +137,7 @@
                             </div>
                         </div>
                         <p class="text-xs text-blue-600 dark:text-blue-400 mt-2">
-                            💡 Berlaku untuk notifikasi scan siswa, ringkasan wali kelas, kepsek, dan waka. Broadcast menggunakan setting di atas.
+                            💡 Setting ini <strong>tidak</strong> berlaku untuk fitur Broadcast — Broadcast menggunakan setting <em>Delay Broadcast</em> di atas.
                         </p>
                     </div>
 
