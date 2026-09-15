@@ -228,7 +228,7 @@ class WhatsAppController extends Controller
     public function logs(Request $request)
     {
         $period = $request->get('period', 'today');
-        $query  = WhatsAppLog::with(['student', 'sender', 'recipientUser'])->latest();
+        $query  = WhatsAppLog::with(['student', 'sender', 'recipientUser', 'studentByOrangTua', 'studentByOrangTua2'])->latest();
 
         // Filter periode (tab)
         match($period) {

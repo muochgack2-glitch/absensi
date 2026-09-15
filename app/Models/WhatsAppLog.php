@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Models\AttendanceStudent;
 
 class WhatsAppLog extends Model
 {
@@ -63,6 +64,22 @@ class WhatsAppLog extends Model
     public function recipientUser(): HasOne
     {
         return $this->hasOne(User::class, 'phone', 'phone_normalized');
+    }
+
+    /**
+     * Relasi ke siswa berdasarkan no HP orang tua (no_hp_ortu/no_hp_ortu2)
+     * Digunakan untuk log tanpa student_id (misal broadcast ke orang tua)
+     */
+    public function studentByOrangTua(): HasOne
+    {
+        return $this->hasOne(AttendanceStudent::class, 'no_hp_ortu', 'phone')
+            ->withoutGlobalScope('tahun_ajaran');
+    }
+
+    public function studentByOrangTua2(): HasOne
+    {
+        return $this->hasOne(AttendanceStudent::class, 'no_hp_ortu2', 'phone')
+            ->withoutGlobalScope('tahun_ajaran');
     }
 
     /**

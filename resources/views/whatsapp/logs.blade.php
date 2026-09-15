@@ -210,6 +210,17 @@
                                             <p class="font-medium text-gray-900 dark:text-white text-xs leading-tight">{{ $log->recipientUser->name }}</p>
                                             <p class="font-mono text-gray-400 text-[11px]">{{ $log->phone }}</p>
                                         </div>
+                                    @elseif($log->studentByOrangTua || $log->studentByOrangTua2)
+                                        @php $ortuSiswa = $log->studentByOrangTua ?? $log->studentByOrangTua2; @endphp
+                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                                            {{ mb_strtoupper(mb_substr($ortuSiswa->nama, 0, 1)) }}
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900 dark:text-white text-xs leading-tight">
+                                                <span class="text-orange-500 text-[10px] font-normal">Ortu:</span> {{ $ortuSiswa->nama }}
+                                            </p>
+                                            <p class="font-mono text-gray-400 text-[11px]">{{ $log->phone }}</p>
+                                        </div>
                                     @else
                                         <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
                                             <i class="fas fa-user text-xs text-gray-500"></i>
@@ -308,6 +319,17 @@
                                 </div>
                                 <div class="min-w-0">
                                     <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">{{ $log->recipientUser->name }}</p>
+                                    <p class="font-mono text-gray-400 text-[11px]">{{ $log->phone }}</p>
+                                </div>
+                            @elseif($log->studentByOrangTua || $log->studentByOrangTua2)
+                                @php $ortuSiswaM = $log->studentByOrangTua ?? $log->studentByOrangTua2; @endphp
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                                    {{ mb_strtoupper(mb_substr($ortuSiswaM->nama, 0, 1)) }}
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">
+                                        <span class="text-orange-500 text-[10px] font-normal">Ortu:</span> {{ $ortuSiswaM->nama }}
+                                    </p>
                                     <p class="font-mono text-gray-400 text-[11px]">{{ $log->phone }}</p>
                                 </div>
                             @else
