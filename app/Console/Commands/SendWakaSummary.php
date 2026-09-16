@@ -11,7 +11,7 @@ use App\Models\User;
 use App\Services\AttendanceWhatsAppService;
 use App\Services\AttendanceSummaryMessageService;
 use App\Models\WhatsAppSetting;
-use App\Jobs\SendWhatsAppNotificationJob;
+use Carbon\Carbon;
 
 class SendWakaSummary extends Command
 {
@@ -213,15 +213,26 @@ class SendWakaSummary extends Command
         }
 
         $sent = $failed = 0;
+        $delayPerPesan = (int) WhatsAppSetting::get('wa_queue_delay_per_message', 4);
         foreach ($wakaUsers as $waka) {
-            // Dispatch ke antrian dengan delay kumulatif
-            $delayPerPesan = (int) WhatsAppSetting::get('wa_queue_delay_per_message', 4);
-            $delay = min($sent * $delayPerPesan, 60);
-            SendWhatsAppNotificationJob::dispatch($waka->phone, $message, null, "waka-" . $type)
-                ->onQueue('whatsapp')
-                ->delay(now()->addSeconds($delay));
-            $this->info("Dijadwalkan ke {$waka->name} ({$waka->phone}) | delay:{$delay}s");
-            $sent++;
+            // Kirim langsung (synchronous) — tidak via queue
+            $result = $this->waService->send($waka->phone, $message, [
+                'type'    => 'waka-' . $type,
+                'sent_by' => null,
+            ]);
+
+            if (($result['success'] ?? false)) {
+                $this->info("  ✓ Terkirim ke {$waka->name} ({$waka->phone})");
+                $sent++;
+            } else {
+                $this->error("  ✗ Gagal ke {$waka->name}: " . ($result['error'] ?? 'unknown'));
+                $failed++;
+            }
+
+            // Jeda antar penerima
+            if ($sent + $failed < $wakaUsers->count()) {
+                sleep($delayPerPesan);
+            }
         }
 
         $this->info("Selesai. Terkirim:{$sent} Gagal:{$failed}");
