@@ -9,7 +9,6 @@ use App\Models\AttendanceStudent;
 use App\Services\AttendanceWhatsAppService;
 use App\Services\AttendanceSummaryMessageService;
 use App\Models\WhatsAppSetting;
-use App\Jobs\SendWhatsAppNotificationJob;
 use Carbon\Carbon;
 
 class SendAttendanceSummary extends Command
@@ -154,14 +153,27 @@ class SendAttendanceSummary extends Command
                 $sent++; continue;
             }
 
-            // Dispatch ke antrian dengan delay kumulatif (4 detik per pesan)
+            // Kirim langsung (synchronous) — ringkasan tidak perlu queue karena
+            // volumenya kecil (1 pesan per kelas) dan harus dipastikan terkirim.
             $delayPerPesan = (int) WhatsAppSetting::get('wa_queue_delay_per_message', 4);
-            $delay = min($sent * $delayPerPesan, 60);
-            SendWhatsAppNotificationJob::dispatch($wali->phone, $message, null, "summary")
-                ->onQueue('whatsapp')
-                ->delay(now()->addSeconds($delay));
-            $this->info("  Dijadwalkan ke {$wali->name} ({$wali->phone}) | delay:{$delay}s");
-            $sent++;
+
+            $result = $this->waService->send($wali->phone, $message, [
+                'type'    => 'summary',
+                'sent_by' => null,
+            ]);
+
+            if (($result['success'] ?? false)) {
+                $this->info("  ✓ Terkirim ke {$wali->name} ({$wali->phone})");
+                $sent++;
+            } else {
+                $this->error("  ✗ Gagal ke {$wali->name}: " . ($result['error'] ?? 'unknown'));
+                $failed++;
+            }
+
+            // Jeda antar pesan untuk menghindari spam detection
+            if ($sent + $failed < $classes->count()) {
+                sleep($delayPerPesan);
+            }
         }
 
         $this->newLine();
