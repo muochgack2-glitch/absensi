@@ -265,8 +265,9 @@ class AttendanceWhatsAppService
             }
 
             $response = $http->post("{$serverUrl}/send", [
-                    'phone'   => $phone,
-                    'message' => $message,
+                    'phone'         => $phone,
+                    'message'       => $message,
+                    'typing_delay'  => $this->calcTypingDelay($message),
                 ]);
 
             if ($response->successful()) {
@@ -728,5 +729,31 @@ class AttendanceWhatsAppService
         }
 
         return $phone;
+    }
+
+    /**
+     * Hitung durasi typing realistis dalam milidetik.
+     *
+     * Formula: 30ms per karakter (±20% variasi acak)
+     * Min: 1500ms (1.5 detik), Max: 6000ms (6 detik)
+     *
+     * Contoh:
+     *   Pesan 100 karakter  → 3000ms base → 2400–3600ms acak
+     *   Pesan 500 karakter  → cap 6000ms  → 4800–6000ms acak
+     *   Pesan 20 karakter   → cap 1500ms  → 1500ms
+     *
+     * @param string $message Isi pesan
+     * @return int Durasi dalam milidetik
+     */
+    private function calcTypingDelay(string $message): int
+    {
+        $base = strlen($message) * 30;          // 30ms per karakter
+        $base = max(1500, min($base, 6000));    // clamp 1.5s – 6s
+
+        // Variasi acak ±20% agar tidak terdeteksi pola tetap
+        $variance = (int) ($base * 0.20);
+        $delay    = $base + rand(-$variance, $variance);
+
+        return max(1500, $delay);
     }
 }
