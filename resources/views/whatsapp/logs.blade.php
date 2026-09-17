@@ -34,7 +34,7 @@
                 default => 'Semua',
             };
         @endphp
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-3 shadow-sm">
                 <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 flex-shrink-0">
                     <i class="fas fa-paper-plane"></i>
@@ -69,6 +69,30 @@
                 <div>
                     <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 leading-none">{{ number_format($stats['pending'] ?? 0) }}</p>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Pending</p>
+                </div>
+            </div>
+            {{-- ACK: Diterima HP --}}
+            @php
+                $pctDelivered = $stats['sent'] > 0 ? round($stats['ack_delivered'] / $stats['sent'] * 100) : 0;
+                $pctRead      = $stats['sent'] > 0 ? round($stats['ack_read']      / $stats['sent'] * 100) : 0;
+            @endphp
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-3 shadow-sm">
+                <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                    <span class="ack-delivered font-bold text-base" style="letter-spacing:-2px">&#x2713;&#x2713;</span>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-gray-700 dark:text-gray-200 leading-none">{{ number_format($stats['ack_delivered'] ?? 0) }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Diterima HP <span class="text-gray-400">({{ $pctDelivered }}%)</span></p>
+                </div>
+            </div>
+            {{-- ACK: Sudah Dibaca --}}
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-3 shadow-sm">
+                <div class="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center flex-shrink-0">
+                    <span class="ack-read font-bold text-base" style="letter-spacing:-2px">&#x2713;&#x2713;</span>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 leading-none">{{ number_format($stats['ack_read'] ?? 0) }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Sudah Dibaca <span class="text-gray-400">({{ $pctRead }}%)</span></p>
                 </div>
             </div>
         </div>

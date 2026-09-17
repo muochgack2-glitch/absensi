@@ -270,10 +270,12 @@ class WhatsAppController extends Controller
             default => null,
         };
         $stats = [
-            'total'   => (clone $sq)->count(),
-            'sent'    => (clone $sq)->where('status', 'sent')->count(),
-            'failed'  => (clone $sq)->where('status', 'failed')->count(),
-            'pending' => (clone $sq)->where('status', 'pending')->count(),
+            'total'         => (clone $sq)->count(),
+            'sent'          => (clone $sq)->where('status', 'sent')->count(),
+            'failed'        => (clone $sq)->where('status', 'failed')->count(),
+            'pending'       => (clone $sq)->where('status', 'pending')->count(),
+            'ack_delivered' => (clone $sq)->where('status', 'sent')->where('ack_status', '>=', 2)->count(),
+            'ack_read'      => (clone $sq)->where('status', 'sent')->where('ack_status', '>=', 3)->count(),
         ];
 
         return view('whatsapp.logs', compact('logs', 'stats', 'period'));
