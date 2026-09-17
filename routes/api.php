@@ -8,6 +8,10 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\Api\EkaldikController;
 use App\Http\Controllers\Api\StudentPhoneController;
+use App\Http\Controllers\Api\WaAckController;
+
+// WhatsApp ACK webhook — dipanggil gateway Baileys saat status centang berubah
+Route::post('/wa-ack', [WaAckController::class, 'receive']);
 
 // AJAX Login API (dengan session middleware untuk auth)
 Route::middleware(['web'])->post('/auth/login', [AuthenticatedSessionController::class, 'store']);

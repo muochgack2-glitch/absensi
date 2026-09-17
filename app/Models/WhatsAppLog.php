@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Models;
 
@@ -27,11 +27,14 @@ class WhatsAppLog extends Model
         'sent_at',
         'metadata',
         'gateway',
+        'message_id',
+        'ack_status',
     ];
 
     protected $casts = [
-        'sent_at' => 'datetime',
-        'metadata' => 'array',
+        'sent_at'    => 'datetime',
+        'metadata'   => 'array',
+        'ack_status' => 'integer',
     ];
 
     /**
@@ -131,15 +134,69 @@ class WhatsAppLog extends Model
     }
 
     /**
-     * Mark message as sent
+     * Mark message as sent.
+     * Ekstrak message_id dari response gateway jika ada.
      */
     public function markAsSent($metadata = null)
     {
-        $this->update([
-            'status' => 'sent',
-            'sent_at' => now(),
-            'metadata' => $metadata,
-        ]);
+        $updates = [
+            'status'     => 'sent',
+            'sent_at'    => now(),
+            'metadata'   => $metadata,
+            'ack_status' => 1, // Server ACK — pesan diterima server WA
+        ];
+
+        // Ekstrak messageId dari response gateway
+        if (is_array($metadata)) {
+            $messageId = $metadata['messageId']
+                ?? $metadata['message_id']
+                ?? $metadata['data']['messageId']
+                ?? null;
+            if ($messageId) {
+                $updates['message_id'] = $messageId;
+            }
+        }
+
+        $this->update($updates);
+    }
+
+    /**
+     * Update ACK status dari webhook gateway.
+     * Hanya naik, tidak pernah turun (misal: 3 -> 2 diabaikan).
+     */
+    public function updateAck(int $ack): void
+    {
+        if ($ack > ($this->ack_status ?? 0)) {
+            $this->update(['ack_status' => $ack]);
+        }
+    }
+
+    /**
+     * Label ACK untuk UI
+     */
+    public function getAckLabelAttribute(): string
+    {
+        return match($this->ack_status) {
+            -1      => 'Error',
+             1      => 'Terkirim',
+             2      => 'Diterima',
+             3      => 'Dibaca',
+            default => '-',
+        };
+    }
+
+    /**
+     * Icon centang ACK (HTML, aman untuk {!! !!})
+     */
+    public function getAckIconAttribute(): string
+    {
+        return match($this->ack_status) {
+            -1 => '<span title="Error" class="text-danger">&#x2717;</span>',
+             1 => '<span title="Terkirim ke server WA" class="ack-sent">&#x2713;</span>',
+             2 => '<span title="Diterima di HP" class="ack-delivered">&#x2713;&#x2713;</span>',
+             3 => '<span title="Sudah dibaca" class="ack-read">&#x2713;&#x2713;</span>',
+            default => '<span title="Menunggu konfirmasi" class="text-muted">&#x23F1;</span>',
+        };
     }
 
     /**

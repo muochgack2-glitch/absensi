@@ -161,6 +161,7 @@
                             <th class="text-left py-3 px-3 text-gray-500 dark:text-gray-400 font-semibold">Pesan <span class="normal-case font-normal text-gray-400">(klik detail)</span></th>
                             <th class="text-left py-3 px-3 text-gray-500 dark:text-gray-400 font-semibold w-28">Tipe</th>
                             <th class="text-left py-3 px-3 text-gray-500 dark:text-gray-400 font-semibold w-36">Status</th>
+                            <th class="text-center py-3 px-3 text-gray-500 dark:text-gray-400 font-semibold w-16" title="Status centang WhatsApp">ACK</th>
                             <th class="text-left py-3 px-3 text-gray-500 dark:text-gray-400 font-semibold w-28">Gateway</th>
                             <th class="text-left py-3 px-3 text-gray-500 dark:text-gray-400 font-semibold w-24">Waktu</th>
                         </tr>
@@ -251,6 +252,14 @@
                                     </p>
                                 @endif
                             </td>
+                            {{-- ACK Status --}}
+                            <td class="py-3 px-3 text-center">
+                                @if($log->status === 'sent')
+                                    <span class="ack-icon ack-{{ $log->ack_status }}" title="{{ $log->ack_label }}">{!! $log->ack_icon !!}</span>
+                                @else
+                                    <span class="text-gray-300 dark:text-gray-600 text-xs">—</span>
+                                @endif
+                            </td>
                             <td class="py-3 px-3">
                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-full {{ $gwClass }}" title="Gateway {{ $gwLabel }}">
                                     <i class="fas {{ $gwIcon }} text-[9px]"></i> {{ $gwLabel }}
@@ -262,7 +271,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="py-16 text-center">
+                            <td colspan="8" class="py-16 text-center">
                                 <div class="flex flex-col items-center gap-3 text-gray-400 dark:text-gray-500">
                                     <div class="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                                         <i class="fas fa-inbox text-3xl opacity-50"></i>
@@ -404,7 +413,20 @@
         </div>
     </div>
 
+    @push('styles')
+    <style>
+        /* ── ACK Status Centang WhatsApp ── */
+        .ack-sent,
+        .ack-delivered   { color: #9ca3af; font-weight: 700; font-size: 13px; letter-spacing: -1px; }
+        .ack-read        { color: #3b82f6; font-weight: 700; font-size: 13px; letter-spacing: -1px; }
+        .dark .ack-sent,
+        .dark .ack-delivered { color: #6b7280; }
+        .dark .ack-read  { color: #60a5fa; }
+    </style>
+    @endpush
+
     @push('scripts')
+
     <script>
         let currentMessage = '';
 
