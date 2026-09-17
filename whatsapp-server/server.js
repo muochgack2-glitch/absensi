@@ -382,7 +382,7 @@ app.post('/send-media', async (req, res) => {
             }
 
             try {
-                const { phone, caption } = req.body;
+                const { phone, caption, typing_delay } = req.body;
                 const mediaFile = req.file;
 
                 if (!phone) {
@@ -408,6 +408,19 @@ app.post('/send-media', async (req, res) => {
                 }
 
                 const formattedPhone = formatPhoneNumber(phone);
+
+                // -- Simulasi Typing untuk Media --
+                // Delay = delay caption + 1500ms ekstra (simulasi upload foto), max 8 detik
+                const baseDelay = Math.max(1500, Math.min(parseInt(typing_delay) || 2000, 6000));
+                const mediaDelay = Math.min(baseDelay + 1500, 8000);
+                try {
+                    await sock.sendPresenceUpdate('composing', formattedPhone);
+                    await new Promise(resolve => setTimeout(resolve, mediaDelay));
+                    await sock.sendPresenceUpdate('paused', formattedPhone);
+                } catch (presenceErr) {
+                    logger.warn(`Presence update failed (non-fatal): ${presenceErr.message}`);
+                }
+                // ----------------------------------
 
                 // Save temp file
                 const tempDir = path.join(__dirname, 'temp');

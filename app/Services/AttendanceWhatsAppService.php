@@ -422,8 +422,9 @@ class AttendanceWhatsAppService
             // Send with multipart/form-data
             $response = $http->attach('media', file_get_contents($fullPath), basename($fullPath))
                 ->post("{$serverUrl}/send-media", [
-                    'phone'   => $phone,
-                    'caption' => $caption,
+                    'phone'         => $phone,
+                    'caption'       => $caption,
+                    'typing_delay'  => $this->calcTypingDelay($caption), // gateway akan tambah 1500ms untuk upload
                 ]);
 
             if ($response->successful()) {
