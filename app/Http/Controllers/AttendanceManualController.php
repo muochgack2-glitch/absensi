@@ -44,6 +44,13 @@ class AttendanceManualController extends Controller
                 ->get()
                 ->keyBy('student_id');
 
+            // Urutkan ulang: siswa yang belum scan (belum ada record) tampil paling atas,
+            // siswa yang sudah scan di bawah. Dalam setiap grup tetap urut kelas → nama.
+            $students = $students->sortBy(function ($student) use ($records) {
+                $hasScan = isset($records[$student->id]) ? 1 : 0;
+                return $hasScan . '_' . $student->kelas_id . '_' . $student->nama;
+            })->values();
+
         } elseif ($classId) {
             $students = AttendanceStudent::with('kelas')
                 ->where('kelas_id', $classId)
