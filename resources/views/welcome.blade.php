@@ -800,10 +800,19 @@
             // Config default (single camera / facingMode) — pakai resolusi QR
             const configDefault = {
                 fps: SCAN_FPS,
-                qrbox: 300,
-                aspectRatio: 1.0,
+                qrbox: function(viewfinderWidth, viewfinderHeight) {
+                    // Dynamic qrbox — fix utama untuk iOS/iPhone agar area deteksi tidak meleset
+                    const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+                    const size   = Math.floor(minEdge * 0.8);
+                    return { width: size, height: size };
+                },
+                // aspectRatio dihapus — iOS Safari paksa rasionya sendiri, nilai 1.0 bikin deteksi meleset
                 disableFlip: false,
-                rememberLastUsedCamera: true,
+                rememberLastUsedCamera: false,
+                experimentalFeatures: {
+                    // Matikan BarcodeDetector — implementasi iOS-nya tidak stabil
+                    useBarCodeDetectorIfSupported: false,
+                },
                 videoConstraints: {
                     facingMode: "environment",
                     width: qrRes.width,
@@ -814,10 +823,16 @@
             // Config dual camera — tambahkan resolusi QR via videoConstraints
             const configDual = {
                 fps: SCAN_FPS,
-                qrbox: 300,
-                aspectRatio: 1.0,
+                qrbox: function(viewfinderWidth, viewfinderHeight) {
+                    const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+                    const size   = Math.floor(minEdge * 0.8);
+                    return { width: size, height: size };
+                },
                 disableFlip: false,
                 rememberLastUsedCamera: false,
+                experimentalFeatures: {
+                    useBarCodeDetectorIfSupported: false,
+                },
                 videoConstraints: {
                     width: qrRes.width,
                     height: qrRes.height
