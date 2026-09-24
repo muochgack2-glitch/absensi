@@ -823,12 +823,12 @@ class AttendanceNotificationService
             return;
         }
 
-        $result = ['success' => false];
+        // Kirim via queue (non-blocking) — sama seperti notifyCheckIn
         foreach ($phones as $phone) {
-            $result = $this->whatsAppService->sendParentNotification($phone, $message);
+            $this->dispatchWa($phone, $message, 'manual_correction', null, $student->id);
         }
 
-        $this->logNotification($student->id, 'manual_correction', $result);
+        $this->logNotification($student->id, 'manual_correction', ['success' => true, 'queued' => true]);
 
         Log::info("Manual correction notif sent", [
             'student_id'  => $student->id,
@@ -909,12 +909,12 @@ class AttendanceNotificationService
             return;
         }
 
-        $result = ['success' => false];
+        // Kirim via queue (non-blocking) — sama seperti notifyCheckIn
         foreach ($phones as $phone) {
-            $result = $this->whatsAppService->sendParentNotification($phone, $message);
+            $this->dispatchWa($phone, $message, 'manual_first_entry', null, $student->id);
         }
 
-        $this->logNotification($student->id, 'manual_first_entry', $result);
+        $this->logNotification($student->id, 'manual_first_entry', ['success' => true, 'queued' => true]);
 
         Log::info("Manual first entry notif sent", [
             'student_id' => $student->id,
@@ -960,6 +960,22 @@ class AttendanceNotificationService
             return;
         }
 
+        // ── Cooldown guard: cegah double notif jika admin simpan dua kali dalam 5 menit ──
+        $alreadySentRecently = AttendanceLog::where('student_id', $student->id)
+            ->where('action', 'notification')
+            ->where('message', 'LIKE', '%manual_status_change%')
+            ->where('created_at', '>=', now()->subMinutes(5))
+            ->exists();
+
+        if ($alreadySentRecently) {
+            Log::debug('Manual status change notif skipped — cooldown 5 menit aktif', [
+                'student_id' => $student->id,
+                'date'       => $date,
+            ]);
+            return;
+        }
+        // ─────────────────────────────────────────────────────────────────────────────────
+
         $hariTanggal   = \Carbon\Carbon::parse($date)->locale('id')->translatedFormat('l, d F Y');
         $schoolName    = AttendanceSetting::get('school_name', 'Sekolah');
 
@@ -988,12 +1004,12 @@ class AttendanceNotificationService
             return;
         }
 
-        $result = ['success' => false];
+        // Kirim via queue (non-blocking) — sama seperti notifyCheckIn
         foreach ($phones as $phone) {
-            $result = $this->whatsAppService->sendParentNotification($phone, $message);
+            $this->dispatchWa($phone, $message, 'manual_status_change', null, $student->id);
         }
 
-        $this->logNotification($student->id, 'manual_status_change', $result);
+        $this->logNotification($student->id, 'manual_status_change', ['success' => true, 'queued' => true]);
 
         Log::info("Manual status change notif sent", [
             'student_id'  => $student->id,
