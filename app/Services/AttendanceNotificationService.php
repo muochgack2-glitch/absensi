@@ -865,6 +865,25 @@ class AttendanceNotificationService
             return;
         }
 
+        // ── Cooldown guard: cegah race condition triple-submit ────────────────
+        // Jika notif manual_first_entry untuk siswa+tanggal ini sudah dikirim
+        // dalam 10 menit terakhir, skip — ini adalah race condition duplicate.
+        $alreadySent = AttendanceLog::where('student_id', $student->id)
+            ->where('action', 'notification')
+            ->where('message', 'LIKE', '%manual_first_entry%')
+            ->where('created_at', '>=', now()->subMinutes(10))
+            ->exists();
+
+        if ($alreadySent) {
+            Log::debug('Manual first entry notif skipped — cooldown 10 menit aktif', [
+                'student_id' => $student->id,
+                'date'       => $date,
+                'status'     => $statusBaru,
+            ]);
+            return;
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
         $jamResmi   = AttendanceSetting::get('check_in_time', '07:00');
         $toleransi  = (int) AttendanceSetting::get('tolerance_minutes', 15);
         $hariTanggal = \Carbon\Carbon::parse($date)->locale('id')->translatedFormat('l, d F Y');
