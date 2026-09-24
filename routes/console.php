@@ -167,6 +167,9 @@ Schedule::command('attendance:cleanup-photos --days=30')
 |--------------------------------------------------------------------------
 */
 Schedule::call(function () {
+    $enabled  = AttendanceSetting::get('waka_summary_enabled', '0');
+    if ($enabled !== '1') return;
+
     $sendTime = AttendanceSetting::get('waka_summary_masuk_time', '08:00');
     $sendDays = AttendanceSetting::get('waka_summary_send_days', '1,2,3,4,5');
 
@@ -196,6 +199,9 @@ Schedule::call(function () {
 |--------------------------------------------------------------------------
 */
 Schedule::call(function () {
+    $enabled  = AttendanceSetting::get('waka_summary_enabled', '0');
+    if ($enabled !== '1') return;
+
     $sendTime = AttendanceSetting::get('waka_summary_pulang_time', '15:00');
     $sendDays = AttendanceSetting::get('waka_summary_send_days', '1,2,3,4,5');
 
@@ -225,6 +231,9 @@ Schedule::call(function () {
 |--------------------------------------------------------------------------
 */
 Schedule::call(function () {
+    $enabled  = AttendanceSetting::get('kepsek_summary_enabled', '0');
+    if ($enabled !== '1') return;
+
     $sendTime = AttendanceSetting::get('kepsek_summary_time', '08:30');
     $sendDays = AttendanceSetting::get('kepsek_summary_send_days', '1,2,3,4,5');
 
@@ -254,6 +263,9 @@ Schedule::call(function () {
 |--------------------------------------------------------------------------
 */
 Schedule::call(function () {
+    $enabled  = AttendanceSetting::get('kepsek_summary_enabled', '0');
+    if ($enabled !== '1') return;
+
     $sendTime = AttendanceSetting::get('kepsek_summary_pulang_time', '15:30');
     $sendDays = AttendanceSetting::get('kepsek_summary_send_days', '1,2,3,4,5');
 
