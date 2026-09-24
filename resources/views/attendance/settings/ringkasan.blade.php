@@ -137,8 +137,10 @@
                                         </div>
                                         <pre id="cmd-pm2-start" class="text-xs bg-gray-900 text-green-400 rounded p-3 overflow-x-auto whitespace-pre">pm2 start "php /www/wwwroot/absensi/artisan queue:work database --queue=whatsapp,default --sleep=3 --tries=3 --timeout=60 --max-time=3600" \
   --name="absensi-queue-worker" \
-  --restart-delay=3000 \
-  --log=/www/wwwroot/absensi/storage/logs/queue-worker.log</pre>
+  --instances=1 \
+  --restart-delay=5000 \
+  --log=/www/wwwroot/absensi/storage/logs/queue-worker.log
+pm2 save</pre>
                                     </div>
 
                                     {{-- Save PM2 --}}
