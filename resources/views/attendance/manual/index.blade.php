@@ -74,7 +74,7 @@
 
         {{-- Tabel Input Absensi --}}
         @if($students->isNotEmpty())
-            <form method="POST" action="{{ route('attendance.manual.store') }}" id="manualForm">
+            <form method="POST" action="{{ route('attendance.manual.store') }}" id="manualForm" onsubmit="return handleManualFormSubmit(this)">
                 @csrf
                 <input type="hidden" name="date" value="{{ $date }}">
                 <input type="hidden" name="class_id" value="{{ $classId }}">
@@ -258,9 +258,10 @@
                             Record yang sudah ada akan diperbarui (Update).
                         </p>
                         <button type="submit"
-                                class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3 text-sm font-semibold rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all">
-                            <i class="fas fa-save mr-2"></i>
-                            Simpan Absensi
+                                id="btnSimpanAbsensi"
+                                class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3 text-sm font-semibold rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+                            <i class="fas fa-save mr-2" id="btnSimpanIcon"></i>
+                            <span id="btnSimpanLabel">Simpan Absensi</span>
                         </button>
                     </div>
                 </x-card>
@@ -386,6 +387,22 @@
             const form = document.getElementById('deleteRecordForm');
             form.action = '/attendance/manual/' + id;
             form.submit();
+        }
+        // ===== Anti double-submit: Simpan Absensi =====
+        let _manualFormSubmitting = false;
+        function handleManualFormSubmit(form) {
+            if (_manualFormSubmitting) return false; // blok submit kedua
+            _manualFormSubmitting = true;
+
+            const btn   = document.getElementById('btnSimpanAbsensi');
+            const icon  = document.getElementById('btnSimpanIcon');
+            const label = document.getElementById('btnSimpanLabel');
+            if (btn) {
+                btn.disabled = true;
+                if (icon)  { icon.className  = 'fas fa-spinner fa-spin mr-2'; }
+                if (label) { label.textContent = 'Menyimpan...'; }
+            }
+            return true; // biarkan form submit normal
         }
     </script>
     @endpush
