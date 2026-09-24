@@ -950,6 +950,9 @@
                 >
                     <i class="fab fa-whatsapp text-lg text-green-400"></i>
                     <span class="nav-text font-medium flex-1 text-left">WhatsApp</span>
+                    {{-- Badge: queue worker mati --}}
+                    <span id="queueWorkerBadge" class="sidebar-badge" style="display:none; right:2rem;"
+                          title="Queue Worker tidak aktif!">!</span>
                     <i class="fas fa-chevron-down nav-text text-xs submenu-arrow transition-transform duration-200 {{ $waOpen ? 'rotate-180' : '' }}"></i>
                 </button>
                 
@@ -1122,3 +1125,34 @@
 
     </div>
 </aside>
+
+@if(auth()->user()?->isAdmin())
+<script>
+(function() {
+    var QUEUE_STATUS_URL = '{{ route("attendance.ringkasan.queue-status") }}';
+
+    function checkQueueWorker() {
+        fetch(QUEUE_STATUS_URL)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var badge = document.getElementById('queueWorkerBadge');
+                if (!badge) return;
+                if (data.worker_status === 'dead') {
+                    badge.style.display = 'flex';
+                    badge.title = 'Queue Worker tidak aktif! Notifikasi WA mungkin tidak terkirim.';
+                } else {
+                    badge.style.display = 'none';
+                }
+            })
+            .catch(function() {
+                // Diam jika gagal — tidak ganggu UX
+            });
+    }
+
+    // Jalankan pertama kali setelah 3 detik (beri waktu halaman load)
+    setTimeout(checkQueueWorker, 3000);
+    // Polling setiap 60 detik
+    setInterval(checkQueueWorker, 60000);
+})();
+</script>
+@endif
