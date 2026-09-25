@@ -803,46 +803,46 @@
 
             console.log('📱 isIOS:', isIOS, '| userAgent:', navigator.userAgent.substring(0, 60));
 
-            // Config default (single camera / facingMode) — pakai resolusi QR
+            // ── Config untuk non-iOS (PC/Android) ────────────────────────────────
             const configDefault = {
                 fps: SCAN_FPS,
-                qrbox: function(viewfinderWidth, viewfinderHeight) {
-                    // Dynamic qrbox — fix utama untuk iOS/iPhone agar area deteksi tidak meleset
-                    const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                    const size   = Math.floor(minEdge * 0.8);
-                    return { width: size, height: size };
+                qrbox: function(w, h) {
+                    const s = Math.floor(Math.min(w, h) * 0.8);
+                    return { width: s, height: s };
                 },
-                // aspectRatio dihapus — iOS Safari paksa rasionya sendiri, nilai 1.0 bikin deteksi meleset
                 disableFlip: false,
                 rememberLastUsedCamera: false,
-                experimentalFeatures: {
-                    // Matikan BarcodeDetector — implementasi iOS-nya tidak stabil
-                    useBarCodeDetectorIfSupported: false,
-                },
-                // iOS 18: width/height constraint bikin decoder gagal silent → hapus di iOS
-                videoConstraints: isIOS
-                    ? { facingMode: { exact: 'environment' } }
-                    : { facingMode: 'environment', width: qrRes.width, height: qrRes.height }
+                experimentalFeatures: { useBarCodeDetectorIfSupported: false },
+                videoConstraints: { facingMode: 'environment', width: qrRes.width, height: qrRes.height }
             };
 
-            // Config dual camera — tambahkan resolusi QR via videoConstraints
+            // ── Config minimal untuk iOS — TANPA videoConstraints, pakai deviceId ─
+            // iOS 18: facingMode+width/height menyebabkan decoder gagal silent.
+            // Solusi: getCameras() lalu start pakai deviceId (kamera belakang).
+            const configIOS = {
+                fps: Math.min(SCAN_FPS, 10), // cap 10fps di iOS
+                qrbox: function(w, h) {
+                    const s = Math.floor(Math.min(w, h) * 0.8);
+                    return { width: s, height: s };
+                },
+                disableFlip: false,
+                rememberLastUsedCamera: false,
+                experimentalFeatures: { useBarCodeDetectorIfSupported: false },
+                // Tidak ada videoConstraints — biarkan browser pilih resolusi terbaik
+            };
+
+            // Config dual camera (PC)
             const configDual = {
                 fps: SCAN_FPS,
-                qrbox: function(viewfinderWidth, viewfinderHeight) {
-                    const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                    const size   = Math.floor(minEdge * 0.8);
-                    return { width: size, height: size };
+                qrbox: function(w, h) {
+                    const s = Math.floor(Math.min(w, h) * 0.8);
+                    return { width: s, height: s };
                 },
                 disableFlip: false,
                 rememberLastUsedCamera: false,
-                experimentalFeatures: {
-                    useBarCodeDetectorIfSupported: false,
-                },
-                videoConstraints: isIOS
-                    ? { facingMode: { exact: 'environment' } }
-                    : { width: qrRes.width, height: qrRes.height }
+                experimentalFeatures: { useBarCodeDetectorIfSupported: false },
+                videoConstraints: { width: qrRes.width, height: qrRes.height }
             };
-
 
             const doStart = (constraint, cfg) => {
                 html5QrCode.start(
@@ -856,40 +856,63 @@
                 });
             };
 
-            if (DUAL_CAMERA) {
+            if (isIOS) {
+                // ── iOS: enumerate cameras → pakai deviceId kamera belakang ────────
+                // Lebih reliable dari facingMode di iOS 18
+                Html5Qrcode.getCameras().then(cameras => {
+                    camerasCache = cameras;
+                    console.log('📷 iOS cameras:', cameras.map((c,i) => `[${i}] ${c.label || '(no label)'}`));
+
+                    if (cameras.length === 0) {
+                        console.warn('⚠️ iOS: no cameras found, fallback facingMode');
+                        doStart({ facingMode: 'environment' }, configIOS);
+                        return;
+                    }
+
+                    // Pilih kamera belakang: match label "back/rear/environment"
+                    // Fallback: kamera TERAKHIR (biasanya belakang di iPhone)
+                    const backCam = cameras.find(c => /back|rear|environment/i.test(c.label || ''))
+                                   || cameras[cameras.length - 1];
+
+                    console.log('📷 iOS using camera:', backCam.label || backCam.id.substring(0, 12));
+                    doStart(backCam.id, configIOS);
+                    setTimeout(updateCameraStatus, 500);
+                }).catch(err => {
+                    console.warn('📷 iOS getCameras gagal:', err, '→ fallback facingMode');
+                    doStart({ facingMode: 'environment' }, configIOS);
+                });
+
+            } else if (DUAL_CAMERA) {
+                // ── PC Dual Camera ─────────────────────────────────────────────────
                 Html5Qrcode.getCameras().then(cameras => {
                     camerasCache = cameras;
                     console.log('📷 Kamera tersedia:', cameras.map((c,i) => `[${i}] ${c.label}`));
 
-                    // Dual camera HANYA jika deviceId match persis (kamera sudah dikonfigurasi)
                     const qrCamera = QR_CAM_DEVICEID ? cameras.find(c => c.id === QR_CAM_DEVICEID) : null;
 
                     if (qrCamera) {
-                        // PC terkonfigurasi: dual camera mode
                         qrCameraId = qrCamera.id;
                         console.log('🎥 QR scanner pakai:', qrCamera.label);
                         doStart(qrCamera.id, configDual);
                         setTimeout(() => initDualCamera(), 800);
                         setTimeout(updateCameraStatus, 500);
                     } else {
-                        // HP/PC baru: pakai facingMode:environment → kamera BELAKANG
-                        // JANGAN pakai cameras[0] — di iOS kamera depan bisa ada di index 0
-                        console.log('📷 Fallback (localStorage kosong) → facingMode:environment (kamera belakang)');
+                        console.log('📷 Fallback → facingMode:environment');
                         doStart({ facingMode: 'environment' }, configDefault);
                         setTimeout(updateCameraStatus, 500);
                     }
                 }).catch(() => {
-                    // getCameras gagal (permission denied?) → coba facingMode langsung
-                    console.log('📷 getCameras gagal → facingMode:environment');
                     doStart({ facingMode: 'environment' }, configDefault);
                 });
+
             } else {
+                // ── Android / PC single camera ─────────────────────────────────────
                 doStart({ facingMode: 'environment' }, configDefault);
             }
 
-
-
         }
+
+
 
 
         /**
