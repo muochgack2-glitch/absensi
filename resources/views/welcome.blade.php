@@ -797,6 +797,12 @@
             const qrRes    = resolutionMap[SCAN_RES_QR]    || resolutionMap['hd'];
             const photoRes = resolutionMap[SCAN_RES_PHOTO] || resolutionMap['hd'];
 
+            // Deteksi iOS (iPhone/iPad) — iOS 18 gagal decode jika width/height terlalu strict
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+            console.log('📱 isIOS:', isIOS, '| userAgent:', navigator.userAgent.substring(0, 60));
+
             // Config default (single camera / facingMode) — pakai resolusi QR
             const configDefault = {
                 fps: SCAN_FPS,
@@ -813,11 +819,10 @@
                     // Matikan BarcodeDetector — implementasi iOS-nya tidak stabil
                     useBarCodeDetectorIfSupported: false,
                 },
-                videoConstraints: {
-                    facingMode: "environment",
-                    width: qrRes.width,
-                    height: qrRes.height
-                }
+                // iOS 18: width/height constraint bikin decoder gagal silent → hapus di iOS
+                videoConstraints: isIOS
+                    ? { facingMode: { exact: 'environment' } }
+                    : { facingMode: 'environment', width: qrRes.width, height: qrRes.height }
             };
 
             // Config dual camera — tambahkan resolusi QR via videoConstraints
@@ -833,11 +838,11 @@
                 experimentalFeatures: {
                     useBarCodeDetectorIfSupported: false,
                 },
-                videoConstraints: {
-                    width: qrRes.width,
-                    height: qrRes.height
-                }
+                videoConstraints: isIOS
+                    ? { facingMode: { exact: 'environment' } }
+                    : { width: qrRes.width, height: qrRes.height }
             };
+
 
             const doStart = (constraint, cfg) => {
                 html5QrCode.start(
