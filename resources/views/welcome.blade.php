@@ -143,8 +143,8 @@
                     <div class="relative inline-block w-full max-w-2xl mx-auto">
                         <div class="absolute -inset-3 bg-gradient-to-r from-primary-500 via-purple-500 to-pink-500 rounded-2xl opacity-30 blur-lg animate-pulse"></div>
                         <div id="readerContainer" class="relative bg-gray-900 rounded-xl p-3 shadow-xl" style="transition: box-shadow 0.2s ease;">
-                            {{-- overflow visible agar video desktop tidak terpotong --}}
-                            <div id="reader" class="mx-auto rounded-lg" style="width: 100%; min-height: 300px;"></div>
+                            {{-- overflow visible agar video desktop tidak terpotong; min-height dihapus agar tidak ada area hitam --}}
+                            <div id="reader" class="mx-auto rounded-lg" style="width: 100%;"></div>
                             
                             {{-- Scanning Animation Overlay --}}
                             <div id="scanOverlay" class="absolute inset-3 pointer-events-none rounded-lg overflow-hidden">
