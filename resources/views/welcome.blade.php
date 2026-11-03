@@ -1,4 +1,49 @@
 <x-public-layout>
+    {{-- ══════════════════════════════════════════════════════════════════════ --}}
+    {{-- TRUSTED DEVICE GATE — Scanner hanya aktif di perangkat terpercaya    --}}
+    {{-- ══════════════════════════════════════════════════════════════════════ --}}
+    <div id="deviceGate" class="fixed inset-0 z-[100] bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4" style="display:none;">
+        <div class="max-w-md w-full text-center">
+            {{-- Icon --}}
+            <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-red-500 to-orange-500 rounded-full mb-6 shadow-2xl">
+                <i class="fas fa-shield-alt text-5xl text-white"></i>
+            </div>
+
+            <h2 class="text-2xl font-black text-white mb-3">Perangkat Belum Terdaftar</h2>
+            <p class="text-gray-400 mb-6 text-sm leading-relaxed">
+                Scanner hanya aktif di perangkat yang sudah didaftarkan oleh admin atau petugas piket.
+                <br>Silakan login untuk mendaftarkan perangkat ini.
+            </p>
+
+            {{-- Login Button --}}
+            <button onclick="showLoginModal()" class="w-full px-8 py-4 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white rounded-xl font-bold text-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-2xl mb-4">
+                <i class="fas fa-sign-in-alt mr-2"></i>
+                Login untuk Aktifkan Scanner
+            </button>
+
+            <p class="text-gray-500 text-xs">
+                <i class="fas fa-info-circle mr-1"></i>
+                Hanya perlu login sekali. Setelah terdaftar, scanner otomatis aktif.
+            </p>
+
+            {{-- Info device token jika sudah registered tapi direvoke --}}
+            <div id="deviceRevokedInfo" class="hidden mt-4 p-3 bg-red-900/30 border border-red-700 rounded-lg">
+                <p class="text-red-400 text-sm">
+                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                    Perangkat ini pernah terdaftar tapi aksesnya sudah dicabut. Hubungi admin.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    {{-- Device Trust Status Badge (pojok kiri atas) --}}
+    <div id="deviceTrustBadge" class="hidden fixed top-3 left-3 z-50">
+        <div class="flex items-center gap-2 bg-green-900/80 backdrop-blur border border-green-700 rounded-full px-3 py-1.5 shadow-lg">
+            <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+            <span class="text-green-300 text-xs font-semibold">Perangkat Terpercaya</span>
+        </div>
+    </div>
+
     {{-- Holiday Banner --}}
     @php $publicHoliday = \App\Models\Holiday::getForDate(); @endphp
     @if($publicHoliday)
@@ -659,6 +704,74 @@
     @push('scripts')
 
     <script>
+        // ══════════════════════════════════════════════════════════════
+        // TRUSTED DEVICE — device token management
+        // ══════════════════════════════════════════════════════════════
+        const DEVICE_TOKEN_KEY = 'absensi_device_token';
+        let deviceTrusted = false;
+
+        /**
+         * Cek apakah device ini trusted (punya token valid).
+         * Dipanggil saat page load, sebelum scanner diinisialisasi.
+         */
+        async function checkDeviceTrust() {
+            const token = localStorage.getItem(DEVICE_TOKEN_KEY);
+            const gate  = document.getElementById('deviceGate');
+            const badge = document.getElementById('deviceTrustBadge');
+
+            if (!token) {
+                // Belum pernah login — tampilkan gate
+                gate.style.display = 'flex';
+                deviceTrusted = false;
+                return false;
+            }
+
+            try {
+                const res = await fetch('/api/device/validate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ device_token: token })
+                });
+
+                const data = await res.json();
+
+                if (data.valid) {
+                    // ✅ Device trusted — sembunyikan gate, tampilkan badge
+                    gate.style.display = 'none';
+                    badge.classList.remove('hidden');
+                    deviceTrusted = true;
+                    console.log('🔒 Perangkat terpercaya:', data.device_name);
+                    return true;
+                } else {
+                    // ❌ Token tidak valid (direvoke/dihapus)
+                    localStorage.removeItem(DEVICE_TOKEN_KEY);
+                    gate.style.display = 'flex';
+                    document.getElementById('deviceRevokedInfo').classList.remove('hidden');
+                    deviceTrusted = false;
+                    return false;
+                }
+            } catch (err) {
+                console.error('Device validation error:', err);
+                // Jika server error, tetap izinkan scan (graceful degradation)
+                // agar scanner tetap jalan walau server sementara unreachable
+                gate.style.display = 'none';
+                badge.classList.remove('hidden');
+                deviceTrusted = true;
+                return true;
+            }
+        }
+
+        /**
+         * Get device token untuk dikirim di setiap scan request.
+         */
+        function getDeviceToken() {
+            return localStorage.getItem(DEVICE_TOKEN_KEY) || '';
+        }
+
         let currentAction = 'check_in';
         let html5QrCode = null;
         let lastScannedNis = null;
@@ -702,13 +815,20 @@
         function waitForHtml5Qrcode() {
             if (typeof window.Html5Qrcode !== 'undefined') {
                 console.log('Html5Qrcode loaded successfully');
-                initScanner();
-                loadTodayStats();
-                loadSchoolHours();
-                loadAnnouncement();
-                loadRecentScans(); // Load initial recent scans
-                autoSetActionByTime(); // Auto-set Check In/Out based on current time
-                // connectSSE(); // DISABLED: SSE causing 30s timeout and blocking server
+                // Cek device trust SEBELUM init scanner
+                checkDeviceTrust().then(trusted => {
+                    if (trusted) {
+                        initScanner();
+                    } else {
+                        console.log('⛔ Scanner tidak diaktifkan — perangkat belum terdaftar');
+                    }
+                    // Load data publik (stats dll) terlepas dari trust status
+                    loadTodayStats();
+                    loadSchoolHours();
+                    loadAnnouncement();
+                    loadRecentScans();
+                    autoSetActionByTime();
+                });
             } else {
                 console.log('Waiting for Html5Qrcode...');
                 setTimeout(waitForHtml5Qrcode, 100);
@@ -1102,7 +1222,8 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'X-Device-Token': getDeviceToken()
                     },
                     body: JSON.stringify({
                         qr_token: nis,   // raw QR content (NIS:HMAC) — backend verifies signature
@@ -1886,6 +2007,10 @@
                         formData.forEach((value, key) => {
                             jsonData[key] = value;
                         });
+
+                        // Tambahkan flag register_device agar server tahu ini login dari scanner
+                        jsonData.register_device = true;
+                        jsonData.device_name = 'Scanner ' + (navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop') + ' — ' + new Date().toLocaleDateString('id-ID');
                         
                         const response = await fetch('/api/auth/login', {
                             method: 'POST',
@@ -1897,15 +2022,37 @@
                             body: JSON.stringify(jsonData)
                         });
                         
-                        console.log('Response status:', response.status);
-                        console.log('Response headers:', response.headers);
-                        
                         const result = await response.json();
-                        console.log('Response data:', result);
+                        console.log('Login response:', result);
                         
                         if (response.ok && result.success !== false) {
-                            // Login success - redirect to dashboard
-                            window.location.href = result.redirect || '{{ route("dashboard") }}';
+                            if (result.device_token) {
+                                // ✅ Device registered — simpan token & aktifkan scanner
+                                localStorage.setItem(DEVICE_TOKEN_KEY, result.device_token);
+                                deviceTrusted = true;
+
+                                // Sembunyikan gate, tampilkan badge
+                                document.getElementById('deviceGate').style.display = 'none';
+                                document.getElementById('deviceTrustBadge').classList.remove('hidden');
+                                document.getElementById('deviceRevokedInfo').classList.add('hidden');
+
+                                // Tutup modal login
+                                hideLoginModal();
+
+                                // Aktifkan scanner
+                                showToast('success', '✅ Perangkat Terdaftar', 'Scanner sekarang aktif di perangkat ini.', 4000);
+                                initScanner();
+
+                                // Reset button
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = originalHTML;
+                            } else if (result.redirect) {
+                                // Login berhasil tapi bukan admin/petugas — redirect ke dashboard
+                                window.location.href = result.redirect;
+                            } else {
+                                // Fallback redirect
+                                window.location.href = '{{ route("dashboard") }}';
+                            }
                         } else {
                             // Login failed - show error
                             const errorMessage = result.message || result.errors?.email?.[0] || 'Login gagal. Periksa email dan password Anda.';

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\TrustedDevice;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -35,11 +36,30 @@ class AuthenticatedSessionController extends Controller
 
             // Check if request expects JSON (AJAX request)
             if ($request->expectsJson()) {
-                return response()->json([
+                $response = [
                     'success'  => true,
                     'message'  => 'Login berhasil',
                     'redirect' => $homeRoute,
-                ]);
+                ];
+
+                // Jika login dari welcome page (scanner), otomatis register device
+                if ($request->input('register_device') && in_array($user->role, ['admin', 'petugas'])) {
+                    $token = TrustedDevice::generateToken();
+                    $device = TrustedDevice::create([
+                        'device_token' => $token,
+                        'user_id'      => $user->id,
+                        'device_name'  => $request->input('device_name') ?: 'Perangkat ' . now()->format('d/m/Y H:i'),
+                        'browser_info' => TrustedDevice::parseBrowserInfo($request->userAgent()),
+                        'ip_address'   => $request->ip(),
+                        'last_used_at' => now(),
+                    ]);
+
+                    $response['device_token'] = $token;
+                    $response['device_registered'] = true;
+                    $response['redirect'] = null; // Jangan redirect, tetap di welcome page
+                }
+
+                return response()->json($response);
             }
 
             return redirect()->intended($homeRoute);

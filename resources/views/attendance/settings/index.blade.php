@@ -494,6 +494,51 @@
         @endif {{-- end admin-only foto & backup --}}
     </div>
 
+
+    {{-- SECTION: PERANGKAT TERPERCAYA --}}
+    @if(auth()->user()?->isAdmin() || auth()->user()?->isPetugas())
+    <div class="flex items-center gap-4 mb-2 mt-6">
+        <div class="flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-full">
+            <div class="w-2 h-2 rounded-full bg-green-500"></div>
+            <span class="text-xs font-semibold text-green-700 dark:text-green-300 uppercase tracking-wider">🔒 Perangkat Terpercaya</span>
+        </div>
+        <div class="flex-1 border-t border-green-200 dark:border-green-700/50"></div>
+    </div>
+
+    <x-card>
+        <div class="flex items-center mb-6">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white text-2xl mr-4">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Kelola Perangkat Terpercaya</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Perangkat yang diizinkan menjalankan scanner absensi</p>
+            </div>
+        </div>
+        <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <p class="text-sm text-blue-700 dark:text-blue-300">
+                <i class="fas fa-info-circle mr-1"></i>
+                Scanner di halaman utama hanya aktif di perangkat yang terdaftar. Login sebagai admin/petugas di halaman scanner untuk mendaftarkan perangkat baru.
+            </p>
+        </div>
+        <div id="trustedDeviceList" class="space-y-3">
+            <div class="text-center py-6 text-gray-400">
+                <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                <p class="text-sm">Memuat daftar perangkat...</p>
+            </div>
+        </div>
+    </x-card>
+    @endif
+
+    @push('scripts')
+    <script>
+        async function loadTrustedDevices(){var c=document.getElementById('trustedDeviceList');if(!c)return;try{var r=await fetch('/api/devices',{headers:{'Accept':'application/json'}});var d=await r.json();if(!d.success||!d.devices.length){c.innerHTML='<div class="text-center py-6 text-gray-400"><i class="fas fa-laptop text-3xl mb-2"></i><p class="text-sm">Belum ada perangkat terdaftar</p></div>';return}c.innerHTML=d.devices.map(function(v){var bc=v.is_active?'border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10':'border-gray-200 dark:border-gray-700 opacity-60';var ic=v.is_active?'bg-green-500':'bg-gray-400';var bg=v.is_active?'<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Aktif</span>':'<span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-500">Dicabut</span>';var bt=v.is_active?'<button onclick="revokeDevice('+v.id+')" class="p-2 text-red-500 hover:bg-red-50 rounded-lg" title="Cabut"><i class="fas fa-ban"></i></button>':'<button onclick="activateDevice('+v.id+')" class="p-2 text-green-500 hover:bg-green-50 rounded-lg" title="Aktifkan"><i class="fas fa-check-circle"></i></button><button onclick="deleteDevice('+v.id+')" class="p-2 text-red-500 hover:bg-red-50 rounded-lg" title="Hapus"><i class="fas fa-trash"></i></button>';return '<div class="flex items-center justify-between p-3 rounded-lg border '+bc+'"><div class="flex items-center gap-3 min-w-0"><div class="w-10 h-10 rounded-lg flex items-center justify-center '+ic+' text-white flex-shrink-0"><i class="fas fa-laptop"></i></div><div class="min-w-0"><p class="font-semibold text-sm text-gray-900 dark:text-white truncate">'+v.device_name+'</p><p class="text-xs text-gray-500">'+(v.browser_info||'-')+' · IP: '+(v.ip_address||'-')+' · Oleh: '+v.authorized_by+'</p><p class="text-xs text-gray-400">Terdaftar: '+v.created_at+' · Aktif: '+v.last_used_at+'</p></div></div><div class="flex items-center gap-2 ml-3">'+bg+bt+'</div></div>'}).join('')}catch(e){c.innerHTML='<div class="text-center py-4 text-red-500"><p class="text-sm">Gagal memuat</p></div>'}}
+        async function revokeDevice(id){if(!confirm('Cabut akses perangkat ini?'))return;await fetch('/api/devices/'+id+'/revoke',{method:'POST',headers:{'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content}});loadTrustedDevices()}
+        async function activateDevice(id){await fetch('/api/devices/'+id+'/activate',{method:'POST',headers:{'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content}});loadTrustedDevices()}
+        async function deleteDevice(id){if(!confirm('Hapus permanen?'))return;await fetch('/api/devices/'+id,{method:'DELETE',headers:{'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content}});loadTrustedDevices()}
+        document.addEventListener('DOMContentLoaded',loadTrustedDevices);
+    </script>
+    @endpush
     @push('scripts')
     <script>
         // ===== Restore: konfirmasi & preview file =====
