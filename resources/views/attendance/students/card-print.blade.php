@@ -294,55 +294,89 @@
         .card-mini-55 {
             width: 61mm;
             height: 74mm;
-            border: 1px solid #003399;
-            border-radius: 3mm;
-            background: #eef6ff;
+            border: 1.5px solid #003399;
+            border-radius: 4mm;
+            background: #edf5fe;
             overflow: hidden;
             position: relative;
             box-sizing: border-box;
             text-align: center;
         }
 
-        /* Header Sekolah */
+        /* Aksen lengkungan dekoratif pojok kanan atas (kuning & biru) */
+        .m55-deco-tr-yellow {
+            position: absolute;
+            top: -12mm;
+            right: -12mm;
+            width: 30mm;
+            height: 30mm;
+            border-radius: 50%;
+            background: #ffd700;
+            z-index: 1;
+        }
+        .m55-deco-tr-blue {
+            position: absolute;
+            top: -9mm;
+            right: -9mm;
+            width: 25mm;
+            height: 25mm;
+            border-radius: 50%;
+            background: #0284c7;
+            z-index: 2;
+        }
+
+        /* Header Sekolah (Seamless, tanpa garis pemotong kaku) */
         .m55-header-table {
             width: 100%;
             border-collapse: collapse;
-            background: #ffffff;
-            border-bottom: 1.5px solid #003399;
-            padding: 1mm 2mm;
-            height: 10.5mm;
+            background: transparent;
+            padding: 2mm 2.5mm 0.5mm;
+            height: 11mm;
+            position: relative;
+            z-index: 10;
         }
         .m55-header-table td {
             vertical-align: middle;
             padding: 0;
         }
         .m55-logo-cell {
+            width: 10.5mm;
+            text-align: center;
+        }
+        .m55-logo-wrap {
             width: 9.5mm;
+            height: 9.5mm;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 1px solid #bfdbfe;
+            overflow: hidden;
+            margin: 0 auto;
             text-align: center;
         }
         .m55-logo-img {
-            width: 8.5mm;
-            height: 8.5mm;
+            width: 9.5mm;
+            height: 9.5mm;
             object-fit: contain;
             display: block;
             margin: 0 auto;
         }
         .m55-divider-cell {
-            width: 2.5mm;
+            width: 3mm;
             text-align: center;
         }
         .m55-vdivider {
-            width: 1.5px;
-            height: 8mm;
+            width: 2px;
+            height: 8.5mm;
             background: #003399;
+            border-radius: 1px;
             margin: 0 auto;
         }
         .m55-school-name {
             padding-left: 2mm;
-            font-size: 9.5pt;
+            font-size: 10.5pt;
             font-weight: 900;
             color: #002b66;
-            letter-spacing: 0.3pt;
+            letter-spacing: 0.4pt;
             text-align: left;
             line-height: 1.1;
             text-transform: uppercase;
@@ -486,14 +520,20 @@
                             @if($layout === 'mini-55')
                                 {{-- Mini-55: Desain Modern Biru-Kuning (Ref Gambar) --}}
                                 <div class="card-mini-55">
+                                    {{-- Aksen dekoratif lengkungan pojok atas (kuning & biru) --}}
+                                    <div class="m55-deco-tr-yellow"></div>
+                                    <div class="m55-deco-tr-blue"></div>
+
                                     <table class="m55-header-table">
                                         <tr>
                                             <td class="m55-logo-cell">
-                                                @if($logoBase64)
-                                                    <img class="m55-logo-img" src="{{ $logoBase64 }}" alt="Logo">
-                                                @else
-                                                    <div style="width:7mm;height:7mm;border-radius:50%;background:#003399;color:white;font-size:4pt;line-height:7mm;text-align:center;margin:0 auto;font-weight:bold;">PGRI</div>
-                                                @endif
+                                                <div class="m55-logo-wrap">
+                                                    @if($logoBase64)
+                                                        <img class="m55-logo-img" src="{{ $logoBase64 }}" alt="Logo">
+                                                    @else
+                                                        <div style="width:9.5mm;height:9.5mm;border-radius:50%;background:#003399;color:white;font-size:5pt;line-height:9.5mm;text-align:center;font-weight:bold;">PGRI</div>
+                                                    @endif
+                                                </div>
                                             </td>
                                             <td class="m55-divider-cell">
                                                 <div class="m55-vdivider"></div>
