@@ -16,9 +16,13 @@
             </p>
 
             {{-- Login Button --}}
-            <button onclick="showLoginModal()" class="w-full px-8 py-4 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white rounded-xl font-bold text-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-2xl mb-4">
+            <button onclick="showLoginModal('scanner')" class="w-full px-8 py-4 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white rounded-xl font-bold text-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-2xl mb-3">
                 <i class="fas fa-sign-in-alt mr-2"></i>
                 Login untuk Aktifkan Scanner
+            </button>
+
+            <button type="button" onclick="showLoginModal('dashboard')" class="text-primary-400 hover:text-primary-300 text-xs font-semibold underline block mx-auto mb-4">
+                atau Login ke Dashboard Admin &rarr;
             </button>
 
             <p class="text-gray-500 text-xs">
@@ -168,11 +172,18 @@
                 </div>
             </button>
             
-            {{-- Login Admin Button --}}
-            <button onclick="showLoginModal()" class="group relative px-5 py-2.5 lg:px-8 lg:py-3 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl font-bold text-sm lg:text-base transition-all transform hover:scale-105 shadow-lg hover:shadow-2xl">
+            {{-- Login Admin / Dashboard Button --}}
+            @auth
+            <a href="{{ route('dashboard') }}" class="group relative px-5 py-2.5 lg:px-8 lg:py-3 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 text-white rounded-xl font-bold text-sm lg:text-base transition-all transform hover:scale-105 shadow-lg hover:shadow-2xl flex items-center">
+                <i class="fas fa-th-large text-xl mr-2"></i>
+                <span>Dashboard</span>
+            </a>
+            @else
+            <button onclick="showLoginModal('dashboard')" class="group relative px-5 py-2.5 lg:px-8 lg:py-3 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl font-bold text-sm lg:text-base transition-all transform hover:scale-105 shadow-lg hover:shadow-2xl flex items-center">
                 <i class="fas fa-user-shield text-xl mr-2"></i>
-                Login Admin
+                <span>Login Admin</span>
             </button>
+            @endauth
         </div>
 
         {{-- Scanner Card with Premium Design --}}
@@ -361,8 +372,8 @@
                     <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-gray-600 to-gray-800 rounded-full mb-4 shadow-lg">
                         <i class="fas fa-user-shield text-3xl text-white"></i>
                     </div>
-                    <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-1">Login Admin</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Masuk ke dashboard admin</p>
+                    <h3 id="loginModalTitle" class="text-2xl font-black text-gray-900 dark:text-white mb-1">Login Admin</h3>
+                    <p id="loginModalDesc" class="text-sm text-gray-500 dark:text-gray-400">Masuk ke dashboard admin</p>
                 </div>
 
                 {{-- Error Alert --}}
@@ -1939,10 +1950,27 @@
             lastScannedNis = null;
         }
 
+        let currentLoginTarget = 'dashboard';
+
         // Login Modal Functions
-        function showLoginModal() {
+        function showLoginModal(target = 'dashboard') {
+            currentLoginTarget = target;
             const loginModal = document.getElementById('loginModal');
             loginModal.classList.remove('hidden');
+
+            const title = document.getElementById('loginModalTitle');
+            const desc  = document.getElementById('loginModalDesc');
+            const btn   = document.getElementById('loginSubmitBtn');
+
+            if (target === 'dashboard') {
+                if (title) title.textContent = 'Login Admin';
+                if (desc) desc.textContent = 'Masuk ke dashboard admin';
+                if (btn) btn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Masuk Dashboard';
+            } else {
+                if (title) title.textContent = 'Aktivasi Scanner';
+                if (desc) desc.textContent = 'Login untuk mengaktifkan scanner di perangkat ini';
+                if (btn) btn.innerHTML = '<i class="fas fa-shield-alt mr-2"></i> Aktifkan Scanner';
+            }
             
             // Focus email field
             setTimeout(() => {
@@ -2027,31 +2055,26 @@
                         
                         if (response.ok && result.success !== false) {
                             if (result.device_token) {
-                                // ✅ Device registered — simpan token & aktifkan scanner
+                                // Simpan token di localStorage agar perangkat ini otomatis terdaftar
                                 localStorage.setItem(DEVICE_TOKEN_KEY, result.device_token);
                                 deviceTrusted = true;
+                            }
 
-                                // Sembunyikan gate, tampilkan badge
+                            if (currentLoginTarget === 'dashboard') {
+                                // Masuk ke Dashboard Admin!
+                                window.location.href = result.redirect || '{{ route("dashboard") }}';
+                            } else {
+                                // Aktifkan scanner di halaman ini (Kiosk Mode)
                                 document.getElementById('deviceGate').style.display = 'none';
                                 document.getElementById('deviceTrustBadge').classList.remove('hidden');
                                 document.getElementById('deviceRevokedInfo').classList.add('hidden');
 
-                                // Tutup modal login
                                 hideLoginModal();
-
-                                // Aktifkan scanner
                                 showToast('success', '✅ Perangkat Terdaftar', 'Scanner sekarang aktif di perangkat ini.', 4000);
                                 initScanner();
 
-                                // Reset button
                                 submitBtn.disabled = false;
                                 submitBtn.innerHTML = originalHTML;
-                            } else if (result.redirect) {
-                                // Login berhasil tapi bukan admin/petugas — redirect ke dashboard
-                                window.location.href = result.redirect;
-                            } else {
-                                // Fallback redirect
-                                window.location.href = '{{ route("dashboard") }}';
                             }
                         } else {
                             // Login failed - show error

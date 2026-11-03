@@ -56,7 +56,7 @@ class AuthenticatedSessionController extends Controller
 
                     $response['device_token'] = $token;
                     $response['device_registered'] = true;
-                    $response['redirect'] = null; // Jangan redirect, tetap di welcome page
+                    // redirect tetap disediakan ($homeRoute) agar frontend bisa memilih redirect atau stay
                 }
 
                 return response()->json($response);
