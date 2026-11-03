@@ -132,7 +132,7 @@
                         <div class="text-3xl mb-2">🏷️</div>
                         <p class="font-bold text-gray-900 dark:text-white">Mini QR 50mm</p>
                         <p class="text-xs text-gray-500 mt-1">12 kartu/halaman</p>
-                        <p class="text-xs text-gray-500 mt-1">QR 50mm • 61×74mm</p>
+                        <p class="text-xs text-blue-600 dark:text-blue-400 font-semibold mt-1">Desain Biru-Kuning (Ref)</p>
                     </div>
                 </div>
             </x-card>

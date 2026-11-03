@@ -288,50 +288,154 @@
             display: block;
         }
         /* ============================================================ */
-        /* KARTU MINI-55: identik mini, QR 55mm (lebih kecil)          */
+        /* KARTU MINI-55: Desain Modern Biru-Kuning (Ref Gambar)         */
+        /* Ukuran: 61mm x 74mm (3 kolom x 4 baris = 12 kartu/hal F4)    */
         /* ============================================================ */
-        .card-mini-55-qr {
-            width: 52mm;
-            height: 52mm;
-            padding: 1mm;
-            background: white;
-            margin: 0 auto;
-        }
-        .card-mini-55-qr img {
-            width: 50mm;
-            height: 50mm;
-            object-fit: contain;
-            display: block;
-        }
-        /* Wrapper: centering vertikal & horizontal konten mini-55 */
-        .card-mini-55-inner {
-            display: table;
-            width: 100%;
+        .card-mini-55 {
+            width: 61mm;
             height: 74mm;
-        }
-        .card-mini-55-cell {
-            display: table-cell;
-            vertical-align: middle;
+            border: 1px solid #003399;
+            border-radius: 3mm;
+            background: #eef6ff;
+            overflow: hidden;
+            position: relative;
+            box-sizing: border-box;
             text-align: center;
         }
 
-        .card-mini-55-nama {
-            width: 50mm;
-            margin: 1.5mm auto 0;
-            font-size: 10pt;
-            font-weight: 700;
-            color: #111827;
-            line-height: 1.15;
+        /* Header Sekolah */
+        .m55-header-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+            border-bottom: 1px solid #bfdbfe;
+            padding: 1.2mm 2mm;
+            height: 9.5mm;
+        }
+        .m55-header-table td {
+            vertical-align: middle;
+            padding: 0;
+        }
+        .m55-logo-cell {
+            width: 8.5mm;
             text-align: center;
         }
-        .card-mini-55-detail {
-            width: 50mm;
-            margin: 0.8mm auto 0;
-            font-size: 9pt;
-            font-weight: 600;
-            color: #374151;
-            line-height: 1.2;
+        .m55-logo-img {
+            width: 7.5mm;
+            height: 7.5mm;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+        }
+        .m55-divider-cell {
+            width: 2mm;
             text-align: center;
+        }
+        .m55-vdivider {
+            width: 1px;
+            height: 6mm;
+            background: #003399;
+            margin: 0 auto;
+        }
+        .m55-school-name {
+            padding-left: 2mm;
+            font-size: 7pt;
+            font-weight: bold;
+            color: #002b66;
+            letter-spacing: 0.2pt;
+            text-align: left;
+            line-height: 1.1;
+            text-transform: uppercase;
+        }
+
+        /* Frame Kotak QR Putih Border Biru Tebal */
+        .m55-qr-section {
+            padding-top: 1.5mm;
+            text-align: center;
+        }
+        .m55-qr-box {
+            display: inline-block;
+            background: #ffffff;
+            border: 1.8px solid #003399;
+            border-radius: 3mm;
+            padding: 1mm;
+            width: 43mm;
+            height: 43mm;
+            box-sizing: border-box;
+            margin: 0 auto;
+        }
+        .m55-qr-box img {
+            width: 40.5mm;
+            height: 40.5mm;
+            display: block;
+            object-fit: contain;
+            margin: 0 auto;
+        }
+
+        /* Badge Siswa (Opsi 2: Nama & NIS/Kelas) */
+        .m55-badge-wrap {
+            margin-top: -3mm;
+            text-align: center;
+            position: relative;
+            z-index: 5;
+        }
+        .m55-badge {
+            display: inline-block;
+            background: #002b66;
+            border: 1px solid #ffffff;
+            border-radius: 999px;
+            padding: 0.6mm 2.5mm;
+            max-width: 55mm;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .m55-badge-nama {
+            color: #ffffff;
+            font-size: 6.5pt;
+            font-weight: bold;
+            line-height: 1.1;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .m55-badge-sub {
+            color: #ffd700;
+            font-size: 5pt;
+            font-weight: bold;
+            line-height: 1.1;
+        }
+
+        /* Footer Lengkungan Biru Navy + Aksen Kuning */
+        .m55-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            background: #002b66;
+            text-align: center;
+            border-top: 2px solid #ffd700;
+            padding: 1.2mm 1mm 1.8mm;
+        }
+        .m55-footer-title {
+            color: #ffffff;
+            font-size: 6.5pt;
+            font-weight: bold;
+            letter-spacing: 0.4pt;
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+        .m55-footer-pill {
+            display: inline-block;
+            background: #ffd700;
+            color: #002b66;
+            border-radius: 1.5mm;
+            font-size: 5pt;
+            font-weight: bold;
+            padding: 0.4mm 2.5mm;
+            margin-top: 0.6mm;
+            letter-spacing: 0.2pt;
+            line-height: 1.1;
+            text-transform: uppercase;
         }
 
 
@@ -378,12 +482,53 @@
                     <td style="width: {{ number_format(100 / $config['cols'], 4) }}%;">
                         @if($item)
                             @php $s = $item['student']; @endphp
-                            @if($layout !== '2x5')
-                                {{-- Mini / mini-55: QR + divider + Nama + NIS|Kelas --}}
+                            @if($layout === 'mini-55')
+                                {{-- Mini-55: Desain Modern Biru-Kuning (Ref Gambar) --}}
+                                <div class="card-mini-55">
+                                    <table class="m55-header-table">
+                                        <tr>
+                                            <td class="m55-logo-cell">
+                                                @if($logoBase64)
+                                                    <img class="m55-logo-img" src="{{ $logoBase64 }}" alt="Logo">
+                                                @else
+                                                    <div style="width:7mm;height:7mm;border-radius:50%;background:#003399;color:white;font-size:4pt;line-height:7mm;text-align:center;margin:0 auto;font-weight:bold;">PGRI</div>
+                                                @endif
+                                            </td>
+                                            <td class="m55-divider-cell">
+                                                <div class="m55-vdivider"></div>
+                                            </td>
+                                            <td class="m55-school-name">
+                                                {{ strtoupper($schoolName) }}
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <div class="m55-qr-section">
+                                        <div class="m55-qr-box">
+                                            @if($item['qr_base64'])
+                                                <img src="{{ $item['qr_base64'] }}" alt="QR">
+                                            @else
+                                                <span style="font-size:6pt;color:#999;line-height:40mm;display:block;">No QR</span>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    <div class="m55-badge-wrap">
+                                        <div class="m55-badge">
+                                            <div class="m55-badge-nama">&#9679; {{ Str::limit($s->nama, 22) }}</div>
+                                            <div class="m55-badge-sub">NIS: {{ $s->nis }} &bull; {{ $s->kelas->nama_kelas ?? '-' }}</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="m55-footer">
+                                        <div class="m55-footer-title">KARTU ABSENSI SISWA</div>
+                                        <div class="m55-footer-pill">SCAN QR UNTUK ABSENSI</div>
+                                    </div>
+                                </div>
+                            @elseif($layout === 'mini')
+                                {{-- Mini: QR + divider + Nama + NIS|Kelas --}}
                                 <div class="card-mini">
-                                    <div class="card-mini-55-inner">
-                                    <div class="card-mini-55-cell">
-                                    <div class="{{ $layout === 'mini-55' ? 'card-mini-55-qr' : 'card-mini-qr' }}">
+                                    <div class="card-mini-qr">
                                         @if($item['qr_base64'])
                                             <img src="{{ $item['qr_base64'] }}" alt="QR">
                                         @else
@@ -391,17 +536,10 @@
                                         @endif
                                     </div>
                                     <div class="card-mini-divider"></div>
-                                    @if($layout === 'mini-55')
-                                        <div class="card-mini-55-nama">{{ $s->nama }}</div>
-                                        <div class="card-mini-55-detail">NIS: {{ $s->nis }}</div>
-                                        <div class="card-mini-55-detail">Kelas: {{ $s->kelas->nama_kelas ?? '-' }}</div>
-                                    @else
-                                        <div class="card-mini-nama">{{ $s->nama }}</div>
-                                        <div class="card-mini-detail">
-                                            NIS: {{ $s->nis }} &nbsp;|&nbsp; {{ $s->kelas->nama_kelas ?? '-' }}
-                                        </div>
-                                    @endif
-                                    </div></div>{{-- /card-mini-55-cell /card-mini-55-inner --}}
+                                    <div class="card-mini-nama">{{ $s->nama }}</div>
+                                    <div class="card-mini-detail">
+                                        NIS: {{ $s->nis }} &nbsp;|&nbsp; {{ $s->kelas->nama_kelas ?? '-' }}
+                                    </div>
                                 </div>
                             @else
                             {{-- 2x5: Full card dengan logo, foto, info table, QR --}}
