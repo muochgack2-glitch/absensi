@@ -308,41 +308,41 @@
             width: 100%;
             border-collapse: collapse;
             background: #ffffff;
-            border-bottom: 1px solid #bfdbfe;
-            padding: 1.2mm 2mm;
-            height: 9.5mm;
+            border-bottom: 1.5px solid #003399;
+            padding: 1mm 2mm;
+            height: 10.5mm;
         }
         .m55-header-table td {
             vertical-align: middle;
             padding: 0;
         }
         .m55-logo-cell {
-            width: 8.5mm;
+            width: 9.5mm;
             text-align: center;
         }
         .m55-logo-img {
-            width: 7.5mm;
-            height: 7.5mm;
+            width: 8.5mm;
+            height: 8.5mm;
             object-fit: contain;
             display: block;
             margin: 0 auto;
         }
         .m55-divider-cell {
-            width: 2mm;
+            width: 2.5mm;
             text-align: center;
         }
         .m55-vdivider {
-            width: 1px;
-            height: 6mm;
+            width: 1.5px;
+            height: 8mm;
             background: #003399;
             margin: 0 auto;
         }
         .m55-school-name {
             padding-left: 2mm;
-            font-size: 7pt;
-            font-weight: bold;
+            font-size: 9.5pt;
+            font-weight: 900;
             color: #002b66;
-            letter-spacing: 0.2pt;
+            letter-spacing: 0.3pt;
             text-align: left;
             line-height: 1.1;
             text-transform: uppercase;
@@ -374,7 +374,7 @@
 
         /* Badge Siswa (Opsi 2: Nama & NIS/Kelas) */
         .m55-badge-wrap {
-            margin-top: -3mm;
+            margin-top: -3.2mm;
             text-align: center;
             position: relative;
             z-index: 5;
@@ -382,26 +382,27 @@
         .m55-badge {
             display: inline-block;
             background: #002b66;
-            border: 1px solid #ffffff;
+            border: 1.2px solid #ffffff;
             border-radius: 999px;
-            padding: 0.6mm 2.5mm;
-            max-width: 55mm;
+            padding: 0.8mm 3mm;
+            max-width: 56mm;
             box-sizing: border-box;
             text-align: center;
         }
         .m55-badge-nama {
             color: #ffffff;
-            font-size: 6.5pt;
+            font-size: 7pt;
             font-weight: bold;
-            line-height: 1.1;
+            line-height: 1.15;
             white-space: nowrap;
             overflow: hidden;
         }
         .m55-badge-sub {
             color: #ffd700;
-            font-size: 5pt;
+            font-size: 5.5pt;
             font-weight: bold;
-            line-height: 1.1;
+            line-height: 1.15;
+            margin-top: 0.2mm;
         }
 
         /* Footer Lengkungan Biru Navy + Aksen Kuning */
@@ -515,8 +516,8 @@
 
                                     <div class="m55-badge-wrap">
                                         <div class="m55-badge">
-                                            <div class="m55-badge-nama">&#9679; {{ Str::limit($s->nama, 22) }}</div>
-                                            <div class="m55-badge-sub">NIS: {{ $s->nis }} &bull; {{ $s->kelas->nama_kelas ?? '-' }}</div>
+                                            <div class="m55-badge-nama">{{ Str::limit($s->nama, 28) }}</div>
+                                            <div class="m55-badge-sub">NIS: {{ $s->nis }} &nbsp;|&nbsp; {{ $s->kelas->nama_kelas ?? '-' }}</div>
                                         </div>
                                     </div>
 
