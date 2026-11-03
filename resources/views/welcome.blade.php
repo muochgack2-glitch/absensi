@@ -40,13 +40,7 @@
         </div>
     </div>
 
-    {{-- Device Trust Status Badge (pojok kiri atas) --}}
-    <div id="deviceTrustBadge" class="hidden fixed top-3 left-3 z-50">
-        <div class="flex items-center gap-2 bg-green-900/80 backdrop-blur border border-green-700 rounded-full px-3 py-1.5 shadow-lg">
-            <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-            <span class="text-green-300 text-xs font-semibold">Perangkat Terpercaya</span>
-        </div>
-    </div>
+
 
     {{-- Holiday Banner --}}
     @php $publicHoliday = \App\Models\Holiday::getForDate(); @endphp
@@ -699,6 +693,14 @@
             <span id="camModeText" style="font-size:12px; color:#d1d5db; font-weight:500;">Mendeteksi...</span>
             <i id="camChevron" class="fas fa-chevron-up" style="color:#6b7280; font-size:10px; transition:transform .2s;"></i>
         </button>
+
+        {{-- Device Trust Status Pill (di bawah tombol Status Kamera) --}}
+        <div id="deviceTrustBadge" class="hidden" style="margin-top: 6px;">
+            <div style="display:flex; align-items:center; gap:6px; background:#111827; border:1px solid #166534; border-radius:999px; padding:4px 10px; box-shadow:0 4px 16px rgba(0,0,0,0.3);">
+                <span style="width:7px; height:7px; border-radius:50%; background:#4ade80; flex-shrink:0;"></span>
+                <span style="font-size:11px; color:#86efac; font-weight:600; white-space:nowrap;">Perangkat Terpercaya</span>
+            </div>
+        </div>
     </div>
 
 
@@ -753,7 +755,10 @@
                 if (data.valid) {
                     // ✅ Device trusted — sembunyikan gate, tampilkan badge
                     gate.style.display = 'none';
-                    badge.classList.remove('hidden');
+                    if (badge) {
+                        badge.classList.remove('hidden');
+                        badge.style.display = 'block';
+                    }
                     deviceTrusted = true;
                     console.log('🔒 Perangkat terpercaya:', data.device_name);
                     return true;
@@ -770,7 +775,10 @@
                 // Jika server error, tetap izinkan scan (graceful degradation)
                 // agar scanner tetap jalan walau server sementara unreachable
                 gate.style.display = 'none';
-                badge.classList.remove('hidden');
+                if (badge) {
+                    badge.classList.remove('hidden');
+                    badge.style.display = 'block';
+                }
                 deviceTrusted = true;
                 return true;
             }
@@ -2077,7 +2085,11 @@
                             } else {
                                 // Aktifkan scanner di halaman ini (Kiosk Mode)
                                 document.getElementById('deviceGate').style.display = 'none';
-                                document.getElementById('deviceTrustBadge').classList.remove('hidden');
+                                const badgeEl = document.getElementById('deviceTrustBadge');
+                                if (badgeEl) {
+                                    badgeEl.classList.remove('hidden');
+                                    badgeEl.style.display = 'block';
+                                }
                                 document.getElementById('deviceRevokedInfo').classList.add('hidden');
 
                                 hideLoginModal();
