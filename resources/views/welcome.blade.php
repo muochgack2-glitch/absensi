@@ -21,9 +21,9 @@
                 Login untuk Aktifkan Scanner
             </button>
 
-            <button type="button" onclick="showLoginModal('dashboard')" class="text-primary-400 hover:text-primary-300 text-xs font-semibold underline block mx-auto mb-4">
+            <a href="{{ route('login') }}" class="text-primary-400 hover:text-primary-300 text-xs font-semibold underline block mx-auto mb-4">
                 atau Login ke Dashboard Admin &rarr;
-            </button>
+            </a>
 
             <p class="text-gray-500 text-xs">
                 <i class="fas fa-info-circle mr-1"></i>
@@ -337,7 +337,7 @@
     </div>
 
     {{-- Toast Container --}}
-    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+    <div id="toast-container" class="fixed top-4 right-4 space-y-2" style="z-index: 250;"></div>
 
     {{-- Bottom Result Bar — slides up from bottom, never covers camera --}}
     <div id="bottomResultBar"
@@ -364,7 +364,7 @@
     </div>
 
     {{-- Login Modal --}}
-    <div id="loginModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="animation: fadeIn 0.2s ease-out;">
+    <div id="loginModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" style="z-index: 200; animation: fadeIn 0.2s ease-out;">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full transform" style="animation: scaleIn 0.3s ease-out;">
             <div class="p-6">
                 {{-- Header --}}
@@ -1956,7 +1956,10 @@
         function showLoginModal(target = 'dashboard') {
             currentLoginTarget = target;
             const loginModal = document.getElementById('loginModal');
+            if (!loginModal) return;
+
             loginModal.classList.remove('hidden');
+            loginModal.style.display = 'flex';
 
             const title = document.getElementById('loginModalTitle');
             const desc  = document.getElementById('loginModalDesc');
@@ -1974,25 +1977,33 @@
             
             // Focus email field
             setTimeout(() => {
-                document.getElementById('loginEmail').focus();
+                document.getElementById('loginEmail')?.focus();
             }, 300);
         }
 
         function hideLoginModal() {
             const loginModal = document.getElementById('loginModal');
+            if (!loginModal) return;
+
             loginModal.classList.add('hidden');
+            loginModal.style.display = 'none';
             
             // Reset form
-            document.getElementById('loginForm').reset();
-            document.getElementById('loginError').classList.add('hidden');
+            document.getElementById('loginForm')?.reset();
+            document.getElementById('loginError')?.classList.add('hidden');
             
             // Reset password visibility
             const passwordInput = document.getElementById('loginPassword');
             const passwordIcon = document.getElementById('passwordToggleIcon');
-            passwordInput.type = 'password';
-            passwordIcon.classList.remove('fa-eye-slash');
-            passwordIcon.classList.add('fa-eye');
+            if (passwordInput) passwordInput.type = 'password';
+            if (passwordIcon) {
+                passwordIcon.classList.remove('fa-eye-slash');
+                passwordIcon.classList.add('fa-eye');
+            }
         }
+
+        window.showLoginModal = showLoginModal;
+        window.hideLoginModal = hideLoginModal;
 
         function togglePasswordVisibility() {
             const passwordInput = document.getElementById('loginPassword');
