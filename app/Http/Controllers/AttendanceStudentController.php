@@ -266,8 +266,25 @@ class AttendanceStudentController extends Controller
 
             $results = $import->getResults();
 
+            $msg = "Import selesai! {$results['success']} siswa berhasil ditambahkan.";
+            if ($results['failed'] > 0) {
+                $errSample = implode('; ', array_slice($results['errors'], 0, 3));
+                return redirect()->route('attendance.students.index')
+                    ->with('warning', "{$msg} Namun ada {$results['failed']} data dilewati ({$errSample})");
+            }
+
             return redirect()->route('attendance.students.index')
-                ->with('success', "Import berhasil! {$results['success']} siswa ditambahkan, {$results['failed']} gagal");
+                ->with('success', $msg);
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errors = [];
+            foreach ($failures as $failure) {
+                $row = $failure->row();
+                $errorMsg = implode(', ', $failure->errors());
+                $errors[] = "Baris {$row}: {$errorMsg}";
+            }
+            return redirect()->back()
+                ->with('error', 'Import gagal pada data: ' . implode(' | ', array_slice($errors, 0, 5)));
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Import gagal: ' . $e->getMessage());

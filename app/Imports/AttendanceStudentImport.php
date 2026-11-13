@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Models\AttendanceStudent;
 use App\Models\AttendanceClass;
+use App\Models\AttendanceSetting;
 use App\Services\QRCodeService;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -25,35 +26,79 @@ class AttendanceStudentImport implements ToModel, WithHeadingRow, WithValidation
     ) {}
 
     /**
+     * Prepare / sanitize each row before running validation.
+     * Mengonversi angka (integer/float) dari Excel menjadi string bersih.
+     */
+    public function prepareForValidation($data, $index)
+    {
+        // Pastikan NIS selalu berupa string bersih
+        if (isset($data['nis'])) {
+            $data['nis'] = trim((string) $data['nis']);
+        }
+
+        // Pastikan Nama selalu berupa string bersih
+        if (isset($data['nama'])) {
+            $data['nama'] = trim((string) $data['nama']);
+        }
+
+        // Pastikan Kelas ID berupa integer jika numerik
+        if (isset($data['kelas_id'])) {
+            $data['kelas_id'] = is_numeric($data['kelas_id']) ? (int) $data['kelas_id'] : $data['kelas_id'];
+        }
+
+        // Sanitasi no_hp_ortu
+        if (isset($data['no_hp_ortu'])) {
+            $val = trim((string) $data['no_hp_ortu']);
+            $data['no_hp_ortu'] = $val !== '' ? $val : null;
+        }
+
+        if (isset($data['no_hp_ortu2'])) {
+            $val = trim((string) $data['no_hp_ortu2']);
+            $data['no_hp_ortu2'] = $val !== '' ? $val : null;
+        }
+
+        return $data;
+    }
+
+    /**
      * Transform each row into a model.
      */
     public function model(array $row)
     {
+        $nis      = trim((string) ($row['nis'] ?? ''));
+        $nama     = trim((string) ($row['nama'] ?? ''));
+        $kelasId  = isset($row['kelas_id']) && is_numeric($row['kelas_id']) ? (int) $row['kelas_id'] : null;
+        $noHpOrtu = !empty($row['no_hp_ortu']) ? trim((string) $row['no_hp_ortu']) : null;
+        $noHpOrtu2= !empty($row['no_hp_ortu2']) ? trim((string) $row['no_hp_ortu2']) : null;
+
         try {
             // Check if student with this NIS already exists
-            $existing = AttendanceStudent::where('nis', $row['nis'])->first();
+            $existing = AttendanceStudent::where('nis', $nis)->first();
             if ($existing) {
                 $this->failedCount++;
-                $this->customErrors[] = "NIS {$row['nis']} sudah ada";
+                $this->customErrors[] = "NIS {$nis} sudah ada";
                 return null;
             }
 
             // Validate kelas_id exists
-            $class = AttendanceClass::find($row['kelas_id']);
+            $class = AttendanceClass::find($kelasId);
             if (!$class) {
                 $this->failedCount++;
-                $this->customErrors[] = "Kelas ID {$row['kelas_id']} tidak ditemukan untuk NIS {$row['nis']}";
+                $this->customErrors[] = "Kelas ID {$kelasId} tidak ditemukan untuk NIS {$nis}";
                 return null;
             }
 
+            $activeTahunAjaran = AttendanceSetting::get('active_tahun_ajaran');
+
             // Create student
             $student = AttendanceStudent::create([
-                'nis'         => $row['nis'],
-                'nama'        => $row['nama'],
-                'kelas_id'    => $row['kelas_id'],
-                'no_hp_ortu'  => $row['no_hp_ortu']  ?? null,
-                'no_hp_ortu2' => $row['no_hp_ortu2'] ?? null,
-                'is_active'   => true,
+                'nis'          => $nis,
+                'nama'         => $nama,
+                'kelas_id'     => $kelasId,
+                'no_hp_ortu'   => $noHpOrtu,
+                'no_hp_ortu2'  => $noHpOrtu2,
+                'is_active'    => true,
+                'tahun_ajaran' => $activeTahunAjaran,
             ]);
 
             // Generate QR Code
@@ -70,7 +115,7 @@ class AttendanceStudentImport implements ToModel, WithHeadingRow, WithValidation
 
         } catch (\Exception $e) {
             $this->failedCount++;
-            $this->customErrors[] = "Error pada NIS {$row['nis']}: " . $e->getMessage();
+            $this->customErrors[] = "Error pada NIS {$nis}: " . $e->getMessage();
             Log::error("Import error for row: " . json_encode($row) . " | Error: " . $e->getMessage());
             return null;
         }
@@ -82,11 +127,11 @@ class AttendanceStudentImport implements ToModel, WithHeadingRow, WithValidation
     public function rules(): array
     {
         return [
-            'nis' => 'required|string|max:50',
-            'nama' => 'required|string|max:255',
-            'kelas_id' => 'required|integer|exists:attendance_classes,id',
-            'no_hp_ortu'  => 'nullable|string|max:20',
-            'no_hp_ortu2' => 'nullable|string|max:20',
+            'nis'         => 'required|max:50',
+            'nama'        => 'required|max:255',
+            'kelas_id'    => 'required|integer|exists:attendance_classes,id',
+            'no_hp_ortu'  => 'nullable|max:20',
+            'no_hp_ortu2' => 'nullable|max:20',
         ];
     }
 
@@ -96,11 +141,15 @@ class AttendanceStudentImport implements ToModel, WithHeadingRow, WithValidation
     public function customValidationMessages()
     {
         return [
-            'nis.required' => 'NIS wajib diisi',
-            'nis.unique' => 'NIS sudah terdaftar',
-            'nama.required' => 'Nama wajib diisi',
+            'nis.required'      => 'NIS wajib diisi',
+            'nis.max'           => 'NIS maksimal 50 karakter',
+            'nama.required'     => 'Nama wajib diisi',
+            'nama.max'          => 'Nama maksimal 255 karakter',
             'kelas_id.required' => 'Kelas ID wajib diisi',
-            'kelas_id.exists' => 'Kelas ID tidak valid',
+            'kelas_id.integer'  => 'Kelas ID harus berupa angka',
+            'kelas_id.exists'   => 'Kelas ID tidak valid / tidak ditemukan di sistem',
+            'no_hp_ortu.max'    => 'No HP Ortu maksimal 20 digit',
+            'no_hp_ortu2.max'   => 'No HP Ortu 2 maksimal 20 digit',
         ];
     }
 
@@ -111,8 +160,8 @@ class AttendanceStudentImport implements ToModel, WithHeadingRow, WithValidation
     {
         return [
             'success' => $this->successCount,
-            'failed' => $this->failedCount,
-            'errors' => $this->customErrors,
+            'failed'  => $this->failedCount,
+            'errors'  => $this->customErrors,
         ];
     }
 
